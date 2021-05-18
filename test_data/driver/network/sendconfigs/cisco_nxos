@@ -1,0 +1,44 @@
+Warning: Permanently added '[localhost]:22022' (RSA) to the list of known hosts.
+User Access Verification
+Password:
+
+Cisco NX-OS Software
+Copyright (c) 2002-2019, Cisco Systems, Inc. All rights reserved.
+Nexus 9000v software ("Nexus 9000v Software") and related documentation,
+files or other reference materials ("Documentation") are
+the proprietary property and confidential information of Cisco
+Systems, Inc. ("Cisco") and are protected, without limitation,
+pursuant to United States and International copyright and trademark
+laws in the applicable jurisdiction which provide civil and criminal
+penalties for copying or distribution without Cisco's authorization.
+
+Any use or disclosure, in whole or in part, of the Nexus 9000v Software
+or Documentation to any third party for any purposes is expressly
+prohibited except as otherwise authorized by Cisco in writing.
+The copyrights to certain works contained herein are owned by other
+third parties and are used and distributed under license. Some parts
+of this software may be covered under the GNU Public License or the
+GNU Lesser General Public License. A copy of each such license is
+available at
+http://www.gnu.org/licenses/gpl.html and
+http://www.gnu.org/licenses/lgpl.html
+***************************************************************************
+*  Nexus 9000v is strictly limited to use for evaluation, demonstration   *
+*  and NX-OS education. Any use or disclosure, in whole or in part of     *
+*  the Nexus 9000v Software or Documentation to any third party for any   *
+*  purposes is expressly prohibited except as otherwise authorized by     *
+*  Cisco in writing.                                                      *
+***************************************************************************
+switch#
+switch# terminal length 0
+switch# terminal width 511
+switch#
+switch# configure terminal
+Enter configuration commands, one per line. End with CNTL/Z.
+switch(config)#
+switch(config)# interface loopback0
+switch(config-if)# description tacocat
+switch(config-if)# no interface loopback0
+switch(config)#
+switch(config)# end
+switch#

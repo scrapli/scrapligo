@@ -1,0 +1,3 @@
+set interfaces fxp0.0 description tacocat
+delete interfaces fxp0.0 description tacocat
+commit

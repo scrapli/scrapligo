@@ -1,0 +1,30 @@
+Warning: Permanently added '[localhost]:24022' (ECDSA) to the list of known hosts.
+No startup-config was found.
+The device is in Zero Touch Provisioning mode and is attempting to
+download the startup-config from a remote system. The device will not
+be fully functional until either a valid startup-config is downloaded
+from a remote system or Zero Touch Provisioning is cancelled.
+To cancel Zero Touch Provisioning, login as admin and type
+'zerotouch cancel' at the CLI. Alternatively, to disable Zero Touch
+Provisioning permanently, type 'zerotouch disable' at the CLI.
+Note: The device will reload when these commands are issued.
+Password:
+Last login: Mon May 17 22:39:57 2021 from 10.0.0.2
+localhost>
+localhost>enable
+Password:
+localhost#
+localhost#terminal length 0
+Pagination disabled.
+localhost#terminal width 32767
+Width set to 32767 columns.
+localhost#
+localhost#configure terminal
+localhost(config)#
+localhost(config)#interface loopback0
+localhost(config-if-Lo0)#description tacocat
+localhost(config-if-Lo0)#no interface loopback0
+localhost(config)#
+localhost(config)#end
+localhost#
+localhost#

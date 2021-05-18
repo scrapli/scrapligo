@@ -1,0 +1,55 @@
+READ: Warning: Permanently added '[localhost]:25022' (ECDSA) to the list of known hosts.
+Password:
+--- JUNOS 17.3R2.10 built 2018-02-08 02:19:07 UTC
+vrnetlab>
+
+vrnetlab> set cli screen-length 0
+Screen length set to 0
+
+vrnetlab> set cli screen-width 511
+Screen width set to 511
+
+vrnetlab> set cli complete-on-space off
+Disabling complete-on-space
+
+vrnetlab> show version
+Model: srx4100
+Junos: 17.3R2.10
+JUNOS Software Release [17.3R2.10]
+
+vrnetlab>
+
+vrnetlab> show interfaces terse
+Interface               Admin Link Proto    Local                 Remote
+dsc                     up    up
+em0                     up    up
+em0.0                   up    up   inet     128.0.0.1/2
+em1                     up    up
+em1.32768               up    up   inet     192.168.1.2/24
+em2                     up    up
+fxp0                    up    up
+fxp0.0                  up    up   inet     10.0.0.15/24
+gre                     up    up
+ipip                    up    up
+irb                     up    up
+lo0                     up    up
+lo0.16384               up    up   inet     127.0.0.1           --> 0/0
+lo0.16385               up    up   inet     10.0.0.1            --> 0/0
+                                            10.0.0.16           --> 0/0
+                                            128.0.0.1           --> 0/0
+                                            128.0.0.4           --> 0/0
+                                            128.0.1.16          --> 0/0
+lo0.32768               up    up
+lsi                     up    up
+mtun                    up    up
+pimd                    up    up
+pime                    up    up
+pp0                     up    up
+ppd0                    up    up
+ppe0                    up    up
+st0                     up    up
+tap                     up    up
+vlan                    up    down
+vtep                    up    up
+
+vrnetlab>

@@ -1,0 +1,12 @@
+csr1000v#
+csr1000v#terminal length 0
+csr1000v#terminal width 512
+csr1000v#configure terminal
+Enter configuration commands, one per line.  End with CNTL/Z.
+csr1000v(config)#
+csr1000v(config)#interface loopback0
+csr1000v(config-if)#description tacocat
+csr1000v(config-if)#no interface loopback0
+csr1000v(config)#
+csr1000v(config)#end
+csr1000v#

@@ -1,0 +1,31 @@
+Interface               Admin Link Proto    Local                 Remote
+dsc                     up    up
+em0                     up    up
+em0.0                   up    up   inet     128.0.0.1/2
+em1                     up    up
+em1.32768               up    up   inet     192.168.1.2/24
+em2                     up    up
+fxp0                    up    up
+fxp0.0                  up    up   inet     10.0.0.15/24
+gre                     up    up
+ipip                    up    up
+irb                     up    up
+lo0                     up    up
+lo0.16384               up    up   inet     127.0.0.1           --> 0/0
+lo0.16385               up    up   inet     10.0.0.1            --> 0/0
+                                            10.0.0.16           --> 0/0
+                                            128.0.0.1           --> 0/0
+                                            128.0.0.4           --> 0/0
+                                            128.0.1.16          --> 0/0
+lo0.32768               up    up
+lsi                     up    up
+mtun                    up    up
+pimd                    up    up
+pime                    up    up
+pp0                     up    up
+ppd0                    up    up
+ppe0                    up    up
+st0                     up    up
+tap                     up    up
+vlan                    up    down
+vtep                    up    up

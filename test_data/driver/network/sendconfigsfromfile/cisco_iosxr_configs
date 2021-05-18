@@ -1,0 +1,4 @@
+interface loopback0
+description tacocat
+no interface loopback0
+commit

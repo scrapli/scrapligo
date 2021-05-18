@@ -1,0 +1,59 @@
+package network
+
+import (
+	"errors"
+
+	"github.com/scrapli/scrapligo/driver/base"
+
+	"github.com/scrapli/scrapligo/channel"
+)
+
+// SendConfigs send configurations to the device, will always send at a privilege level of
+// "configuration"!
+func (d *Driver) SendConfigs(c []string, o ...base.SendOption) (*base.MultiResponse, error) {
+	finalOpts := d.ParseSendOptions(o)
+
+	if d.CurrentPriv != finalOpts.DesiredPrivilegeLevel {
+		err := d.AcquirePriv(finalOpts.DesiredPrivilegeLevel)
+		if err != nil {
+			r := base.NewMultiResponse(d.Host)
+			return r, err
+		}
+	}
+
+	m, err := d.Driver.FullSendCommands(c,
+		finalOpts.FailedWhenContains,
+		finalOpts.StripPrompt,
+		finalOpts.StopOnFailed,
+		finalOpts.Eager,
+		finalOpts.TimeoutOps,
+	)
+
+	if err != nil && !errors.Is(err, channel.ErrChannelTimeout) {
+		// if we encountered an error we *probably* cant abort anyway unless its a timeout error
+		// if its a timeout error we can at least try to keep going on, otherwise lets bail here
+		return m, err
+	}
+
+	if finalOpts.StopOnFailed && m.Failed() {
+		if f, ok := d.Augments["abortConfig"]; ok {
+			_, err = f(d)
+		}
+	}
+
+	return m, err
+}
+
+// SendConfigsFromFile send configurations from a file to the device, will always send at a
+// privilege level of "configuration"!
+func (d *Driver) SendConfigsFromFile(
+	f string,
+	o ...base.SendOption,
+) (*base.MultiResponse, error) {
+	c, err := base.LoadFileLines(f)
+	if err != nil {
+		return base.NewMultiResponse(d.Host), err
+	}
+
+	return d.SendConfigs(c, o...)
+}
