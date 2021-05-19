@@ -18,3 +18,5 @@ jobs:
           version: v1.39
       - name: golangci-lint
         run: golangci-lint run
+      - name: tests
+        run: go test -cover -v ./channel/... ./driver/... ./netconf/... ./logging/... ./transport/...

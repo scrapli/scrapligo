@@ -205,7 +205,17 @@ func (d *Driver) AcquirePriv(desiredPriv string) error {
 	privChangeCount := 0
 
 	for {
-		currentPrompt, _ := d.GetPrompt()
+		currentPrompt, err := d.GetPrompt()
+		if err != nil {
+			logging.LogError(
+				d.FormatLogMessage(
+					"error",
+					fmt.Sprintf("failed fetching prompt, error: %s\n", err),
+				),
+			)
+
+			return err
+		}
 
 		privAction, targetPriv, err := d.processAcquirePriv(
 			desiredPriv,

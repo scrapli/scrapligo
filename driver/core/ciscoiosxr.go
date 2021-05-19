@@ -29,15 +29,6 @@ func NewIOSXRDriver(
 			EscalateAuth:   false,
 			EscalatePrompt: "",
 		},
-		"configuration_exclusive": {
-			Pattern:        `(?im)^[a-z0-9.\-_@/:]{1,63}\(config[a-z0-9.\-@/:\+]{0,32}\)#$`,
-			Name:           "configuration_exclusive",
-			PreviousPriv:   privExecPrivLevel,
-			Deescalate:     "end",
-			Escalate:       "configure exclusive",
-			EscalateAuth:   false,
-			EscalatePrompt: "",
-		},
 	}
 
 	defaultFailedWhenContains := []string{

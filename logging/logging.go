@@ -6,10 +6,10 @@ import "fmt"
 type Logger func(...interface{})
 
 // DebugLog default DebugLog -- defaults to nil.
-var DebugLog Logger = nil
+var DebugLog Logger
 
 // ErrorLog default ErrorLog -- defaults to nil.
-var ErrorLog Logger = nil
+var ErrorLog Logger
 
 // SetDebugLogger function to set debug logger to something that implements `Logger`.
 func SetDebugLogger(logger Logger) {
