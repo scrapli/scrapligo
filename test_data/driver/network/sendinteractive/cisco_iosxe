@@ -1,0 +1,7 @@
+csr1000v#
+csr1000v#terminal length 0
+csr1000v#terminal width 512
+csr1000v#clear logging
+Clear logging buffer [confirm]
+
+csr1000v#

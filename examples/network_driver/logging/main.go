@@ -2,15 +2,22 @@ package main
 
 import (
 	"fmt"
+	"log"
+
+	"github.com/scrapli/scrapligo/logging"
 
 	"github.com/scrapli/scrapligo/driver/base"
 
 	"github.com/scrapli/scrapligo/driver/core"
 )
 
-const commandsFile = "commandsfile"
-
 func main() {
+	// logging can be enabled by passing a function that accepts a variadic of interface, so
+	// basically you can pass things like `log.Print` or `logrus.Error` etc.. This applies to both
+	// error and debug logging.
+	logging.SetDebugLogger(log.Print)
+
+	// use the NewCoreDriver factory and pass in a platform argument
 	d, err := core.NewCoreDriver(
 		"localhost",
 		"cisco_iosxe",
@@ -32,36 +39,12 @@ func main() {
 		return
 	}
 
-	// fetch the prompt
 	prompt, err := d.GetPrompt()
 	if err != nil {
 		fmt.Printf("failed to get prompt; error: %+v\n", err)
-	} else {
-		fmt.Printf("found prompt: %s\n", prompt)
-	}
-
-	// send some commands from a file
-	mr, err := d.SendCommandsFromFile(commandsFile)
-	if err != nil {
-		fmt.Printf("failed to send commands from file; error: %+v\n", err)
 		return
 	}
-	for _, r := range mr.Responses {
-		fmt.Printf("sent command '%s', output received:\n %s\n", r.ChannelInput, r.Result)
-	}
-
-	// send some configs
-	configs := []string{
-		"interface loopback0",
-		"interface loopback0 description tacocat",
-		"no interface loopback0",
-	}
-
-	_, err = d.SendConfigs(configs)
-	if err != nil {
-		fmt.Printf("failed to send configs; error: %+v\n", err)
-		return
-	}
+	fmt.Printf("found prompt: %s\n", prompt)
 
 	err = d.Close()
 	if err != nil {
