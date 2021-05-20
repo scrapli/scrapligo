@@ -22,15 +22,16 @@ func NewCoreDriver(
 	platform string,
 	options ...base.Option,
 ) (*network.Driver, error) {
-	if platform == "cisco_iosxe" {
+	switch platform {
+	case "cisco_iosxe":
 		return NewIOSXEDriver(host, options...)
-	} else if platform == "cisco_iosxr" {
+	case "cisco_iosxr":
 		return NewIOSXRDriver(host, options...)
-	} else if platform == "cisco_nxos" {
+	case "cisco_nxos":
 		return NewNXOSDriver(host, options...)
-	} else if platform == "arista_eos" {
+	case "arista_eos":
 		return NewEOSDriver(host, options...)
-	} else if platform == "juniper_junos" {
+	case "juniper_junos":
 		return NewJUNOSDriver(host, options...)
 	}
 
