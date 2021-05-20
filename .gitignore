@@ -26,3 +26,7 @@ private/
 
 # mkdocs site
 site/*
+
+# vscode
+.vscode
+.devcontainer
