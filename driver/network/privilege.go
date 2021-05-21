@@ -17,14 +17,9 @@ func (d *Driver) buildPrivGraph() {
 	d.privGraph = map[string]map[string]bool{}
 
 	for _, privLevel := range d.PrivilegeLevels {
+		d.privGraph[privLevel.Name] = map[string]bool{}
 		if privLevel.PreviousPriv != "" {
-			if d.privGraph[privLevel.Name] == nil {
-				d.privGraph[privLevel.Name] = map[string]bool{}
-			}
-
 			d.privGraph[privLevel.Name][privLevel.PreviousPriv] = true
-		} else {
-			d.privGraph[privLevel.Name] = map[string]bool{}
 		}
 	}
 
