@@ -54,12 +54,10 @@ func NewNetworkDriver(
 	}
 
 	d := &Driver{
-		Driver:      *newDriver,
-		OnOpen:      onOpen,
-		OnClose:     onClose,
-		privGraph:   map[string]map[string]bool{},
-		CurrentPriv: "",
-		Augments:    map[string]func(d *Driver) (*base.Response, error){},
+		Driver:   *newDriver,
+		OnOpen:   onOpen,
+		OnClose:  onClose,
+		Augments: map[string]func(d *Driver) (*base.Response, error){},
 	}
 
 	if len(d.FailedWhenContains) == 0 {
