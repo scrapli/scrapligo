@@ -130,7 +130,7 @@ func WithTimeoutOps(timeout time.Duration) Option {
 // necessary if using a network level driver.
 func WithCommsPromptPattern(pattern string) Option {
 	return func(d *Driver) error {
-		d.CommsPromptPattern = *regexp.MustCompile(pattern)
+		d.CommsPromptPattern = regexp.MustCompile(pattern)
 		return nil
 	}
 }
