@@ -43,7 +43,7 @@ type Driver struct {
 	TimeoutTransport time.Duration
 	TimeoutOps       time.Duration
 
-	CommsPromptPattern regexp.Regexp
+	CommsPromptPattern *regexp.Regexp
 	CommsReturnChar    string
 
 	TransportType string
@@ -71,7 +71,7 @@ func NewDriver(
 		TimeoutSocket:      30 * time.Second,
 		TimeoutTransport:   45 * time.Second,
 		TimeoutOps:         60 * time.Second,
-		CommsPromptPattern: *regexp.MustCompile(`(?im)^[a-z0-9.\-@()/:]{1,48}[#>$]\s*$`),
+		CommsPromptPattern: regexp.MustCompile(`(?im)^[a-z0-9.\-@()/:]{1,48}[#>$]\s*$`),
 		CommsReturnChar:    "\n",
 		TransportType:      transport.SystemTransportName,
 		FailedWhenContains: []string{},
@@ -123,7 +123,7 @@ func NewDriver(
 	}
 
 	c := &channel.Channel{
-		CommsPromptPattern: &d.CommsPromptPattern,
+		CommsPromptPattern: d.CommsPromptPattern,
 		CommsReturnChar:    &d.CommsReturnChar,
 		TimeoutOps:         &d.TimeoutOps,
 		Transport:          d.Transport,

@@ -122,12 +122,10 @@ func (d *Driver) generateJoinedCommsPromptPattern() {
 
 	joinedPattern := strings.Join(allPatterns, "|")
 
-	compiledJoinedPattern := regexp.MustCompile(joinedPattern)
-
-	d.CommsPromptPattern = *compiledJoinedPattern
+	d.CommsPromptPattern = regexp.MustCompile(joinedPattern)
 	// need to update the channel to point to the network driver's CommsPromptPattern memory addr
 	// this way if users update the driver's comms pattern, the channel is updated... there needs
 	// to be a "refreshPatterns" or something similar to scrapli for when we add dynamic priv levels
 	// for things like config sessions and such
-	d.Channel.CommsPromptPattern = &d.CommsPromptPattern
+	d.Channel.CommsPromptPattern = d.CommsPromptPattern
 }
