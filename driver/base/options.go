@@ -157,17 +157,14 @@ func WithChannelLog(log io.Writer) Option {
 
 // WithTransportType provide string name of type of transport to use.
 func WithTransportType(transportType string) Option {
-	validTransports := []string{transport.SystemTransportName, transport.StandardTransportName}
-	finalTransport := ""
+	var finalTransport string
 
-	for _, possibleTransport := range validTransports {
-		if possibleTransport == transportType {
-			finalTransport = possibleTransport
-			break
-		}
-	}
-
-	if finalTransport == "" {
+	switch transportType {
+	case transport.SystemTransportName:
+		finalTransport = transport.SystemTransportName
+	case transport.StandardTransportName:
+		finalTransport = transport.StandardTransportName
+	default:
 		return func(d *Driver) error {
 			return transport.ErrUnknownTransport
 		}
