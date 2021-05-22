@@ -64,7 +64,7 @@ func (d *Driver) deescalate(currentPriv string) error {
 	return err
 }
 
-func (d *Driver) determineCurrentPriv(currentPrompt string) (string, error) {
+func (d *Driver) determineCurrentPriv(currentPrompt string) ([]string, error) {
 	var matchingPrivLevels []string
 
 	for privName, privData := range d.PrivilegeLevels {
@@ -87,7 +87,7 @@ func (d *Driver) determineCurrentPriv(currentPrompt string) (string, error) {
 			),
 		)
 
-		return "", ErrCouldNotDeterminePriv
+		return []string{}, ErrCouldNotDeterminePriv
 	}
 
 	logging.LogDebug(
@@ -97,12 +97,10 @@ func (d *Driver) determineCurrentPriv(currentPrompt string) (string, error) {
 		),
 	)
 
-	// scrapli holdover, should always be a single priv level here since the patterns *should* be
-	// exacting enough to never match more than one priv at a time
-	return matchingPrivLevels[0], nil
+	return matchingPrivLevels, nil
 }
 
-func privMapContains(s []string, e string) bool {
+func strSliceContains(s []string, e string) bool {
 	for _, a := range s {
 		if a == e {
 			return true
@@ -129,7 +127,7 @@ func (d *Driver) buildPrivChangeMap(
 	}
 
 	for privName := range d.privGraph[currentPriv] {
-		if !privMapContains(workingPrivChangeMap, privName) {
+		if !strSliceContains(workingPrivChangeMap, privName) {
 			updatedPrivChangeMap := d.buildPrivChangeMap(
 				privName,
 				desiredPriv,
@@ -154,13 +152,24 @@ func (d *Driver) processAcquirePriv(
 		),
 	)
 
-	currentPriv, err := d.determineCurrentPriv(currentPrompt)
+	possibleCurrentPrivs, err := d.determineCurrentPriv(currentPrompt)
 
 	if err != nil {
 		return noAction, "", err
 	}
 
-	if desiredPriv == currentPriv {
+	var currentPriv string
+
+	switch {
+	case strSliceContains(possibleCurrentPrivs, d.CurrentPriv):
+		currentPriv = d.PrivilegeLevels[d.CurrentPriv].Name
+	case strSliceContains(possibleCurrentPrivs, desiredPriv):
+		currentPriv = d.PrivilegeLevels[desiredPriv].Name
+	default:
+		currentPriv = possibleCurrentPrivs[0]
+	}
+
+	if currentPriv == desiredPriv {
 		logging.LogDebug(
 			d.FormatLogMessage(
 				"debug",
@@ -168,10 +177,16 @@ func (d *Driver) processAcquirePriv(
 			),
 		)
 
+		d.CurrentPriv = desiredPriv
+
 		return noAction, currentPriv, nil
 	}
 
 	mapToDesiredPriv := d.buildPrivChangeMap(currentPriv, desiredPriv, nil)
+
+	// at this point we basically dont *know* the privilege leve we are at (or we wont/cant after
+	// we do an escalation or deescalation, so we reset to the dummy priv level
+	d.CurrentPriv = "UNKNOWN"
 
 	if d.PrivilegeLevels[mapToDesiredPriv[1]].PreviousPriv != currentPriv {
 		logging.LogDebug(d.FormatLogMessage("debug", "determined privilege deescalation necessary"))
@@ -221,7 +236,6 @@ func (d *Driver) AcquirePriv(desiredPriv string) error {
 		case err != nil:
 			return err
 		case privAction == noAction:
-			d.CurrentPriv = desiredPriv
 			return nil
 		case privAction == escalateAction:
 			err = d.escalate(targetPriv)
