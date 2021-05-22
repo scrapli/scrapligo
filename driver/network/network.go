@@ -8,8 +8,6 @@ import (
 	"github.com/scrapli/scrapligo/logging"
 
 	"github.com/scrapli/scrapligo/driver/base"
-
-	"github.com/scrapli/scrapligo/driver/generic"
 )
 
 type privilegeAction string
@@ -29,7 +27,7 @@ var ErrCouldNotDeterminePriv = errors.New("could not determine current privilege
 // Driver driver for the "network" layer -- adds privilege levels, on open/close, and augments to
 // the generic driver it extends.
 type Driver struct {
-	generic.Driver
+	base.Driver
 	OnOpen      func(*Driver) error
 	OnClose     func(*Driver) error
 	privGraph   map[string]map[string]bool
@@ -47,7 +45,7 @@ func NewNetworkDriver(
 	onClose func(d *Driver) error,
 	options ...base.Option,
 ) (*Driver, error) {
-	newDriver, err := generic.NewGenericDriver(host, options...)
+	newDriver, err := base.NewDriver(host, options...)
 
 	if err != nil {
 		return nil, err

@@ -1,4 +1,4 @@
-package generic
+package base
 
 // GetPrompt fetch device prompt.
 func (d *Driver) GetPrompt() (string, error) {

@@ -1,11 +1,9 @@
-package generic
+package base
 
 import (
 	"time"
 
 	"github.com/scrapli/scrapligo/logging"
-
-	"github.com/scrapli/scrapligo/driver/base"
 )
 
 // FullSendCommands same as `SendCommands` but requiring explicit options.
@@ -14,8 +12,8 @@ func (d *Driver) FullSendCommands(
 	failedWhenContains []string,
 	stripPrompt, stopOnFailed, eager bool,
 	timeoutOps time.Duration,
-) (*base.MultiResponse, error) {
-	mr := base.NewMultiResponse(d.Host)
+) (*MultiResponse, error) {
+	mr := NewMultiResponse(d.Host)
 
 	for _, command := range c[:len(c)-1] {
 		r, err := d.FullSendCommand(
@@ -60,8 +58,8 @@ func (d *Driver) FullSendCommands(
 // SendCommands send commands to a device, accepts a string command and variadic of `SendOption`s.
 func (d *Driver) SendCommands(
 	c []string,
-	o ...base.SendOption,
-) (*base.MultiResponse, error) {
+	o ...SendOption,
+) (*MultiResponse, error) {
 	finalOpts := d.ParseSendOptions(o)
 
 	return d.FullSendCommands(
@@ -78,13 +76,13 @@ func (d *Driver) SendCommands(
 // of `SendOption`s.
 func (d *Driver) SendCommandsFromFile(
 	f string,
-	o ...base.SendOption,
-) (*base.MultiResponse, error) {
+	o ...SendOption,
+) (*MultiResponse, error) {
 	finalOpts := d.ParseSendOptions(o)
 
-	c, err := base.LoadFileLines(f)
+	c, err := LoadFileLines(f)
 	if err != nil {
-		return base.NewMultiResponse(d.Host), err
+		return NewMultiResponse(d.Host), err
 	}
 
 	return d.FullSendCommands(

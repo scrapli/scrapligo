@@ -3,7 +3,6 @@ package network
 import (
 	"github.com/scrapli/scrapligo/channel"
 	"github.com/scrapli/scrapligo/driver/base"
-	"github.com/scrapli/scrapligo/driver/generic"
 )
 
 // SendInteractive send interactive commands to a device, accepts a slice of `SendInteractiveEvent`
@@ -13,7 +12,7 @@ func (d *Driver) SendInteractive(
 	o ...base.SendOption,
 ) (*base.Response, error) {
 	finalOpts := d.ParseSendOptions(o)
-	joinedEventInputs := generic.JoinEventInputs(events)
+	joinedEventInputs := base.JoinEventInputs(events)
 
 	if d.CurrentPriv != d.DefaultDesiredPriv {
 		err := d.AcquirePriv(d.DefaultDesiredPriv)
