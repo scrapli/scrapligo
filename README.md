@@ -34,7 +34,6 @@ scrapligo -- scrap(e c)li (but in go!) --  is a Go library focused on connecting
 package main
 
 import (
-	"bytes"
 	"fmt"
 
 	"github.com/scrapli/scrapligo/driver/base"
