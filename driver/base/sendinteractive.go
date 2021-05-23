@@ -1,10 +1,8 @@
-package generic
+package base
 
 import (
 	"strings"
 	"time"
-
-	"github.com/scrapli/scrapligo/driver/base"
 
 	"github.com/scrapli/scrapligo/channel"
 )
@@ -15,8 +13,8 @@ func (d *Driver) FullSendInteractive(
 	failedWhenContains []string,
 	timeoutOps time.Duration,
 	joinedEventInputs string,
-) (*base.Response, error) {
-	r := base.NewResponse(d.Host, d.Port, joinedEventInputs, failedWhenContains)
+) (*Response, error) {
+	r := NewResponse(d.Host, d.Port, joinedEventInputs, failedWhenContains)
 
 	rawResult, err := d.Channel.SendInteractive(events, timeoutOps)
 
@@ -33,8 +31,8 @@ func (d *Driver) FullSendInteractive(
 // and variadic of `SendOption`s.
 func (d *Driver) SendInteractive(
 	events []*channel.SendInteractiveEvent,
-	o ...base.SendOption,
-) (*base.Response, error) {
+	o ...SendOption,
+) (*Response, error) {
 	finalOpts := d.ParseSendOptions(o)
 	joinedEventInputs := JoinEventInputs(events)
 

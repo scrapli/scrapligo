@@ -58,14 +58,24 @@ func main() {
 		HideInput:       false,
 	}
 
-	// at the "base" level there are no convenience wrappers around the channel supporting options,
-	// so you have to specify all the parameters when using the channel directly
+	// you can access the channel directly, however there are no convenience wrappers around the
+	// channel supporting options, so you have to specify all the parameters when using it directly
 	interactiveOutput, err := d.Channel.SendInteractive(events, -1)
 	if err != nil {
 		fmt.Printf("failed to send interactive input to device; error: %+v\n", err)
 	} else {
 		fmt.Printf("output received: %s\n", interactiveOutput)
 	}
+
+	// send a command -- as this is "base" there will have been no paging disabling, so have to
+	// either disable paging yourself or send a command that will not make the device page the
+	// output!
+	r, err := d.SendCommand("show version | i uptime")
+	if err != nil {
+		fmt.Printf("failed to send command; error: %+v\n", err)
+		return
+	}
+	fmt.Printf("sent command '%s', output received:\n %s\n", r.ChannelInput, r.Result)
 
 	err = d.Close()
 	if err != nil {
