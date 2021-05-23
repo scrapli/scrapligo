@@ -111,7 +111,7 @@ func (d *Driver) Close() error {
 
 func (d *Driver) generateJoinedCommsPromptPattern() {
 	// handle setting up the "joined" priv pattern
-	allPatterns := make([]string, 0)
+	allPatterns := make([]string, 0, len(d.PrivilegeLevels))
 	for _, pLevel := range d.PrivilegeLevels {
 		allPatterns = append(allPatterns, pLevel.Pattern)
 	}
