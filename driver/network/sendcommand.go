@@ -4,7 +4,7 @@ import (
 	"github.com/scrapli/scrapligo/driver/base"
 )
 
-// SendCommand basically the same as the generic driver flavor, but acquires the
+// SendCommand basically the same as the base driver flavor, but acquires the
 // `DefaultDesiredPriv` prior to sending the command.
 func (d *Driver) SendCommand(c string, o ...base.SendOption) (*base.Response, error) {
 	finalOpts := d.ParseSendOptions(o)

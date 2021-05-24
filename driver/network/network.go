@@ -25,7 +25,7 @@ var ErrInvalidDesiredPriv = errors.New("invalid desired priv name")
 var ErrCouldNotDeterminePriv = errors.New("could not determine current privilege level")
 
 // Driver driver for the "network" layer -- adds privilege levels, on open/close, and augments to
-// the generic driver it extends.
+// the base driver it extends.
 type Driver struct {
 	base.Driver
 	OnOpen      func(*Driver) error

@@ -4,7 +4,7 @@ import (
 	"github.com/scrapli/scrapligo/driver/base"
 )
 
-// SendCommands basically the same as the generic driver flavor, but acquires the
+// SendCommands basically the same as the base driver flavor, but acquires the
 // `DefaultDesiredPriv` prior to sending the command.
 func (d *Driver) SendCommands(
 	c []string,
@@ -29,7 +29,7 @@ func (d *Driver) SendCommands(
 	)
 }
 
-// SendCommandsFromFile basically the same as the generic driver flavor, but acquires the
+// SendCommandsFromFile basically the same as the base driver flavor, but acquires the
 // `DefaultDesiredPriv` prior to sending the command.
 func (d *Driver) SendCommandsFromFile(
 	f string,
