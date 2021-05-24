@@ -12,8 +12,7 @@ func (c *Channel) getPrompt() *channelResult {
 	err := c.SendReturn()
 	if err != nil {
 		return &channelResult{
-			result: make([]byte, 0),
-			error:  err,
+			error: err,
 		}
 	}
 
@@ -25,8 +24,7 @@ func (c *Channel) getPrompt() *channelResult {
 
 		if readErr != nil {
 			return &channelResult{
-				result: make([]byte, 0),
-				error:  readErr,
+				error: readErr,
 			}
 		}
 
@@ -54,7 +52,11 @@ func (c *Channel) GetPrompt() (string, error) {
 
 	select {
 	case r := <-_c:
-		return strings.TrimSpace(string(bytes.Trim(r.result, "\x00"))), r.error
+		if r.error != nil {
+			return "", r.error
+		}
+
+		return strings.TrimSpace(string(bytes.Trim(r.result, "\x00"))), nil
 	case <-timer.C:
 		logging.LogError(c.FormatLogMessage("error", "timed out sending getting prompt"))
 
