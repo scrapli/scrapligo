@@ -55,6 +55,7 @@ func (c *Channel) GetPrompt() (string, error) {
 		if r.error != nil {
 			return "", r.error
 		}
+
 		return strings.TrimSpace(string(bytes.Trim(r.result, "\x00"))), nil
 	case <-timer.C:
 		logging.LogError(c.FormatLogMessage("error", "timed out sending getting prompt"))
