@@ -16,7 +16,7 @@ func (c *Channel) getPrompt() *channelResult {
 		}
 	}
 
-	b := make([]byte, 100)
+	b := make([]byte, 0, 100)
 
 	for {
 		chunk, readErr := c.Read()
