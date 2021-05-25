@@ -15,7 +15,7 @@ func (d *Driver) SendCommands(
 	if d.CurrentPriv != d.DefaultDesiredPriv {
 		err := d.AcquirePriv(d.DefaultDesiredPriv)
 		if err != nil {
-			return base.NewMultiResponse(d.Host), err
+			return nil, err
 		}
 	}
 
@@ -37,7 +37,7 @@ func (d *Driver) SendCommandsFromFile(
 ) (*base.MultiResponse, error) {
 	c, err := base.LoadFileLines(f)
 	if err != nil {
-		return base.NewMultiResponse(d.Host), err
+		return nil, err
 	}
 
 	return d.SendCommands(c, o...)

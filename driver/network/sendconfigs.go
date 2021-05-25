@@ -16,8 +16,7 @@ func (d *Driver) SendConfigs(c []string, o ...base.SendOption) (*base.MultiRespo
 	if d.CurrentPriv != finalOpts.DesiredPrivilegeLevel {
 		err := d.AcquirePriv(finalOpts.DesiredPrivilegeLevel)
 		if err != nil {
-			r := base.NewMultiResponse(d.Host)
-			return r, err
+			return nil, err
 		}
 	}
 
@@ -52,7 +51,7 @@ func (d *Driver) SendConfigsFromFile(
 ) (*base.MultiResponse, error) {
 	c, err := base.LoadFileLines(f)
 	if err != nil {
-		return base.NewMultiResponse(d.Host), err
+		return nil, err
 	}
 
 	return d.SendConfigs(c, o...)

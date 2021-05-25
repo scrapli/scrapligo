@@ -17,8 +17,7 @@ func (d *Driver) SendInteractive(
 	if d.CurrentPriv != d.DefaultDesiredPriv {
 		err := d.AcquirePriv(d.DefaultDesiredPriv)
 		if err != nil {
-			r := base.NewResponse(d.Host, d.Port, joinedEventInputs, []string{})
-			return r, err
+			return nil, err
 		}
 	}
 

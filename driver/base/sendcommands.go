@@ -82,7 +82,7 @@ func (d *Driver) SendCommandsFromFile(
 
 	c, err := LoadFileLines(f)
 	if err != nil {
-		return NewMultiResponse(d.Host), err
+		return nil, err
 	}
 
 	return d.FullSendCommands(

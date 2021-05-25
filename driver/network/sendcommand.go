@@ -12,8 +12,7 @@ func (d *Driver) SendCommand(c string, o ...base.SendOption) (*base.Response, er
 	if d.CurrentPriv != d.DefaultDesiredPriv {
 		err := d.AcquirePriv(d.DefaultDesiredPriv)
 		if err != nil {
-			r := base.NewResponse(d.Host, d.Port, c, []string{})
-			return r, err
+			return nil, err
 		}
 	}
 
