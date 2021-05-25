@@ -16,6 +16,7 @@ func platformCommandMap() map[string]string {
 		"cisco_nxos":    "show version",
 		"arista_eos":    "show version",
 		"juniper_junos": "show version",
+		"nokia_sros":    "show version",
 	}
 }
 

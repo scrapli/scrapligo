@@ -25,6 +25,12 @@ func platformConfigsMap() map[string][]string {
 			"delete interfaces fxp0.0 description tacocat",
 			"commit",
 		},
+		"nokia_sros": {
+			`configure router interface "system" description "@ntdvps"`,
+			"configure system",
+			"location wide_internet",
+			"commit",
+		},
 	}
 }
 
