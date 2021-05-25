@@ -13,7 +13,12 @@ var ErrUnknownPlatform = errors.New("unknown platform provided")
 
 // SupportedPlatforms pseudo constant providing slice of all core platform types.
 func SupportedPlatforms() []string {
-	return []string{"cisco_iosxe", "cisco_iosxr", "cisco_nxos", "arista_eos", "juniper_junos", "nokia_sros"}
+	return []string{"cisco_iosxe",
+		"cisco_iosxr",
+		"cisco_nxos",
+		"arista_eos",
+		"juniper_junos",
+		"nokia_sros"}
 }
 
 // NewCoreDriver return a new core driver for a given platform.
