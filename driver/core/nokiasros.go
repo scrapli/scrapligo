@@ -74,11 +74,11 @@ func SROSOnOpen(d *network.Driver) error {
 		return err
 	}
 
-	if _, err := d.SendCommand("environment console width 512", nil); err != nil {
+	if _, err = d.SendCommand("environment console width 512", nil); err != nil {
 		return err
 	}
 
-	if _, err := d.SendCommand("environment more false", nil); err != nil {
+	if _, err = d.SendCommand("environment more false", nil); err != nil {
 		return err
 	}
 
@@ -112,9 +112,11 @@ func SROSAbortConfig(d *network.Driver) (*base.Response, error) {
 	if _, err := d.Channel.SendInput("discard /", false, false, -1); err != nil {
 		return nil, err
 	}
+
 	if _, err := d.Channel.SendInput("exit", false, false, -1); err != nil {
 		return nil, err
 	}
+
 	_, err := d.Channel.SendInput("quit-config", false, false, -1)
 
 	d.CurrentPriv = privExecPrivLevel
