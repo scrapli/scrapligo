@@ -16,6 +16,7 @@ func platformCommandsMap() map[string][]string {
 		"cisco_nxos":    {"show version", "show ip int brie"},
 		"arista_eos":    {"show version", "show ip int brie"},
 		"juniper_junos": {"show version", "show interfaces terse"},
+		"nokia_sros":    {"show version", "show router interface"},
 	}
 }
 
