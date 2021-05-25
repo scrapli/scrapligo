@@ -6,6 +6,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/scrapli/scrapligo/driver/core"
 )
 
@@ -64,12 +65,12 @@ func SendCommandsTestHelper(t *testing.T, driverName string, commands []string) 
 		finalResultOne := string(bytes.Trim([]byte(responseOne), "\x00\x0a"))
 		finalResultTwo := string(bytes.Trim([]byte(responseTwo), "\x00\x0a"))
 
-		if finalResultOne != string(expectedOne) {
-			t.Fatal("actual result one and expected result do not match")
+		if diff := cmp.Diff(finalResultOne, string(expectedOne)); diff != "" {
+			t.Errorf("actual result one and expected result do not match (-want +got):\n%s", diff)
 		}
 
-		if finalResultTwo != string(expectedTwo) {
-			t.Fatal("actual result two and expected result do not match")
+		if diff := cmp.Diff(finalResultTwo, string(expectedTwo)); diff != "" {
+			t.Errorf("actual result two and expected result do not match (-want +got):\n%s", diff)
 		}
 	}
 }
