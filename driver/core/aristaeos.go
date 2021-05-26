@@ -15,7 +15,7 @@ func NewEOSDriver(
 ) (*network.Driver, error) {
 	defaultPrivilegeLevels := map[string]*base.PrivilegeLevel{
 		"exec": {
-			Pattern:        `(?im)^([\w.@()/: ]){1,63}>\s?$`,
+			Pattern:        `(?im)^[\w.@()/: ]{1,63}>\s?$`,
 			Name:           execPrivLevel,
 			PreviousPriv:   "",
 			Deescalate:     "",
@@ -24,7 +24,7 @@ func NewEOSDriver(
 			EscalatePrompt: "",
 		},
 		"privilege_exec": {
-			Pattern:        `(?im)^([\w.@/: ]){1,63}#\s?$`,
+			Pattern:        `(?im)^[\w.@/: ]{1,63}#\s?$`,
 			Name:           privExecPrivLevel,
 			PreviousPriv:   execPrivLevel,
 			Deescalate:     "disable",
