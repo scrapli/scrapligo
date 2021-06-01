@@ -11,12 +11,13 @@ import (
 
 func platformCommandMap() map[string]string {
 	return map[string]string{
-		"cisco_iosxe":   "show version",
-		"cisco_iosxr":   "show version",
-		"cisco_nxos":    "show version",
-		"arista_eos":    "show version",
-		"juniper_junos": "show version",
-		"nokia_sros":    "show version",
+		"cisco_iosxe":        "show version",
+		"cisco_iosxr":        "show version",
+		"cisco_nxos":         "show version",
+		"arista_eos":         "show version",
+		"juniper_junos":      "show version",
+		"nokia_sros":         "show version",
+		"nokia_sros_classic": "show version",
 	}
 }
 

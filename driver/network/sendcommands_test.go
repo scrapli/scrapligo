@@ -11,12 +11,13 @@ import (
 
 func platformCommandsMap() map[string][]string {
 	return map[string][]string{
-		"cisco_iosxe":   {"show version", "show ip int brie"},
-		"cisco_iosxr":   {"show version", "show ip int brie"},
-		"cisco_nxos":    {"show version", "show ip int brie"},
-		"arista_eos":    {"show version", "show ip int brie"},
-		"juniper_junos": {"show version", "show interfaces terse"},
-		"nokia_sros":    {"show version", "show router interface"},
+		"cisco_iosxe":        {"show version", "show ip int brie"},
+		"cisco_iosxr":        {"show version", "show ip int brie"},
+		"cisco_nxos":         {"show version", "show ip int brie"},
+		"arista_eos":         {"show version", "show ip int brie"},
+		"juniper_junos":      {"show version", "show interfaces terse"},
+		"nokia_sros":         {"show version", "show router interface"},
+		"nokia_sros_classic": {"show version", "show router interface"},
 	}
 }
 

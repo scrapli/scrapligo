@@ -71,6 +71,11 @@ func TestSendInteractive(t *testing.T) {
 			continue
 		}
 
+		if platform == "nokia_sros_classic" {
+			// gotta figure out a interactive command on sros
+			continue
+		}
+
 		f := testhelper.SendInteractiveTestHelper(platform, interactiveMap[platform])
 		t.Run(fmt.Sprintf("Platform=%s", platform), f)
 	}

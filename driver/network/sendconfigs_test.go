@@ -31,6 +31,11 @@ func platformConfigsMap() map[string][]string {
 			"location wide_internet",
 			"commit",
 		},
+		"nokia_sros_classic": {
+			`configure router interface "system" description "@ntdvps"`,
+			"configure system",
+			"location wide_internet",
+		},
 	}
 }
 
