@@ -18,7 +18,9 @@ func SupportedPlatforms() []string {
 		"cisco_nxos",
 		"arista_eos",
 		"juniper_junos",
-		"nokia_sros"}
+		"nokia_sros",
+		"nokia_sros_classic",
+	}
 }
 
 // NewCoreDriver return a new core driver for a given platform.
@@ -40,6 +42,8 @@ func NewCoreDriver(
 		return NewJUNOSDriver(host, options...)
 	case "nokia_sros":
 		return NewSROSDriver(host, options...)
+	case "nokia_sros_classic":
+		return NewSROSClassicDriver(host, options...)
 	}
 
 	return nil, ErrUnknownPlatform

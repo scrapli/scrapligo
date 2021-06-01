@@ -1,0 +1,3 @@
+configure router interface "system" description "@ntdvps"
+configure system
+location wide_internet
