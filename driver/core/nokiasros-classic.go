@@ -5,7 +5,8 @@ import (
 	"github.com/scrapli/scrapligo/driver/network"
 )
 
-// NewSROSClassicDriver returns a driver setup for operation with Nokia SR OS devices running in classic configuration mode.
+// NewSROSClassicDriver returns a driver setup for operation
+// with Nokia SR OS devices running in classic configuration mode.
 func NewSROSClassicDriver(
 	host string,
 	options ...base.Option,
