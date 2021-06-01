@@ -39,7 +39,7 @@ func NewNetconfResponse(
 	xmlInput interface{},
 	stripNamespaces bool,
 ) *Response {
-	failedWhenContains := make([][]byte, 0)
+	var failedWhenContains [][]byte
 	failedWhenContains = append(
 		failedWhenContains,
 		[]byte("<rpc-error>"),
@@ -93,7 +93,7 @@ func (r *Response) Record(rawResult []byte) {
 }
 
 func (r *Response) recordResponse10() {
-	tmpResult := make([]byte, 0)
+	var tmpResult []byte
 	tmpResult = bytes.TrimPrefix(tmpResult, []byte(XMLHeader))
 	tmpResult = bytes.TrimSuffix(tmpResult, []byte(Version10DelimiterPattern))
 	r.Result = string(tmpResult)
@@ -123,7 +123,7 @@ func (r *Response) validateChunkSize(chunkSize int, chunk []byte) {
 func (r *Response) recordResponse11() {
 	resultSectionLens := Netconf11ChunkPatternCompiled.FindAllSubmatch(r.RawResult, -1)
 
-	joinedResult := make([]byte, 0)
+	var joinedResult []byte
 
 	for _, resultSectionMatch := range resultSectionLens {
 		chunkSize, _ := strconv.Atoi(string(resultSectionMatch[1]))

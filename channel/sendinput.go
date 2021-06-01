@@ -20,7 +20,7 @@ func (c *Channel) sendInput(channelInput []byte, stripPrompt, eager bool) *chann
 		),
 	)
 
-	b := make([]byte, 0)
+	var b []byte
 
 	err := c.Write(channelInput, false)
 	if err != nil {
@@ -88,6 +88,6 @@ func (c *Channel) SendInput(
 		return r.result, r.error
 	case <-timer.C:
 		logging.LogError(c.FormatLogMessage("error", "timed out sending input to device"))
-		return make([]byte, 0), ErrChannelTimeout
+		return []byte{}, ErrChannelTimeout
 	}
 }

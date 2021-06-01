@@ -46,11 +46,9 @@ func NewNetconfDriver(
 
 	nc := &Channel{
 		BaseChannel: d.Channel,
-	}
-
-	// this should be re-investigated... do we need an "echo check" like w/ python?
-	if d.TransportType == transport.SystemTransportName {
-		nc.ServerEcho = true
+		// system will always echo, and standard is set to echo... so far 100% of the time this
+		// works :)
+		ServerEcho: true,
 	}
 
 	d.NetconfChannel = nc
@@ -74,7 +72,7 @@ func (d *Driver) Open() error {
 		return err
 	}
 
-	authenticationBuf := make([]byte, 0)
+	var authenticationBuf []byte
 
 	if d.TransportType == transport.SystemTransportName {
 		r, authErr := d.Channel.AuthenticateSSH(d.AuthPassword, d.AuthPrivateKeyPassphrase)

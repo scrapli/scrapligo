@@ -1,8 +1,6 @@
 package channel
 
 import (
-	"bytes"
-	"strings"
 	"time"
 
 	"github.com/scrapli/scrapligo/logging"
@@ -16,7 +14,7 @@ func (c *Channel) getPrompt() *channelResult {
 		}
 	}
 
-	b := make([]byte, 0, 100)
+	var b []byte
 
 	for {
 		chunk, readErr := c.Read()
@@ -56,7 +54,7 @@ func (c *Channel) GetPrompt() (string, error) {
 			return "", r.error
 		}
 
-		return strings.TrimSpace(string(bytes.Trim(r.result, "\x00"))), nil
+		return string(r.result), nil
 	case <-timer.C:
 		logging.LogError(c.FormatLogMessage("error", "timed out sending getting prompt"))
 

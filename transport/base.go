@@ -70,6 +70,6 @@ func transportTimeout(
 	case r := <-c:
 		return r.result, r.error
 	case <-timer.C:
-		return make([]byte, 0), ErrTransportTimeout
+		return []byte{}, ErrTransportTimeout
 	}
 }

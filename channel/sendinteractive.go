@@ -15,7 +15,7 @@ type SendInteractiveEvent struct {
 }
 
 func (c *Channel) sendInteractive(events []*SendInteractiveEvent) *channelResult {
-	b := make([]byte, 0)
+	var b []byte
 
 	for _, event := range events {
 		channelInput := []byte(event.ChannelInput)
@@ -110,6 +110,6 @@ func (c *Channel) SendInteractive(
 			c.FormatLogMessage("error", "timed out sending interactive input to device"),
 		)
 
-		return make([]byte, 0), ErrChannelTimeout
+		return []byte{}, ErrChannelTimeout
 	}
 }

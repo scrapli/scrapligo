@@ -92,7 +92,7 @@ func (c *Channel) WriteAndReturn(channelInput []byte, redacted bool) error {
 }
 
 func (c *Channel) readUntilInput(channelInput []byte) ([]byte, error) {
-	b := make([]byte, 0)
+	var b []byte
 
 	if len(channelInput) == 0 {
 		return b, nil
@@ -118,7 +118,7 @@ func (c *Channel) readUntilPrompt(prompt *string) ([]byte, error) {
 		matchPattern = regexp.MustCompile(*prompt)
 	}
 
-	b := make([]byte, 0)
+	var b []byte
 
 	for {
 		chunk, err := c.Read()

@@ -71,7 +71,7 @@ func (c *Channel) OpenNetconf(authenticationBuf []byte) error {
 }
 
 func (c *Channel) readUntilInput(channelInput []byte) error {
-	b := make([]byte, 0)
+	var b []byte
 
 	if !c.ServerEcho || len(channelInput) == 0 {
 		return nil

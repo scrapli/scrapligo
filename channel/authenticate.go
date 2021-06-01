@@ -14,7 +14,7 @@ func (c *Channel) authenticateSSH(authPassword, authPassphrase []byte) *channelR
 
 	var passphraseCount = 0
 
-	b := make([]byte, 0)
+	var b []byte
 
 	for {
 		chunk, err := c.Read()
@@ -34,7 +34,7 @@ func (c *Channel) authenticateSSH(authPassword, authPassphrase []byte) *channelR
 		passphraseMatch := passphrasePattern.Match(b)
 
 		if passwordMatch {
-			b = make([]byte, 0)
+			b = []byte{}
 			passwordCount++
 
 			if passwordCount > passwordSeenMax {
@@ -54,7 +54,7 @@ func (c *Channel) authenticateSSH(authPassword, authPassphrase []byte) *channelR
 				}
 			}
 		} else if passphraseMatch {
-			b = make([]byte, 0)
+			b = []byte{}
 			passphraseCount++
 
 			if passwordCount > passphraseSeenMax {
