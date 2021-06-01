@@ -32,8 +32,8 @@ type BaseTransportArgs struct {
 	// passed as pointers so they can be modified at the driver layer
 	TimeoutSocket    *time.Duration
 	TimeoutTransport *time.Duration
-	// LoggingUID       string
-	// TransportOptions; not sure how to handle this yet as it is very... vague and... this is go... :)
+	PtyHeight        int
+	PtyWidth         int
 }
 
 type transportResult struct {

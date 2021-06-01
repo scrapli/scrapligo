@@ -175,8 +175,12 @@ func (t *Standard) openBase() error {
 		ssh.TTY_OP_OSPEED: 115200,
 	}
 
-	// possible that term sizes matter like on huawei in system transport...
-	err = t.session.RequestPty("xterm", 80, 40, modes)
+	err = t.session.RequestPty(
+		"xterm",
+		t.BaseTransportArgs.PtyHeight,
+		t.BaseTransportArgs.PtyWidth,
+		modes,
+	)
 	if err != nil {
 		return err
 	}
