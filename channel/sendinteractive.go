@@ -15,7 +15,7 @@ type SendInteractiveEvent struct {
 }
 
 func (c *Channel) sendInteractive(events []*SendInteractiveEvent) *channelResult {
-	b := make([]byte, 1)
+	b := make([]byte, 0)
 
 	for _, event := range events {
 		channelInput := []byte(event.ChannelInput)

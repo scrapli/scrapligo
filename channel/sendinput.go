@@ -20,7 +20,7 @@ func (c *Channel) sendInput(channelInput []byte, stripPrompt, eager bool) *chann
 		),
 	)
 
-	b := make([]byte, 1)
+	b := make([]byte, 0)
 
 	err := c.Write(channelInput, false)
 	if err != nil {
