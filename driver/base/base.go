@@ -46,8 +46,10 @@ type Driver struct {
 	CommsPromptPattern *regexp.Regexp
 	CommsReturnChar    string
 
-	TransportType string
-	Transport     transport.BaseTransport
+	TransportType      string
+	Transport          transport.BaseTransport
+	transportPtyWidth  int
+	transportPtyHeight int
 
 	Channel    *channel.Channel
 	channelLog io.Writer
@@ -74,6 +76,8 @@ func NewDriver(
 		CommsPromptPattern: regexp.MustCompile(`(?im)^[a-z0-9.\-@()/:]{1,48}[#>$]\s*$`),
 		CommsReturnChar:    "\n",
 		TransportType:      transport.SystemTransportName,
+		transportPtyHeight: 80,
+		transportPtyWidth:  256,
 		FailedWhenContains: []string{},
 		PrivilegeLevels:    map[string]*PrivilegeLevel{},
 		DefaultDesiredPriv: "",
@@ -91,6 +95,8 @@ func NewDriver(
 		AuthUsername:     d.AuthUsername,
 		TimeoutSocket:    &d.TimeoutSocket,
 		TimeoutTransport: &d.TimeoutTransport,
+		PtyHeight:        d.transportPtyHeight,
+		PtyWidth:         d.transportPtyWidth,
 	}
 
 	if d.Transport == nil {

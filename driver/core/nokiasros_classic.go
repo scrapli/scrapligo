@@ -48,7 +48,7 @@ func NewSROSClassicDriver(
 	return d, nil
 }
 
-// SROSOnOpen is a default on open callable for SR OS.
+// SROSClassicOnOpen is a default on open callable for SR OS classic.
 func SROSClassicOnOpen(d *network.Driver) error {
 	err := d.AcquirePriv(d.DefaultDesiredPriv)
 	if err != nil {
@@ -60,7 +60,7 @@ func SROSClassicOnOpen(d *network.Driver) error {
 	return err
 }
 
-// SROSOnClose is a default on close callable for SR OS.
+// SROSClassicOnClose is a default on close callable for SR OS classic.
 func SROSClassicOnClose(d *network.Driver) error {
 	err := d.AcquirePriv(d.DefaultDesiredPriv)
 	if err != nil {

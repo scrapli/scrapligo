@@ -110,7 +110,13 @@ func (t *System) Open() error {
 	)
 
 	sshCommand := exec.Command("ssh", t.openCmd...)
-	sessionFd, err := pty.Start(sshCommand)
+	sessionFd, err := pty.StartWithSize(
+		sshCommand,
+		&pty.Winsize{
+			Rows: uint16(t.BaseTransportArgs.PtyHeight),
+			Cols: uint16(t.BaseTransportArgs.PtyWidth),
+		},
+	)
 
 	if err != nil {
 		logging.ErrorLog(t.FormatLogMessage("error", "failed opening transport connection to host"))

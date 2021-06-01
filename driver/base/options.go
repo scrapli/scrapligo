@@ -176,6 +176,16 @@ func WithTransportType(transportType string) Option {
 	}
 }
 
+// WithTransportPtySize provide pty width/height to use.
+func WithTransportPtySize(w, h int) Option {
+	return func(d *Driver) error {
+		d.transportPtyWidth = w
+		d.transportPtyHeight = h
+
+		return nil
+	}
+}
+
 // Network driver options
 
 // WithFailedWhenContains provide a custom slice of strings to use to check if an output is failed
