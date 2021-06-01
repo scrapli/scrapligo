@@ -170,7 +170,7 @@ func (t *Standard) openBase() error {
 
 	// not sure what to do about the tty speeds... figured lets just go fast?
 	modes := ssh.TerminalModes{
-		ssh.ECHO:          0,
+		ssh.ECHO:          1,
 		ssh.TTY_OP_ISPEED: 115200,
 		ssh.TTY_OP_OSPEED: 115200,
 	}
