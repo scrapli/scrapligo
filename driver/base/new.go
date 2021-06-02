@@ -50,7 +50,8 @@ func NewDriver(
 	}
 
 	if d.Transport == nil {
-		if d.TransportType == transport.SystemTransportName {
+		switch d.TransportType {
+		case transport.SystemTransportName:
 			systemTransportArgs := &transport.SystemTransportArgs{
 				AuthPrivateKey:    d.AuthPrivateKey,
 				AuthStrictKey:     d.AuthStrictKey,
@@ -62,7 +63,7 @@ func NewDriver(
 				SystemTransportArgs: systemTransportArgs,
 			}
 			d.Transport = t
-		} else if d.TransportType == transport.StandardTransportName {
+		case transport.StandardTransportName:
 			standardTransportArgs := &transport.StandardTransportArgs{
 				AuthPassword:      d.AuthPassword,
 				AuthPrivateKey:    d.AuthPrivateKey,
@@ -75,6 +76,8 @@ func NewDriver(
 				StandardTransportArgs: standardTransportArgs,
 			}
 			d.Transport = t
+		default:
+			return nil, transport.ErrUnknownTransport
 		}
 	}
 

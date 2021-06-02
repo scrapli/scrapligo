@@ -25,7 +25,7 @@ func NewDriver(
 		TimeoutOps:         60 * time.Second,
 		CommsPromptPattern: regexp.MustCompile(`(?im)^[a-z0-9.\-@()/:]{1,48}[#>$]\s*$`),
 		CommsReturnChar:    "\n",
-		TransportType:      transport.SystemTransportName,
+		TransportType:      transport.StandardTransportName,
 		transportPtyHeight: 80,
 		transportPtyWidth:  256,
 		FailedWhenContains: []string{},
@@ -50,18 +50,23 @@ func NewDriver(
 	}
 
 	if d.Transport == nil {
-		standardTransportArgs := &transport.StandardTransportArgs{
-			AuthPassword:      d.AuthPassword,
-			AuthPrivateKey:    d.AuthPrivateKey,
-			AuthStrictKey:     d.AuthStrictKey,
-			SSHConfigFile:     d.SSHConfigFile,
-			SSHKnownHostsFile: d.SSHKnownHostsFile,
+		switch d.TransportType {
+		case transport.StandardTransportName:
+			standardTransportArgs := &transport.StandardTransportArgs{
+				AuthPassword:      d.AuthPassword,
+				AuthPrivateKey:    d.AuthPrivateKey,
+				AuthStrictKey:     d.AuthStrictKey,
+				SSHConfigFile:     d.SSHConfigFile,
+				SSHKnownHostsFile: d.SSHKnownHostsFile,
+			}
+			t := &transport.Standard{
+				BaseTransportArgs:     baseTransportArgs,
+				StandardTransportArgs: standardTransportArgs,
+			}
+			d.Transport = t
+		default:
+			return nil, transport.ErrUnknownTransport
 		}
-		t := &transport.Standard{
-			BaseTransportArgs:     baseTransportArgs,
-			StandardTransportArgs: standardTransportArgs,
-		}
-		d.Transport = t
 	}
 
 	c := &channel.Channel{
