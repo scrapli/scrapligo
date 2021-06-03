@@ -237,7 +237,7 @@ func (t *Standard) Close() error {
 }
 
 func (t *Standard) read() *transportResult {
-	b := make([]byte, ReadSize)
+	b := make([]byte, 0, ReadSize)
 	_, err := t.reader.Read(b)
 
 	if err != nil {

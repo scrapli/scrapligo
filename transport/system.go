@@ -181,7 +181,7 @@ func (t *System) Close() error {
 }
 
 func (t *System) read() *transportResult {
-	b := make([]byte, ReadSize)
+	b := make([]byte, 0, ReadSize)
 	_, err := t.sessionFd.Read(b)
 
 	if err != nil {

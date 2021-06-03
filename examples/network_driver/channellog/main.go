@@ -49,7 +49,7 @@ func main() {
 	}
 
 	// We can then read and print out the channel log data like normal
-	b := make([]byte, 65535)
+	b := make([]byte, 0, 65535)
 	_, _ = channelLog.Read(b)
 	fmt.Printf("Channel log output:\n%s", b)
 }
