@@ -31,6 +31,8 @@ func NewNetconfDriver(
 	host string,
 	options ...base.Option,
 ) (*Driver, error) {
+	options = append([]base.Option{base.WithPort(DefaultPort)}, options...)
+
 	newDriver, err := base.NewDriver(host, options...)
 
 	if err != nil {

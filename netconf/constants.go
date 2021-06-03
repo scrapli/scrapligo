@@ -24,4 +24,5 @@ const (
 	Version11DelimiterPattern = `(?m)^##$`
 	Version11ChunkPattern     = `(?ms)(\d+)\n(.*?)#`
 	XMLHeader                 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+	DefaultPort               = 830
 )
