@@ -19,6 +19,7 @@ func (d *Driver) buildPrivGraph() {
 	for _, privLevel := range d.PrivilegeLevels {
 		privLevel.PatternRe = regexp.MustCompile(privLevel.Pattern)
 		d.privGraph[privLevel.Name] = map[string]bool{}
+
 		if privLevel.PreviousPriv != "" {
 			d.privGraph[privLevel.Name][privLevel.PreviousPriv] = true
 		}
