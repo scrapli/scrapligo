@@ -17,7 +17,9 @@ func (d *Driver) buildPrivGraph() {
 	d.privGraph = map[string]map[string]bool{}
 
 	for _, privLevel := range d.PrivilegeLevels {
+		privLevel.PatternRe = regexp.MustCompile(privLevel.Pattern)
 		d.privGraph[privLevel.Name] = map[string]bool{}
+
 		if privLevel.PreviousPriv != "" {
 			d.privGraph[privLevel.Name][privLevel.PreviousPriv] = true
 		}
@@ -69,8 +71,7 @@ func (d *Driver) determineCurrentPriv(currentPrompt string) ([]string, error) {
 	var matchingPrivLevels []string
 
 	for privName, privData := range d.PrivilegeLevels {
-		privPattern := regexp.MustCompile(privData.Pattern)
-		promptMatch := privPattern.MatchString(currentPrompt)
+		promptMatch := privData.PatternRe.MatchString(currentPrompt)
 
 		if promptMatch {
 			matchingPrivLevels = append(matchingPrivLevels, privName)
