@@ -2,6 +2,7 @@ package testhelper
 
 import (
 	"os"
+	"reflect"
 	"testing"
 
 	"github.com/scrapli/scrapligo/driver/base"
@@ -9,10 +10,30 @@ import (
 	"github.com/scrapli/scrapligo/transport"
 )
 
+// FetchCapturedWrites fetches writes written to the testing transport.
+func FetchCapturedWrites(transportObj transport.BaseTransport, t *testing.T) [][]byte {
+	v := reflect.ValueOf(transportObj)
+
+	capturedWrites := v.Elem().FieldByName("CapturedWrites")
+
+	if !capturedWrites.IsValid() {
+		t.Fatalf("This should not happen; TestingTransport patching failed somehow")
+	}
+
+	if capturedWrites.Type() != reflect.TypeOf([][]byte{}) {
+		t.Fatalf("This should not happen; TestingTransport patching failed somehow")
+	}
+
+	finalCapturedWrites := capturedWrites.Interface().([][]byte)
+
+	return finalCapturedWrites
+}
+
 // TestingTransport patched transport for testing.
 type TestingTransport struct {
 	BaseTransportArgs *transport.BaseTransportArgs
 	FakeSession       *os.File
+	CapturedWrites    [][]byte
 }
 
 // Open do nothing!
@@ -49,8 +70,7 @@ func (t *TestingTransport) ReadN(n int) ([]byte, error) {
 
 // Write do nothing!
 func (t *TestingTransport) Write(channelInput []byte) error {
-	// for now just ignoring this as the inputs are reflected already in the file that is loaded
-	_ = channelInput
+	t.CapturedWrites = append(t.CapturedWrites, channelInput)
 	return nil
 }
 
