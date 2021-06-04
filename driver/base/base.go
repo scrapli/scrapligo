@@ -60,7 +60,7 @@ type Driver struct {
 	PrivilegeLevels    map[string]*PrivilegeLevel
 	DefaultDesiredPriv string
 
-	NetconfEcho bool
+	NetconfEcho *bool
 }
 
 // Open open the connection.

@@ -48,7 +48,7 @@ func NewNetconfDriver(
 
 	nc := &Channel{
 		BaseChannel: d.Channel,
-		serverEcho:  &d.NetconfEcho,
+		serverEcho:  d.NetconfEcho,
 	}
 
 	d.NetconfChannel = nc

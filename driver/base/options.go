@@ -220,7 +220,7 @@ func WithDefaultDesiredPriv(defaultDesiredPriv string) Option {
 // for netconf.
 func WithNetconfServerEcho(echo bool) Option {
 	return func(d *Driver) error {
-		d.NetconfEcho = echo
+		d.NetconfEcho = &echo
 		return nil
 	}
 }
