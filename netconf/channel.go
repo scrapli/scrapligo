@@ -16,7 +16,7 @@ type Channel struct {
 	PreferredNetconfVersion string
 	SelectedNetconfVersion  string
 	serverCapabilities      []string
-	ServerEcho              bool
+	serverEcho              *bool
 }
 
 type channelResult struct {
@@ -73,7 +73,7 @@ func (c *Channel) OpenNetconf(authenticationBuf []byte) error {
 func (c *Channel) readUntilInput(channelInput []byte) error {
 	var b []byte
 
-	if !c.ServerEcho || len(channelInput) == 0 {
+	if !*c.serverEcho || len(channelInput) == 0 {
 		return nil
 	}
 
@@ -139,9 +139,21 @@ func (c *Channel) checkEcho() error {
 			return err
 		}
 
-		c.ServerEcho = true
+		logging.LogDebug(c.BaseChannel.FormatLogMessage(
+			"info", "server echoes inputs, setting serverEcho to 'true'"),
+		)
+
+		echo := true
+
+		c.serverEcho = &echo
 	case <-timer.C:
-		c.ServerEcho = false
+		logging.LogDebug(c.BaseChannel.FormatLogMessage(
+			"info", "server does *not* echo inputs, setting serverEcho to 'false'"),
+		)
+
+		echo := false
+
+		c.serverEcho = &echo
 	}
 
 	return nil
