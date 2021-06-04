@@ -111,7 +111,12 @@ func (c *Channel) sendClientCapabilities() error {
 		return err
 	}
 
-	err = c.readUntilInput([]byte(clientCapabilities))
+	err = c.checkEcho()
+	if err != nil {
+		return err
+	}
+
+	err = c.readUntilInput([]byte(clientCapabilities[1:]))
 	if err != nil {
 		return err
 	}

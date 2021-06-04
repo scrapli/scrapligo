@@ -180,8 +180,8 @@ func (t *System) Close() error {
 	return err
 }
 
-func (t *System) read() *transportResult {
-	b := make([]byte, ReadSize)
+func (t *System) read(n int) *transportResult {
+	b := make([]byte, n)
 	_, err := t.fileObj.Read(b)
 
 	if err != nil {
@@ -202,6 +202,23 @@ func (t *System) Read() ([]byte, error) {
 	b, err := transportTimeout(
 		*t.BaseTransportArgs.TimeoutTransport,
 		t.read,
+		ReadSize,
+	)
+
+	if err != nil {
+		logging.LogError(t.FormatLogMessage("error", "timed out reading from transport"))
+		return b, err
+	}
+
+	return b, nil
+}
+
+// ReadN read N bytes from the transport.
+func (t *System) ReadN(n int) ([]byte, error) {
+	b, err := transportTimeout(
+		*t.BaseTransportArgs.TimeoutTransport,
+		t.read,
+		n,
 	)
 
 	if err != nil {

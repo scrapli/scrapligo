@@ -114,3 +114,35 @@ func (c *Channel) readUntilPrompt(b []byte, prompt *string) ([]byte, error) {
 		}
 	}
 }
+
+func (c *Channel) checkEcho() error {
+	var _c = make(chan error, 1)
+
+	echoTimeout := 1 * time.Second
+	if *c.BaseChannel.TimeoutOps > 0*time.Second {
+		echoTimeout = *c.BaseChannel.TimeoutOps / 20
+	}
+
+	go func() {
+		// try to read a single byte off the transport
+		_, err := c.BaseChannel.Transport.ReadN(1)
+
+		_c <- err
+		close(_c)
+	}()
+
+	timer := time.NewTimer(echoTimeout)
+
+	select {
+	case err := <-_c:
+		if err != nil {
+			return err
+		}
+
+		c.ServerEcho = true
+	case <-timer.C:
+		c.ServerEcho = false
+	}
+
+	return nil
+}
