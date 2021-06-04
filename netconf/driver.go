@@ -48,9 +48,7 @@ func NewNetconfDriver(
 
 	nc := &Channel{
 		BaseChannel: d.Channel,
-		// system will always echo, and standard is set to echo... so far 100% of the time this
-		// works :)
-		ServerEcho: true,
+		ServerEcho:  true,
 	}
 
 	d.NetconfChannel = nc

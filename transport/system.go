@@ -16,7 +16,7 @@ import (
 type System struct {
 	BaseTransportArgs   *BaseTransportArgs
 	SystemTransportArgs *SystemTransportArgs
-	sessionFd           *os.File
+	fileObj             *os.File
 	openCmd             []string
 }
 
@@ -112,7 +112,7 @@ func (t *System) Open() error {
 	)
 
 	sshCommand := exec.Command("ssh", t.openCmd...)
-	sessionFd, err := pty.StartWithSize(
+	fileObj, err := pty.StartWithSize(
 		sshCommand,
 		&pty.Winsize{
 			Rows: uint16(t.BaseTransportArgs.PtyHeight),
@@ -128,7 +128,7 @@ func (t *System) Open() error {
 
 	logging.LogDebug(t.FormatLogMessage("debug", "transport connection to host opened"))
 
-	t.sessionFd = sessionFd
+	t.fileObj = fileObj
 
 	return err
 }
@@ -154,7 +154,7 @@ func (t *System) OpenNetconf() error {
 	)
 
 	sshCommand := exec.Command("ssh", t.openCmd...)
-	sessionFd, err := pty.Start(sshCommand)
+	fileObj, err := pty.Start(sshCommand)
 
 	if err != nil {
 		logging.ErrorLog(
@@ -166,15 +166,15 @@ func (t *System) OpenNetconf() error {
 
 	logging.LogDebug(t.FormatLogMessage("debug", "netconf transport connection to host opened"))
 
-	t.sessionFd = sessionFd
+	t.fileObj = fileObj
 
 	return err
 }
 
 // Close close the transport connection to the device.
 func (t *System) Close() error {
-	err := t.sessionFd.Close()
-	t.sessionFd = nil
+	err := t.fileObj.Close()
+	t.fileObj = nil
 	logging.LogDebug(t.FormatLogMessage("debug", "transport connection to host closed"))
 
 	return err
@@ -182,7 +182,7 @@ func (t *System) Close() error {
 
 func (t *System) read() *transportResult {
 	b := make([]byte, ReadSize)
-	_, err := t.sessionFd.Read(b)
+	_, err := t.fileObj.Read(b)
 
 	if err != nil {
 		return &transportResult{
@@ -214,7 +214,7 @@ func (t *System) Read() ([]byte, error) {
 
 // Write write bytes to the transport.
 func (t *System) Write(channelInput []byte) error {
-	_, err := t.sessionFd.Write(channelInput)
+	_, err := t.fileObj.Write(channelInput)
 	if err != nil {
 		return err
 	}
@@ -224,7 +224,7 @@ func (t *System) Write(channelInput []byte) error {
 
 // IsAlive indicate if the transport is alive or not.
 func (t *System) IsAlive() bool {
-	return t.sessionFd != nil
+	return t.fileObj != nil
 }
 
 // FormatLogMessage formats log message payload, adding contextual info about the host.

@@ -2,7 +2,6 @@ package transport
 
 import (
 	"encoding/base64"
-	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -13,9 +12,6 @@ import (
 
 	"golang.org/x/crypto/ssh"
 )
-
-// ErrNotImplemented error raised when trying to use netconf w/ standard transport.
-var ErrNotImplemented = errors.New("not implemented")
 
 // Standard the "standard" (standard library) transport option for scrapligo.
 type Standard struct {
