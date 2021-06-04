@@ -58,7 +58,7 @@ func transportTimeout(
 	f func(int) *transportResult,
 	n int,
 ) ([]byte, error) {
-	c := make(chan *transportResult, 1)
+	c := make(chan *transportResult)
 
 	go func() {
 		r := f(n)

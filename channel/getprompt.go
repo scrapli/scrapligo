@@ -38,7 +38,7 @@ func (c *Channel) getPrompt() *channelResult {
 
 // GetPrompt fetch the current prompt.
 func (c *Channel) GetPrompt() (string, error) {
-	_c := make(chan *channelResult, 1)
+	_c := make(chan *channelResult)
 
 	go func() {
 		r := c.getPrompt()

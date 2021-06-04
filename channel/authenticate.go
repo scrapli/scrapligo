@@ -89,7 +89,7 @@ func (c *Channel) authenticateSSH(authPassword, authPassphrase []byte) *channelR
 
 // AuthenticateSSH Handle "in channel" SSH authentication (for "system" transport).
 func (c *Channel) AuthenticateSSH(authPassword, authPassphrase string) ([]byte, error) {
-	var _c = make(chan *channelResult, 1)
+	var _c = make(chan *channelResult)
 
 	go func() {
 		r := c.authenticateSSH([]byte(authPassword), []byte(authPassphrase))

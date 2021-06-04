@@ -27,7 +27,7 @@ type channelResult struct {
 // OpenNetconf open a netconf channel to the device, handles capabilities exchange.
 func (c *Channel) OpenNetconf(authenticationBuf []byte) error {
 	if !bytes.Contains(authenticationBuf, []byte("]]>]]>")) {
-		var _c = make(chan *channelResult, 1)
+		var _c = make(chan *channelResult)
 
 		go func() {
 			r := c.getServerCapabilities(authenticationBuf)
@@ -116,7 +116,7 @@ func (c *Channel) readUntilPrompt(b []byte, prompt *string) ([]byte, error) {
 }
 
 func (c *Channel) checkEcho() error {
-	var _c = make(chan error, 1)
+	var _c = make(chan error)
 
 	echoTimeout := 1 * time.Second
 	if *c.BaseChannel.TimeoutOps > 0*time.Second {

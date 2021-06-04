@@ -74,7 +74,7 @@ func (c *Channel) SendInputBytes(
 	stripPrompt, eager bool,
 	timeoutOps time.Duration,
 ) ([]byte, error) {
-	_c := make(chan *channelResult, 1)
+	_c := make(chan *channelResult)
 
 	go func() {
 		r := c.sendInput(channelInput, stripPrompt, eager)
