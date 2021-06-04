@@ -41,6 +41,12 @@ func (t *TestingTransport) Read() ([]byte, error) {
 	return b, err
 }
 
+// ReadN read from the fake session.
+func (t *TestingTransport) ReadN(n int) ([]byte, error) {
+	// not needed for testing at this time
+	return []byte{}, nil
+}
+
 // Write do nothing!
 func (t *TestingTransport) Write(channelInput []byte) error {
 	// for now just ignoring this as the inputs are reflected already in the file that is loaded

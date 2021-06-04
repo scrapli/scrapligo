@@ -232,8 +232,8 @@ func (t *Standard) Close() error {
 	return err
 }
 
-func (t *Standard) read() *transportResult {
-	b := make([]byte, ReadSize)
+func (t *Standard) read(n int) *transportResult {
+	b := make([]byte, n)
 	_, err := t.reader.Read(b)
 
 	if err != nil {
@@ -254,6 +254,23 @@ func (t *Standard) Read() ([]byte, error) {
 	b, err := transportTimeout(
 		*t.BaseTransportArgs.TimeoutTransport,
 		t.read,
+		ReadSize,
+	)
+
+	if err != nil {
+		logging.LogError(t.FormatLogMessage("error", "timed out reading from transport"))
+		return b, err
+	}
+
+	return b, nil
+}
+
+// ReadN read N bytes from the transport.
+func (t *Standard) ReadN(n int) ([]byte, error) {
+	b, err := transportTimeout(
+		*t.BaseTransportArgs.TimeoutTransport,
+		t.read,
+		n,
 	)
 
 	if err != nil {

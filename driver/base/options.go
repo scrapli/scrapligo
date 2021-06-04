@@ -214,6 +214,17 @@ func WithDefaultDesiredPriv(defaultDesiredPriv string) Option {
 	}
 }
 
+// Netconf driver options
+
+// WithNetconfServerEcho provide custom default preferred privilege level to use -- only applicable
+// for netconf.
+func WithNetconfServerEcho(echo bool) Option {
+	return func(d *Driver) error {
+		d.NetconfEcho = &echo
+		return nil
+	}
+}
+
 // Send command/config options
 
 const (

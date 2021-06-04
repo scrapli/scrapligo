@@ -48,18 +48,20 @@ type BaseTransport interface {
 	Close() error
 	IsAlive() bool
 	Read() ([]byte, error)
+	ReadN(int) ([]byte, error)
 	Write([]byte) error
 	FormatLogMessage(string, string) string
 }
 
 func transportTimeout(
 	timeout time.Duration,
-	f func() *transportResult,
+	f func(int) *transportResult,
+	n int,
 ) ([]byte, error) {
 	c := make(chan *transportResult, 1)
 
 	go func() {
-		r := f()
+		r := f(n)
 		c <- r
 		close(c)
 	}()

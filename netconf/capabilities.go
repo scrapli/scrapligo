@@ -111,7 +111,19 @@ func (c *Channel) sendClientCapabilities() error {
 		return err
 	}
 
-	err = c.readUntilInput([]byte(clientCapabilities))
+	if c.serverEcho == nil {
+		logging.LogDebug(c.BaseChannel.FormatLogMessage(
+			"debug", "server echo is unset, determining if server echoes inputs now"),
+		)
+
+		err = c.checkEcho()
+
+		if err != nil {
+			return err
+		}
+	}
+
+	err = c.readUntilInput([]byte(clientCapabilities[1:]))
 	if err != nil {
 		return err
 	}
