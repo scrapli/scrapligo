@@ -13,6 +13,8 @@ import (
 type TestingTransport struct {
 	BaseTransportArgs *transport.BaseTransportArgs
 	FakeSession       *os.File
+	CapturedWrites    [][]byte
+	ReadSize          *int
 }
 
 // Open do nothing!
@@ -35,7 +37,13 @@ func (t *TestingTransport) Read() ([]byte, error) {
 	// need to read one byte at a time so we dont auto read past prompts and commands and such
 	// its sorta strange that 65535 works for scrapli IRL but i guess its just consuming a byte at
 	// a time out of a stream rather than just reading an already present file?
-	b := make([]byte, 1)
+	readSize := 1
+
+	if t.ReadSize != nil {
+		readSize = *t.ReadSize
+	}
+
+	b := make([]byte, readSize)
 	_, err := t.FakeSession.Read(b)
 
 	return b, err
@@ -49,8 +57,7 @@ func (t *TestingTransport) ReadN(n int) ([]byte, error) {
 
 // Write do nothing!
 func (t *TestingTransport) Write(channelInput []byte) error {
-	// for now just ignoring this as the inputs are reflected already in the file that is loaded
-	_ = channelInput
+	t.CapturedWrites = append(t.CapturedWrites, channelInput)
 	return nil
 }
 
