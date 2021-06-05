@@ -114,7 +114,7 @@ func (c *Channel) readUntilInput(channelInput []byte) ([]byte, error) {
 
 func (c *Channel) readUntilPrompt(prompt *string) ([]byte, error) {
 	matchPattern := c.CommsPromptPattern
-	if prompt != nil {
+	if prompt != nil && len(*prompt) > 0 {
 		matchPattern = regexp.MustCompile(*prompt)
 	}
 
