@@ -2,32 +2,12 @@ package testhelper
 
 import (
 	"os"
-	"reflect"
 	"testing"
 
 	"github.com/scrapli/scrapligo/driver/base"
 	"github.com/scrapli/scrapligo/logging"
 	"github.com/scrapli/scrapligo/transport"
 )
-
-// FetchCapturedWrites fetches writes written to the testing transport.
-func FetchCapturedWrites(transportObj transport.BaseTransport, t *testing.T) [][]byte {
-	v := reflect.ValueOf(transportObj)
-
-	capturedWrites := v.Elem().FieldByName("CapturedWrites")
-
-	if !capturedWrites.IsValid() {
-		t.Fatalf("This should not happen; TestingTransport patching failed somehow")
-	}
-
-	if capturedWrites.Type() != reflect.TypeOf([][]byte{}) {
-		t.Fatalf("This should not happen; TestingTransport patching failed somehow")
-	}
-
-	finalCapturedWrites := capturedWrites.Interface().([][]byte)
-
-	return finalCapturedWrites
-}
 
 // TestingTransport patched transport for testing.
 type TestingTransport struct {
