@@ -70,6 +70,7 @@ func (t *Standard) open(cfg *ssh.ClientConfig) error {
 		fmt.Sprintf("%s:%d", t.BaseTransportArgs.Host, t.BaseTransportArgs.Port),
 		cfg,
 	)
+
 	if err != nil {
 		logging.LogError(
 			t.FormatLogMessage("error", fmt.Sprintf("error connecting to host: %v", err)),
