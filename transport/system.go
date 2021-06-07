@@ -121,7 +121,7 @@ func (t *System) Open() error {
 	)
 
 	if err != nil {
-		logging.ErrorLog(t.FormatLogMessage("error", "failed opening transport connection to host"))
+		logging.LogError(t.FormatLogMessage("error", "failed opening transport connection to host"))
 
 		return err
 	}
@@ -157,7 +157,7 @@ func (t *System) OpenNetconf() error {
 	fileObj, err := pty.Start(sshCommand)
 
 	if err != nil {
-		logging.ErrorLog(
+		logging.LogError(
 			t.FormatLogMessage("error", "failed opening netconf transport connection to host"),
 		)
 
