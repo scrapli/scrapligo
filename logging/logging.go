@@ -5,33 +5,33 @@ import "fmt"
 // Logger accept logging interface to set as library logger(s).
 type Logger func(...interface{})
 
-// DebugLog default DebugLog -- defaults to nil.
-var DebugLog Logger
+// debugLog default DebugLog -- defaults to nil.
+var debugLog Logger
 
-// ErrorLog default ErrorLog -- defaults to nil.
-var ErrorLog Logger
+// errorLog default ErrorLog -- defaults to nil.
+var errorLog Logger
 
 // SetDebugLogger function to set debug logger to something that implements `Logger`.
 func SetDebugLogger(logger Logger) {
-	DebugLog = logger
+	debugLog = logger
 }
 
 // SetErrorLogger function to set error logger to something that implements `Logger`.
 func SetErrorLogger(logger Logger) {
-	ErrorLog = logger
+	errorLog = logger
 }
 
 // LogDebug write debug message to the debug log.
 func LogDebug(msg string) {
-	if DebugLog != nil {
-		DebugLog(msg)
+	if debugLog != nil {
+		debugLog(msg)
 	}
 }
 
 // LogError write error message to the error log.
 func LogError(msg string) {
-	if ErrorLog != nil {
-		ErrorLog(msg)
+	if errorLog != nil {
+		errorLog(msg)
 	}
 }
 
