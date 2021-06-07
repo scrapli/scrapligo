@@ -65,14 +65,14 @@ func trustedHostKeyCallback(trustedKey string) ssh.HostKeyCallback {
 
 func (t *Standard) open(cfg *ssh.ClientConfig) error {
 	var err error
-
 	t.client, err = ssh.Dial(
 		"tcp",
 		fmt.Sprintf("%s:%d", t.BaseTransportArgs.Host, t.BaseTransportArgs.Port),
 		cfg,
 	)
+
 	if err != nil {
-		logging.ErrorLog(
+		logging.LogError(
 			t.FormatLogMessage("error", fmt.Sprintf("error connecting to host: %v", err)),
 		)
 
@@ -81,7 +81,7 @@ func (t *Standard) open(cfg *ssh.ClientConfig) error {
 
 	t.session, err = t.client.NewSession()
 	if err != nil {
-		logging.ErrorLog(
+		logging.LogError(
 			t.FormatLogMessage("error", fmt.Sprintf("error allocating session: %v", err)),
 		)
 
@@ -90,7 +90,7 @@ func (t *Standard) open(cfg *ssh.ClientConfig) error {
 
 	t.writer, err = t.session.StdinPipe()
 	if err != nil {
-		logging.ErrorLog(
+		logging.LogError(
 			t.FormatLogMessage("error", fmt.Sprintf("error allocating writer: %v", err)),
 		)
 
@@ -99,7 +99,7 @@ func (t *Standard) open(cfg *ssh.ClientConfig) error {
 
 	t.reader, err = t.session.StdoutPipe()
 	if err != nil {
-		logging.ErrorLog(
+		logging.LogError(
 			t.FormatLogMessage("error", fmt.Sprintf("error allocating reader: %v", err)),
 		)
 
@@ -128,7 +128,7 @@ func (t *Standard) openBase() error {
 		signer, err := ssh.ParsePrivateKey(key)
 
 		if err != nil {
-			logging.ErrorLog(
+			logging.LogError(
 				t.FormatLogMessage("error", fmt.Sprintf("unable to parse private key: %v", err)),
 			)
 
