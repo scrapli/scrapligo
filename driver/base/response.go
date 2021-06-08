@@ -15,7 +15,7 @@ import (
 var ErrFailedOpeningTemplate = errors.New("failed opening provided path to textfsm template")
 
 // ErrFailedParsingTemplate error for failure of parsing a textfsm template.
-var ErrFailedParsingTemplate = errors.New("failed opening provided path to textfsm template")
+var ErrFailedParsingTemplate = errors.New("failed parsing textfsm template")
 
 // Response response object that gets returned from scrapli send operations.
 type Response struct {
