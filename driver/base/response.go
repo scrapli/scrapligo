@@ -1,9 +1,21 @@
 package base
 
 import (
+	"errors"
+	"fmt"
+	"os"
 	"strings"
 	"time"
+
+	"github.com/scrapli/scrapligo/logging"
+	"github.com/sirikothe/gotextfsm"
 )
+
+// ErrFailedOpeningTemplate error for failure to open a textfsm template.
+var ErrFailedOpeningTemplate = errors.New("failed opening provided path to textfsm template")
+
+// ErrFailedParsingTemplate error for failure of parsing a textfsm template.
+var ErrFailedParsingTemplate = errors.New("failed opening provided path to textfsm template")
 
 // Response response object that gets returned from scrapli send operations.
 type Response struct {
@@ -60,4 +72,57 @@ func (r *Response) Record(rawResult []byte, result string) {
 			break
 		}
 	}
+}
+
+// TextFsmParse parses recorded output w/ a provided textfsm template.
+func (r *Response) TextFsmParse(template string) ([]map[string]interface{}, error) {
+	t, err := os.ReadFile(template)
+	if err != nil {
+		logging.LogError(
+			r.FormatLogMessage(
+				"error",
+				fmt.Sprintf("Failed opening provided template, error: %s\n", err.Error()),
+			),
+		)
+
+		return []map[string]interface{}{}, ErrFailedOpeningTemplate
+	}
+
+	fsm := gotextfsm.TextFSM{}
+
+	err = fsm.ParseString(string(t))
+	if err != nil {
+		logging.LogError(
+			r.FormatLogMessage(
+				"error",
+				fmt.Sprintf("Failed parsing provided template, gotextfsm error: %s\n", err.Error()),
+			),
+		)
+
+		return []map[string]interface{}{}, ErrFailedParsingTemplate
+	}
+
+	parser := gotextfsm.ParserOutput{}
+
+	err = parser.ParseTextString(r.Result, fsm, true)
+	if err != nil {
+		logging.LogError(
+			r.FormatLogMessage(
+				"error",
+				fmt.Sprintf(
+					"Error while parsing device output, gotextfsm error: %s\n",
+					err.Error(),
+				),
+			),
+		)
+
+		return []map[string]interface{}{}, err
+	}
+
+	return parser.Dict, nil
+}
+
+// FormatLogMessage formats log message payload, adding contextual info about the host.
+func (r *Response) FormatLogMessage(level, msg string) string {
+	return logging.FormatLogMessage(level, r.Host, r.Port, msg)
 }
