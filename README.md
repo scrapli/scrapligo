@@ -27,12 +27,12 @@ scrapligo -- scrap(e c)li (but in go!) --  is a Go library focused on connecting
 - __But wait, there's more!__: Have NETCONF devices in your environment, but love the speed and simplicity of
   scrapli? You're in luck! NETCONF support is built right into scrapligo!
 
-## Running examples
+## Running the examples
 
-You need Go 1.16+ installed. Clone the the repo and  run `make` to see the list. 
+You need [Go 1.16+](https://golang.org/doc/install) installed. Clone the the repo and ``go run` any of the examples in the (examples)[examples] folder. 
 
 ```bash
-$  make net-simple-example 
+$  go run examples/base_driver/main.go
 found prompt: 
 csr1000v-1#
 

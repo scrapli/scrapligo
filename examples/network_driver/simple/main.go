@@ -11,7 +11,7 @@ import (
 // const commandsFile = "commandsfile"
 
 func main() {
-	arg := flag.String("argument", "", "argument from Makefile")
+	arg := flag.String("file", "examples/simple/commandsfile", "argument from user")
 	flag.Parse()
 
 	d, err := core.NewCoreDriver(
