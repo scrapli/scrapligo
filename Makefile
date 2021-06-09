@@ -11,6 +11,9 @@ lint: ## Run linters
 test: ## Test execution
 	go test -cover -v ./channel/... ./driver/... ./netconf/... ./logging/... ./transport/...
 
+examples: base-example net-simple-example net-log-example net-interactive-example net-factory-example \
+          net-onopen-example net-channellog-example
+
 base-example: ## Run Base example
 	-@go run examples/base_driver/main.go
 
