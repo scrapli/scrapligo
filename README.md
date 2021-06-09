@@ -52,8 +52,8 @@ Compiled Wed 20-Mar-19 07:56 by mcpre
 
 For more details, check out [Network automation options in Go with scrapligo](https://netdevops.me/2021/network-automation-options-in-go-with-scrapligo/).
 
-```bash
-⇨  go run examples/network_driver/textfsm/main.go
+```yaml
+$  go run examples/network_driver/textfsm/main.go
 Hostname: csr1000v-1
 SW Version: 16.9.3
 Uptime: 18 minutes
