@@ -29,7 +29,7 @@ scrapligo -- scrap(e c)li (but in go!) --  is a Go library focused on connecting
 
 ## Running the examples
 
-You need [Go 1.16+](https://golang.org/doc/install) installed. Clone the the repo and ``go run` any of the examples in the (examples)[examples] folder. 
+You need [Go 1.16+](https://golang.org/doc/install) installed. Clone the the repo and `go run` any of the examples in the [examples](examples) folder. 
 
 ```bash
 $  go run examples/base_driver/main.go
