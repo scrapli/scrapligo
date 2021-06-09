@@ -4,17 +4,16 @@ import (
 	"fmt"
 
 	"github.com/scrapli/scrapligo/channel"
-
 	"github.com/scrapli/scrapligo/driver/base"
 )
 
 func main() {
 	d, err := base.NewDriver(
-		"localhost",
-		base.WithPort(21022),
+		"ios-xe-mgmt.cisco.com",
+		base.WithPort(8181),
 		base.WithAuthStrictKey(false),
-		base.WithAuthUsername("vrnetlab"),
-		base.WithAuthPassword("VR-netlab9"),
+		base.WithAuthUsername("developer"),
+		base.WithAuthPassword("C1sco12345"),
 	)
 
 	if err != nil {
@@ -31,7 +30,7 @@ func main() {
 	if err != nil {
 		fmt.Printf("failed to get prompt; error: %+v\n", err)
 	} else {
-		fmt.Printf("found prompt: %s\n", prompt)
+		fmt.Printf("found prompt: %s\n\n\n", prompt)
 	}
 
 	// send some input
@@ -41,7 +40,7 @@ func main() {
 	if err != nil {
 		fmt.Printf("failed to send input to device; error: %+v\n", err)
 	} else {
-		fmt.Printf("output received: %s\n", output)
+		fmt.Printf("output received (SendInput):\n %s\n\n\n", output)
 	}
 
 	// send an interactive input
@@ -64,7 +63,7 @@ func main() {
 	if err != nil {
 		fmt.Printf("failed to send interactive input to device; error: %+v\n", err)
 	} else {
-		fmt.Printf("output received: %s\n", interactiveOutput)
+		fmt.Printf("output received (SendInteractive):\n %s\n\n\n", interactiveOutput)
 	}
 
 	// send a command -- as this is "base" there will have been no paging disabling, so have to
@@ -75,7 +74,11 @@ func main() {
 		fmt.Printf("failed to send command; error: %+v\n", err)
 		return
 	}
-	fmt.Printf("sent command '%s', output received:\n %s\n", r.ChannelInput, r.Result)
+	fmt.Printf(
+		"sent command '%s', output received (SendCommand):\n %s\n\n\n",
+		r.ChannelInput,
+		r.Result,
+	)
 
 	err = d.Close()
 	if err != nil {

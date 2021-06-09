@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/scrapli/scrapligo/driver/base"
-
 	"github.com/scrapli/scrapligo/driver/core"
 	"github.com/scrapli/scrapligo/driver/network"
 )
@@ -30,13 +29,12 @@ func customOnOpen(d *network.Driver) error {
 
 func main() {
 	d, err := core.NewCoreDriver(
-		"localhost",
+		"ios-xe-mgmt.cisco.com",
 		"cisco_iosxe",
-		base.WithPort(21022),
+		base.WithPort(8181),
 		base.WithAuthStrictKey(false),
-		base.WithAuthUsername("vrnetlab"),
-		base.WithAuthPassword("VR-netlab9"),
-		base.WithAuthSecondary("VR-netlab9"),
+		base.WithAuthUsername("developer"),
+		base.WithAuthPassword("C1sco12345"),
 	)
 
 	if err != nil {
@@ -61,7 +59,7 @@ func main() {
 		fmt.Printf("failed to get prompt; error: %+v\n", err)
 		return
 	}
-	fmt.Printf("found prompt: %s\n", prompt)
+	fmt.Printf("found prompt: %s\n\n\n", prompt)
 
 	err = d.Close()
 	if err != nil {

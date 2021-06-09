@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/scrapli/scrapligo/driver/base"
-
 	"github.com/scrapli/scrapligo/netconf"
 )
 
