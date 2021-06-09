@@ -1,24 +1,26 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 
 	"github.com/scrapli/scrapligo/driver/base"
-
 	"github.com/scrapli/scrapligo/driver/core"
 )
 
-const commandsFile = "commandsfile"
+// const commandsFile = "commandsfile"
 
 func main() {
+	arg := flag.String("file", "examples/simple/commandsfile", "argument from user")
+	flag.Parse()
+
 	d, err := core.NewCoreDriver(
-		"localhost",
+		"ios-xe-mgmt.cisco.com",
 		"cisco_iosxe",
-		base.WithPort(21022),
+		base.WithPort(8181),
 		base.WithAuthStrictKey(false),
-		base.WithAuthUsername("vrnetlab"),
-		base.WithAuthPassword("VR-netlab9"),
-		base.WithAuthSecondary("VR-netlab9"),
+		base.WithAuthUsername("developer"),
+		base.WithAuthPassword("C1sco12345"),
 	)
 
 	if err != nil {
@@ -37,17 +39,17 @@ func main() {
 	if err != nil {
 		fmt.Printf("failed to get prompt; error: %+v\n", err)
 	} else {
-		fmt.Printf("found prompt: %s\n", prompt)
+		fmt.Printf("found prompt: %s\n\n\n", prompt)
 	}
 
 	// send some commands from a file
-	mr, err := d.SendCommandsFromFile(commandsFile)
+	mr, err := d.SendCommandsFromFile(*arg)
 	if err != nil {
 		fmt.Printf("failed to send commands from file; error: %+v\n", err)
 		return
 	}
 	for _, r := range mr.Responses {
-		fmt.Printf("sent command '%s', output received:\n %s\n", r.ChannelInput, r.Result)
+		fmt.Printf("sent command '%s', output received:\n %s\n\n\n", r.ChannelInput, r.Result)
 	}
 
 	// send some configs

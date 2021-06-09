@@ -21,14 +21,32 @@ scrapligo -- scrap(e c)li (but in go!) --  is a Go library focused on connecting
 #### Key Features:
 
 - __Easy__: It's easy to get going with scrapligo -- if you are familiar with go and/or scrapli you are already most of 
-  the way there! Check otu the examples linked above to get started! 
+  the way there! Check out the examples linked above to get started! 
 - __Fast__: Do you like to go fast? Of course you do! All of scrapli is built with speed in mind, but this port of 
   scrapli to go is of course even faster than its python sibling! 
 - __But wait, there's more!__: Have NETCONF devices in your environment, but love the speed and simplicity of
   scrapli? You're in luck! NETCONF support is built right into scrapligo!
 
+## Running the examples
 
-## A simple Example
+You need [Go 1.16+](https://golang.org/doc/install) installed. Clone the the repo and ``go run` any of the examples in the (examples)[examples] folder. 
+
+```bash
+$  go run examples/base_driver/main.go
+found prompt: 
+csr1000v-1#
+
+
+sent command 'show version', output received:
+ Cisco IOS XE Software, Version 16.09.03
+Cisco IOS Software [Fuji], Virtual XE Software (X86_64_LINUX_IOSD-UNIVERSALK9-M), Version 16.9.3, RELEASE SOFTWARE (fc2)
+Technical Support: http://www.cisco.com/techsupport
+Copyright (c) 1986-2019 by Cisco Systems, Inc.
+Compiled Wed 20-Mar-19 07:56 by mcpre
+...
+```
+
+## Code Example
 
 ```go
 package main
@@ -37,7 +55,6 @@ import (
 	"fmt"
 
 	"github.com/scrapli/scrapligo/driver/base"
-
 	"github.com/scrapli/scrapligo/driver/core"
 )
 

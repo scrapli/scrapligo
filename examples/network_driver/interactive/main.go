@@ -4,22 +4,19 @@ import (
 	"fmt"
 
 	"github.com/scrapli/scrapligo/channel"
-
 	"github.com/scrapli/scrapligo/driver/base"
-
 	"github.com/scrapli/scrapligo/driver/core"
 )
 
 func main() {
 	// use the NewCoreDriver factory and pass in a platform argument
 	d, err := core.NewCoreDriver(
-		"localhost",
+		"ios-xe-mgmt.cisco.com",
 		"cisco_iosxe",
-		base.WithPort(21022),
+		base.WithPort(8181),
 		base.WithAuthStrictKey(false),
-		base.WithAuthUsername("vrnetlab"),
-		base.WithAuthPassword("VR-netlab9"),
-		base.WithAuthSecondary("VR-netlab9"),
+		base.WithAuthUsername("developer"),
+		base.WithAuthPassword("C1sco12345"),
 	)
 
 	if err != nil {
