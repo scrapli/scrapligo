@@ -31,6 +31,8 @@ scrapligo -- scrap(e c)li (but in go!) --  is a Go library focused on connecting
 
 You need [Go 1.16+](https://golang.org/doc/install) installed. Clone the repo and `go run` any of the examples in the [examples](/examples) folder. 
 
+### Executing a number of commands (from a file)
+
 ```bash
 $  go run examples/base_driver/main.go
 found prompt: 
@@ -44,6 +46,17 @@ Technical Support: http://www.cisco.com/techsupport
 Copyright (c) 1986-2019 by Cisco Systems, Inc.
 Compiled Wed 20-Mar-19 07:56 by mcpre
 ...
+```
+
+### Parsing a command output
+
+For more details, check out [Network automation options in Go with scrapligo](https://netdevops.me/2021/network-automation-options-in-go-with-scrapligo/).
+
+```yaml
+$  go run examples/network_driver/textfsm/main.go
+Hostname: csr1000v-1
+SW Version: 16.9.3
+Uptime: 18 minutes
 ```
 
 ## Code Example
