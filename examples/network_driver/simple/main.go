@@ -11,7 +11,7 @@ import (
 // const commandsFile = "commandsfile"
 
 func main() {
-	arg := flag.String("file", "examples/simple/commandsfile", "argument from user")
+	arg := flag.String("file", "examples/network_driver/simple/commandsfile", "argument from user")
 	flag.Parse()
 
 	d, err := core.NewCoreDriver(
