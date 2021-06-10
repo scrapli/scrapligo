@@ -33,6 +33,7 @@ func main() {
 		fmt.Printf("failed to open driver; error: %+v\n", err)
 		return
 	}
+	defer d.Close()
 
 	// fetch the prompt
 	prompt, err := d.GetPrompt()
@@ -63,10 +64,5 @@ func main() {
 	if err != nil {
 		fmt.Printf("failed to send configs; error: %+v\n", err)
 		return
-	}
-
-	err = d.Close()
-	if err != nil {
-		fmt.Printf("failed to close driver; error: %+v\n", err)
 	}
 }

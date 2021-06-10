@@ -92,6 +92,7 @@ func main() {
 		fmt.Printf("failed to open driver; error: %+v\n", err)
 		return
 	}
+	defer d.Close()
 
 	// send some configs
 	configs := []string{
@@ -104,11 +105,6 @@ func main() {
 	if err != nil {
 		fmt.Printf("failed to send configs; error: %+v\n", err)
 		return
-	}
-
-	err = d.Close()
-	if err != nil {
-		fmt.Printf("failed to close driver; error: %+v\n", err)
 	}
 }
 ```

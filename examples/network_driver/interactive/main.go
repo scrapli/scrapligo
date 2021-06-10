@@ -29,6 +29,7 @@ func main() {
 		fmt.Printf("failed to open driver; error: %+v\n", err)
 		return
 	}
+	defer d.Close()
 
 	events := []*channel.SendInteractiveEvent{
 		{
@@ -49,9 +50,4 @@ func main() {
 		return
 	}
 	fmt.Printf("interact response:\n%s\n", r.Result)
-
-	err = d.Close()
-	if err != nil {
-		fmt.Printf("failed to close driver; error: %+v\n", err)
-	}
 }

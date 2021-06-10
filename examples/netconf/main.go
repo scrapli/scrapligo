@@ -22,6 +22,7 @@ func main() {
 		fmt.Printf("failed to open driver; error: %+v\n", err)
 		return
 	}
+	defer d.Close()
 
 	r, err := d.GetConfig("running")
 	if err != nil {
@@ -65,9 +66,4 @@ func main() {
 	fmt.Printf("Edit Config Response: %s\n", r.Result)
 
 	_, _ = d.Commit()
-
-	err = d.Close()
-	if err != nil {
-		fmt.Printf("some issue closing driver -> %v\n", err)
-	}
 }
