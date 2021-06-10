@@ -10,7 +10,11 @@ import (
 
 func main() {
 	// File from https://github.com/networktocode/ntc-templates/blob/master/ntc_templates/templates/cisco_ios_show_version.textfsm
-	arg := flag.String("file", "examples/network_driver/textfsm/cisco_ios_show_version.textfsm", "argument from user")
+	arg := flag.String(
+		"file",
+		"examples/network_driver/textfsm/cisco_ios_show_version.textfsm",
+		"argument from user",
+	)
 	flag.Parse()
 
 	d, err := core.NewCoreDriver(
@@ -48,5 +52,4 @@ func main() {
 
 	fmt.Printf("Hostname: %s\nSW Version: %s\nUptime: %s\n",
 		parsedOut[0]["HOSTNAME"], parsedOut[0]["VERSION"], parsedOut[0]["UPTIME"])
-
 }
