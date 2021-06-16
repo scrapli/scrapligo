@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
+	"strings"
 
 	"github.com/scrapli/scrapligo/logging"
 
@@ -70,7 +71,16 @@ func (d *Driver) deescalate(currentPriv string) error {
 func (d *Driver) determineCurrentPriv(currentPrompt string) ([]string, error) {
 	var matchingPrivLevels []string
 
+PrivLevel:
 	for privName, privData := range d.PrivilegeLevels {
+		if len(privData.PatternNotContains) > 0 {
+			for _, notContains := range privData.PatternNotContains {
+				if strings.Contains(currentPrompt, notContains) {
+					continue PrivLevel
+				}
+			}
+		}
+
 		promptMatch := privData.PatternRe.MatchString(currentPrompt)
 
 		if promptMatch {

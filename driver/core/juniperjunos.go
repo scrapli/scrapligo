@@ -12,7 +12,7 @@ func NewJUNOSDriver(
 ) (*network.Driver, error) {
 	defaultPrivilegeLevels := map[string]*base.PrivilegeLevel{
 		"privilege_exec": {
-			Pattern:        `(?im)^({\w+:\d}\n){0,1}[a-z0-9.\-_@()/:]{1,63}>\s?$`,
+			Pattern:        `(?im)^({\w+:\d}\n){0,1}[\w.\-@()/:]{1,63}>\s?$`,
 			Name:           privExecPrivLevel,
 			PreviousPriv:   "",
 			Deescalate:     "disable",
@@ -21,7 +21,7 @@ func NewJUNOSDriver(
 			EscalatePrompt: `(?im)^(?:enable\s){0,1}password:\s?$`,
 		},
 		"configuration": {
-			Pattern:        `(?im)^({\w+:\d}\[edit\]\n){0,1}[a-z0-9.\-_@()/:]{1,63}#\s?$`,
+			Pattern:        `(?im)^({\w+:\d}\[edit\]\n){0,1}[\w.\-@()/:]{1,63}#\s?$`,
 			Name:           configPrivLevel,
 			PreviousPriv:   privExecPrivLevel,
 			Deescalate:     "exit configuration-mode",

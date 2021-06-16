@@ -12,7 +12,7 @@ func NewIOSXEDriver(
 ) (*network.Driver, error) {
 	defaultPrivilegeLevels := map[string]*base.PrivilegeLevel{
 		"exec": {
-			Pattern:        `(?im)^[a-z0-9.\\-_@()/:]{1,63}>$`,
+			Pattern:        `(?im)^[\w.\-@/:]{1,63}>$`,
 			Name:           execPrivLevel,
 			PreviousPriv:   "",
 			Deescalate:     "",
@@ -21,7 +21,7 @@ func NewIOSXEDriver(
 			EscalatePrompt: "",
 		},
 		"privilege_exec": {
-			Pattern:        `(?im)^[a-z0-9.\-_@/:]{1,63}#$`,
+			Pattern:        `(?im)^[\w.\-@/:]{1,63}#$`,
 			Name:           privExecPrivLevel,
 			PreviousPriv:   execPrivLevel,
 			Deescalate:     "disable",
@@ -30,11 +30,21 @@ func NewIOSXEDriver(
 			EscalatePrompt: `(?im)^(?:enable\s){0,1}password:\s?$`,
 		},
 		"configuration": {
-			Pattern:        `(?im)^[a-z0-9.\-_@/:]{1,63}\([a-z0-9.\-@/:\+]{0,32}\)#$`,
-			Name:           configPrivLevel,
+			Pattern:            `(?im)^[\w.\-@/:]+\([\w.\-@/:+]{0,32}\)#$`,
+			PatternNotContains: []string{"tcl)"},
+			Name:               configPrivLevel,
+			PreviousPriv:       privExecPrivLevel,
+			Deescalate:         "end",
+			Escalate:           "configure terminal",
+			EscalateAuth:       false,
+			EscalatePrompt:     "",
+		},
+		"tclsh": {
+			Pattern:        `(?im)^([\w.\-@/+>:]+\(tcl\)[>#]|\+>)$`,
+			Name:           "tclsh",
 			PreviousPriv:   privExecPrivLevel,
-			Deescalate:     "end",
-			Escalate:       "configure terminal",
+			Deescalate:     "tclquit",
+			Escalate:       "tclsh",
 			EscalateAuth:   false,
 			EscalatePrompt: "",
 		},
