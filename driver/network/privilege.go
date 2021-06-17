@@ -73,11 +73,9 @@ func (d *Driver) determineCurrentPriv(currentPrompt string) ([]string, error) {
 
 PrivLevel:
 	for privName, privData := range d.PrivilegeLevels {
-		if len(privData.PatternNotContains) > 0 {
-			for _, notContains := range privData.PatternNotContains {
-				if strings.Contains(currentPrompt, notContains) {
-					continue PrivLevel
-				}
+		for _, notContains := range privData.PatternNotContains {
+			if strings.Contains(currentPrompt, notContains) {
+				continue PrivLevel
 			}
 		}
 
