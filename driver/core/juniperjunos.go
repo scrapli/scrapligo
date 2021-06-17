@@ -11,21 +11,48 @@ func NewJUNOSDriver(
 	options ...base.Option,
 ) (*network.Driver, error) {
 	defaultPrivilegeLevels := map[string]*base.PrivilegeLevel{
-		"privilege_exec": {
-			Pattern:        `(?im)^({\w+:\d}\n){0,1}[\w.\-@()/:]{1,63}>\s?$`,
-			Name:           privExecPrivLevel,
+		"exec": {
+			Pattern:        `(?im)^({\w+:\d}\n){0,1}[\w\-@()/:]{1,63}>\s?$`,
+			Name:           execPrivLevel,
 			PreviousPriv:   "",
-			Deescalate:     "disable",
-			Escalate:       "enable",
-			EscalateAuth:   true,
-			EscalatePrompt: `(?im)^(?:enable\s){0,1}password:\s?$`,
+			Deescalate:     "",
+			Escalate:       "",
+			EscalateAuth:   false,
+			EscalatePrompt: "",
 		},
 		"configuration": {
-			Pattern:        `(?im)^({\w+:\d}\[edit\]\n){0,1}[\w.\-@()/:]{1,63}#\s?$`,
+			Pattern:        `(?im)^({\w+:\d}\[edit\]\n){0,1}[\w\-@()/:]{1,63}#\s?$`,
 			Name:           configPrivLevel,
-			PreviousPriv:   privExecPrivLevel,
+			PreviousPriv:   execPrivLevel,
 			Deescalate:     "exit configuration-mode",
 			Escalate:       "configure",
+			EscalateAuth:   false,
+			EscalatePrompt: "",
+		},
+		"configuration_exclusive": {
+			Pattern:        `(?im)^({\w+:\d}\[edit\]\n){0,1}[\w\-@()/:]{1,63}#\s?$`,
+			Name:           "configuration_exclusive",
+			PreviousPriv:   execPrivLevel,
+			Deescalate:     "exit configuration-mode",
+			Escalate:       "configure exclusive",
+			EscalateAuth:   false,
+			EscalatePrompt: "",
+		},
+		"configuration_private": {
+			Pattern:        `(?im)^({\w+:\d}\[edit\]\n){0,1}[\w\-@()/:]{1,63}#\s?$`,
+			Name:           "configuration_private",
+			PreviousPriv:   execPrivLevel,
+			Deescalate:     "exit configuration-mode",
+			Escalate:       "configure exclusive",
+			EscalateAuth:   false,
+			EscalatePrompt: "",
+		},
+		"shell": {
+			Pattern:        `(?im)^%\s?$`,
+			Name:           "shell",
+			PreviousPriv:   execPrivLevel,
+			Deescalate:     "exit",
+			Escalate:       "start shell",
 			EscalateAuth:   false,
 			EscalatePrompt: "",
 		},
@@ -38,7 +65,7 @@ func NewJUNOSDriver(
 		"syntax error",
 	}
 
-	const defaultDefaultDesiredPriv = privExecPrivLevel
+	const defaultDefaultDesiredPriv = execPrivLevel
 
 	d, err := network.NewNetworkDriver(
 		host,

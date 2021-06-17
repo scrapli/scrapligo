@@ -15,7 +15,7 @@ func NewNXOSDriver(
 ) (*network.Driver, error) {
 	defaultPrivilegeLevels := map[string]*base.PrivilegeLevel{
 		"exec": {
-			Pattern:        `(?im)^[\w.\-@()/:]{1,63}>\s?$`,
+			Pattern:        `(?im)^[\w.\-]{1,63}>\s?$`,
 			Name:           execPrivLevel,
 			PreviousPriv:   "",
 			Deescalate:     "",
@@ -24,21 +24,32 @@ func NewNXOSDriver(
 			EscalatePrompt: "",
 		},
 		"privilege_exec": {
-			Pattern:            `(?im)^[\w.\-@/:]{1,63}#\s?$`,
+			Pattern:            `(?im)^[\w.\-]{1,63}#\s?$`,
 			PatternNotContains: []string{"-tcl"},
 			Name:               privExecPrivLevel,
 			PreviousPriv:       execPrivLevel,
 			Deescalate:         "disable",
 			Escalate:           "enable",
 			EscalateAuth:       true,
-			EscalatePrompt:     `(?im)^(?:enable\s){0,1}password:\s?$`,
+			EscalatePrompt:     `(?im)^[pP]assword:\s?$`,
 		},
 		"configuration": {
-			Pattern:        `(?im)^[\w.\-@/:]{1,63}\(config[\w.\-@/:\+]{0,32}\)#\s?$`,
-			Name:           configPrivLevel,
+			Pattern:            `(?im)^[\w.\-]{1,63}\(config[\w.\-@/:]{0,32}\)#\s?$`,
+			PatternNotContains: []string{"config-tcl", "config-s"},
+			Name:               configPrivLevel,
+			PreviousPriv:       privExecPrivLevel,
+			Deescalate:         "end",
+			Escalate:           "configure terminal",
+			EscalateAuth:       false,
+			EscalatePrompt:     "",
+		},
+		"tclsh": {
+			Pattern: `(?im)(^[\w.\-@/:]{1,63}\-tcl#\s?$)|` +
+				`(^[\w.\-@/:]{1,63}\(config\-tcl\)#\s?$)|(^>\s?$)`,
+			Name:           "tclsh",
 			PreviousPriv:   privExecPrivLevel,
-			Deescalate:     "end",
-			Escalate:       "configure terminal",
+			Deescalate:     "tclquit",
+			Escalate:       "tclsh",
 			EscalateAuth:   false,
 			EscalatePrompt: "",
 		},

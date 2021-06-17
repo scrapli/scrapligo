@@ -30,7 +30,7 @@ func NewIOSXEDriver(
 			EscalatePrompt: `(?im)^(?:enable\s){0,1}password:\s?$`,
 		},
 		"configuration": {
-			Pattern:            `(?im)^[\w.\-@/:]+\([\w.\-@/:+]{0,32}\)#$`,
+			Pattern:            `(?im)^[\w.\-@/:]{1,63}\([\w.\-@/:+]{0,32}\)#$`,
 			PatternNotContains: []string{"tcl)"},
 			Name:               configPrivLevel,
 			PreviousPriv:       privExecPrivLevel,

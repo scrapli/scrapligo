@@ -21,7 +21,7 @@ func NewIOSXRDriver(
 			EscalatePrompt: "",
 		},
 		"configuration": {
-			Pattern:        `(?im)^[\w.\-@/:]{1,63}\(config[\w.\-@/:]{0,32}\)#$`,
+			Pattern:        `(?im)^[\w.\-@/:]{1,63}\(config[\w.\-@/:]{0,32}\)#\s?$`,
 			Name:           configPrivLevel,
 			PreviousPriv:   privExecPrivLevel,
 			Deescalate:     "end",
@@ -30,7 +30,7 @@ func NewIOSXRDriver(
 			EscalatePrompt: "",
 		},
 		"configuration_exclusive": {
-			Pattern:        `(?im)^[\w.\-@/:]{1,63}\(config[\w.\-@/:]{0,32}\)#$`,
+			Pattern:        `(?im)^[\w.\-@/:]{1,63}\(config[\w.\-@/:]{0,32}\)#\s?$`,
 			Name:           "configuration_exclusive",
 			PreviousPriv:   privExecPrivLevel,
 			Deescalate:     "end",
