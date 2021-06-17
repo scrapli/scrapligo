@@ -12,7 +12,7 @@ func NewIOSXRDriver(
 ) (*network.Driver, error) {
 	defaultPrivilegeLevels := map[string]*base.PrivilegeLevel{
 		"privilege_exec": {
-			Pattern:        `(?im)^[a-z0-9.\-_@/:]{1,63}#\s?$`,
+			Pattern:        `(?im)^[\w.\-@/:]{1,63}#\s?$`,
 			Name:           privExecPrivLevel,
 			PreviousPriv:   "",
 			Deescalate:     "",
@@ -21,7 +21,7 @@ func NewIOSXRDriver(
 			EscalatePrompt: "",
 		},
 		"configuration": {
-			Pattern:        `(?im)^[a-z0-9.\-_@/:]{1,63}\(config[a-z0-9.\-@/:\+]{0,32}\)#$`,
+			Pattern:        `(?im)^[\w.\-@/:]{1,63}\(config[\w.\-@/:]{0,32}\)#$`,
 			Name:           configPrivLevel,
 			PreviousPriv:   privExecPrivLevel,
 			Deescalate:     "end",
@@ -30,7 +30,7 @@ func NewIOSXRDriver(
 			EscalatePrompt: "",
 		},
 		"configuration_exclusive": {
-			Pattern:        `(?im)^[a-z0-9.\-_@/:]{1,63}\(config[a-z0-9.\-@/:\+]{0,32}\)#$`,
+			Pattern:        `(?im)^[\w.\-@/:]{1,63}\(config[\w.\-@/:]{0,32}\)#$`,
 			Name:           "configuration_exclusive",
 			PreviousPriv:   privExecPrivLevel,
 			Deescalate:     "end",

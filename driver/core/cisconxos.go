@@ -15,7 +15,7 @@ func NewNXOSDriver(
 ) (*network.Driver, error) {
 	defaultPrivilegeLevels := map[string]*base.PrivilegeLevel{
 		"exec": {
-			Pattern:        `(?im)^[a-z0-9.\\-_@()/:]{1,63}>\s?$`,
+			Pattern:        `(?im)^[\w.\-@()/:]{1,63}>\s?$`,
 			Name:           execPrivLevel,
 			PreviousPriv:   "",
 			Deescalate:     "",
@@ -24,16 +24,17 @@ func NewNXOSDriver(
 			EscalatePrompt: "",
 		},
 		"privilege_exec": {
-			Pattern:        `(?im)^[a-z0-9.\-_@/:]{1,63}#\s?$`,
-			Name:           privExecPrivLevel,
-			PreviousPriv:   execPrivLevel,
-			Deescalate:     "disable",
-			Escalate:       "enable",
-			EscalateAuth:   true,
-			EscalatePrompt: `(?im)^(?:enable\s){0,1}password:\s?$`,
+			Pattern:            `(?im)^[\w.\-@/:]{1,63}#\s?$`,
+			PatternNotContains: []string{"-tcl"},
+			Name:               privExecPrivLevel,
+			PreviousPriv:       execPrivLevel,
+			Deescalate:         "disable",
+			Escalate:           "enable",
+			EscalateAuth:       true,
+			EscalatePrompt:     `(?im)^(?:enable\s){0,1}password:\s?$`,
 		},
 		"configuration": {
-			Pattern:        `(?im)^[a-z0-9.\-_@/:]{1,63}\(config[a-z0-9.\-@/:\+]{0,32}\)#\s?$`,
+			Pattern:        `(?im)^[\w.\-@/:]{1,63}\(config[\w.\-@/:\+]{0,32}\)#\s?$`,
 			Name:           configPrivLevel,
 			PreviousPriv:   privExecPrivLevel,
 			Deescalate:     "end",

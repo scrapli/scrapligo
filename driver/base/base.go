@@ -14,14 +14,15 @@ import (
 
 // PrivilegeLevel struct defining a single privilege level -- used only for "network" level drivers.
 type PrivilegeLevel struct {
-	Pattern        string
-	PatternRe      *regexp.Regexp
-	Name           string
-	PreviousPriv   string
-	Deescalate     string
-	Escalate       string
-	EscalateAuth   bool
-	EscalatePrompt string
+	Pattern            string
+	PatternRe          *regexp.Regexp
+	PatternNotContains []string
+	Name               string
+	PreviousPriv       string
+	Deescalate         string
+	Escalate           string
+	EscalateAuth       bool
+	EscalatePrompt     string
 }
 
 // Driver primary/base driver struct.
