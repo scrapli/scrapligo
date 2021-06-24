@@ -269,6 +269,31 @@ func (d *Driver) BuildDeleteConfigElem(
 	return netconfInput
 }
 
+// copy-config
+
+// CopyConfig struct representing the copy-config message element.
+type CopyConfig struct {
+	XMLName xml.Name `xml:"copy-config"`
+	Source  *Source  `xml:""`
+	Target  *Target  `xml:""`
+}
+
+// BuildDeleteConfigElem creates a delete-config element for a get operation.
+func (d *Driver) BuildCopyConfigElem(
+	source,
+	target string,
+) *Message {
+	copyConfigElem := &CopyConfig{
+		XMLName: xml.Name{},
+		Source:  d.BuildSourceElem(source),
+		Target:  d.BuildTargetElem(target),
+	}
+
+	netconfInput := d.BuildPayload(copyConfigElem)
+
+	return netconfInput
+}
+
 // commit
 
 // Commit struct representing the commit message element.
