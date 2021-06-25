@@ -278,7 +278,7 @@ type CopyConfig struct {
 	Target  *Target  `xml:""`
 }
 
-// BuildDeleteConfigElem creates a delete-config element for a get operation.
+// BuildCopyConfigElem creates a copy-config element for a copy-config operation.
 func (d *Driver) BuildCopyConfigElem(
 	source,
 	target string,
