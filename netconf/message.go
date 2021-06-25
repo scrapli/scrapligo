@@ -18,7 +18,7 @@ func (c *Channel) BuildFinalMessage(xmlMessage interface{}) ([]byte, error) {
 		message = append([]byte(fmt.Sprintf("#%d\n", len(message))), message...)
 		message = append(message, []byte("\n##")...)
 	} else {
-		message = append(message, []byte("\n]]>]]>")...)
+		message = append(message, []byte("]]>]]>")...)
 	}
 
 	return message, nil

@@ -93,7 +93,7 @@ func (r *Response) Record(rawResult []byte) {
 }
 
 func (r *Response) recordResponse10() {
-	var tmpResult []byte
+	tmpResult := r.RawResult
 	tmpResult = bytes.TrimPrefix(tmpResult, []byte(XMLHeader))
 	tmpResult = bytes.TrimSuffix(tmpResult, []byte(Version10DelimiterPattern))
 	r.Result = string(tmpResult)
