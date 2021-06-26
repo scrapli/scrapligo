@@ -73,6 +73,11 @@ func (c *Channel) OpenNetconf(authenticationBuf []byte) error {
 func (c *Channel) readUntilInput(channelInput []byte) error {
 	var b []byte
 
+	if c.serverEcho == nil {
+		// echo check hasnt been figured out yet
+		return nil
+	}
+
 	if !*c.serverEcho || len(channelInput) == 0 {
 		return nil
 	}
@@ -113,48 +118,4 @@ func (c *Channel) readUntilPrompt(b []byte, prompt *string) ([]byte, error) {
 			return b, err
 		}
 	}
-}
-
-func (c *Channel) checkEcho() error {
-	var _c = make(chan error)
-
-	echoTimeout := 1 * time.Second
-	if *c.BaseChannel.TimeoutOps > 0*time.Second {
-		echoTimeout = *c.BaseChannel.TimeoutOps / 20
-	}
-
-	go func() {
-		// try to read a single byte off the transport
-		_, err := c.BaseChannel.Transport.ReadN(1)
-
-		_c <- err
-		close(_c)
-	}()
-
-	timer := time.NewTimer(echoTimeout)
-
-	select {
-	case err := <-_c:
-		if err != nil {
-			return err
-		}
-
-		logging.LogDebug(c.BaseChannel.FormatLogMessage(
-			"info", "server echoes inputs, setting serverEcho to 'true'"),
-		)
-
-		echo := true
-
-		c.serverEcho = &echo
-	case <-timer.C:
-		logging.LogDebug(c.BaseChannel.FormatLogMessage(
-			"info", "server does *not* echo inputs, setting serverEcho to 'false'"),
-		)
-
-		echo := false
-
-		c.serverEcho = &echo
-	}
-
-	return nil
 }
