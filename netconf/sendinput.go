@@ -119,9 +119,15 @@ func (c *Channel) SendInputNetconf(channelInput []byte) ([]byte, error) {
 		)
 
 		if bytes.Contains(b, channelInput) {
+			logging.LogDebug(c.BaseChannel.FormatLogMessage(
+				"info", "server echoes inputs, setting serverEcho to 'true'"),
+			)
 			echo := true
 			c.serverEcho = &echo
 		} else {
+			logging.LogDebug(c.BaseChannel.FormatLogMessage(
+				"info", "server does *not* echo inputs, setting serverEcho to 'false'"),
+			)
 			echo := false
 			c.serverEcho = &echo
 		}
