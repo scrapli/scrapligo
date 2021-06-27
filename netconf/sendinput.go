@@ -113,6 +113,28 @@ func (c *Channel) SendInputNetconf(channelInput []byte) ([]byte, error) {
 		return b, err
 	}
 
+	if c.serverEcho == nil {
+		logging.LogDebug(c.BaseChannel.FormatLogMessage(
+			"debug", "server echo is unset, determining if server echoes inputs now"),
+		)
+
+		if bytes.Contains(b, channelInput) {
+			logging.LogDebug(c.BaseChannel.FormatLogMessage(
+				"info", "server echoes inputs, setting serverEcho to 'true'"),
+			)
+
+			echo := true
+			c.serverEcho = &echo
+		} else {
+			logging.LogDebug(c.BaseChannel.FormatLogMessage(
+				"info", "server does *not* echo inputs, setting serverEcho to 'false'"),
+			)
+
+			echo := false
+			c.serverEcho = &echo
+		}
+	}
+
 	if c.SelectedNetconfVersion == Version11 {
 		returnErr := c.BaseChannel.SendReturn()
 		if returnErr != nil {
