@@ -2,6 +2,7 @@ package cfg
 
 import (
 	"errors"
+	"regexp"
 
 	"github.com/scrapli/scrapligo/logging"
 
@@ -14,11 +15,32 @@ var ErrNoConfigSourcesProvided = errors.New("no configuration sources provided, 
 // that this is also the same api surface of the Cfg object that users see.
 type Platform interface {
 	GetVersion() *Response
-	// GetConfig(source string) *Response
+	GetConfig(source string) *Response
 	// LoadConfig(config string, replace bool, options ...LoadOption) *Response
 	// AbortConfig() *Response
 	// CommitConfig(source string) *Response
 	// DiffConfig(source string) *DiffResponse
+}
+
+type PlatformArgs struct {
+	VersionPattern   *regexp.Regexp
+	ConfigCommandMap map[string]string
+}
+
+func setPlatformOptions(p Platform, options ...Option) error {
+	for _, option := range options {
+		err := option(p)
+
+		if err != nil {
+			if errors.Is(err, ErrIgnoredOption) {
+				continue
+			} else {
+				return err
+			}
+		}
+	}
+
+	return nil
 }
 
 // Cfg primary/base cfg platform struct.
@@ -50,8 +72,14 @@ func newCfg(
 	}
 
 	for _, option := range options {
-		if err := option(c); err != nil {
-			return nil, err
+		err := option(c)
+
+		if err != nil {
+			if errors.Is(err, ErrIgnoredOption) {
+				continue
+			} else {
+				return nil, err
+			}
 		}
 	}
 
@@ -89,6 +117,19 @@ func (d *Cfg) GetVersion() *Response {
 
 	if r.Result == "" {
 		logging.LogDebug(d.formatLogMessage("warning", "failed to parse device version"))
+	}
+
+	return r
+}
+
+// GetConfig get the configuration of a source datastore from the device.
+func (d *Cfg) GetConfig(source string) *Response {
+	// TODO probably need to (maybe not for get version, but for others) make sure prepared is true
+	//  prior to doing stuff
+	r := d.Platform.GetConfig(source)
+
+	if r.Failed {
+		logging.LogError(d.formatLogMessage("debug", "failed to fetch config from device"))
 	}
 
 	return r

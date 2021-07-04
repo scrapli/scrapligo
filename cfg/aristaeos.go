@@ -8,8 +8,9 @@ import (
 )
 
 type EOSCfg struct {
-	conn           *network.Driver
-	versionPattern *regexp.Regexp
+	conn             *network.Driver
+	VersionPattern   *regexp.Regexp
+	configCommandMap map[string]string
 }
 
 // NewEOSCfg return a cfg instance setup for an Arista EOS device.
@@ -26,7 +27,12 @@ func NewEOSCfg(
 
 	c.Platform = &EOSCfg{
 		conn:           conn,
-		versionPattern: regexp.MustCompile(`(?i)\d+\.\d+\.[a-z0-9\-]+(\.\d+[a-z]?)?`),
+		VersionPattern: regexp.MustCompile(`(?i)\d+\.\d+\.[a-z0-9\-]+(\.\d+[a-z]?)?`),
+	}
+
+	err = setPlatformOptions(c.Platform, options...)
+	if err != nil {
+		return nil, err
 	}
 
 	return c, nil
@@ -41,7 +47,24 @@ func (p *EOSCfg) GetVersion() *Response {
 		return r
 	}
 
-	r.Record([]*base.Response{versionResult}, p.versionPattern.FindString(versionResult.Result))
+	r.Record([]*base.Response{versionResult}, p.VersionPattern.FindString(versionResult.Result))
+
+	return r
+}
+
+// GetConfig get the configuration of a source datastore from the device.
+func (p *EOSCfg) GetConfig(source string) *Response {
+	r := NewResponse(p.conn.Host, nil)
+
+	// TODO make configCommandMap and then use that to fetch appropriate command based on the source
+	_ = source
+	configResult, err := p.conn.SendCommand("show version | i Software image version")
+
+	if err != nil {
+		return r
+	}
+
+	r.Record([]*base.Response{configResult}, p.VersionPattern.FindString(configResult.Result))
 
 	return r
 }
