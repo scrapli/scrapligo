@@ -3,36 +3,50 @@ package cfg
 import (
 	"errors"
 
+	"github.com/scrapli/scrapligo/logging"
+
 	"github.com/scrapli/scrapligo/driver/network"
 )
 
 var ErrNoConfigSourcesProvided = errors.New("no configuration sources provided, cannot continue")
 
+// Platform -- interface describing the methods the vendor specific platforms must implement, note
+// that this is also the same api surface of the Cfg object that users see.
+type Platform interface {
+	GetVersion() *Response
+	// GetConfig(source string) *Response
+	// LoadConfig(config string, replace bool, options ...LoadOption) *Response
+	// AbortConfig() *Response
+	// CommitConfig(source string) *Response
+	// DiffConfig(source string) *DiffResponse
+}
+
 // Cfg primary/base cfg platform struct.
 type Cfg struct {
-	Conn                *network.Driver
 	ConfigSources       []string
 	OnPrepare           func(*network.Driver) error
 	DedicatedConnection bool
 	IgnoreVersion       bool
 
-	candidateConfig   string
-	getVersionCommand string
-	versionString     string
-	prepared          bool
+	CandidateConfig string
+	VersionString   string
+	prepared        bool
+
+	Platform Platform
+	conn     *network.Driver
 }
 
 // NewCfg returns a new instance of Cfg.
-func NewCfg(
+func newCfg(
 	conn *network.Driver,
 	options ...Option,
 ) (*Cfg, error) {
 	c := &Cfg{
-		Conn:                conn,
 		OnPrepare:           nil,
 		DedicatedConnection: false,
 		IgnoreVersion:       false,
 		prepared:            false,
+		conn:                conn,
 	}
 
 	for _, option := range options {
@@ -65,11 +79,21 @@ func (d *Cfg) RenderSubstitutedConfig() (string, error) {
 	return "", nil
 }
 
-type Platform interface {
-	GetVersion() *Response
-	GetConfig(source string) *Response
-	LoadConfig(config string, replace bool, options ...LoadOption) *Response
-	AbortConfig() *Response
-	CommitConfig(source string) *Response
-	DiffConfig(source string) *DiffResponse
+// GetVersion get the version from the device.
+func (d *Cfg) GetVersion() *Response {
+	r := d.Platform.GetVersion()
+
+	if r.Failed {
+		logging.LogError(d.formatLogMessage("debug", "failed to fetch device version"))
+	}
+
+	if r.Result == "" {
+		logging.LogDebug(d.formatLogMessage("warning", "failed to parse device version"))
+	}
+
+	return r
+}
+
+func (d *Cfg) formatLogMessage(level, msg string) string {
+	return logging.FormatLogMessage(level, d.conn.Host, d.conn.Port, msg)
 }
