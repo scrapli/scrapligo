@@ -2,10 +2,11 @@ package network_test
 
 import (
 	"fmt"
-	"github.com/scrapli/scrapligo/driver/core"
-	"github.com/scrapli/scrapligo/util/testhelper"
 	"strings"
 	"testing"
+
+	"github.com/scrapli/scrapligo/driver/core"
+	"github.com/scrapli/scrapligo/util/testhelper"
 )
 
 func TestSendConfig(t *testing.T) {
