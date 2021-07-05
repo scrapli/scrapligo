@@ -125,6 +125,11 @@ issues:
       text: "global variable"
       linters:
         - gochecknoglobals
+    # ignoring complaint about global patterns singleton
+    - path: cfg
+      text: "PatternsInstance is a global variable"
+      linters:
+        - gochecknoglobals
     # ignoring complaint about junos/xr core drivers having dupl lines
     - path: driver/core
       text: "9-59 lines are duplicate"

@@ -8,8 +8,7 @@ import (
 	"github.com/scrapli/scrapligo/channel"
 )
 
-// SendConfigs send configurations to the device, will always send at a privilege level of
-// "configuration"!
+// SendConfigs send configurations to the device.
 func (d *Driver) SendConfigs(c []string, o ...base.SendOption) (*base.MultiResponse, error) {
 	finalOpts := d.ParseSendOptions(o)
 
@@ -43,8 +42,7 @@ func (d *Driver) SendConfigs(c []string, o ...base.SendOption) (*base.MultiRespo
 	return m, err
 }
 
-// SendConfigsFromFile send configurations from a file to the device, will always send at a
-// privilege level of "configuration"!
+// SendConfigsFromFile send configurations from a file to the device.
 func (d *Driver) SendConfigsFromFile(
 	f string,
 	o ...base.SendOption,
