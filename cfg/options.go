@@ -126,9 +126,33 @@ func WithVersionPattern(versionPattern *regexp.Regexp) Option {
 	}
 }
 
-// LoadOptions struct for LoadConfig options.
-type LoadOptions struct {
+// OperationOptions struct for options for any "operation" (LoadConfig, CommitConfig, etc.).
+type OperationOptions struct {
+	Source              string
+	DiffColorize        bool
+	DiffSideBySideWidth int
 }
 
-// LoadOption function to set options for cfg LoadConfig operations.
-type LoadOption func(*LoadOptions) error
+// OperationOption function to set options for cfg operations.
+type OperationOption func(*OperationOptions)
+
+// WithConfigSource set version pattern for the platform instance.
+func WithConfigSource(source string) OperationOption {
+	return func(o *OperationOptions) {
+		o.Source = source
+	}
+}
+
+// WithDiffColorize set colorize attribute of diff response object.
+func WithDiffColorize(c bool) OperationOption {
+	return func(o *OperationOptions) {
+		o.DiffColorize = c
+	}
+}
+
+// WithDiffSideBySideWidth set side by side diff width of diff response object.
+func WithDiffSideBySideWidth(i int) OperationOption {
+	return func(o *OperationOptions) {
+		o.DiffSideBySideWidth = i
+	}
+}

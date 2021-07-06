@@ -22,20 +22,24 @@ var ErrPrepareNotCalled = errors.New("the Prepare method has not been called, ca
 var ErrConfigSessionAlreadyExists = errors.New(
 	"configuration session name already exists, cannot create it")
 
+var ErrInvalidSource = errors.New("invalid config source/target provided")
+
 var ErrGetConfigFailed = errors.New("get config operation failed")
 var ErrLoadConfigFailed = errors.New("load config operation failed")
 var ErrAbortConfigFailed = errors.New("abort config operation failed")
+var ErrCommitConfigFailed = errors.New("commit config operation failed")
+var ErrDiffConfigFailed = errors.New("diff config operation failed")
 
 // Platform -- interface describing the methods the vendor specific platforms must implement, note
-// that this is also the same api surface of the Cfg object that users see.
+// that this is also similar (but not the same!) to the same api surface of the Cfg object that
+// users see.
 type Platform interface {
 	GetVersion() (string, []*base.Response, error)
 	GetConfig(source string) (string, []*base.Response, error)
-	LoadConfig(config string, replace bool, options ...LoadOption) ([]*base.Response, error)
+	LoadConfig(config string, replace bool, options *OperationOptions) ([]*base.Response, error)
 	AbortConfig() ([]*base.Response, error)
-	// CommitConfig(source string) ([]*base.Response, error)
-	// DiffConfig(source string) *DiffResponse
-
+	CommitConfig(source string) ([]*base.Response, error)
+	DiffConfig(source, candidateConfig string) ([]*base.Response, string, string, string, error)
 	ClearConfigSession()
 }
 
@@ -57,6 +61,18 @@ func setPlatformOptions(p Platform, options ...Option) error {
 	}
 
 	return nil
+}
+
+func parseOperationOptions(o []OperationOption) *OperationOptions {
+	opts := &OperationOptions{Source: "running"}
+
+	if len(o) > 0 && o[0] != nil {
+		for _, option := range o {
+			option(opts)
+		}
+	}
+
+	return opts
 }
 
 // Cfg primary/base cfg platform struct.
@@ -282,6 +298,16 @@ func (d *Cfg) RenderSubstitutedConfig() (string, error) {
 	return "", nil
 }
 
+func (d *Cfg) configSourceValid(source string) bool {
+	for _, configSource := range d.ConfigSources {
+		if configSource == source {
+			return true
+		}
+	}
+
+	return false
+}
+
 // GetVersion get the version from the device.
 func (d *Cfg) GetVersion() (*Response, error) {
 	logging.LogDebug(
@@ -322,6 +348,10 @@ func (d *Cfg) GetConfig(source string) (*Response, error) {
 		return r, operationOkErr
 	}
 
+	if !d.configSourceValid(source) {
+		return r, ErrInvalidSource
+	}
+
 	cfgString, scrapliResponses, err := d.Platform.GetConfig(source)
 
 	r.Record(scrapliResponses, cfgString)
@@ -334,10 +364,16 @@ func (d *Cfg) GetConfig(source string) (*Response, error) {
 }
 
 // LoadConfig load a candidate configuration.
-func (d *Cfg) LoadConfig(config string, replace bool, options ...LoadOption) (*Response, error) {
+func (d *Cfg) LoadConfig(
+	config string,
+	replace bool,
+	options ...OperationOption,
+) (*Response, error) {
 	logging.LogDebug(
 		FormatLogMessage(d.conn, "info", "load config requested"),
 	)
+
+	opts := parseOperationOptions(options)
 
 	d.CandidateConfig = config
 	r := NewResponse(d.conn.Host, ErrLoadConfigFailed)
@@ -347,7 +383,7 @@ func (d *Cfg) LoadConfig(config string, replace bool, options ...LoadOption) (*R
 		return r, operationOkErr
 	}
 
-	scrapliResponses, err := d.Platform.LoadConfig(config, replace, options...)
+	scrapliResponses, err := d.Platform.LoadConfig(config, replace, opts)
 
 	r.Record(scrapliResponses, "")
 
@@ -396,6 +432,96 @@ func (d *Cfg) AbortConfig() (*Response, error) {
 	}
 
 	d.clearConfigSession()
+
+	return r, err
+}
+
+// CommitConfig commit the loaded candidate configuration.
+func (d *Cfg) CommitConfig(options ...OperationOption) (*Response, error) {
+	logging.LogDebug(
+		FormatLogMessage(d.conn, "info", "commit config requested"),
+	)
+
+	opts := parseOperationOptions(options)
+
+	r := NewResponse(d.conn.Host, ErrCommitConfigFailed)
+
+	if d.CandidateConfig == "" {
+		logging.LogError(
+			FormatLogMessage(
+				d.conn,
+				"error",
+				"no candidate configuration exists, you must load a config in order to commit it!",
+			),
+		)
+
+		return r, ErrCommitConfigFailed
+	}
+
+	if !d.configSourceValid(opts.Source) {
+		return r, ErrInvalidSource
+	}
+
+	scrapliResponses, err := d.Platform.CommitConfig(opts.Source)
+
+	r.Record(scrapliResponses, "")
+
+	if r.Failed {
+		logging.LogError(
+			FormatLogMessage(d.conn, "error", "failed to commit candidate configuration"),
+		)
+	}
+
+	d.clearConfigSession()
+
+	return r, err
+}
+
+// DiffConfig diff the candidate configuration against a source config.
+func (d *Cfg) DiffConfig(options ...OperationOption) (*DiffResponse, error) {
+	logging.LogDebug(
+		FormatLogMessage(d.conn, "info", "diff config requested"),
+	)
+
+	opts := parseOperationOptions(options)
+
+	r := NewDiffResponse(d.conn.Host, opts.Source, opts.DiffColorize, opts.DiffSideBySideWidth)
+
+	operationOkErr := d.operationOk()
+	if operationOkErr != nil {
+		return r, operationOkErr
+	}
+
+	if d.CandidateConfig == "" {
+		logging.LogError(
+			FormatLogMessage(
+				d.conn,
+				"error",
+				"no candidate configuration exists, you must load a config in order to diff it!",
+			),
+		)
+
+		return r, ErrDiffConfigFailed
+	}
+
+	if !d.configSourceValid(opts.Source) {
+		// TODO prolly should put logs in all these places (or put it in the actual method itself)
+		return r, ErrDiffConfigFailed
+	}
+
+	scrapliResponses, sourceConfig, candidateConfig, deviceDiff, err := d.Platform.DiffConfig(
+		opts.Source,
+		d.CandidateConfig,
+	)
+
+	r.Record(scrapliResponses, "")
+	r.RecordDiff(sourceConfig, candidateConfig, deviceDiff)
+
+	if r.Failed {
+		logging.LogError(
+			FormatLogMessage(d.conn, "error", "failed to diff configuration"),
+		)
+	}
 
 	return r, err
 }

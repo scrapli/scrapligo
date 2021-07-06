@@ -203,9 +203,9 @@ func (p *EOSCfg) loadConfig(stdConfig, eagerConfig string, replace bool) ([]*bas
 func (p *EOSCfg) LoadConfig(
 	config string,
 	replace bool,
-	options ...LoadOption,
+	options *OperationOptions,
 ) ([]*base.Response, error) {
-	// options are unused for eos
+	// options are unused for eos load config
 	_ = options
 
 	stdConfig, eagerConfig := p.prepareConfigPayloads(config)
@@ -246,5 +246,131 @@ func (p *EOSCfg) AbortConfig() ([]*base.Response, error) {
 
 	p.conn.CurrentPriv = "privilege_exec"
 
-	return nil, nil
+	return scrapliResponses, nil
+}
+
+// CommitConfig commit the loaded candidate configuration.
+func (p *EOSCfg) CommitConfig(source string) ([]*base.Response, error) {
+	if source != "running" {
+		logging.LogDebug(
+			FormatLogMessage(
+				p.conn,
+				"warning",
+				"eos only supports committing to running config, running config is automatically copied to "+
+					"startup during commit operation",
+			),
+		)
+	}
+
+	var scrapliResponses []*base.Response
+
+	commands := []string{
+		fmt.Sprintf("configure session %s commit", p.configSessionName),
+		"copy running-config startup-config",
+	}
+
+	m, err := p.conn.SendCommands(commands)
+	if err != nil {
+		return scrapliResponses, err
+	}
+
+	scrapliResponses = append(scrapliResponses, m.Responses...)
+
+	return scrapliResponses, err
+}
+
+func (p *EOSCfg) normalizeSourceAndCandidateConfigs(
+	sourceConfig, candidateConfig string,
+) (normalizedSourceConfig, normalizedCandidateConfig string) {
+	patterns := getEosPatterns()
+
+	// Remove all comment lines from both the source and candidate configs -- this is only done
+	// here pre-diff, so we dont modify the user provided candidate config which can totally have
+	// those comment lines - we only remove "global" (top level) comments though... user comments
+	// attached to interfaces and the stuff will remain
+	normalizedSourceConfig = patterns.globalCommentLinePattern.ReplaceAllString(sourceConfig, "")
+	normalizedSourceConfig = strings.Replace(normalizedSourceConfig, "\n\n", "\n", -1)
+
+	normalizedCandidateConfig = patterns.globalCommentLinePattern.ReplaceAllString(
+		candidateConfig,
+		"",
+	)
+	normalizedCandidateConfig = strings.Replace(normalizedCandidateConfig, "\n\n", "\n", -1)
+
+	return normalizedSourceConfig, normalizedCandidateConfig
+}
+
+// DiffConfig diff the candidate configuration against a source config.
+func (p *EOSCfg) DiffConfig(
+	source, candidateConfig string,
+) (responses []*base.Response, normalizedSourceConfig, normalizedCandidateConfig, deviceDiff string, err error) {
+	if source != "running" {
+		logging.LogDebug(
+			FormatLogMessage(
+				p.conn,
+				"warning",
+				"eos only supports diffing against the running config",
+			),
+		)
+	}
+
+	var scrapliResponses []*base.Response
+
+	r, err := p.conn.SendConfig(
+		"show session-config diffs",
+		base.WithDesiredPrivilegeLevel(p.configSessionName),
+	)
+	if err != nil {
+		return scrapliResponses, "", "", "", err
+	}
+
+	scrapliResponses = append(scrapliResponses, r)
+
+	if r.Failed {
+		logging.LogError(
+			FormatLogMessage(
+				p.conn,
+				"error",
+				"failed generating diff for config session",
+			),
+		)
+
+		return scrapliResponses, "", "", "", nil
+	}
+
+	deviceDiff = r.Result
+
+	sourceConfig, getConfigR, err := p.GetConfig(source)
+	if err != nil {
+		logging.LogError(
+			FormatLogMessage(
+				p.conn,
+				"error",
+				"failed fetching source config for diff comparison",
+			),
+		)
+
+		return scrapliResponses, "", "", "", nil
+	}
+
+	scrapliResponses = append(scrapliResponses, getConfigR[0])
+
+	if getConfigR[0].Failed {
+		logging.LogError(
+			FormatLogMessage(
+				p.conn,
+				"error",
+				"failed generating diff for config session",
+			),
+		)
+
+		return scrapliResponses, "", "", "", nil
+	}
+
+	normalizedSourceConfig, normalizedCandidateConfig = p.normalizeSourceAndCandidateConfigs(
+		sourceConfig,
+		candidateConfig,
+	)
+
+	return scrapliResponses, normalizedSourceConfig, normalizedCandidateConfig, deviceDiff, nil
 }

@@ -54,4 +54,48 @@ func (r *Response) Record(scrapliResponses []*base.Response, result string) {
 
 // DiffResponse cfg diff response object that gets returned from diff operations.
 type DiffResponse struct {
+	*Response
+	Source          string
+	SourceConfig    string
+	CandidateConfig string
+	DeviceDiff      string
+	UnifiedDiff     string
+	SideBySideDiff  string
+	colorize        bool
+	sideBySideWidth int
+}
+
+func (r *DiffResponse) RecordDiff(sourceConfig, candidateConfig, deviceDiff string) {
+	r.SourceConfig = sourceConfig
+	r.CandidateConfig = candidateConfig
+	r.DeviceDiff = deviceDiff
+
+	// TODO
+}
+
+// NewDiffResponse create a new cfg diff response object.
+func NewDiffResponse(
+	host string,
+	source string,
+	colorize bool,
+	sideBySideWidth int,
+) *DiffResponse {
+	r := &Response{
+		Host:        host,
+		Result:      "",
+		StartTime:   time.Now(),
+		EndTime:     time.Time{},
+		ElapsedTime: 0,
+		ErrorType:   ErrDiffConfigFailed,
+		Failed:      true,
+	}
+
+	dr := &DiffResponse{
+		Response:        r,
+		Source:          source,
+		colorize:        colorize,
+		sideBySideWidth: sideBySideWidth,
+	}
+
+	return dr
 }
