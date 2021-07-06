@@ -69,14 +69,6 @@ func NewEOSCfg(
 }
 
 func (p *EOSCfg) ClearConfigSession() {
-	logging.LogDebug(
-		FormatLogMessage(
-			p.conn,
-			"debug",
-			"resetting candidate config and config session name",
-		),
-	)
-
 	p.configSessionName = ""
 }
 
@@ -236,4 +228,23 @@ func (p *EOSCfg) LoadConfig(
 	}
 
 	return p.loadConfig(stdConfig, eagerConfig, replace)
+}
+
+// AbortConfig abort the loaded candidate configuration.
+func (p *EOSCfg) AbortConfig() ([]*base.Response, error) {
+	var scrapliResponses []*base.Response
+
+	err := p.conn.AcquirePriv(p.configSessionName)
+	if err != nil {
+		return scrapliResponses, err
+	}
+
+	_, err = p.conn.Channel.SendInput("abort", false, false, p.conn.TimeoutOps)
+	if err != nil {
+		return scrapliResponses, err
+	}
+
+	p.conn.CurrentPriv = "privilege_exec"
+
+	return nil, nil
 }

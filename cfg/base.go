@@ -2,6 +2,7 @@ package cfg
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/scrapli/scrapligo/driver/base"
 	"github.com/scrapli/scrapligo/logging"
@@ -21,19 +22,20 @@ var ErrPrepareNotCalled = errors.New("the Prepare method has not been called, ca
 var ErrConfigSessionAlreadyExists = errors.New(
 	"configuration session name already exists, cannot create it")
 
+var ErrGetConfigFailed = errors.New("get config operation failed")
+var ErrLoadConfigFailed = errors.New("load config operation failed")
+var ErrAbortConfigFailed = errors.New("abort config operation failed")
+
 // Platform -- interface describing the methods the vendor specific platforms must implement, note
 // that this is also the same api surface of the Cfg object that users see.
 type Platform interface {
 	GetVersion() (string, []*base.Response, error)
 	GetConfig(source string) (string, []*base.Response, error)
 	LoadConfig(config string, replace bool, options ...LoadOption) ([]*base.Response, error)
-	// AbortConfig() ([]*base.Response, error)
+	AbortConfig() ([]*base.Response, error)
 	// CommitConfig(source string) ([]*base.Response, error)
 	// DiffConfig(source string) *DiffResponse
-}
 
-// simple interface to allow for checking if platform implements ClearConfigSession.
-type platformWithClearConfigSession interface {
 	ClearConfigSession()
 }
 
@@ -156,20 +158,6 @@ func (d *Cfg) operationOk() error {
 	return nil
 }
 
-func (d *Cfg) open() error {
-	if d.conn.Transport.IsAlive() {
-		// nothing to do, connection is already open!
-		return nil
-	}
-
-	if d.DedicatedConnection {
-		err := d.conn.Open()
-		return err
-	}
-
-	return ErrConnectionNotOpen
-}
-
 func (d *Cfg) validateAndSetVersion(versionResponse *Response) error {
 	if versionResponse.Failed {
 		logging.LogError(FormatLogMessage(d.conn, "error", "failed getting version from device"))
@@ -187,6 +175,20 @@ func (d *Cfg) validateAndSetVersion(versionResponse *Response) error {
 	d.VersionString = versionResponse.Result
 
 	return nil
+}
+
+func (d *Cfg) open() error {
+	if d.conn.Transport.IsAlive() {
+		// nothing to do, connection is already open!
+		return nil
+	}
+
+	if d.DedicatedConnection {
+		err := d.conn.Open()
+		return err
+	}
+
+	return ErrConnectionNotOpen
 }
 
 // Prepare the connection.
@@ -229,6 +231,19 @@ func (d *Cfg) Prepare() error {
 	return nil
 }
 
+func (d *Cfg) clearConfigSession() {
+	logging.LogDebug(
+		FormatLogMessage(
+			d.conn,
+			"debug",
+			"resetting config session data",
+		),
+	)
+
+	d.CandidateConfig = ""
+	d.Platform.ClearConfigSession()
+}
+
 func (d *Cfg) close() error {
 	if d.DedicatedConnection && d.conn.Transport.IsAlive() {
 		logging.LogDebug(
@@ -255,13 +270,9 @@ func (d *Cfg) Cleanup() error {
 	}
 
 	d.VersionString = ""
-	d.CandidateConfig = ""
 	d.prepared = false
 
-	platform, ok := interface{}(d.Platform).(platformWithClearConfigSession)
-	if ok {
-		platform.ClearConfigSession()
-	}
+	d.clearConfigSession()
 
 	return nil
 }
@@ -273,6 +284,10 @@ func (d *Cfg) RenderSubstitutedConfig() (string, error) {
 
 // GetVersion get the version from the device.
 func (d *Cfg) GetVersion() (*Response, error) {
+	logging.LogDebug(
+		FormatLogMessage(d.conn, "info", "get version requested"),
+	)
+
 	r := NewResponse(d.conn.Host, nil)
 
 	versionString, scrapliResponses, err := d.Platform.GetVersion()
@@ -292,7 +307,15 @@ func (d *Cfg) GetVersion() (*Response, error) {
 
 // GetConfig get the configuration of a source datastore from the device.
 func (d *Cfg) GetConfig(source string) (*Response, error) {
-	r := NewResponse(d.conn.Host, nil)
+	logging.LogDebug(
+		FormatLogMessage(
+			d.conn,
+			"info",
+			fmt.Sprintf("get config requested for config source '%s'", source),
+		),
+	)
+
+	r := NewResponse(d.conn.Host, ErrGetConfigFailed)
 
 	operationOkErr := d.operationOk()
 	if operationOkErr != nil {
@@ -312,8 +335,12 @@ func (d *Cfg) GetConfig(source string) (*Response, error) {
 
 // LoadConfig load a candidate configuration.
 func (d *Cfg) LoadConfig(config string, replace bool, options ...LoadOption) (*Response, error) {
+	logging.LogDebug(
+		FormatLogMessage(d.conn, "info", "load config requested"),
+	)
+
 	d.CandidateConfig = config
-	r := NewResponse(d.conn.Host, nil)
+	r := NewResponse(d.conn.Host, ErrLoadConfigFailed)
 
 	operationOkErr := d.operationOk()
 	if operationOkErr != nil {
@@ -326,9 +353,49 @@ func (d *Cfg) LoadConfig(config string, replace bool, options ...LoadOption) (*R
 
 	if r.Failed {
 		logging.LogError(
-			FormatLogMessage(d.conn, "error", "failed loading candidate configuration"),
+			FormatLogMessage(d.conn, "error", "failed to load candidate configuration"),
 		)
 	}
+
+	return r, err
+}
+
+// AbortConfig abort the loaded candidate configuration.
+func (d *Cfg) AbortConfig() (*Response, error) {
+	logging.LogDebug(
+		FormatLogMessage(d.conn, "info", "abort config requested"),
+	)
+
+	r := NewResponse(d.conn.Host, ErrAbortConfigFailed)
+
+	if d.CandidateConfig == "" {
+		logging.LogError(
+			FormatLogMessage(
+				d.conn,
+				"error",
+				"no candidate configuration exists, you must load a config in order to abort it!",
+			),
+		)
+
+		return r, ErrAbortConfigFailed
+	}
+
+	operationOkErr := d.operationOk()
+	if operationOkErr != nil {
+		return r, operationOkErr
+	}
+
+	scrapliResponses, err := d.Platform.AbortConfig()
+
+	r.Record(scrapliResponses, "")
+
+	if r.Failed {
+		logging.LogError(
+			FormatLogMessage(d.conn, "error", "failed to abort candidate configuration"),
+		)
+	}
+
+	d.clearConfigSession()
 
 	return r, err
 }
