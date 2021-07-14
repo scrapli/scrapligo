@@ -1,7 +1,10 @@
 package cfg
 
 import (
+	"strings"
 	"time"
+
+	"github.com/scrapli/scrapligo/difflibgo"
 
 	"github.com/scrapli/scrapligo/driver/base"
 )
@@ -52,6 +55,9 @@ func (r *Response) Record(scrapliResponses []*base.Response, result string) {
 	}
 }
 
+type sideBySideDiffFunc func(response *DiffResponse) string
+
+
 // DiffResponse cfg diff response object that gets returned from diff operations.
 type DiffResponse struct {
 	*Response
@@ -59,8 +65,12 @@ type DiffResponse struct {
 	SourceConfig    string
 	CandidateConfig string
 	DeviceDiff      string
+	difflines       []string
+	additions       []string
+	subtractions    []string
 	UnifiedDiff     string
-	SideBySideDiff  string
+	sideBySideDiff  string
+	SideBySideDiff  sideBySideDiffFunc
 	colorize        bool
 	sideBySideWidth int
 }
@@ -70,7 +80,19 @@ func (r *DiffResponse) RecordDiff(sourceConfig, candidateConfig, deviceDiff stri
 	r.CandidateConfig = candidateConfig
 	r.DeviceDiff = deviceDiff
 
-	// TODO
+	d := difflibgo.Differ{}
+	r.difflines = d.Compare(
+		strings.Split(r.SourceConfig, "\n"),
+		strings.Split(r.CandidateConfig, "\n"),
+	)
+
+	for _, v := range r.difflines {
+		if v[:2] == "+ " {
+			r.additions = append(r.additions, v[2:])
+		} else if v[:2] == "- " {
+			r.subtractions = append(r.additions, v[2:])
+		}
+	}
 }
 
 // NewDiffResponse create a new cfg diff response object.
