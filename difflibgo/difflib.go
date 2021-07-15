@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+	"unicode"
 )
 
 const (
@@ -610,8 +611,35 @@ func (d *Differ) dump(tag string, sequence []string, lo, hi int) []string {
 	return dumper
 }
 
+func keepOriginalWs(s, tags string) string {
+	var strippedS string
+
+	var iterLen int
+
+	if len(s) > len(tags) {
+		iterLen = len(tags)
+	} else {
+		iterLen = len(s)
+	}
+
+	for i := 0; i < iterLen; i++ {
+		c, tagC := s[i], tags[i]
+
+		if string(tagC) == " " && unicode.IsSpace(rune(c)) {
+			strippedS += string(c)
+		} else {
+			strippedS += string(tagC)
+		}
+	}
+
+	return strings.TrimRight(strippedS, " ")
+}
+
 func (d *Differ) qFormat(aline, bline, atags, btags string) []string {
 	var f []string
+
+	atags = keepOriginalWs(aline, atags)
+	btags = keepOriginalWs(bline, btags)
 
 	f = append(f, fmt.Sprintf("- %s", aline))
 
@@ -785,6 +813,5 @@ func (d *Differ) Compare(seqA, seqB []string) []string {
 
 	// https://github.com/python/cpython/blob/main/Lib/difflib.py
 	// https://github.com/pmezard/go-difflib/blob/master/difflib/difflib.go
-
 	return finalOut
 }
