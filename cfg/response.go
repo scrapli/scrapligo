@@ -89,6 +89,7 @@ func NewDiffResponse(
 		Failed:      true,
 	}
 
+	// TODO should have colorize be default and have it tweaked with an option
 	dr := &DiffResponse{
 		Response:        r,
 		Source:          source,
