@@ -129,6 +129,18 @@ func newCfg(
 	return c, nil
 }
 
+func (d *Cfg) invalidConfigSource(err error) error {
+	logging.LogError(
+		FormatLogMessage(
+			d.conn,
+			"error",
+			"invalid configuration source",
+		),
+	)
+
+	return err
+}
+
 func (d *Cfg) prepareOk() error {
 	if d.OnPrepare != nil && !d.prepared {
 		logging.LogError(
@@ -353,7 +365,7 @@ func (d *Cfg) GetConfig(source string) (*Response, error) {
 	}
 
 	if !d.configSourceValid(source) {
-		return r, ErrInvalidSource
+		return r, d.invalidConfigSource(ErrInvalidSource)
 	}
 
 	cfgString, scrapliResponses, err := d.Platform.GetConfig(source)
@@ -463,7 +475,7 @@ func (d *Cfg) CommitConfig(options ...OperationOption) (*Response, error) {
 	}
 
 	if !d.configSourceValid(opts.Source) {
-		return r, ErrInvalidSource
+		return r, d.invalidConfigSource(ErrInvalidSource)
 	}
 
 	scrapliResponses, err := d.Platform.CommitConfig(opts.Source)
@@ -509,8 +521,7 @@ func (d *Cfg) DiffConfig(options ...OperationOption) (*DiffResponse, error) {
 	}
 
 	if !d.configSourceValid(opts.Source) {
-		// TODO prolly should put logs in all these places (or put it in the actual method itself)
-		return r, ErrDiffConfigFailed
+		return r, d.invalidConfigSource(ErrDiffConfigFailed)
 	}
 
 	scrapliResponses, sourceConfig, candidateConfig, deviceDiff, err := d.Platform.DiffConfig(
