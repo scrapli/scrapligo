@@ -20,7 +20,7 @@ type eosPatterns struct {
 
 var eosPatternsInstance *eosPatterns
 
-func getEosPatterns() *eosPatterns {
+func getEOSPatterns() *eosPatterns {
 	if eosPatternsInstance == nil {
 		eosPatternsInstance = &eosPatterns{
 			globalCommentLinePattern: regexp.MustCompile(`(?im)^! .*$`),
@@ -82,19 +82,9 @@ func (p *EOSCfg) GetVersion() (string, []*base.Response, error) {
 	return p.VersionPattern.FindString(versionResult.Result), []*base.Response{versionResult}, nil
 }
 
-func (p *EOSCfg) getConfigCommand(source string) (string, error) {
-	cmd, ok := p.configCommandMap[source]
-
-	if !ok {
-		return "", ErrInvalidConfigTarget
-	}
-
-	return cmd, nil
-}
-
 // GetConfig get the configuration of a source datastore from the device.
 func (p *EOSCfg) GetConfig(source string) (string, []*base.Response, error) {
-	cmd, err := p.getConfigCommand(source)
+	cmd, err := getConfigCommand(p.configCommandMap, source)
 	if err != nil {
 		return "", nil, err
 	}
@@ -109,7 +99,7 @@ func (p *EOSCfg) GetConfig(source string) (string, []*base.Response, error) {
 }
 
 func (p *EOSCfg) prepareConfigPayloads(config string) (stdConfig, eagerConfig string) {
-	patterns := getEosPatterns()
+	patterns := getEOSPatterns()
 
 	// remove comment lines
 	config = patterns.globalCommentLinePattern.ReplaceAllString(config, "!")
@@ -160,7 +150,10 @@ func (p *EOSCfg) RegisterConfigSession(sessionName string) error {
 	return nil
 }
 
-func (p *EOSCfg) loadConfig(stdConfig, eagerConfig string, replace bool) ([]*base.Response, error) {
+func (p *EOSCfg) loadConfig(
+	stdConfig, eagerConfig string,
+	replace bool,
+) ([]*base.Response, error) {
 	var scrapliResponses []*base.Response
 
 	if replace {
@@ -282,7 +275,7 @@ func (p *EOSCfg) CommitConfig(source string) ([]*base.Response, error) {
 func (p *EOSCfg) normalizeSourceAndCandidateConfigs(
 	sourceConfig, candidateConfig string,
 ) (normalizedSourceConfig, normalizedCandidateConfig string) {
-	patterns := getEosPatterns()
+	patterns := getEOSPatterns()
 
 	// Remove all comment lines from both the source and candidate configs -- this is only done
 	// here pre-diff, so we dont modify the user provided candidate config which can totally have

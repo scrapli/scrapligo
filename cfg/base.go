@@ -28,6 +28,10 @@ var ErrConfigSessionAlreadyExists = errors.New(
 
 var ErrInvalidSource = errors.New("invalid config source/target provided")
 
+var ErrFailedToDetermineDeviceState = errors.New(
+	"failed to determine device state, ex: failed to determine available space")
+var ErrInsufficientSpaceAvailable = errors.New("insufficient space available on device")
+
 var ErrGetConfigFailed = errors.New("get config operation failed")
 var ErrLoadConfigFailed = errors.New("load config operation failed")
 var ErrAbortConfigFailed = errors.New("abort config operation failed")
@@ -68,7 +72,7 @@ func setPlatformOptions(p Platform, options ...Option) error {
 }
 
 func parseOperationOptions(o []OperationOption) *OperationOptions {
-	opts := &OperationOptions{Source: "running", DiffColorize: true}
+	opts := &OperationOptions{Source: "running", DiffColorize: true, AutoClean: true}
 
 	if len(o) > 0 && o[0] != nil {
 		for _, option := range o {
@@ -250,7 +254,7 @@ func (d *Cfg) Prepare() error {
 	}
 
 	if d.OnPrepare != nil {
-		logging.LogDebug(FormatLogMessage(d.conn, "debug", "OnPrepare provided, exucting now"))
+		logging.LogDebug(FormatLogMessage(d.conn, "debug", "OnPrepare provided, executing now"))
 
 		prepareErr := d.OnPrepare(d.conn)
 		if prepareErr != nil {

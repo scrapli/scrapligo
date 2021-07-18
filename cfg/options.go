@@ -126,11 +126,27 @@ func WithVersionPattern(versionPattern *regexp.Regexp) Option {
 	}
 }
 
+// WithFilesystem set string name of filesystem to use.
+func WithFilesystem(fs string) Option {
+	return func(p interface{}) error {
+		err := setPlatformAttr("Filesystem", fs, p)
+
+		if err != nil {
+			if !errors.Is(err, ErrIgnoredOption) {
+				return err
+			}
+		}
+
+		return nil
+	}
+}
+
 // OperationOptions struct for options for any "operation" (LoadConfig, CommitConfig, etc.).
 type OperationOptions struct {
 	Source              string
 	DiffColorize        bool
 	DiffSideBySideWidth int
+	AutoClean           bool
 }
 
 // OperationOption function to set options for cfg operations.
@@ -154,5 +170,12 @@ func WithDiffColorize(c bool) OperationOption {
 func WithDiffSideBySideWidth(i int) OperationOption {
 	return func(o *OperationOptions) {
 		o.DiffSideBySideWidth = i
+	}
+}
+
+// WithAutoClean set auto clean for IOSXE platform.
+func WithAutoClean(a bool) OperationOption {
+	return func(o *OperationOptions) {
+		o.AutoClean = a
 	}
 }
