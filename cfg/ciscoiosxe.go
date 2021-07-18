@@ -7,10 +7,18 @@ import (
 	"strings"
 	"time"
 
+	"github.com/scrapli/scrapligo/channel"
+
 	"github.com/scrapli/scrapligo/logging"
 
 	"github.com/scrapli/scrapligo/driver/base"
 	"github.com/scrapli/scrapligo/driver/network"
+)
+
+const (
+	filePromptNoisy = "noisy"
+	filePromptQuiet = "quiet"
+	filePromptAlert = "alert"
 )
 
 type iosxePatterns struct {
@@ -174,6 +182,9 @@ func (p *IOSXECfg) LoadConfig(
 	replace bool,
 	options *OperationOptions,
 ) ([]*base.Response, error) {
+	// replace is unused for load on iosxe
+	_ = replace
+
 	var scrapliResponses []*base.Response
 
 	if options.AutoClean {
@@ -234,9 +245,83 @@ func (p *IOSXECfg) LoadConfig(
 	return scrapliResponses, nil
 }
 
+func (p *IOSXECfg) determineFilePromptMode() (string, error) {
+	r, err := p.conn.SendCommand("show run | i file prompt")
+	if err != nil {
+		return "", err
+	}
+
+	patterns := getIOSXEPatterns()
+
+	filePromptMatch := patterns.filePromptModePattern.FindString(r.Result)
+
+	if filePromptMatch == "" {
+		return filePromptAlert, nil
+	}
+
+	if strings.Contains(filePromptMatch, filePromptNoisy) {
+		return filePromptNoisy, nil
+	}
+
+	return filePromptQuiet, nil
+}
+
 // AbortConfig abort the loaded candidate configuration.
 func (p *IOSXECfg) AbortConfig() ([]*base.Response, error) {
-	return nil, nil
+	filePromptMode, err := p.determineFilePromptMode()
+	if err != nil {
+		return nil, err
+	}
+
+	var scrapliResponses []*base.Response
+
+	var deleteEvents []*channel.SendInteractiveEvent
+
+	if filePromptMode == filePromptNoisy || filePromptMode == filePromptAlert {
+		deleteEvents = []*channel.SendInteractiveEvent{
+			{
+				ChannelInput: fmt.Sprintf(
+					"delete %s%s",
+					p.Filesystem,
+					p.candidateConfigFilename,
+				),
+				ChannelResponse: "Delete filename",
+				HideInput:       false,
+			},
+			{
+				ChannelInput:    "",
+				ChannelResponse: "[confirm]",
+				HideInput:       false,
+			},
+			{
+				ChannelInput:    "",
+				ChannelResponse: "",
+				HideInput:       false,
+			},
+		}
+	} else {
+		deleteEvents = []*channel.SendInteractiveEvent{
+			{
+				ChannelInput:    fmt.Sprintf("delete %s%s", p.Filesystem, p.candidateConfigFilename),
+				ChannelResponse: "[confirm]",
+				HideInput:       false,
+			},
+			{
+				ChannelInput:    "",
+				ChannelResponse: "",
+				HideInput:       false,
+			},
+		}
+	}
+
+	r, err := p.conn.SendInteractive(deleteEvents)
+	if err != nil {
+		return scrapliResponses, err
+	}
+
+	scrapliResponses = append(scrapliResponses, r)
+
+	return scrapliResponses, nil
 }
 
 // CommitConfig commit the loaded candidate configuration.
