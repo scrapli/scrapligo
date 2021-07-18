@@ -10,6 +10,10 @@ import (
 	"github.com/scrapli/scrapligo/driver/network"
 )
 
+const (
+	runningConfig = "running"
+)
+
 var ErrNoConfigSourcesProvided = errors.New("no configuration sources provided, cannot continue")
 var ErrInvalidConfigTarget = errors.New("provided config source is not valid")
 
@@ -64,7 +68,7 @@ func setPlatformOptions(p Platform, options ...Option) error {
 }
 
 func parseOperationOptions(o []OperationOption) *OperationOptions {
-	opts := &OperationOptions{Source: "running"}
+	opts := &OperationOptions{Source: "running", DiffColorize: true}
 
 	if len(o) > 0 && o[0] != nil {
 		for _, option := range o {

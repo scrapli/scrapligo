@@ -251,7 +251,7 @@ func (p *EOSCfg) AbortConfig() ([]*base.Response, error) {
 
 // CommitConfig commit the loaded candidate configuration.
 func (p *EOSCfg) CommitConfig(source string) ([]*base.Response, error) {
-	if source != "running" {
+	if source != runningConfig {
 		logging.LogDebug(
 			FormatLogMessage(
 				p.conn,
@@ -303,8 +303,11 @@ func (p *EOSCfg) normalizeSourceAndCandidateConfigs(
 // DiffConfig diff the candidate configuration against a source config.
 func (p *EOSCfg) DiffConfig(
 	source, candidateConfig string,
-) (responses []*base.Response, normalizedSourceConfig, normalizedCandidateConfig, deviceDiff string, err error) {
-	if source != "running" {
+) (responses []*base.Response,
+	normalizedSourceConfig,
+	normalizedCandidateConfig,
+	deviceDiff string, err error) {
+	if source != runningConfig {
 		logging.LogDebug(
 			FormatLogMessage(
 				p.conn,

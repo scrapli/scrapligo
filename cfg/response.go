@@ -7,8 +7,14 @@ import (
 
 	"golang.org/x/term"
 
-	"github.com/scrapli/scrapligo/difflibgo"
+	"github.com/carlmontanari/difflibgo/difflibgo"
 	"github.com/scrapli/scrapligo/driver/base"
+)
+
+const (
+	subtraction = "- "
+	addition    = "+ "
+	unknown     = "? "
 )
 
 // Response cfg response object that gets returned from cfg operations.
@@ -68,6 +74,7 @@ type DiffResponse struct {
 	additions       []string
 	subtractions    []string
 	sideBySideDiff  string
+	unifiedDiff     string
 	colorize        bool
 	sideBySideWidth int
 }
@@ -89,7 +96,6 @@ func NewDiffResponse(
 		Failed:      true,
 	}
 
-	// TODO should have colorize be default and have it tweaked with an option
 	dr := &DiffResponse{
 		Response:        r,
 		Source:          source,
@@ -112,15 +118,15 @@ func (r *DiffResponse) RecordDiff(sourceConfig, candidateConfig, deviceDiff stri
 	)
 
 	for _, v := range r.difflines {
-		if v[:2] == "+ " {
+		if v[:2] == addition {
 			r.additions = append(r.additions, v[2:])
-		} else if v[:2] == "- " {
-			r.subtractions = append(r.additions, v[2:])
+		} else if v[:2] == subtraction {
+			r.subtractions = append(r.subtractions, v[2:])
 		}
 	}
 }
 
-func (r *DiffResponse) generateColors() (string, string, string, string) {
+func (r *DiffResponse) generateColors() (unknown, subtraction, addition, end string) {
 	if !r.colorize {
 		return "? ", "- ", "+ ", ""
 	}
@@ -150,33 +156,34 @@ func (r *DiffResponse) SideBySideDiff() string {
 	halfTermWidth := termWidth / 2
 	diffSideWidth := halfTermWidth - 5
 
-	var sideBySideDiffLines []string
+	sideBySideDiffLines := make([]string, 0)
 
 	for _, line := range r.difflines {
 		var current, candidate string
 
 		trimLen := diffSideWidth
 		difflineLen := len(line)
+
 		if difflineLen < trimLen {
 			trimLen = difflineLen - 2
 		}
 
 		switch line[:2] {
-		case " ?":
+		case unknown:
 			current = yellow + fmt.Sprintf(
 				"%-*s",
 				halfTermWidth,
 				strings.TrimRight(line[2:][:trimLen], " "),
 			) + end
 			candidate = yellow + strings.TrimRight(line[2:][:trimLen], " ") + end
-		case "- ":
+		case subtraction:
 			current = red + fmt.Sprintf(
 				"%-*s",
 				halfTermWidth,
 				strings.TrimRight(line[2:][:trimLen], " "),
 			) + end
 			candidate = ""
-		case "+ ":
+		case addition:
 			current = strings.Repeat(" ", halfTermWidth)
 			candidate = green + strings.TrimRight(line[2:][:trimLen], " ") + end
 		default:
@@ -194,4 +201,35 @@ func (r *DiffResponse) SideBySideDiff() string {
 	r.sideBySideDiff = strings.Join(sideBySideDiffLines, "\n")
 
 	return r.sideBySideDiff
+}
+
+func (r *DiffResponse) UnifiedDiff() string {
+	if len(r.unifiedDiff) > 0 {
+		return r.unifiedDiff
+	}
+
+	yellow, red, green, end := r.generateColors()
+
+	unifiedDiffLines := make([]string, 0)
+
+	for _, line := range r.difflines {
+		var diffLine string
+
+		switch line[:2] {
+		case unknown:
+			diffLine = yellow + line[2:] + end
+		case subtraction:
+			diffLine = red + line[2:] + end
+		case addition:
+			diffLine = green + line[2:] + end
+		default:
+			diffLine = line[2:]
+		}
+
+		unifiedDiffLines = append(unifiedDiffLines, diffLine)
+	}
+
+	r.unifiedDiff = strings.Join(unifiedDiffLines, "\n")
+
+	return r.unifiedDiff
 }
