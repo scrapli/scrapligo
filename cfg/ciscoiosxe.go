@@ -38,7 +38,7 @@ func getIOSXEPatterns() *iosxePatterns {
 			filePromptModePattern: regexp.MustCompile(`(?i)(?:file prompt )(?P<prompt_mode>\w+)`),
 			// sort of a bad name, but it matches python version --  used to find the version
 			// string in the config so we can remove anything in front of it
-			outputHeaderPattern:   regexp.MustCompile(`(?im)(^version \d+\.\d+$)`),
+			outputHeaderPattern: regexp.MustCompile(`(?im)(^version \d+\.\d+$)`),
 		}
 	}
 
