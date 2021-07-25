@@ -479,6 +479,34 @@ func (p *IOSXECfg) CommitConfig(source string) ([]*base.Response, error) {
 	return nil, nil
 }
 
+func (p *IOSXECfg) getDiffCommand(source string) string {
+	if p.replaceConfig {
+		return fmt.Sprintf(
+			"show archive config differences system:%s-config %s%s",
+			source,
+			p.Filesystem,
+			p.candidateConfigFilename,
+		)
+	}
+
+	return fmt.Sprintf(
+		"show archive config incremental-diffs %s%s ignorecase",
+		p.Filesystem,
+		p.candidateConfigFilename,
+	)
+}
+
+func (p *IOSXECfg) normalizeSourceAndCandidateConfigs(
+	sourceConfig, candidateConfig string,
+) (normalizedSourceConfig, normalizedCandidateConfig string) {
+	// remove any of the leading timestamp/building config/config size/last change lines in both the
+	// source and candidate configs so they dont need to be compared
+	normalizedSourceConfig = p.cleanConfig(sourceConfig)
+	normalizedCandidateConfig = p.cleanConfig(candidateConfig)
+
+	return normalizedSourceConfig, normalizedCandidateConfig
+}
+
 // DiffConfig diff the candidate configuration against a source config.
 func (p *IOSXECfg) DiffConfig(
 	source, candidateConfig string,
@@ -486,5 +514,52 @@ func (p *IOSXECfg) DiffConfig(
 	normalizedSourceConfig,
 	normalizedCandidateConfig,
 	deviceDiff string, err error) {
-	return nil, "", "", "", nil
+	var scrapliResponses []*base.Response
+
+	diffResult, err := p.conn.SendCommand(p.getDiffCommand(source))
+	if err != nil {
+		return scrapliResponses, "", "", "", err
+	}
+
+	scrapliResponses = append(scrapliResponses, diffResult)
+
+	if diffResult.Failed {
+		logging.LogError(
+			FormatLogMessage(
+				p.conn,
+				"error",
+				"failed generating diff for config session",
+			),
+		)
+
+		return scrapliResponses, "", "", "", nil
+	}
+
+	deviceDiff = diffResult.Result
+
+	sourceConfig, getConfigR, err := p.GetConfig(source)
+	if err != nil {
+		return scrapliResponses, "", "", "", nil
+	}
+
+	scrapliResponses = append(scrapliResponses, getConfigR[0])
+
+	if getConfigR[0].Failed {
+		logging.LogError(
+			FormatLogMessage(
+				p.conn,
+				"error",
+				"failed fetching source config for diff comparison",
+			),
+		)
+
+		return scrapliResponses, "", "", "", nil
+	}
+
+	normalizedSourceConfig, normalizedCandidateConfig = p.normalizeSourceAndCandidateConfigs(
+		sourceConfig,
+		candidateConfig,
+	)
+
+	return scrapliResponses, normalizedSourceConfig, normalizedCandidateConfig, deviceDiff, nil
 }

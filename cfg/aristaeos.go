@@ -312,7 +312,7 @@ func (p *EOSCfg) DiffConfig(
 
 	var scrapliResponses []*base.Response
 
-	r, err := p.conn.SendConfig(
+	diffResult, err := p.conn.SendConfig(
 		"show session-config diffs",
 		base.WithDesiredPrivilegeLevel(p.configSessionName),
 	)
@@ -320,9 +320,9 @@ func (p *EOSCfg) DiffConfig(
 		return scrapliResponses, "", "", "", err
 	}
 
-	scrapliResponses = append(scrapliResponses, r)
+	scrapliResponses = append(scrapliResponses, diffResult)
 
-	if r.Failed {
+	if diffResult.Failed {
 		logging.LogError(
 			FormatLogMessage(
 				p.conn,
@@ -334,18 +334,10 @@ func (p *EOSCfg) DiffConfig(
 		return scrapliResponses, "", "", "", nil
 	}
 
-	deviceDiff = r.Result
+	deviceDiff = diffResult.Result
 
 	sourceConfig, getConfigR, err := p.GetConfig(source)
 	if err != nil {
-		logging.LogError(
-			FormatLogMessage(
-				p.conn,
-				"error",
-				"failed fetching source config for diff comparison",
-			),
-		)
-
 		return scrapliResponses, "", "", "", nil
 	}
 
@@ -356,7 +348,7 @@ func (p *EOSCfg) DiffConfig(
 			FormatLogMessage(
 				p.conn,
 				"error",
-				"failed generating diff for config session",
+				"failed fetching source config for diff comparison",
 			),
 		)
 

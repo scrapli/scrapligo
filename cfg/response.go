@@ -164,7 +164,7 @@ func (r *DiffResponse) SideBySideDiff() string {
 		trimLen := diffSideWidth
 		difflineLen := len(line)
 
-		if difflineLen < trimLen {
+		if difflineLen-1 <= trimLen {
 			trimLen = difflineLen - 2
 		}
 
