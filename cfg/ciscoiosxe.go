@@ -36,7 +36,9 @@ func getIOSXEPatterns() *iosxePatterns {
 				`(?i)(?P<bytes_available>\d+)(?: bytes free)`,
 			),
 			filePromptModePattern: regexp.MustCompile(`(?i)(?:file prompt )(?P<prompt_mode>\w+)`),
-			outputHeaderPattern:   regexp.MustCompile(`(?is)(.*)(version \d+\.\d+)`),
+			// sort of a bad name, but it matches python version --  used to find the version
+			// string in the config so we can remove anything in front of it
+			outputHeaderPattern:   regexp.MustCompile(`(?im)(^version \d+\.\d+$)`),
 		}
 	}
 
@@ -50,6 +52,7 @@ type IOSXECfg struct {
 	filesystemSpaceAvailBufferPerc float32
 	configCommandMap               map[string]string
 	candidateConfigFilename        string
+	replaceConfig                  bool
 }
 
 // NewIOSXECfg return a cfg instance setup for an Cisco IOSXE device.
@@ -125,10 +128,10 @@ func (p *IOSXECfg) cleanConfig(config string) string {
 	}
 
 	if len(configSectionIndices) == 2 { //nolint:gomnd
-		return config[configSectionIndices[1]:]
+		return config[configSectionIndices[0]:]
 	}
 
-	panic("stripping config header failed, this is a bug...")
+	panic("stripping config header failed, this is a bug, provided config is wonky, or both...")
 }
 
 func (p *IOSXECfg) prepareConfigPayload(config string) string {
@@ -182,8 +185,7 @@ func (p *IOSXECfg) LoadConfig(
 	replace bool,
 	options *OperationOptions,
 ) ([]*base.Response, error) {
-	// replace is unused for load on iosxe
-	_ = replace
+	p.replaceConfig = replace
 
 	var scrapliResponses []*base.Response
 
@@ -268,17 +270,136 @@ func (p *IOSXECfg) determineFilePromptMode() (string, error) {
 
 // AbortConfig abort the loaded candidate configuration.
 func (p *IOSXECfg) AbortConfig() ([]*base.Response, error) {
+	var scrapliResponses []*base.Response
+
+	r, err := p.deleteCandidateConfigFile()
+
+	scrapliResponses = append(scrapliResponses, r)
+
+	return scrapliResponses, err
+}
+
+func (p *IOSXECfg) commitConfigMerge() (*base.Response, error) {
 	filePromptMode, err := p.determineFilePromptMode()
 	if err != nil {
 		return nil, err
 	}
 
-	var scrapliResponses []*base.Response
+	var mergeEvents []*channel.SendInteractiveEvent
 
-	var deleteEvents []*channel.SendInteractiveEvent
+	if filePromptMode == filePromptAlert {
+		mergeEvents = []*channel.SendInteractiveEvent{
+			{
+				ChannelInput: fmt.Sprintf(
+					"copy %s%s running-config",
+					p.Filesystem,
+					p.candidateConfigFilename,
+				),
+				ChannelResponse: "Destination filename",
+				HideInput:       false,
+			},
+			{
+				ChannelInput:    "",
+				ChannelResponse: "",
+				HideInput:       false,
+			},
+		}
+	} else if filePromptMode == filePromptNoisy {
+		mergeEvents = []*channel.SendInteractiveEvent{
+			{
+				ChannelInput: fmt.Sprintf(
+					"copy %s%s running-config", p.Filesystem, p.candidateConfigFilename),
+				ChannelResponse: "Source filename",
+				HideInput:       false,
+			},
+			{
+				ChannelInput:    "",
+				ChannelResponse: "Destination filename",
+				HideInput:       false,
+			},
+			{
+				ChannelInput:    "",
+				ChannelResponse: "",
+				HideInput:       false,
+			},
+		}
+	} else {
+		mergeEvents = []*channel.SendInteractiveEvent{
+			{
+				ChannelInput: fmt.Sprintf(
+					"copy %s%s running-config", p.Filesystem, p.candidateConfigFilename),
+				ChannelResponse: "",
+				HideInput:       false,
+			},
+		}
+	}
 
-	if filePromptMode == filePromptNoisy || filePromptMode == filePromptAlert {
-		deleteEvents = []*channel.SendInteractiveEvent{
+	return p.conn.SendInteractive(mergeEvents)
+}
+
+// SaveConfig writes running config to startup config.
+func (p *IOSXECfg) SaveConfig() (*base.Response, error) {
+	filePromptMode, err := p.determineFilePromptMode()
+	if err != nil {
+		return nil, err
+	}
+
+	var saveEvents []*channel.SendInteractiveEvent
+
+	if filePromptMode == filePromptAlert {
+		saveEvents = []*channel.SendInteractiveEvent{
+			{
+				ChannelInput:    "copy running-config startup-config",
+				ChannelResponse: "Destination filename",
+				HideInput:       false,
+			},
+			{
+				ChannelInput:    "",
+				ChannelResponse: "",
+				HideInput:       false,
+			},
+		}
+	} else if filePromptMode == filePromptNoisy {
+		saveEvents = []*channel.SendInteractiveEvent{
+			{
+				ChannelInput:    "copy running-config startup-config",
+				ChannelResponse: "Source filename",
+				HideInput:       false,
+			},
+			{
+				ChannelInput:    "",
+				ChannelResponse: "Destination filename",
+				HideInput:       false,
+			},
+			{
+				ChannelInput:    "",
+				ChannelResponse: "",
+				HideInput:       false,
+			},
+		}
+	} else {
+		saveEvents = []*channel.SendInteractiveEvent{
+			{
+				ChannelInput:    "copy running-config startup-config",
+				ChannelResponse: "",
+				HideInput:       false,
+			},
+		}
+	}
+
+	return p.conn.SendInteractive(saveEvents)
+}
+
+func (p *IOSXECfg) deleteCandidateConfigFile() (*base.Response, error) {
+	filePromptMode, err := p.determineFilePromptMode()
+	if err != nil {
+		return nil, err
+	}
+
+	var saveEvents []*channel.SendInteractiveEvent
+
+	if filePromptMode == filePromptAlert || filePromptMode == filePromptNoisy {
+		saveEvents = []*channel.SendInteractiveEvent{
 			{
 				ChannelInput: fmt.Sprintf(
 					"delete %s%s",
@@ -300,7 +421,7 @@ func (p *IOSXECfg) AbortConfig() ([]*base.Response, error) {
 			},
 		}
 	} else {
-		deleteEvents = []*channel.SendInteractiveEvent{
+		saveEvents = []*channel.SendInteractiveEvent{
 			{
 				ChannelInput:    fmt.Sprintf("delete %s%s", p.Filesystem, p.candidateConfigFilename),
 				ChannelResponse: "[confirm]",
@@ -314,18 +435,47 @@ func (p *IOSXECfg) AbortConfig() ([]*base.Response, error) {
 		}
 	}
 
-	r, err := p.conn.SendInteractive(deleteEvents)
-	if err != nil {
-		return scrapliResponses, err
-	}
-
-	scrapliResponses = append(scrapliResponses, r)
-
-	return scrapliResponses, nil
+	return p.conn.SendInteractive(saveEvents)
 }
 
 // CommitConfig commit the loaded candidate configuration.
 func (p *IOSXECfg) CommitConfig(source string) ([]*base.Response, error) {
+	var scrapliResponses []*base.Response
+
+	var commitResult *base.Response
+
+	var err error
+
+	if p.replaceConfig {
+		commitResult, err = p.conn.SendCommand(
+			fmt.Sprintf("configure replace %s%s force", p.Filesystem, p.candidateConfigFilename),
+		)
+	} else {
+		commitResult, err = p.commitConfigMerge()
+	}
+
+	scrapliResponses = append(scrapliResponses, commitResult)
+
+	if err != nil {
+		return scrapliResponses, err
+	}
+
+	saveResult, err := p.SaveConfig()
+
+	scrapliResponses = append(scrapliResponses, saveResult)
+
+	if err != nil {
+		return scrapliResponses, err
+	}
+
+	cleanupResult, err := p.deleteCandidateConfigFile()
+
+	scrapliResponses = append(scrapliResponses, cleanupResult)
+
+	if err != nil {
+		return scrapliResponses, err
+	}
+
 	return nil, nil
 }
 

@@ -478,6 +478,11 @@ func (d *Cfg) CommitConfig(options ...OperationOption) (*Response, error) {
 		return r, ErrCommitConfigFailed
 	}
 
+	operationOkErr := d.operationOk()
+	if operationOkErr != nil {
+		return r, operationOkErr
+	}
+
 	if !d.configSourceValid(opts.Source) {
 		return r, d.invalidConfigSource(ErrInvalidSource)
 	}
