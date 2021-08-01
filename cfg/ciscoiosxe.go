@@ -3,7 +3,6 @@ package cfg
 import (
 	"fmt"
 	"regexp"
-	"strconv"
 	"strings"
 	"time"
 
@@ -153,30 +152,7 @@ func (p *IOSXECfg) getFilesystemSpaceAvail() (int, error) {
 		return -1, ErrFailedToDetermineDeviceState
 	}
 
-	bytesAvailMatch := patterns.bytesFreePattern.FindStringSubmatch(filesystemSizeResult.Result)
-
-	bytesAvail := -1
-
-	for i, name := range patterns.bytesFreePattern.SubexpNames() {
-		if i != 0 && name == "bytes_available" {
-			bytesAvail, err = strconv.Atoi(bytesAvailMatch[i])
-			if err != nil {
-				return -1, err
-			}
-		}
-	}
-
-	return bytesAvail, nil
-}
-
-func (p *IOSXECfg) isSpaceSufficient(filesystemBytesAvail int, config string) bool {
-	return float32(
-		filesystemBytesAvail,
-	) >= float32(
-		len(config),
-	)/(p.filesystemSpaceAvailBufferPerc/100.0)+float32(
-		len(config),
-	)
+	return parseSpaceAvail(patterns.bytesFreePattern, filesystemSizeResult)
 }
 
 // LoadConfig load a candidate configuration.
@@ -198,7 +174,11 @@ func (p *IOSXECfg) LoadConfig(
 		return nil, err
 	}
 
-	spaceSufficient := p.isSpaceSufficient(filesystemBytesAvail, config)
+	spaceSufficient := isSpaceSufficient(
+		filesystemBytesAvail,
+		p.filesystemSpaceAvailBufferPerc,
+		config,
+	)
 	if !spaceSufficient {
 		return nil, ErrInsufficientSpaceAvailable
 	}
@@ -454,29 +434,27 @@ func (p *IOSXECfg) CommitConfig(source string) ([]*base.Response, error) {
 		commitResult, err = p.commitConfigMerge()
 	}
 
-	scrapliResponses = append(scrapliResponses, commitResult)
-
 	if err != nil {
 		return scrapliResponses, err
 	}
 
+	scrapliResponses = append(scrapliResponses, commitResult)
+
 	saveResult, err := p.SaveConfig()
+	if err != nil {
+		return scrapliResponses, err
+	}
 
 	scrapliResponses = append(scrapliResponses, saveResult)
 
+	cleanupResult, err := p.deleteCandidateConfigFile()
 	if err != nil {
 		return scrapliResponses, err
 	}
-
-	cleanupResult, err := p.deleteCandidateConfigFile()
 
 	scrapliResponses = append(scrapliResponses, cleanupResult)
 
-	if err != nil {
-		return scrapliResponses, err
-	}
-
-	return nil, nil
+	return scrapliResponses, nil
 }
 
 func (p *IOSXECfg) getDiffCommand(source string) string {

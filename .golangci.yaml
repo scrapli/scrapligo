@@ -135,6 +135,15 @@ issues:
       text: "9-59 lines are duplicate"
       linters:
         - dupl
+    # ignoring complaint about iosxe/nxos cfg platforms having dupl lines
+    - path: cfg/
+      text: "58-87 lines are duplicate"
+      linters:
+        - dupl
+    - path: cfg/
+      text: "67-99 lines are duplicate"
+      linters:
+        - dupl
 #    - text: "TODO/BUG/FIXME"
 #      linters:
 #        - godox
