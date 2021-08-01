@@ -141,12 +141,15 @@ func WithFilesystem(fs string) Option {
 	}
 }
 
+// operation specific options
+
 // OperationOptions struct for options for any "operation" (LoadConfig, CommitConfig, etc.).
 type OperationOptions struct {
 	Source              string
 	DiffColorize        bool
 	DiffSideBySideWidth int
 	AutoClean           bool
+	ConfigPrivLevel     string
 }
 
 // OperationOption function to set options for cfg operations.

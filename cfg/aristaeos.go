@@ -137,7 +137,7 @@ func (p *EOSCfg) RegisterConfigSession(sessionName string) error {
 	sessionPrivilegeLevel := &base.PrivilegeLevel{
 		Pattern:        sessionPromptPattern,
 		Name:           sessionName,
-		PreviousPriv:   "privilege_exec",
+		PreviousPriv:   execPrivLevel,
 		Deescalate:     "end",
 		Escalate:       fmt.Sprintf("configure session %s", sessionName),
 		EscalateAuth:   false,
@@ -237,7 +237,7 @@ func (p *EOSCfg) AbortConfig() ([]*base.Response, error) {
 		return scrapliResponses, err
 	}
 
-	p.conn.CurrentPriv = "privilege_exec"
+	p.conn.CurrentPriv = execPrivLevel
 
 	return scrapliResponses, nil
 }
