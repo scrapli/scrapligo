@@ -73,8 +73,6 @@ func (d *Driver) ParseSendOptions(
 		StopOnFailed:       DefaultSendOptionsStopOnFailed,
 		TimeoutOps:         DefaultSendOptionsTimeoutOps,
 		Eager:              DefaultSendOptionsEager,
-		// only used with SendConfig(s), thus this should default to "configuration"
-		DesiredPrivilegeLevel: "configuration",
 	}
 
 	if len(o) > 0 && o[0] != nil {

@@ -12,6 +12,10 @@ import (
 func (d *Driver) SendConfigs(c []string, o ...base.SendOption) (*base.MultiResponse, error) {
 	finalOpts := d.ParseSendOptions(o)
 
+	if finalOpts.DesiredPrivilegeLevel == "" {
+		finalOpts.DesiredPrivilegeLevel = "configuration"
+	}
+
 	if d.CurrentPriv != finalOpts.DesiredPrivilegeLevel {
 		err := d.AcquirePriv(finalOpts.DesiredPrivilegeLevel)
 		if err != nil {

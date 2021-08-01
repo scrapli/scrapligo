@@ -14,8 +14,12 @@ func (d *Driver) SendInteractive(
 	finalOpts := d.ParseSendOptions(o)
 	joinedEventInputs := base.JoinEventInputs(events)
 
-	if d.CurrentPriv != d.DefaultDesiredPriv {
-		err := d.AcquirePriv(d.DefaultDesiredPriv)
+	if finalOpts.DesiredPrivilegeLevel == "" {
+		finalOpts.DesiredPrivilegeLevel = d.DefaultDesiredPriv
+	}
+
+	if d.CurrentPriv != finalOpts.DesiredPrivilegeLevel {
+		err := d.AcquirePriv(finalOpts.DesiredPrivilegeLevel)
 		if err != nil {
 			return nil, err
 		}
