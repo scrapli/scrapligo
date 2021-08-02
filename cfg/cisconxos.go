@@ -99,6 +99,7 @@ func NewNXOSCfg(
 }
 
 func (p *NXOSCfg) ClearConfigSession() {
+	p.candidateConfigFilename = ""
 }
 
 // GetVersion get the version from the device.
