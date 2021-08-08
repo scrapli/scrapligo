@@ -101,7 +101,16 @@ func (p *IOSXRCfg) ClearConfigSession() {
 
 // GetVersion get the version from the device.
 func (p *IOSXRCfg) GetVersion() (string, []*base.Response, error) {
-	versionResult, err := p.conn.SendCommand("show version | i Version")
+	var versionResult *base.Response
+
+	var err error
+
+	if !p.configInProgress {
+		versionResult, err = p.conn.SendCommand("show version | i Version")
+	} else {
+		versionResult, err = p.conn.SendConfig("do show version | i Version")
+	}
+
 	if err != nil {
 		return "", nil, err
 	}

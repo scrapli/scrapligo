@@ -35,7 +35,7 @@ type JUNOSCfg struct {
 	VersionPattern          *regexp.Regexp
 	Filesystem              string
 	replaceConfig           bool
-	inConfigurationSession  bool
+	configInProgress        bool
 	candidateConfigFilename string
 	configSetStyle          bool
 }
@@ -72,15 +72,22 @@ func NewJUNOSCfg(
 
 func (p *JUNOSCfg) ClearConfigSession() {
 	p.candidateConfigFilename = ""
-	p.inConfigurationSession = false
+	p.configInProgress = false
 	p.configSetStyle = false
 }
 
 // GetVersion get the version from the device.
 func (p *JUNOSCfg) GetVersion() (string, []*base.Response, error) {
-	// TODO for this and the other platforms where we cant "get out" of the config mode (xr.. maybe thats it), need
-	//  to do the same thing with the "if in config session use this command" thing.
-	versionResult, err := p.conn.SendCommand("show version | grep junos:")
+	var versionResult *base.Response
+
+	var err error
+
+	if !p.configInProgress {
+		versionResult, err = p.conn.SendCommand("show configuration")
+	} else {
+		versionResult, err = p.conn.SendConfig("run show configuration")
+	}
+
 	if err != nil {
 		return "", nil, err
 	}
@@ -94,7 +101,7 @@ func (p *JUNOSCfg) GetConfig(source string) (string, []*base.Response, error) {
 
 	var err error
 
-	if !p.inConfigurationSession {
+	if !p.configInProgress {
 		configResult, err = p.conn.SendCommand("show configuration")
 	} else {
 		configResult, err = p.conn.SendConfig("run show configuration")
@@ -160,7 +167,7 @@ func (p *JUNOSCfg) LoadConfig(
 		return nil, err
 	}
 
-	p.inConfigurationSession = true
+	p.configInProgress = true
 
 	scrapliResponses = append(scrapliResponses, r)
 
@@ -191,9 +198,6 @@ func (p *JUNOSCfg) deleteCandidateConfigFile() (*base.Response, error) {
 // AbortConfig abort the loaded candidate configuration.
 func (p *JUNOSCfg) AbortConfig() ([]*base.Response, error) {
 	var scrapliResponses []*base.Response
-
-	// TODO scrapli python has the delete candidate first... i think that cant work because we are in the
-	//  config session and if we try to leave we'll be prompted no??
 
 	rollbackResponse, err := p.conn.SendConfig("rollback 0")
 	if err != nil {
