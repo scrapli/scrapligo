@@ -150,6 +150,7 @@ type OperationOptions struct {
 	DiffSideBySideWidth int
 	AutoClean           bool
 	ConfigPrivLevel     string
+	Kwargs              map[string]string
 }
 
 // OperationOption function to set options for cfg operations.
@@ -180,5 +181,12 @@ func WithDiffSideBySideWidth(i int) OperationOption {
 func WithAutoClean(a bool) OperationOption {
 	return func(o *OperationOptions) {
 		o.AutoClean = a
+	}
+}
+
+// WithKwargs option that accepts a map to act like python kwargs a little.
+func WithKwargs(m map[string]string) OperationOption {
+	return func(o *OperationOptions) {
+		o.Kwargs = m
 	}
 }
