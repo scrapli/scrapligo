@@ -149,7 +149,6 @@ type OperationOptions struct {
 	DiffColorize        bool
 	DiffSideBySideWidth int
 	AutoClean           bool
-	ConfigPrivLevel     string
 	Kwargs              map[string]string
 }
 
