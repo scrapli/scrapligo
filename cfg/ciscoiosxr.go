@@ -175,8 +175,10 @@ func (p *IOSXRCfg) LoadConfig(
 	p.replaceConfig = replace
 	p.configInProgress = true
 
-	// TODO - replace this w/ kwargs, also replace autoclean for iosxe (this wasnt actually implemented anyway)
-	if options.ConfigPrivLevel == configExclusivePrivLevel {
+	// the actual value is irrelevant, if there is a key "exclusive" w/ any value we assume user is
+	// wanting to use configuration_exclusive config mode
+	_, ok := options.Kwargs["exclusive"]
+	if ok {
 		p.configPrivLevel = configExclusivePrivLevel
 	}
 

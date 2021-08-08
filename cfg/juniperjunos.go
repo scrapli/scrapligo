@@ -240,6 +240,7 @@ func (p *JUNOSCfg) normalizeSourceAndCandidateConfigs(
 	patterns := getJUNOSPatterns()
 
 	normalizedSourceConfig = patterns.outputHeaderPattern.ReplaceAllString(sourceConfig, "")
+	normalizedSourceConfig = patterns.editPattern.ReplaceAllString(normalizedSourceConfig, "")
 	normalizedSourceConfig = strings.Replace(normalizedSourceConfig, "\n\n", "\n", -1)
 
 	normalizedCandidateConfig = patterns.outputHeaderPattern.ReplaceAllString(
@@ -247,7 +248,7 @@ func (p *JUNOSCfg) normalizeSourceAndCandidateConfigs(
 		"",
 	)
 	normalizedCandidateConfig = strings.Replace(normalizedCandidateConfig, "\n\n", "\n", -1)
-	normalizedSourceConfig = patterns.editPattern.ReplaceAllString(normalizedCandidateConfig, "")
+	normalizedCandidateConfig = patterns.editPattern.ReplaceAllString(normalizedCandidateConfig, "")
 
 	return normalizedSourceConfig, normalizedCandidateConfig
 }
