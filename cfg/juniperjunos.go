@@ -83,9 +83,9 @@ func (p *JUNOSCfg) GetVersion() (string, []*base.Response, error) {
 	var err error
 
 	if !p.configInProgress {
-		versionResult, err = p.conn.SendCommand("show configuration")
+		versionResult, err = p.conn.SendCommand("show version")
 	} else {
-		versionResult, err = p.conn.SendConfig("run show configuration")
+		versionResult, err = p.conn.SendConfig("run show version")
 	}
 
 	if err != nil {
