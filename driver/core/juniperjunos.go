@@ -56,6 +56,15 @@ func NewJUNOSDriver(
 			EscalateAuth:   false,
 			EscalatePrompt: "",
 		},
+		"root_shell": {
+			Pattern:        `(?im)^root@%\s?$`,
+			Name:           "root_shell",
+			PreviousPriv:   execPrivLevel,
+			Deescalate:     "exit",
+			Escalate:       "start shell user root",
+			EscalateAuth:   true,
+			EscalatePrompt: `(?im)^[pP]assword:\s?$`,
+		},
 	}
 
 	defaultFailedWhenContains := []string{

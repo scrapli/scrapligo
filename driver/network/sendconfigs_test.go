@@ -40,10 +40,10 @@ func platformConfigsMap() map[string][]string {
 }
 
 func TestSendConfigs(t *testing.T) {
-	commandsMap := platformConfigsMap()
+	configsMap := platformConfigsMap()
 
 	for _, platform := range core.SupportedPlatforms() {
-		f := testhelper.SendConfigsTestHelper(platform, commandsMap[platform])
+		f := testhelper.SendConfigsTestHelper(platform, configsMap[platform])
 		t.Run(fmt.Sprintf("Platform=%s", platform), f)
 	}
 }
