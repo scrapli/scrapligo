@@ -47,7 +47,7 @@ func (c *Channel) sendInput(channelInput []byte, stripPrompt, eager bool) *chann
 	}
 
 	if !eager {
-		postInputBuf, readErr := c.readUntilPrompt(nil)
+		postInputBuf, readErr := c.readUntilPrompt()
 
 		if readErr != nil {
 			return &channelResult{

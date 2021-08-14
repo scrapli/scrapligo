@@ -54,7 +54,7 @@ func (d *Driver) escalate(escalatePriv string) error {
 				HideInput:       true,
 			},
 		}
-		_, err := d.Channel.SendInteractive(events, -1)
+		_, err := d.Channel.SendInteractive(events, nil, -1)
 
 		return err
 	}

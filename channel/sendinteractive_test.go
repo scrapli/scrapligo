@@ -34,7 +34,7 @@ func TestSendInteractive(t *testing.T) {
 			HideInput:       false,
 		},
 	}
-	actual, promptErr := c.SendInteractive(events, 0)
+	actual, promptErr := c.SendInteractive(events, nil, 0)
 
 	if promptErr != nil {
 		t.Fatalf("error sending input to mock channel: %v", promptErr)

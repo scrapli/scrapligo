@@ -10,13 +10,14 @@ import (
 // FullSendInteractive same as `SendInteractive` but requiring explicit options.
 func (d *Driver) FullSendInteractive(
 	events []*channel.SendInteractiveEvent,
+	interactionCompletePatterns,
 	failedWhenContains []string,
 	timeoutOps time.Duration,
 	joinedEventInputs string,
 ) (*Response, error) {
 	r := NewResponse(d.Host, d.Port, joinedEventInputs, failedWhenContains)
 
-	rawResult, err := d.Channel.SendInteractive(events, timeoutOps)
+	rawResult, err := d.Channel.SendInteractive(events, interactionCompletePatterns, timeoutOps)
 
 	r.Record(rawResult, string(rawResult))
 
@@ -38,6 +39,7 @@ func (d *Driver) SendInteractive(
 
 	return d.FullSendInteractive(
 		events,
+		finalOpts.InteractionCompletePatterns,
 		finalOpts.FailedWhenContains,
 		finalOpts.TimeoutOps,
 		joinedEventInputs,

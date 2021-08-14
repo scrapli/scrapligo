@@ -240,12 +240,13 @@ const (
 
 // SendOptions struct for send operation options.
 type SendOptions struct {
-	StripPrompt           bool
-	FailedWhenContains    []string
-	StopOnFailed          bool
-	TimeoutOps            time.Duration
-	Eager                 bool
-	DesiredPrivilegeLevel string
+	StripPrompt                 bool
+	FailedWhenContains          []string
+	StopOnFailed                bool
+	TimeoutOps                  time.Duration
+	Eager                       bool
+	DesiredPrivilegeLevel       string
+	InteractionCompletePatterns []string
 }
 
 // SendOption func to set send options.
@@ -295,5 +296,14 @@ func WithDesiredPrivilegeLevel(privilegeLevel string) SendOption {
 	// ignored for command(s) operations, only applicable for interactive/config operations
 	return func(o *SendOptions) {
 		o.DesiredPrivilegeLevel = privilegeLevel
+	}
+}
+
+// WithInteractionCompletePatterns provide a list of patterns which, when seen, indicate a
+// `SendInteractive` "session" is complete. Only used for `SendInteractive`, otherwise ignored.
+func WithInteractionCompletePatterns(interactionCompletePatterns []string) SendOption {
+	// ignored for command(s) operations, only applicable for interactive/config operations
+	return func(o *SendOptions) {
+		o.InteractionCompletePatterns = interactionCompletePatterns
 	}
 }

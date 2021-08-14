@@ -2,6 +2,7 @@ package channel
 
 import (
 	"fmt"
+	"regexp"
 	"time"
 
 	"github.com/scrapli/scrapligo/logging"
@@ -14,12 +15,27 @@ type SendInteractiveEvent struct {
 	HideInput       bool
 }
 
-func (c *Channel) sendInteractive(events []*SendInteractiveEvent) *channelResult {
+func (c *Channel) sendInteractive(
+	events []*SendInteractiveEvent,
+	interactionCompletePatterns []string,
+) *channelResult {
 	var b []byte
 
 	for _, event := range events {
 		channelInput := []byte(event.ChannelInput)
 		channelResponse := event.ChannelResponse
+
+		prompts := make([]*regexp.Regexp, 0)
+		if len(channelResponse) > 0 {
+			prompts = append(prompts, regexp.MustCompile(channelResponse))
+		} else {
+			prompts = append(prompts, c.CommsPromptPattern)
+		}
+
+		for _, interactionCompletePattern := range interactionCompletePatterns {
+			prompts = append(prompts, regexp.MustCompile(interactionCompletePattern))
+		}
+
 		hideInput := event.HideInput
 
 		logging.LogDebug(
@@ -68,7 +84,7 @@ func (c *Channel) sendInteractive(events []*SendInteractiveEvent) *channelResult
 			}
 		}
 
-		postInputBuf, err := c.readUntilPrompt(&channelResponse)
+		postInputBuf, err := c.readUntilExplicitPrompt(prompts)
 		if err != nil {
 			return &channelResult{
 				result: []byte(""),
@@ -90,12 +106,13 @@ func (c *Channel) sendInteractive(events []*SendInteractiveEvent) *channelResult
 // Used for dealing with "prompting" from a target device.
 func (c *Channel) SendInteractive(
 	events []*SendInteractiveEvent,
+	interactionCompletePatterns []string,
 	timeoutOps time.Duration,
 ) ([]byte, error) {
 	_c := make(chan *channelResult)
 
 	go func() {
-		r := c.sendInteractive(events)
+		r := c.sendInteractive(events, interactionCompletePatterns)
 		_c <- r
 		close(_c)
 	}()
