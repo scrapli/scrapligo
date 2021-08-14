@@ -76,6 +76,13 @@ func NewDriver(
 				StandardTransportArgs: standardTransportArgs,
 			}
 			d.Transport = t
+		case transport.TelnetTransportName:
+			telnetTransportArgs := &transport.TelnetTransportArgs{}
+			t := &transport.Telnet{
+				BaseTransportArgs:   baseTransportArgs,
+				TelnetTransportArgs: telnetTransportArgs,
+			}
+			d.Transport = t
 		default:
 			return nil, transport.ErrUnknownTransport
 		}

@@ -78,15 +78,19 @@ func (d *Driver) Open() error {
 		return err
 	}
 
+	var authErr error
 	if d.TransportType == transport.SystemTransportName && !d.AuthBypass {
-		_, err = d.Channel.AuthenticateSSH(d.AuthPassword, d.AuthPrivateKeyPassphrase)
-		if err != nil {
-			logging.LogError(
-				d.FormatLogMessage("error", "authentication failed, connection not opened"),
-			)
+		_, authErr = d.Channel.AuthenticateSSH(d.AuthPassword, d.AuthPrivateKeyPassphrase)
+	} else if d.TransportType == transport.TelnetTransportName && !d.AuthBypass {
+		_, authErr = d.Channel.AuthenticateTelnet(d.AuthUsername, d.AuthPassword)
+	}
 
-			return err
-		}
+	if authErr != nil {
+		logging.LogError(
+			d.FormatLogMessage("error", "authentication failed, connection not opened"),
+		)
+
+		return err
 	}
 
 	logging.LogDebug(d.FormatLogMessage("info", "connection to device opened successfully"))

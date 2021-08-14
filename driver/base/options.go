@@ -164,6 +164,8 @@ func WithTransportType(transportType string) Option {
 		finalTransport = transport.SystemTransportName
 	case transport.StandardTransportName:
 		finalTransport = transport.StandardTransportName
+	case transport.TelnetTransportName:
+		finalTransport = transport.TelnetTransportName
 	default:
 		return func(d *Driver) error {
 			return transport.ErrUnknownTransport

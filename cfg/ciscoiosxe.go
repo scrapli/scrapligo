@@ -26,7 +26,7 @@ type iosxePatterns struct {
 	outputHeaderPattern   *regexp.Regexp
 }
 
-var iosxePatternsInstance *iosxePatterns
+var iosxePatternsInstance *iosxePatterns //nolint:gochecknoglobals
 
 func getIOSXEPatterns() *iosxePatterns {
 	if iosxePatternsInstance == nil {

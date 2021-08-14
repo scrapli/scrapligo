@@ -24,7 +24,7 @@ type nxosPatterns struct {
 	checkpointLinePattern *regexp.Regexp
 }
 
-var nxosPatternsInstance *nxosPatterns
+var nxosPatternsInstance *nxosPatterns //nolint:gochecknoglobals
 
 func getNXOSPatterns() *nxosPatterns {
 	if nxosPatternsInstance == nil {

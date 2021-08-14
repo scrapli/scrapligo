@@ -2,11 +2,11 @@ package logging
 
 import "fmt"
 
-// Logger accept logging interface to set as library logger(s).
+// Logger accepts logging interface to set as library logger(s).
 type Logger func(...interface{})
 
 // debugLog default DebugLog -- defaults to nil.
-var debugLog Logger
+var debugLog Logger //nolint:gochecknoglobals
 
 // errorLog default ErrorLog -- defaults to nil.
 var errorLog Logger
@@ -21,14 +21,14 @@ func SetErrorLogger(logger Logger) {
 	errorLog = logger
 }
 
-// LogDebug write debug message to the debug log.
+// LogDebug writes debug message to the debug log.
 func LogDebug(msg string) {
 	if debugLog != nil {
 		debugLog(msg)
 	}
 }
 
-// LogError write error message to the error log.
+// LogError writes error message to the error log.
 func LogError(msg string) {
 	if errorLog != nil {
 		errorLog(msg)

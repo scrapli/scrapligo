@@ -13,9 +13,6 @@ import (
 	"github.com/scrapli/scrapligo/transport"
 )
 
-var passwordPattern = regexp.MustCompile("(?i)password")
-var passphrasePattern = regexp.MustCompile("(?i)enter passphrase for key")
-
 // ErrAuthTimeout error for channel auth timeouts.
 var ErrAuthTimeout = errors.New("channel authentication timed out")
 
@@ -33,6 +30,7 @@ var ErrAuthFailedPassphrase = errors.New(
 var ErrChannelTimeout = errors.New("channel operation timed out")
 
 const (
+	loginSeenMax      = 2
 	passwordSeenMax   = 2
 	passphraseSeenMax = 2
 	ansi              = "[\u001B\u009B][[\\]()#;?]*(?:(?:(?:[a-zA-Z\\d]*(?:;[a-zA-Z\\d]*)*)?" +
