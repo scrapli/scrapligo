@@ -18,7 +18,7 @@ type eosPatterns struct {
 	endPattern               *regexp.Regexp
 }
 
-var eosPatternsInstance *eosPatterns
+var eosPatternsInstance *eosPatterns //nolint:gochecknoglobals
 
 func getEOSPatterns() *eosPatterns {
 	if eosPatternsInstance == nil {

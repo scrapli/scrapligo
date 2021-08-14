@@ -110,26 +110,6 @@ issues:
     - path: _test\.go
       linters:
         - gomnd
-    # ignoring launching subprocess with user provided args
-    - path: transport/system
-      text: "G204"
-      linters:
-        - gosec
-    # ignoring slightly too nested channel authentication
-    - path: channel/authenticate
-      text: "deeply nested"
-      linters:
-        - nestif
-    # ignoring complaint about global logger
-    - path: logging/logging
-      text: "global variable"
-      linters:
-        - gochecknoglobals
-    # ignoring complaint about global patterns singleton
-    - path: cfg
-      text: "PatternsInstance is a global variable"
-      linters:
-        - gochecknoglobals
     # ignoring complaint about junos/xr core drivers having dupl lines
     - path: driver/core
       text: "9-59 lines are duplicate"
@@ -142,6 +122,15 @@ issues:
         - dupl
     - path: cfg/
       text: "67-99 lines are duplicate"
+      linters:
+        - dupl
+    # ignoring complaint about channel auth having dupl lines
+    - path: channel/
+      text: "31-135 lines are duplicate"
+      linters:
+        - dupl
+    - path: channel/
+      text: "137-241 lines are duplicate"
       linters:
         - dupl
 #    - text: "TODO/BUG/FIXME"

@@ -119,7 +119,7 @@ func (t *System) Open() error {
 		),
 	)
 
-	command := exec.Command(t.ExecCmd, t.OpenCmd...)
+	command := exec.Command(t.ExecCmd, t.OpenCmd...) //nolint:gosec
 	fileObj, err := pty.StartWithSize(
 		command,
 		&pty.Winsize{
@@ -161,7 +161,7 @@ func (t *System) OpenNetconf() error {
 		),
 	)
 
-	command := exec.Command("ssh", t.OpenCmd...)
+	command := exec.Command("ssh", t.OpenCmd...) //nolint:gosec
 	fileObj, err := pty.Start(command)
 
 	if err != nil {

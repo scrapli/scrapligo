@@ -23,7 +23,7 @@ type iosxrPatterns struct {
 	endPattern           *regexp.Regexp
 }
 
-var iosxrPatternsInstance *iosxrPatterns
+var iosxrPatternsInstance *iosxrPatterns //nolint:gochecknoglobals
 
 func getIOSXRPatterns() *iosxrPatterns {
 	if iosxrPatternsInstance == nil {

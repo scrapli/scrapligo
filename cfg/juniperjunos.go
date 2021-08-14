@@ -17,7 +17,7 @@ type junosPatterns struct {
 	editPattern         *regexp.Regexp
 }
 
-var junosPatternsInstance *junosPatterns
+var junosPatternsInstance *junosPatterns //nolint:gochecknoglobals
 
 func getJUNOSPatterns() *junosPatterns {
 	if junosPatternsInstance == nil {

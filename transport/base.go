@@ -10,6 +10,7 @@ const (
 	ReadSize              = 65_535
 	SystemTransportName   = "system"
 	StandardTransportName = "standard"
+	TelnetTransportName   = "telnet"
 )
 
 // ErrTransportFailure error for EOF/failure reading from the transport.
@@ -23,6 +24,9 @@ var ErrTransportTimeout = errors.New("transport operation timed out")
 
 // ErrKeyVerificationFailed ssh key verification failure.
 var ErrKeyVerificationFailed = errors.New("ssh key verification failed")
+
+// ErrUnsupportedOperation error for things like trying to use telnet transport with netconf.
+var ErrUnsupportedOperation = errors.New("unsupported operation for this transport type")
 
 // BaseTransportArgs struct for attributes that are required for any transport type.
 type BaseTransportArgs struct {
