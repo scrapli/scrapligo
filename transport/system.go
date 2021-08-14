@@ -17,7 +17,8 @@ type System struct {
 	BaseTransportArgs   *BaseTransportArgs
 	SystemTransportArgs *SystemTransportArgs
 	fileObj             *os.File
-	openCmd             []string
+	OpenCmd             []string
+	ExecCmd             string
 }
 
 // SystemTransportArgs struct representing attributes required for the System transport.
@@ -29,10 +30,10 @@ type SystemTransportArgs struct {
 }
 
 func (t *System) buildOpenCmd() {
-	// base ssh arguments; "ssh" itself passed in Open()
+	// base open command arguments; the exec command itself will be passed in Open()
 	// need to add user arguments could go here at some point
-	t.openCmd = append(
-		t.openCmd,
+	t.OpenCmd = append(
+		t.OpenCmd,
 		t.BaseTransportArgs.Host,
 		"-p",
 		fmt.Sprintf("%d", t.BaseTransportArgs.Port),
@@ -43,39 +44,39 @@ func (t *System) buildOpenCmd() {
 	)
 
 	if t.SystemTransportArgs.AuthPrivateKey != "" {
-		t.openCmd = append(
-			t.openCmd,
+		t.OpenCmd = append(
+			t.OpenCmd,
 			"-i",
 			t.SystemTransportArgs.AuthPrivateKey,
 		)
 	}
 
 	if t.BaseTransportArgs.AuthUsername != "" {
-		t.openCmd = append(
-			t.openCmd,
+		t.OpenCmd = append(
+			t.OpenCmd,
 			"-l",
 			t.BaseTransportArgs.AuthUsername,
 		)
 	}
 
 	if !t.SystemTransportArgs.AuthStrictKey {
-		t.openCmd = append(
-			t.openCmd,
+		t.OpenCmd = append(
+			t.OpenCmd,
 			"-o",
 			"StrictHostKeyChecking=no",
 			"-o",
 			"UserKnownHostsFile=/dev/null",
 		)
 	} else {
-		t.openCmd = append(
-			t.openCmd,
+		t.OpenCmd = append(
+			t.OpenCmd,
 			"-o",
 			"StrictHostKeyChecking=yes",
 		)
 
 		if t.SystemTransportArgs.SSHKnownHostsFile != "" {
-			t.openCmd = append(
-				t.openCmd,
+			t.OpenCmd = append(
+				t.OpenCmd,
 				"-o",
 				fmt.Sprintf("UserKnownHostsFile=%s", t.SystemTransportArgs.SSHKnownHostsFile),
 			)
@@ -83,37 +84,44 @@ func (t *System) buildOpenCmd() {
 	}
 
 	if t.SystemTransportArgs.SSHConfigFile != "" {
-		t.openCmd = append(
-			t.openCmd,
+		t.OpenCmd = append(
+			t.OpenCmd,
 			"-F",
 			t.SystemTransportArgs.SSHConfigFile,
 		)
 	} else {
-		t.openCmd = append(
-			t.openCmd,
+		t.OpenCmd = append(
+			t.OpenCmd,
 			"-F",
 			"/dev/null",
 		)
 	}
 }
 
-// Open open a standard ssh connection.
+// Open opens a standard connection -- typically `ssh`, but users can set the `ExecCommand` to spawn
+// different types of programs such as `docker exec` or `kubectl exec`.
 func (t *System) Open() error {
-	t.buildOpenCmd()
+	if t.OpenCmd == nil {
+		t.buildOpenCmd()
+	}
+
+	if t.ExecCmd == "" {
+		t.ExecCmd = "ssh"
+	}
 
 	logging.LogDebug(
 		t.FormatLogMessage(
 			"debug",
 			fmt.Sprintf(
 				"\"attempting to open transport connection with the following command: %s",
-				t.openCmd,
+				t.OpenCmd,
 			),
 		),
 	)
 
-	sshCommand := exec.Command("ssh", t.openCmd...)
+	command := exec.Command(t.ExecCmd, t.OpenCmd...)
 	fileObj, err := pty.StartWithSize(
-		sshCommand,
+		command,
 		&pty.Winsize{
 			Rows: uint16(t.BaseTransportArgs.PtyHeight),
 			Cols: uint16(t.BaseTransportArgs.PtyWidth),
@@ -133,11 +141,11 @@ func (t *System) Open() error {
 	return err
 }
 
-// OpenNetconf open a netconf connection.
+// OpenNetconf opens a netconf connection.
 func (t *System) OpenNetconf() error {
 	t.buildOpenCmd()
 
-	t.openCmd = append(t.openCmd,
+	t.OpenCmd = append(t.OpenCmd,
 		"-tt",
 		"-s",
 		"netconf",
@@ -148,13 +156,13 @@ func (t *System) OpenNetconf() error {
 			"debug",
 			fmt.Sprintf(
 				"\"attempting to open netconf transport connection with the following command: %s",
-				t.openCmd,
+				t.OpenCmd,
 			),
 		),
 	)
 
-	sshCommand := exec.Command("ssh", t.openCmd...)
-	fileObj, err := pty.Start(sshCommand)
+	command := exec.Command("ssh", t.OpenCmd...)
+	fileObj, err := pty.Start(command)
 
 	if err != nil {
 		logging.LogError(
@@ -171,7 +179,7 @@ func (t *System) OpenNetconf() error {
 	return err
 }
 
-// Close close the transport connection to the device.
+// Close closes the transport connection to the device.
 func (t *System) Close() error {
 	err := t.fileObj.Close()
 	t.fileObj = nil
@@ -213,7 +221,7 @@ func (t *System) Read() ([]byte, error) {
 	return b, nil
 }
 
-// ReadN read N bytes from the transport.
+// ReadN reads N bytes from the transport.
 func (t *System) ReadN(n int) ([]byte, error) {
 	b, err := transportTimeout(
 		*t.BaseTransportArgs.TimeoutTransport,
@@ -229,7 +237,7 @@ func (t *System) ReadN(n int) ([]byte, error) {
 	return b, nil
 }
 
-// Write write bytes to the transport.
+// Write writes bytes to the transport.
 func (t *System) Write(channelInput []byte) error {
 	_, err := t.fileObj.Write(channelInput)
 	if err != nil {
@@ -239,7 +247,7 @@ func (t *System) Write(channelInput []byte) error {
 	return nil
 }
 
-// IsAlive indicate if the transport is alive or not.
+// IsAlive indicates if the transport is alive or not.
 func (t *System) IsAlive() bool {
 	return t.fileObj != nil
 }
