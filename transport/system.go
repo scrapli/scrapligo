@@ -17,7 +17,8 @@ type System struct {
 	BaseTransportArgs   *BaseTransportArgs
 	SystemTransportArgs *SystemTransportArgs
 	fileObj             *os.File
-	openCmd             []string
+	OpenCmd             []string
+	ExecCmd             string
 }
 
 // SystemTransportArgs struct representing attributes required for the System transport.
@@ -31,8 +32,8 @@ type SystemTransportArgs struct {
 func (t *System) buildOpenCmd() {
 	// base ssh arguments; "ssh" itself passed in Open()
 	// need to add user arguments could go here at some point
-	t.openCmd = append(
-		t.openCmd,
+	t.OpenCmd = append(
+		t.OpenCmd,
 		t.BaseTransportArgs.Host,
 		"-p",
 		fmt.Sprintf("%d", t.BaseTransportArgs.Port),
@@ -43,39 +44,39 @@ func (t *System) buildOpenCmd() {
 	)
 
 	if t.SystemTransportArgs.AuthPrivateKey != "" {
-		t.openCmd = append(
-			t.openCmd,
+		t.OpenCmd = append(
+			t.OpenCmd,
 			"-i",
 			t.SystemTransportArgs.AuthPrivateKey,
 		)
 	}
 
 	if t.BaseTransportArgs.AuthUsername != "" {
-		t.openCmd = append(
-			t.openCmd,
+		t.OpenCmd = append(
+			t.OpenCmd,
 			"-l",
 			t.BaseTransportArgs.AuthUsername,
 		)
 	}
 
 	if !t.SystemTransportArgs.AuthStrictKey {
-		t.openCmd = append(
-			t.openCmd,
+		t.OpenCmd = append(
+			t.OpenCmd,
 			"-o",
 			"StrictHostKeyChecking=no",
 			"-o",
 			"UserKnownHostsFile=/dev/null",
 		)
 	} else {
-		t.openCmd = append(
-			t.openCmd,
+		t.OpenCmd = append(
+			t.OpenCmd,
 			"-o",
 			"StrictHostKeyChecking=yes",
 		)
 
 		if t.SystemTransportArgs.SSHKnownHostsFile != "" {
-			t.openCmd = append(
-				t.openCmd,
+			t.OpenCmd = append(
+				t.OpenCmd,
 				"-o",
 				fmt.Sprintf("UserKnownHostsFile=%s", t.SystemTransportArgs.SSHKnownHostsFile),
 			)
@@ -83,14 +84,14 @@ func (t *System) buildOpenCmd() {
 	}
 
 	if t.SystemTransportArgs.SSHConfigFile != "" {
-		t.openCmd = append(
-			t.openCmd,
+		t.OpenCmd = append(
+			t.OpenCmd,
 			"-F",
 			t.SystemTransportArgs.SSHConfigFile,
 		)
 	} else {
-		t.openCmd = append(
-			t.openCmd,
+		t.OpenCmd = append(
+			t.OpenCmd,
 			"-F",
 			"/dev/null",
 		)
@@ -99,19 +100,25 @@ func (t *System) buildOpenCmd() {
 
 // Open open a standard ssh connection.
 func (t *System) Open() error {
-	t.buildOpenCmd()
+	if t.OpenCmd == nil {
+		t.buildOpenCmd()
+	}
+
+	if t.ExecCmd == "" {
+		t.ExecCmd = "ssh"
+	}
 
 	logging.LogDebug(
 		t.FormatLogMessage(
 			"debug",
 			fmt.Sprintf(
 				"\"attempting to open transport connection with the following command: %s",
-				t.openCmd,
+				t.OpenCmd,
 			),
 		),
 	)
 
-	sshCommand := exec.Command("ssh", t.openCmd...)
+	sshCommand := exec.Command(t.ExecCmd, t.OpenCmd...)
 	fileObj, err := pty.StartWithSize(
 		sshCommand,
 		&pty.Winsize{
@@ -137,7 +144,7 @@ func (t *System) Open() error {
 func (t *System) OpenNetconf() error {
 	t.buildOpenCmd()
 
-	t.openCmd = append(t.openCmd,
+	t.OpenCmd = append(t.OpenCmd,
 		"-tt",
 		"-s",
 		"netconf",
@@ -148,12 +155,12 @@ func (t *System) OpenNetconf() error {
 			"debug",
 			fmt.Sprintf(
 				"\"attempting to open netconf transport connection with the following command: %s",
-				t.openCmd,
+				t.OpenCmd,
 			),
 		),
 	)
 
-	sshCommand := exec.Command("ssh", t.openCmd...)
+	sshCommand := exec.Command("ssh", t.OpenCmd...)
 	fileObj, err := pty.Start(sshCommand)
 
 	if err != nil {
