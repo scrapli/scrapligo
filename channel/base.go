@@ -112,11 +112,8 @@ func (c *Channel) readUntilInput(channelInput []byte) ([]byte, error) {
 	}
 }
 
-func (c *Channel) readUntilPrompt(prompt *string) ([]byte, error) {
+func (c *Channel) readUntilPrompt() ([]byte, error) {
 	matchPattern := c.CommsPromptPattern
-	if prompt != nil && len(*prompt) > 0 {
-		matchPattern = regexp.MustCompile(*prompt)
-	}
 
 	var b []byte
 
@@ -133,6 +130,29 @@ func (c *Channel) readUntilPrompt(prompt *string) ([]byte, error) {
 			logging.LogDebug(c.FormatLogMessage("debug", "found prompt match"))
 
 			return b, err
+		}
+	}
+}
+
+func (c *Channel) readUntilExplicitPrompt(prompts []*regexp.Regexp) ([]byte, error) {
+	var b []byte
+
+	for {
+		chunk, err := c.Read()
+		b = append(b, chunk...)
+
+		if err != nil {
+			return b, err
+		}
+
+		for _, prompt := range prompts {
+			channelMatch := prompt.Match(b)
+
+			if channelMatch {
+				logging.LogDebug(c.FormatLogMessage("debug", "found prompt match"))
+
+				return b, err
+			}
 		}
 	}
 }

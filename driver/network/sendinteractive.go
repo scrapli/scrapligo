@@ -27,6 +27,7 @@ func (d *Driver) SendInteractive(
 
 	return d.Driver.FullSendInteractive(
 		events,
+		finalOpts.InteractionCompletePatterns,
 		finalOpts.FailedWhenContains,
 		finalOpts.TimeoutOps,
 		joinedEventInputs,
