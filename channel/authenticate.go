@@ -20,7 +20,7 @@ func getAuthPatterns() *authPatterns {
 	if authPatternsInstance == nil {
 		authPatternsInstance = &authPatterns{
 			telnetLoginPattern: regexp.MustCompile(`(?im)^(.*username:)|(.*login:)\s?$`),
-			passwordPattern:    regexp.MustCompile(`(?im)^password:\s?$`),
+			passwordPattern:    regexp.MustCompile(`(?im)^(.*@.*)?password:\s?$`),
 			passphrasePattern:  regexp.MustCompile(`(?i)enter passphrase for key`),
 		}
 	}
