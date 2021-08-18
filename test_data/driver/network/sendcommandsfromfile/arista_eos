@@ -19,7 +19,7 @@ Pagination disabled.
 localhost#terminal width 32767
 Width set to 32767 columns.
 localhost#show version
- vEOS
+vEOS
 Hardware version:
 Serial number:
 System MAC address:  5254.001f.e379

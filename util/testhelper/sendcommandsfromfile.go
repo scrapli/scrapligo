@@ -11,13 +11,13 @@ import (
 
 // SendCommandsFromFileTestHelper helper function to handle send commands from file tests.
 func SendCommandsFromFileTestHelper(t *testing.T, driverName string) func(t *testing.T) {
-	sessionFile := fmt.Sprintf("../../test_data/driver/network/sendcommands/%s", driverName)
+	sessionFile := fmt.Sprintf("../../test_data/driver/network/sendcommandsfromfile/%s", driverName)
 	expectedFileOne := fmt.Sprintf(
-		"../../test_data/driver/network/sendcommands/%s_expected_one",
+		"../../test_data/driver/network/sendcommandsfromfile/%s_expected_one",
 		driverName,
 	)
 	expectedFileTwo := fmt.Sprintf(
-		"../../test_data/driver/network/sendcommands/%s_expected_two",
+		"../../test_data/driver/network/sendcommandsfromfile/%s_expected_two",
 		driverName,
 	)
 
@@ -70,7 +70,9 @@ func SendCommandsFromFileTestHelper(t *testing.T, driverName string) func(t *tes
 		finalResultTwo := string(bytes.Trim([]byte(responseTwo), "\x00\x0a"))
 
 		if finalResultOne != string(expectedOne) {
-			t.Fatal("actual result one and expected result do not match")
+			t.Fatal(
+				"actual result one and expected result do not match",
+			)
 		}
 
 		if finalResultTwo != string(expectedTwo) {
