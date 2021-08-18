@@ -60,7 +60,7 @@ func main() {
 
 	// you can access the channel directly, however there are no convenience wrappers around the
 	// channel supporting options, so you have to specify all the parameters when using it directly
-	interactiveOutput, err := d.Channel.SendInteractive(events, -1)
+	interactiveOutput, err := d.Channel.SendInteractive(events, nil, -1)
 	if err != nil {
 		fmt.Printf("failed to send interactive input to device; error: %+v\n", err)
 	} else {
