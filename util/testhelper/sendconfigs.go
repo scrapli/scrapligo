@@ -15,7 +15,7 @@ func SendConfigsTestHelper(driverName string, configs []string) func(t *testing.
 		d, driverErr := core.NewCoreDriver(
 			"localhost",
 			driverName,
-			WithPatchedTransport(sessionFile, t),
+			WithPatchedTransport(sessionFile),
 		)
 
 		if driverErr != nil {

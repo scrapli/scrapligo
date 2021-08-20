@@ -2,15 +2,14 @@ package testhelper
 
 import (
 	"os"
-	"testing"
 
 	"github.com/scrapli/scrapligo/driver/base"
-	"github.com/scrapli/scrapligo/logging"
 	"github.com/scrapli/scrapligo/transport"
 )
 
 // TestingTransport patched transport for testing.
 type TestingTransport struct {
+	*transport.System
 	BaseTransportArgs *transport.BaseTransportArgs
 	FakeSession       *os.File
 	CapturedWrites    [][]byte
@@ -66,20 +65,16 @@ func (t *TestingTransport) IsAlive() bool {
 	return true
 }
 
-// FormatLogMessage formats log message payload, adding contextual info about the host.
-func (t *TestingTransport) FormatLogMessage(level, msg string) string {
-	return logging.FormatLogMessage(level, t.BaseTransportArgs.Host, t.BaseTransportArgs.Port, msg)
-}
-
 // WithPatchedTransport option to use to patch a driver transport.
-func WithPatchedTransport(sessionFile string, t *testing.T) base.Option {
+func WithPatchedTransport(sessionFile string) base.Option {
 	return func(d *base.Driver) error {
 		f, err := os.Open(sessionFile)
 		if err != nil {
-			t.Fatalf("failed opening transport session file '%s' err: %v", sessionFile, err)
+			return err
 		}
 
 		d.Transport = &TestingTransport{
+			System:      &transport.System{},
 			FakeSession: f,
 		}
 

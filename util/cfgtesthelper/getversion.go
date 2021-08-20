@@ -18,7 +18,7 @@ func GetVersionTestHelper(t *testing.T, driverName, expectedVersion string) func
 		d, driverErr := core.NewCoreDriver(
 			"localhost",
 			driverName,
-			testhelper.WithPatchedTransport(sessionFile, t),
+			testhelper.WithPatchedTransport(sessionFile),
 		)
 
 		if driverErr != nil {

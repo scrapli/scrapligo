@@ -35,7 +35,7 @@ func SendCommandsFromFileTestHelper(t *testing.T, driverName string) func(t *tes
 		d, driverErr := core.NewCoreDriver(
 			"localhost",
 			driverName,
-			WithPatchedTransport(sessionFile, t),
+			WithPatchedTransport(sessionFile),
 		)
 
 		if driverErr != nil {
