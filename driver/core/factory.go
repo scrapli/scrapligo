@@ -24,7 +24,9 @@ func SupportedPlatforms() []string {
 }
 
 // NewCoreDriver return a new core driver for a given platform.
-func NewCoreDriver(
+var NewCoreDriver = newCoreDriver //nolint:gochecknoglobals
+
+func newCoreDriver(
 	host,
 	platform string,
 	options ...base.Option,

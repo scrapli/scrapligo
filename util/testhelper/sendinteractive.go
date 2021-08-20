@@ -20,7 +20,7 @@ func SendInteractiveTestHelper(
 		d, driverErr := core.NewCoreDriver(
 			"localhost",
 			driverName,
-			WithPatchedTransport(sessionFile, t),
+			WithPatchedTransport(sessionFile),
 		)
 
 		if driverErr != nil {
