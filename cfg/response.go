@@ -37,13 +37,14 @@ func NewResponse(
 	raiseError error,
 ) *Response {
 	r := &Response{
-		Host:        host,
-		Result:      "",
-		StartTime:   time.Now(),
-		EndTime:     time.Time{},
-		ElapsedTime: 0,
-		ErrorType:   raiseError,
-		Failed:      true,
+		Host:          host,
+		OperationType: opType,
+		Result:        "",
+		StartTime:     time.Now(),
+		EndTime:       time.Time{},
+		ElapsedTime:   0,
+		ErrorType:     raiseError,
+		Failed:        true,
 	}
 
 	return r
