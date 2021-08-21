@@ -90,13 +90,14 @@ func NewDiffResponse(
 	sideBySideWidth int,
 ) *DiffResponse {
 	r := &Response{
-		Host:        host,
-		Result:      "",
-		StartTime:   time.Now(),
-		EndTime:     time.Time{},
-		ElapsedTime: 0,
-		ErrorType:   ErrDiffConfigFailed,
-		Failed:      true,
+		Host:          host,
+		OperationType: "DiffConfig",
+		Result:        "",
+		StartTime:     time.Now(),
+		EndTime:       time.Time{},
+		ElapsedTime:   0,
+		ErrorType:     ErrDiffConfigFailed,
+		Failed:        true,
 	}
 
 	dr := &DiffResponse{
