@@ -3,6 +3,7 @@ package cfg
 import (
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/scrapli/scrapligo/driver/base"
 	"github.com/scrapli/scrapligo/logging"
@@ -298,7 +299,7 @@ func (d *Cfg) close() error {
 	return nil
 }
 
-// Cleanup the connection.
+// Cleanup cleans up the cfg session.
 func (d *Cfg) Cleanup() error {
 	err := d.close()
 	if err != nil {
@@ -328,13 +329,13 @@ func (d *Cfg) configSourceValid(source string) bool {
 	return false
 }
 
-// GetVersion get the version from the device.
+// GetVersion gets the version from the device.
 func (d *Cfg) GetVersion() (*Response, error) {
 	logging.LogDebug(
 		FormatLogMessage(d.conn, "info", "get version requested"),
 	)
 
-	r := NewResponse(d.conn.Host, nil)
+	r := NewResponse(d.conn.Host, "GetVersion", nil)
 
 	versionString, scrapliResponses, err := d.Platform.GetVersion()
 
@@ -351,7 +352,7 @@ func (d *Cfg) GetVersion() (*Response, error) {
 	return r, err
 }
 
-// GetConfig get the configuration of a source datastore from the device.
+// GetConfig gets the configuration of a source datastore from the device.
 func (d *Cfg) GetConfig(source string) (*Response, error) {
 	logging.LogDebug(
 		FormatLogMessage(
@@ -361,7 +362,7 @@ func (d *Cfg) GetConfig(source string) (*Response, error) {
 		),
 	)
 
-	r := NewResponse(d.conn.Host, ErrGetConfigFailed)
+	r := NewResponse(d.conn.Host, "GetConfig", ErrGetConfigFailed)
 
 	operationOkErr := d.operationOk()
 	if operationOkErr != nil {
@@ -383,7 +384,7 @@ func (d *Cfg) GetConfig(source string) (*Response, error) {
 	return r, err
 }
 
-// LoadConfig load a candidate configuration.
+// LoadConfig loads a candidate configuration.
 func (d *Cfg) LoadConfig(
 	config string,
 	replace bool,
@@ -396,7 +397,7 @@ func (d *Cfg) LoadConfig(
 	opts := parseOperationOptions(options)
 
 	d.CandidateConfig = config
-	r := NewResponse(d.conn.Host, ErrLoadConfigFailed)
+	r := NewResponse(d.conn.Host, "LoadConfig", ErrLoadConfigFailed)
 
 	operationOkErr := d.operationOk()
 	if operationOkErr != nil {
@@ -416,13 +417,31 @@ func (d *Cfg) LoadConfig(
 	return r, err
 }
 
-// AbortConfig abort the loaded candidate configuration.
+// LoadConfigFromFile loads a candidate configuration from a provided file.
+func (d *Cfg) LoadConfigFromFile(
+	f string,
+	replace bool,
+	options ...OperationOption,
+) (*Response, error) {
+	logging.LogDebug(
+		FormatLogMessage(d.conn, "info", "load config from file requested"),
+	)
+
+	c, err := base.LoadFileLines(f)
+	if err != nil {
+		return nil, err
+	}
+
+	return d.LoadConfig(strings.Join(c, "\n"), replace, options...)
+}
+
+// AbortConfig aborts the loaded candidate configuration.
 func (d *Cfg) AbortConfig() (*Response, error) {
 	logging.LogDebug(
 		FormatLogMessage(d.conn, "info", "abort config requested"),
 	)
 
-	r := NewResponse(d.conn.Host, ErrAbortConfigFailed)
+	r := NewResponse(d.conn.Host, "AbortConfig", ErrAbortConfigFailed)
 
 	if d.CandidateConfig == "" {
 		logging.LogError(
@@ -456,7 +475,7 @@ func (d *Cfg) AbortConfig() (*Response, error) {
 	return r, err
 }
 
-// CommitConfig commit the loaded candidate configuration.
+// CommitConfig commits the loaded candidate configuration.
 func (d *Cfg) CommitConfig(options ...OperationOption) (*Response, error) {
 	logging.LogDebug(
 		FormatLogMessage(d.conn, "info", "commit config requested"),
@@ -464,7 +483,7 @@ func (d *Cfg) CommitConfig(options ...OperationOption) (*Response, error) {
 
 	opts := parseOperationOptions(options)
 
-	r := NewResponse(d.conn.Host, ErrCommitConfigFailed)
+	r := NewResponse(d.conn.Host, "CommitConfig", ErrCommitConfigFailed)
 
 	if d.CandidateConfig == "" {
 		logging.LogError(
@@ -502,7 +521,7 @@ func (d *Cfg) CommitConfig(options ...OperationOption) (*Response, error) {
 	return r, err
 }
 
-// DiffConfig diff the candidate configuration against a source config.
+// DiffConfig diffs the candidate configuration against a source config.
 func (d *Cfg) DiffConfig(options ...OperationOption) (*DiffResponse, error) {
 	logging.LogDebug(
 		FormatLogMessage(d.conn, "info", "diff config requested"),

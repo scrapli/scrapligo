@@ -397,7 +397,7 @@ func (p *NXOSCfg) GetCheckpoint() (*Response, error) {
 		FormatLogMessage(p.conn, "info", "get checkpoint requested"),
 	)
 
-	r := NewResponse(p.conn.Host, ErrGetCheckpointFailed)
+	r := NewResponse(p.conn.Host, "GetCheckpoint", ErrGetCheckpointFailed)
 
 	timestamp := time.Now().Unix()
 	checkpointCommands := []string{

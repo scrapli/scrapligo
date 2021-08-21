@@ -20,6 +20,7 @@ const (
 // Response cfg response object that gets returned from cfg operations.
 type Response struct {
 	Host             string
+	OperationType    string
 	Result           string
 	StartTime        time.Time
 	EndTime          time.Time
@@ -31,7 +32,8 @@ type Response struct {
 
 // NewResponse create a new cfg response object.
 func NewResponse(
-	host string,
+	host,
+	opType string,
 	raiseError error,
 ) *Response {
 	r := &Response{
