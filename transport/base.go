@@ -11,6 +11,8 @@ const (
 	SystemTransportName   = "system"
 	StandardTransportName = "standard"
 	TelnetTransportName   = "telnet"
+	// MaxTimeout maximum allowable timeout value -- one day.
+	MaxTimeout = 86_400
 )
 
 // ErrTransportFailure error for EOF/failure reading from the transport.
@@ -69,6 +71,10 @@ func transportTimeout(
 		c <- r
 		close(c)
 	}()
+
+	if timeout <= 0 {
+		timeout = MaxTimeout * time.Second
+	}
 
 	timer := time.NewTimer(timeout)
 
