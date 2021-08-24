@@ -27,7 +27,6 @@ func (d *Driver) SendConfig(c string, o ...base.SendOption) (*base.Response, err
 	r.EndTime = time.Now()
 	r.ElapsedTime = r.EndTime.Sub(r.StartTime).Seconds()
 	r.Result = strings.Join(individualResponses, "\n")
-	r.Failed = m.Failed()
 
 	return r, nil
 }

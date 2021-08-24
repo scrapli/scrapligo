@@ -57,7 +57,7 @@ func SendCommandsFromFileTestHelper(t *testing.T, driverName string) func(t *tes
 			t.Fatalf("failed sending command: %v", cmdErr)
 		}
 
-		if r.Failed() {
+		if r.Failed {
 			t.Fatal("response object indicates failure")
 		}
 

@@ -32,7 +32,7 @@ func SendConfigsTestHelper(driverName string, configs []string) func(t *testing.
 			t.Fatalf("failed sending configs: %v", cmdErr)
 		}
 
-		if r.Failed() {
+		if r.Failed {
 			t.Fatal("response object indicates failure")
 		}
 	}
