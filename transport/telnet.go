@@ -130,14 +130,16 @@ func (t *Telnet) Open() error {
 		return dialErr
 	}
 
-	logging.LogDebug(t.FormatLogMessage("debug", "tcp socket to host opened"))
+	logging.LogDebug(FormatLogMessage(t.BaseTransportArgs, "debug", "tcp socket to host opened"))
 
 	controlCharErr := t.handleControlChars()
 	if controlCharErr != nil {
 		return controlCharErr
 	}
 
-	logging.LogDebug(t.FormatLogMessage("debug", "telnet control characters exchanged"))
+	logging.LogDebug(
+		FormatLogMessage(t.BaseTransportArgs, "debug", "telnet control characters exchanged"),
+	)
 
 	return nil
 }
@@ -152,7 +154,9 @@ func (t *Telnet) Close() error {
 	err := t.Conn.Close()
 
 	t.Conn = nil
-	logging.LogDebug(t.FormatLogMessage("debug", "transport connection to host closed"))
+	logging.LogDebug(
+		FormatLogMessage(t.BaseTransportArgs, "debug", "transport connection to host closed"),
+	)
 
 	return err
 }
@@ -193,7 +197,10 @@ func (t *Telnet) Read() ([]byte, error) {
 	)
 
 	if err != nil {
-		logging.LogError(t.FormatLogMessage("error", "timed out reading from transport"))
+		logging.LogError(
+			FormatLogMessage(t.BaseTransportArgs, "error", "timed out reading from transport"),
+		)
+
 		return b, err
 	}
 
@@ -209,7 +216,10 @@ func (t *Telnet) ReadN(n int) ([]byte, error) {
 	)
 
 	if err != nil {
-		logging.LogError(t.FormatLogMessage("error", "timed out reading from transport"))
+		logging.LogError(
+			FormatLogMessage(t.BaseTransportArgs, "error", "timed out reading from transport"),
+		)
+
 		return b, err
 	}
 
@@ -229,9 +239,4 @@ func (t *Telnet) Write(channelInput []byte) error {
 // IsAlive indicates if the transport is alive or not.
 func (t *Telnet) IsAlive() bool {
 	return t.Conn != nil
-}
-
-// FormatLogMessage formats log message payload, adding contextual info about the host.
-func (t *Telnet) FormatLogMessage(level, msg string) string {
-	return logging.FormatLogMessage(level, t.BaseTransportArgs.Host, t.BaseTransportArgs.Port, msg)
 }

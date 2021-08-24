@@ -8,6 +8,8 @@ import (
 	"regexp"
 	"time"
 
+	"github.com/scrapli/scrapligo/util"
+
 	"github.com/scrapli/scrapligo/logging"
 
 	"github.com/scrapli/scrapligo/transport"
@@ -33,13 +35,9 @@ const (
 	loginSeenMax      = 2
 	passwordSeenMax   = 2
 	passphraseSeenMax = 2
-	ansi              = "[\u001B\u009B][[\\]()#;?]*(?:(?:(?:[a-zA-Z\\d]*(?:;[a-zA-Z\\d]*)*)?" +
-		"\u0007)|(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PRZcf-ntqry=><~]))"
 	// MaxTimeout maximum allowable timeout value -- one day.
 	MaxTimeout = 86_400
 )
-
-var ansiPattern = regexp.MustCompile(ansi)
 
 // Channel struct representing the channel object.
 type Channel struct {
@@ -166,7 +164,7 @@ func (c *Channel) Read() ([]byte, error) {
 	if bytes.Contains(b, []byte("\x1b")) {
 		logging.LogDebug(c.FormatLogMessage("debug", "stripping ansi chars..."))
 
-		b = stripAnsi(b)
+		b = util.StripAnsi(b)
 	}
 
 	logging.LogDebug(c.FormatLogMessage("debug", fmt.Sprintf("read: %s", b)))
@@ -211,8 +209,4 @@ func (c *Channel) DetermineOperationTimeout(timeoutOps time.Duration) time.Durat
 // FormatLogMessage formats log message payload, adding contextual info about the host.
 func (c *Channel) FormatLogMessage(level, msg string) string {
 	return logging.FormatLogMessage(level, c.Host, c.Port, msg)
-}
-
-func stripAnsi(b []byte) []byte {
-	return ansiPattern.ReplaceAll(b, []byte{})
 }

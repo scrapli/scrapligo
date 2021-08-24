@@ -196,7 +196,7 @@ func (d *Cfg) operationOk() error {
 }
 
 func (d *Cfg) validateAndSetVersion(versionResponse *Response) error {
-	if versionResponse.Failed {
+	if versionResponse.Failed != nil {
 		logging.LogError(FormatLogMessage(d.conn, "error", "failed getting version from device"))
 		return ErrVersionError
 	}
@@ -341,7 +341,7 @@ func (d *Cfg) GetVersion() (*Response, error) {
 
 	r.Record(scrapliResponses, versionString)
 
-	if r.Failed {
+	if r.Failed != nil {
 		logging.LogDebug(FormatLogMessage(d.conn, "warning", "failed to fetch device version"))
 	}
 
@@ -377,7 +377,7 @@ func (d *Cfg) GetConfig(source string) (*Response, error) {
 
 	r.Record(scrapliResponses, cfgString)
 
-	if r.Failed {
+	if r.Failed != nil {
 		logging.LogError(FormatLogMessage(d.conn, "debug", "failed to fetch config from device"))
 	}
 
@@ -408,7 +408,7 @@ func (d *Cfg) LoadConfig(
 
 	r.Record(scrapliResponses, "")
 
-	if r.Failed {
+	if r.Failed != nil {
 		logging.LogError(
 			FormatLogMessage(d.conn, "error", "failed to load candidate configuration"),
 		)
@@ -464,7 +464,7 @@ func (d *Cfg) AbortConfig() (*Response, error) {
 
 	r.Record(scrapliResponses, "")
 
-	if r.Failed {
+	if r.Failed != nil {
 		logging.LogError(
 			FormatLogMessage(d.conn, "error", "failed to abort candidate configuration"),
 		)
@@ -510,7 +510,7 @@ func (d *Cfg) CommitConfig(options ...OperationOption) (*Response, error) {
 
 	r.Record(scrapliResponses, "")
 
-	if r.Failed {
+	if r.Failed != nil {
 		logging.LogError(
 			FormatLogMessage(d.conn, "error", "failed to commit candidate configuration"),
 		)
@@ -560,7 +560,7 @@ func (d *Cfg) DiffConfig(options ...OperationOption) (*DiffResponse, error) {
 	r.Record(scrapliResponses, "")
 	r.RecordDiff(sourceConfig, candidateConfig, deviceDiff)
 
-	if r.Failed {
+	if r.Failed != nil {
 		logging.LogError(
 			FormatLogMessage(d.conn, "error", "failed to diff configuration"),
 		)

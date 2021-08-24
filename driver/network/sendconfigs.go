@@ -37,7 +37,7 @@ func (d *Driver) SendConfigs(c []string, o ...base.SendOption) (*base.MultiRespo
 		return m, err
 	}
 
-	if finalOpts.StopOnFailed && m.Failed {
+	if finalOpts.StopOnFailed && m.Failed != nil {
 		if f, ok := d.Augments["abortConfig"]; ok {
 			_, err = f(d)
 		}

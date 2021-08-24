@@ -110,7 +110,7 @@ func (t *System) Open() error {
 	}
 
 	logging.LogDebug(
-		t.FormatLogMessage(
+		FormatLogMessage(t.BaseTransportArgs,
 			"debug",
 			fmt.Sprintf(
 				"\"attempting to open transport connection with the following command: %s",
@@ -129,12 +129,20 @@ func (t *System) Open() error {
 	)
 
 	if err != nil {
-		logging.LogError(t.FormatLogMessage("error", "failed opening transport connection to host"))
+		logging.LogError(
+			FormatLogMessage(
+				t.BaseTransportArgs,
+				"error",
+				"failed opening transport connection to host",
+			),
+		)
 
 		return err
 	}
 
-	logging.LogDebug(t.FormatLogMessage("debug", "transport connection to host opened"))
+	logging.LogDebug(
+		FormatLogMessage(t.BaseTransportArgs, "debug", "transport connection to host opened"),
+	)
 
 	t.fileObj = fileObj
 
@@ -152,7 +160,7 @@ func (t *System) OpenNetconf() error {
 	)
 
 	logging.LogDebug(
-		t.FormatLogMessage(
+		FormatLogMessage(t.BaseTransportArgs,
 			"debug",
 			fmt.Sprintf(
 				"\"attempting to open netconf transport connection with the following command: %s",
@@ -166,13 +174,23 @@ func (t *System) OpenNetconf() error {
 
 	if err != nil {
 		logging.LogError(
-			t.FormatLogMessage("error", "failed opening netconf transport connection to host"),
+			FormatLogMessage(
+				t.BaseTransportArgs,
+				"error",
+				"failed opening netconf transport connection to host",
+			),
 		)
 
 		return err
 	}
 
-	logging.LogDebug(t.FormatLogMessage("debug", "netconf transport connection to host opened"))
+	logging.LogDebug(
+		FormatLogMessage(
+			t.BaseTransportArgs,
+			"debug",
+			"netconf transport connection to host opened",
+		),
+	)
 
 	t.fileObj = fileObj
 
@@ -183,7 +201,9 @@ func (t *System) OpenNetconf() error {
 func (t *System) Close() error {
 	err := t.fileObj.Close()
 	t.fileObj = nil
-	logging.LogDebug(t.FormatLogMessage("debug", "transport connection to host closed"))
+	logging.LogDebug(
+		FormatLogMessage(t.BaseTransportArgs, "debug", "transport connection to host closed"),
+	)
 
 	return err
 }
@@ -205,7 +225,7 @@ func (t *System) read(n int) *transportResult {
 	}
 }
 
-// Read read bytes from the transport.
+// Read reads bytes from the transport.
 func (t *System) Read() ([]byte, error) {
 	b, err := transportTimeout(
 		*t.BaseTransportArgs.TimeoutTransport,
@@ -214,7 +234,10 @@ func (t *System) Read() ([]byte, error) {
 	)
 
 	if err != nil {
-		logging.LogError(t.FormatLogMessage("error", "timed out reading from transport"))
+		logging.LogError(
+			FormatLogMessage(t.BaseTransportArgs, "error", "timed out reading from transport"),
+		)
+
 		return b, err
 	}
 
@@ -230,7 +253,10 @@ func (t *System) ReadN(n int) ([]byte, error) {
 	)
 
 	if err != nil {
-		logging.LogError(t.FormatLogMessage("error", "timed out reading from transport"))
+		logging.LogError(
+			FormatLogMessage(t.BaseTransportArgs, "error", "timed out reading from transport"),
+		)
+
 		return b, err
 	}
 
@@ -250,9 +276,4 @@ func (t *System) Write(channelInput []byte) error {
 // IsAlive indicates if the transport is alive or not.
 func (t *System) IsAlive() bool {
 	return t.fileObj != nil
-}
-
-// FormatLogMessage formats log message payload, adding contextual info about the host.
-func (t *System) FormatLogMessage(level, msg string) string {
-	return logging.FormatLogMessage(level, t.BaseTransportArgs.Host, t.BaseTransportArgs.Port, msg)
 }

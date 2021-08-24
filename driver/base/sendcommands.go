@@ -30,7 +30,7 @@ func (d *Driver) FullSendCommands(
 			return mr, err
 		}
 
-		if stopOnFailed && r.Failed {
+		if stopOnFailed && r.Failed != nil {
 			logging.LogDebug(
 				d.FormatLogMessage(
 					"info",

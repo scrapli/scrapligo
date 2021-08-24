@@ -27,7 +27,7 @@ type Response struct {
 	ElapsedTime      float64
 	ScrapliResponses []*base.Response
 	ErrorType        error
-	Failed           bool
+	Failed           error
 }
 
 // NewResponse create a new cfg response object.
@@ -44,7 +44,6 @@ func NewResponse(
 		EndTime:       time.Time{},
 		ElapsedTime:   0,
 		ErrorType:     raiseError,
-		Failed:        true,
 	}
 
 	return r
@@ -55,12 +54,11 @@ func (r *Response) Record(scrapliResponses []*base.Response, result string) {
 	r.ElapsedTime = r.EndTime.Sub(r.StartTime).Seconds()
 
 	r.Result = result
-	r.Failed = false
 	r.ScrapliResponses = scrapliResponses
 
 	for _, response := range r.ScrapliResponses {
-		if response.Failed {
-			r.Failed = true
+		if response.Failed != nil {
+			r.Failed = r.ErrorType
 			break
 		}
 	}
@@ -97,7 +95,6 @@ func NewDiffResponse(
 		EndTime:       time.Time{},
 		ElapsedTime:   0,
 		ErrorType:     ErrDiffConfigFailed,
-		Failed:        true,
 	}
 
 	dr := &DiffResponse{

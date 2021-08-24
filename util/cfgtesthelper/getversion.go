@@ -41,8 +41,8 @@ func GetVersionTestHelper(t *testing.T, driverName, expectedVersion string) func
 			t.Fatalf("failed running GetVersion: %v", cmdErr)
 		}
 
-		if r.Failed {
-			t.Fatal("response object indicates failure")
+		if r.Failed != nil {
+			t.Fatalf("response object indicates failure; error: %+v\n", r.Failed)
 		}
 
 		if r.Result != expectedVersion {

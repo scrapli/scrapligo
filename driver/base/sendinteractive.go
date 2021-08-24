@@ -21,10 +21,6 @@ func (d *Driver) FullSendInteractive(
 
 	r.Record(rawResult, string(rawResult))
 
-	if err != nil {
-		r.Failed = true
-	}
-
 	return r, err
 }
 

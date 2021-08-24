@@ -4,8 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"strings"
 	"time"
+
+	"github.com/scrapli/scrapligo/util"
 
 	"github.com/scrapli/scrapligo/logging"
 	"github.com/sirikothe/gotextfsm"
@@ -17,19 +18,10 @@ var ErrFailedOpeningTemplate = errors.New("failed opening provided path to textf
 // ErrFailedParsingTemplate error for failure of parsing a textfsm template.
 var ErrFailedParsingTemplate = errors.New("failed parsing textfsm template")
 
-func stringSliceContains(s string, l []string) (bool, string) { //nolint:gocritic
-	for _, ss := range l {
-		if strings.Contains(s, ss) {
-			return true, ss
-		}
-	}
-
-	return false, ""
-}
-
 // OperationError is an error object returned when a scrapli operation completes "successfully" --
 // as in does not have an EOF/timeout or otherwise unrecoverable error -- but contains output in the
-// device's response indicating that an input was bad/invalid.
+// device's response indicating that an input was bad/invalid or device failed to process it at
+// that time.
 type OperationError struct {
 	Input       string
 	Output      string
@@ -56,8 +48,10 @@ type Response struct {
 	EndTime            time.Time
 	ElapsedTime        float64
 	FailedWhenContains []string
-	Failed             bool
-	FailedMsg          string
+	// Failed returns an error if any of the `FailedWhenContains` substrings are seen in the output
+	// returned from the device. This error indicates that the operation has completed successfully,
+	// but that an input was bad/invalid or device failed to process it at that time
+	Failed *OperationError
 }
 
 // NewResponse creates a new response object.
@@ -76,7 +70,6 @@ func NewResponse(
 		StartTime:          time.Now(),
 		EndTime:            time.Time{},
 		ElapsedTime:        0,
-		Failed:             false,
 		FailedWhenContains: failedWhenContains,
 	}
 
@@ -91,23 +84,13 @@ func (r *Response) Record(rawResult []byte, result string) {
 	r.RawResult = rawResult
 	r.Result = result
 
-	f, s := stringSliceContains(r.Result, r.FailedWhenContains)
-	r.Failed = f
-	r.FailedMsg = s
-}
-
-// OperationOk returns an error if the `Failed` attribute is true -- this indicates that an
-// operation has been completed and the result contains one or more substrings from the
-// `FailedWhenContains` attribute.
-func (r *Response) OperationOk() error {
-	if !r.Failed {
-		return nil
-	}
-
-	return &OperationError{
-		Input:       r.ChannelInput,
-		Output:      r.Result,
-		ErrorString: r.FailedMsg,
+	s := util.StrContainsAnySubStr(r.Result, r.FailedWhenContains)
+	if len(s) > 0 {
+		r.Failed = &OperationError{
+			Input:       r.ChannelInput,
+			Output:      r.Result,
+			ErrorString: s,
+		}
 	}
 }
 

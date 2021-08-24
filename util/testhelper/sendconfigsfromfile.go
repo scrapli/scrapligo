@@ -37,8 +37,8 @@ func SendConfigsFromFileTestHelper(driverName string) func(t *testing.T) {
 			t.Fatalf("failed sending configs: %v", cmdErr)
 		}
 
-		if r.Failed {
-			t.Fatal("response object indicates failure")
+		if r.Failed != nil {
+			t.Fatalf("response object indicates failure; error: %+v\n", r.Failed)
 		}
 	}
 }

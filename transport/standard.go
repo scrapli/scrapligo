@@ -73,7 +73,11 @@ func (t *Standard) open(cfg *ssh.ClientConfig) error {
 
 	if err != nil {
 		logging.LogError(
-			t.FormatLogMessage("error", fmt.Sprintf("error connecting to host: %v", err)),
+			FormatLogMessage(
+				t.BaseTransportArgs,
+				"error",
+				fmt.Sprintf("error connecting to host: %v", err),
+			),
 		)
 
 		return err
@@ -82,7 +86,11 @@ func (t *Standard) open(cfg *ssh.ClientConfig) error {
 	t.session, err = t.client.NewSession()
 	if err != nil {
 		logging.LogError(
-			t.FormatLogMessage("error", fmt.Sprintf("error allocating session: %v", err)),
+			FormatLogMessage(
+				t.BaseTransportArgs,
+				"error",
+				fmt.Sprintf("error allocating session: %v", err),
+			),
 		)
 
 		return err
@@ -91,7 +99,11 @@ func (t *Standard) open(cfg *ssh.ClientConfig) error {
 	t.writer, err = t.session.StdinPipe()
 	if err != nil {
 		logging.LogError(
-			t.FormatLogMessage("error", fmt.Sprintf("error allocating writer: %v", err)),
+			FormatLogMessage(
+				t.BaseTransportArgs,
+				"error",
+				fmt.Sprintf("error allocating writer: %v", err),
+			),
 		)
 
 		return err
@@ -100,7 +112,11 @@ func (t *Standard) open(cfg *ssh.ClientConfig) error {
 	t.reader, err = t.session.StdoutPipe()
 	if err != nil {
 		logging.LogError(
-			t.FormatLogMessage("error", fmt.Sprintf("error allocating reader: %v", err)),
+			FormatLogMessage(
+				t.BaseTransportArgs,
+				"error",
+				fmt.Sprintf("error allocating reader: %v", err),
+			),
 		)
 
 		return err
@@ -129,7 +145,11 @@ func (t *Standard) openBase() error {
 
 		if err != nil {
 			logging.LogError(
-				t.FormatLogMessage("error", fmt.Sprintf("unable to parse private key: %v", err)),
+				FormatLogMessage(
+					t.BaseTransportArgs,
+					"error",
+					fmt.Sprintf("unable to parse private key: %v", err),
+				),
 			)
 
 			return err
@@ -184,7 +204,7 @@ func (t *Standard) openBase() error {
 	return nil
 }
 
-// Open open a standard ssh connection.
+// Open opens a standard ssh connection.
 func (t *Standard) Open() error {
 	err := t.openBase()
 	if err != nil {
@@ -199,7 +219,7 @@ func (t *Standard) Open() error {
 	return nil
 }
 
-// OpenNetconf open a netconf connection.
+// OpenNetconf opens a netconf connection.
 func (t *Standard) OpenNetconf() error {
 	err := t.openBase()
 	if err != nil {
@@ -222,12 +242,14 @@ func (t *Standard) OpenNetconf() error {
 	return nil
 }
 
-// Close close the transport connection to the device.
+// Close closes the transport connection to the device.
 func (t *Standard) Close() error {
 	err := t.session.Close()
 	t.session = nil
 
-	logging.LogDebug(t.FormatLogMessage("debug", "transport connection to host closed"))
+	logging.LogDebug(
+		FormatLogMessage(t.BaseTransportArgs, "debug", "transport connection to host closed"),
+	)
 
 	return err
 }
@@ -249,7 +271,7 @@ func (t *Standard) read(n int) *transportResult {
 	}
 }
 
-// Read read bytes from the transport.
+// Read reads bytes from the transport.
 func (t *Standard) Read() ([]byte, error) {
 	b, err := transportTimeout(
 		*t.BaseTransportArgs.TimeoutTransport,
@@ -258,14 +280,17 @@ func (t *Standard) Read() ([]byte, error) {
 	)
 
 	if err != nil {
-		logging.LogError(t.FormatLogMessage("error", "timed out reading from transport"))
+		logging.LogError(
+			FormatLogMessage(t.BaseTransportArgs, "error", "timed out reading from transport"),
+		)
+
 		return b, err
 	}
 
 	return b, nil
 }
 
-// ReadN read N bytes from the transport.
+// ReadN reads N bytes from the transport.
 func (t *Standard) ReadN(n int) ([]byte, error) {
 	b, err := transportTimeout(
 		*t.BaseTransportArgs.TimeoutTransport,
@@ -274,14 +299,17 @@ func (t *Standard) ReadN(n int) ([]byte, error) {
 	)
 
 	if err != nil {
-		logging.LogError(t.FormatLogMessage("error", "timed out reading from transport"))
+		logging.LogError(
+			FormatLogMessage(t.BaseTransportArgs, "error", "timed out reading from transport"),
+		)
+
 		return b, err
 	}
 
 	return b, nil
 }
 
-// Write write bytes to the transport.
+// Write writes bytes to the transport.
 func (t *Standard) Write(channelInput []byte) error {
 	_, err := t.writer.Write(channelInput)
 	if err != nil {
@@ -291,12 +319,7 @@ func (t *Standard) Write(channelInput []byte) error {
 	return nil
 }
 
-// IsAlive indicate if the transport is alive or not.
+// IsAlive indicates if the transport is alive or not.
 func (t *Standard) IsAlive() bool {
 	return t.session != nil
-}
-
-// FormatLogMessage formats log message payload, adding contextual info about the host.
-func (t *Standard) FormatLogMessage(level, msg string) string {
-	return logging.FormatLogMessage(level, t.BaseTransportArgs.Host, t.BaseTransportArgs.Port, msg)
 }

@@ -170,7 +170,7 @@ func (p *EOSCfg) loadConfig(
 		stdConfig,
 		base.WithDesiredPrivilegeLevel(p.configSessionName),
 	)
-	if stdConfigErr != nil || configResult.Failed {
+	if stdConfigErr != nil || configResult.Failed != nil {
 		return scrapliResponses, stdConfigErr
 	}
 
@@ -181,9 +181,12 @@ func (p *EOSCfg) loadConfig(
 		base.WithDesiredPrivilegeLevel(p.configSessionName),
 		base.WithSendEager(true),
 	)
+
 	if eagerConfigErr != nil {
 		return scrapliResponses, eagerConfigErr
-	} else if eagerResult.Failed {
+	}
+
+	if eagerResult.Failed != nil {
 		return scrapliResponses, eagerConfigErr
 	}
 
@@ -322,7 +325,7 @@ func (p *EOSCfg) DiffConfig(
 
 	scrapliResponses = append(scrapliResponses, diffResult)
 
-	if diffResult.Failed {
+	if diffResult.Failed != nil {
 		logging.LogError(
 			FormatLogMessage(
 				p.conn,
@@ -343,7 +346,7 @@ func (p *EOSCfg) DiffConfig(
 
 	scrapliResponses = append(scrapliResponses, getConfigR[0])
 
-	if getConfigR[0].Failed {
+	if getConfigR[0].Failed != nil {
 		logging.LogError(
 			FormatLogMessage(
 				p.conn,

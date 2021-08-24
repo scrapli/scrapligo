@@ -501,7 +501,7 @@ func (p *IOSXECfg) DiffConfig(
 
 	scrapliResponses = append(scrapliResponses, diffResult)
 
-	if diffResult.Failed {
+	if diffResult.Failed != nil {
 		logging.LogError(
 			FormatLogMessage(
 				p.conn,
@@ -522,7 +522,7 @@ func (p *IOSXECfg) DiffConfig(
 
 	scrapliResponses = append(scrapliResponses, getConfigR[0])
 
-	if getConfigR[0].Failed {
+	if getConfigR[0].Failed != nil {
 		logging.LogError(
 			FormatLogMessage(
 				p.conn,

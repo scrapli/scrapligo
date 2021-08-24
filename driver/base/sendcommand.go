@@ -17,10 +17,6 @@ func (d *Driver) FullSendCommand(
 
 	r.Record(rawResult, string(rawResult))
 
-	if err != nil {
-		r.Failed = true
-	}
-
 	return r, err
 }
 

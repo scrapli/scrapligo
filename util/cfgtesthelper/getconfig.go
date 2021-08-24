@@ -60,8 +60,8 @@ func GetConfigTestHelper(t *testing.T, driverName, configSource string) func(t *
 			t.Fatalf("failed running GetVersion: %v", cmdErr)
 		}
 
-		if r.Failed {
-			t.Fatal("response object indicates failure")
+		if r.Failed != nil {
+			t.Fatalf("response object indicates failure; error: %+v\n", r.Failed)
 		}
 
 		// i have no idea where the null bit is getting read from... but it does? so we'll just remove

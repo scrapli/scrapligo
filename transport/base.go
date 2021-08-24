@@ -3,6 +3,8 @@ package transport
 import (
 	"errors"
 	"time"
+
+	"github.com/scrapli/scrapligo/logging"
 )
 
 // constants for basic transport values.
@@ -56,7 +58,6 @@ type BaseTransport interface {
 	Read() ([]byte, error)
 	ReadN(int) ([]byte, error)
 	Write([]byte) error
-	FormatLogMessage(string, string) string
 }
 
 func transportTimeout(
@@ -84,4 +85,9 @@ func transportTimeout(
 	case <-timer.C:
 		return []byte{}, ErrTransportTimeout
 	}
+}
+
+// FormatLogMessage formats log messages for transport level logging.
+func FormatLogMessage(b *BaseTransportArgs, level, msg string) string {
+	return logging.FormatLogMessage(level, b.Host, b.Port, msg)
 }

@@ -33,7 +33,7 @@ type MultiResponse struct {
 	EndTime     time.Time
 	ElapsedTime float64
 	Responses   []*Response
-	Failed      bool
+	Failed      *MultiOperationError
 }
 
 // NewMultiResponse creates a new MultiResponse object.
@@ -43,7 +43,6 @@ func NewMultiResponse(host string) *MultiResponse {
 		StartTime:   time.Now(),
 		EndTime:     time.Time{},
 		ElapsedTime: 0,
-		Failed:      false,
 	}
 
 	return r
@@ -51,9 +50,12 @@ func NewMultiResponse(host string) *MultiResponse {
 
 // AppendResponse appends a response to the `Responses` attribute of the MultiResponse object.
 func (mr *MultiResponse) AppendResponse(r *Response) {
-	if !mr.Failed && r.Failed {
-		// if the MultiResponse is not failed, but we get a failed response, set to failed
-		mr.Failed = true
+	if r.Failed != nil {
+		if mr.Failed == nil {
+			mr.Failed = &MultiOperationError{}
+		}
+
+		mr.Failed.Operations = append(mr.Failed.Operations, r.Failed)
 	}
 
 	mr.Responses = append(mr.Responses, r)
@@ -70,29 +72,4 @@ func (mr *MultiResponse) JoinedResult() string {
 	}
 
 	return strings.Join(resultsSlice, "\n")
-}
-
-// OperationOk returns an error if the `Failed` attribute is true -- this indicates that an
-// operation has been completed and the result contains one or more substrings from the
-// `FailedWhenContains` attribute.
-func (mr *MultiResponse) OperationOk() error {
-	if !mr.Failed {
-		return nil
-	}
-
-	var oppErrors []*OperationError
-
-	for _, r := range mr.Responses {
-		if r.Failed {
-			oppErrors = append(oppErrors, &OperationError{
-				Input:       r.ChannelInput,
-				Output:      r.Result,
-				ErrorString: r.FailedMsg,
-			})
-		}
-	}
-
-	return &MultiOperationError{
-		Operations: oppErrors,
-	}
 }
