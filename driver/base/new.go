@@ -11,7 +11,7 @@ import (
 
 // NewDriver create a new instance of `Driver`, accepts a host and variadic of options to modify
 // the driver behavior.
-func NewDriver(
+func NewDriver( //nolint:funlen
 	host string,
 	options ...Option,
 ) (*Driver, error) {
@@ -96,6 +96,18 @@ func NewDriver(
 			d.Transport = t
 		default:
 			return nil, transport.ErrUnknownTransport
+		}
+	}
+
+	for _, option := range options {
+		err := option(d.Transport)
+
+		if err != nil {
+			if errors.Is(err, ErrIgnoredOption) {
+				continue
+			} else {
+				return nil, err
+			}
 		}
 	}
 

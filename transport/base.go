@@ -16,6 +16,11 @@ const (
 	MaxTimeout = 86_400
 )
 
+// SupportedTransports pseudo constant providing slice of supported transport types.
+func SupportedTransports() []string {
+	return []string{SystemTransportName, StandardTransportName, TelnetTransportName}
+}
+
 // ErrTransportFailure error for EOF/failure reading from the transport.
 var ErrTransportFailure = errors.New("error reading from transport, cannot continue")
 

@@ -66,7 +66,7 @@ func resolveFilePath(f string) (string, error) {
 		return f, nil
 	}
 
-	// if didnt stat a fully qualified file, strip user dir (if exists) and then check there
+	// if didn't stat a fully qualified file, strip user dir (if exists) and then check there
 	f = strings.TrimPrefix(f, "~/")
 	homeDir, err := os.UserHomeDir()
 

@@ -84,6 +84,18 @@ func NewDriver(
 		}
 	}
 
+	for _, option := range options {
+		err := option(d.Transport)
+
+		if err != nil {
+			if errors.Is(err, ErrIgnoredOption) {
+				continue
+			} else {
+				return nil, err
+			}
+		}
+	}
+
 	c, err := NewChannel(d.Transport, options...)
 	if err != nil {
 		return nil, err
