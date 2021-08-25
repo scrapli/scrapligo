@@ -76,7 +76,7 @@ func NewNetworkDriver(
 	return d, nil
 }
 
-// Open opens a connection; calls the base driver `Open` method, but additionally executes the
+// Open opens a connection; calls the base driver `open` method, but additionally executes the
 // `OnOpen` callable.
 func (d *Driver) Open() error {
 	err := d.Driver.Open()

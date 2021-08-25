@@ -5,6 +5,8 @@ import (
 	"net"
 	"time"
 
+	"github.com/scrapli/scrapligo/util"
+
 	"github.com/scrapli/scrapligo/logging"
 )
 
@@ -19,7 +21,6 @@ const (
 
 // Telnet the telnet transport option for scrapligo.
 type Telnet struct {
-	BaseTransportArgs   *BaseTransportArgs
 	TelnetTransportArgs *TelnetTransportArgs
 	Conn                net.Conn
 	initialBuf          []byte
@@ -29,16 +30,6 @@ type Telnet struct {
 type TelnetTransportArgs struct {
 }
 
-func byteInSlice(b byte, s []byte) bool {
-	for _, i := range s {
-		if b == i {
-			return true
-		}
-	}
-
-	return false
-}
-
 func (t *Telnet) handleControlCharResponse(ctrlBuf []byte, c byte) ([]byte, error) {
 	if len(ctrlBuf) == 0 { //nolint:nestif
 		if c != IAC {
@@ -46,7 +37,7 @@ func (t *Telnet) handleControlCharResponse(ctrlBuf []byte, c byte) ([]byte, erro
 		} else {
 			ctrlBuf = append(ctrlBuf, c)
 		}
-	} else if len(ctrlBuf) == 1 && byteInSlice(c, []byte{DO, DONT, WILL, WONT}) {
+	} else if len(ctrlBuf) == 1 && util.ByteInSlice(c, []byte{DO, DONT, WILL, WONT}) {
 		ctrlBuf = append(ctrlBuf, c)
 	} else if len(ctrlBuf) == 2 { //nolint:gomnd
 		cmd := ctrlBuf[1:2][0]
@@ -56,7 +47,7 @@ func (t *Telnet) handleControlCharResponse(ctrlBuf []byte, c byte) ([]byte, erro
 
 		if cmd == DO && c == SGA {
 			_, writeErr = t.Conn.Write([]byte{IAC, WILL, c})
-		} else if byteInSlice(cmd, []byte{DO, DONT}) {
+		} else if util.ByteInSlice(cmd, []byte{DO, DONT}) {
 			_, writeErr = t.Conn.Write([]byte{IAC, WONT, c})
 		} else if cmd == WILL {
 			_, writeErr = t.Conn.Write([]byte{IAC, DO, c})
@@ -72,8 +63,8 @@ func (t *Telnet) handleControlCharResponse(ctrlBuf []byte, c byte) ([]byte, erro
 	return ctrlBuf, nil
 }
 
-func (t *Telnet) handleControlChars() error {
-	socketTimeout := t.BaseTransportArgs.TimeoutSocket
+func (t *Telnet) handleControlChars(baseArgs *BaseTransportArgs) error {
+	socketTimeout := baseArgs.TimeoutSocket
 	d := *socketTimeout / 4
 
 	var handleErr error
@@ -86,7 +77,7 @@ func (t *Telnet) handleControlChars() error {
 			return setDeadlineErr
 		}
 
-		// speed up timeout after initial read
+		// speed up timeout after initial Read
 		d = *socketTimeout / 10
 
 		charBuf := make([]byte, 1)
@@ -118,57 +109,56 @@ func (t *Telnet) handleControlChars() error {
 	}
 }
 
-// Open opens a telnet connection.
-func (t *Telnet) Open() error {
+func (t *Telnet) Open(baseArgs *BaseTransportArgs) error {
 	var dialErr error
 
 	t.Conn, dialErr = net.Dial(
 		"tcp",
-		fmt.Sprintf("%s:%d", t.BaseTransportArgs.Host, t.BaseTransportArgs.Port),
+		fmt.Sprintf("%s:%d", baseArgs.Host, baseArgs.Port),
 	)
 	if dialErr != nil {
 		return dialErr
 	}
 
-	logging.LogDebug(FormatLogMessage(t.BaseTransportArgs, "debug", "tcp socket to host opened"))
+	logging.LogDebug(FormatLogMessage(baseArgs, "debug", "tcp socket to host opened"))
 
-	controlCharErr := t.handleControlChars()
+	controlCharErr := t.handleControlChars(baseArgs)
 	if controlCharErr != nil {
 		return controlCharErr
 	}
 
 	logging.LogDebug(
-		FormatLogMessage(t.BaseTransportArgs, "debug", "telnet control characters exchanged"),
+		FormatLogMessage(baseArgs, "debug", "telnet control characters exchanged"),
 	)
 
 	return nil
 }
 
-// OpenNetconf returns an error, netconf does not support telnet... duh.
-func (t *Telnet) OpenNetconf() error {
+func (t *Telnet) OpenNetconf(baseArgs *BaseTransportArgs) error {
+	_ = baseArgs
 	return ErrUnsupportedOperation
 }
 
-// Close closes the transport connection to the device.
 func (t *Telnet) Close() error {
 	err := t.Conn.Close()
 
 	t.Conn = nil
-	logging.LogDebug(
-		FormatLogMessage(t.BaseTransportArgs, "debug", "transport connection to host closed"),
-	)
 
 	return err
 }
 
-func (t *Telnet) read(n int) *transportResult {
+func (t *Telnet) IsAlive() bool {
+	return t.Conn != nil
+}
+
+func (t *Telnet) Read(n int) *ReadResult {
 	if len(t.initialBuf) > 0 {
 		b := t.initialBuf
 		t.initialBuf = []byte{}
 
-		return &transportResult{
-			result: b,
-			error:  nil,
+		return &ReadResult{
+			Result: b,
+			Error:  nil,
 		}
 	}
 
@@ -176,67 +166,20 @@ func (t *Telnet) read(n int) *transportResult {
 	_, err := t.Conn.Read(b)
 
 	if err != nil {
-		return &transportResult{
-			result: nil,
-			error:  ErrTransportFailure,
+		return &ReadResult{
+			Result: nil,
+			Error:  ErrTransportFailure,
 		}
 	}
 
-	return &transportResult{
-		result: b,
-		error:  nil,
+	return &ReadResult{
+		Result: b,
+		Error:  nil,
 	}
 }
 
-// Read reads bytes from the transport.
-func (t *Telnet) Read() ([]byte, error) {
-	b, err := transportTimeout(
-		*t.BaseTransportArgs.TimeoutTransport,
-		t.read,
-		ReadSize,
-	)
-
-	if err != nil {
-		logging.LogError(
-			FormatLogMessage(t.BaseTransportArgs, "error", "timed out reading from transport"),
-		)
-
-		return b, err
-	}
-
-	return b, nil
-}
-
-// ReadN reads N bytes from the transport.
-func (t *Telnet) ReadN(n int) ([]byte, error) {
-	b, err := transportTimeout(
-		*t.BaseTransportArgs.TimeoutTransport,
-		t.read,
-		n,
-	)
-
-	if err != nil {
-		logging.LogError(
-			FormatLogMessage(t.BaseTransportArgs, "error", "timed out reading from transport"),
-		)
-
-		return b, err
-	}
-
-	return b, nil
-}
-
-// Write writes bytes to the transport.
 func (t *Telnet) Write(channelInput []byte) error {
 	_, err := t.Conn.Write(channelInput)
-	if err != nil {
-		return err
-	}
 
-	return nil
-}
-
-// IsAlive indicates if the transport is alive or not.
-func (t *Telnet) IsAlive() bool {
-	return t.Conn != nil
+	return err
 }

@@ -7,14 +7,12 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/scrapli/scrapligo/logging"
-
 	"github.com/creack/pty"
+	"github.com/scrapli/scrapligo/logging"
 )
 
 // System the "system" (pty subprocess wrapper) transport option for scrapligo.
 type System struct {
-	BaseTransportArgs   *BaseTransportArgs
 	SystemTransportArgs *SystemTransportArgs
 	fileObj             *os.File
 	OpenCmd             []string
@@ -29,18 +27,18 @@ type SystemTransportArgs struct {
 	SSHKnownHostsFile string
 }
 
-func (t *System) buildOpenCmd() {
-	// base open command arguments; the exec command itself will be passed in Open()
+func (t *System) buildOpenCmd(baseArgs *BaseTransportArgs) {
+	// base open command arguments; the exec command itself will be passed in open()
 	// need to add user arguments could go here at some point
 	t.OpenCmd = append(
 		t.OpenCmd,
-		t.BaseTransportArgs.Host,
+		baseArgs.Host,
 		"-p",
-		fmt.Sprintf("%d", t.BaseTransportArgs.Port),
+		fmt.Sprintf("%d", baseArgs.Port),
 		"-o",
-		fmt.Sprintf("ConnectTimeout=%d", int(t.BaseTransportArgs.TimeoutSocket.Seconds())),
+		fmt.Sprintf("ConnectTimeout=%d", int(baseArgs.TimeoutSocket.Seconds())),
 		"-o",
-		fmt.Sprintf("ServerAliveInterval=%d", int(t.BaseTransportArgs.TimeoutTransport.Seconds())),
+		fmt.Sprintf("ServerAliveInterval=%d", int(baseArgs.TimeoutTransport.Seconds())),
 	)
 
 	if t.SystemTransportArgs.AuthPrivateKey != "" {
@@ -51,11 +49,11 @@ func (t *System) buildOpenCmd() {
 		)
 	}
 
-	if t.BaseTransportArgs.AuthUsername != "" {
+	if baseArgs.AuthUsername != "" {
 		t.OpenCmd = append(
 			t.OpenCmd,
 			"-l",
-			t.BaseTransportArgs.AuthUsername,
+			baseArgs.AuthUsername,
 		)
 	}
 
@@ -98,11 +96,9 @@ func (t *System) buildOpenCmd() {
 	}
 }
 
-// Open opens a standard connection -- typically `ssh`, but users can set the `ExecCommand` to spawn
-// different types of programs such as `docker exec` or `kubectl exec`.
-func (t *System) Open() error {
+func (t *System) Open(baseArgs *BaseTransportArgs) error {
 	if t.OpenCmd == nil {
-		t.buildOpenCmd()
+		t.buildOpenCmd(baseArgs)
 	}
 
 	if t.ExecCmd == "" {
@@ -110,7 +106,7 @@ func (t *System) Open() error {
 	}
 
 	logging.LogDebug(
-		FormatLogMessage(t.BaseTransportArgs,
+		FormatLogMessage(baseArgs,
 			"debug",
 			fmt.Sprintf(
 				"\"attempting to open transport connection with the following command: %s",
@@ -123,35 +119,20 @@ func (t *System) Open() error {
 	fileObj, err := pty.StartWithSize(
 		command,
 		&pty.Winsize{
-			Rows: uint16(t.BaseTransportArgs.PtyHeight),
-			Cols: uint16(t.BaseTransportArgs.PtyWidth),
+			Rows: uint16(baseArgs.PtyHeight),
+			Cols: uint16(baseArgs.PtyWidth),
 		},
 	)
 
-	if err != nil {
-		logging.LogError(
-			FormatLogMessage(
-				t.BaseTransportArgs,
-				"error",
-				"failed opening transport connection to host",
-			),
-		)
-
-		return err
+	if err == nil {
+		t.fileObj = fileObj
 	}
-
-	logging.LogDebug(
-		FormatLogMessage(t.BaseTransportArgs, "debug", "transport connection to host opened"),
-	)
-
-	t.fileObj = fileObj
 
 	return err
 }
 
-// OpenNetconf opens a netconf connection.
-func (t *System) OpenNetconf() error {
-	t.buildOpenCmd()
+func (t *System) OpenNetconf(baseArgs *BaseTransportArgs) error {
+	t.buildOpenCmd(baseArgs)
 
 	t.OpenCmd = append(t.OpenCmd,
 		"-tt",
@@ -160,7 +141,7 @@ func (t *System) OpenNetconf() error {
 	)
 
 	logging.LogDebug(
-		FormatLogMessage(t.BaseTransportArgs,
+		FormatLogMessage(baseArgs,
 			"debug",
 			fmt.Sprintf(
 				"\"attempting to open netconf transport connection with the following command: %s",
@@ -172,108 +153,43 @@ func (t *System) OpenNetconf() error {
 	command := exec.Command("ssh", t.OpenCmd...) //nolint:gosec
 	fileObj, err := pty.Start(command)
 
-	if err != nil {
-		logging.LogError(
-			FormatLogMessage(
-				t.BaseTransportArgs,
-				"error",
-				"failed opening netconf transport connection to host",
-			),
-		)
-
-		return err
+	if err == nil {
+		t.fileObj = fileObj
 	}
-
-	logging.LogDebug(
-		FormatLogMessage(
-			t.BaseTransportArgs,
-			"debug",
-			"netconf transport connection to host opened",
-		),
-	)
-
-	t.fileObj = fileObj
 
 	return err
 }
 
-// Close closes the transport connection to the device.
 func (t *System) Close() error {
 	err := t.fileObj.Close()
 	t.fileObj = nil
-	logging.LogDebug(
-		FormatLogMessage(t.BaseTransportArgs, "debug", "transport connection to host closed"),
-	)
 
 	return err
 }
 
-func (t *System) read(n int) *transportResult {
+func (t *System) IsAlive() bool {
+	return t.fileObj != nil
+}
+
+func (t *System) Read(n int) *ReadResult {
 	b := make([]byte, n)
 	_, err := t.fileObj.Read(b)
 
 	if err != nil {
-		return &transportResult{
-			result: nil,
-			error:  ErrTransportFailure,
+		return &ReadResult{
+			Result: nil,
+			Error:  ErrTransportFailure,
 		}
 	}
 
-	return &transportResult{
-		result: b,
-		error:  nil,
+	return &ReadResult{
+		Result: b,
+		Error:  nil,
 	}
 }
 
-// Read reads bytes from the transport.
-func (t *System) Read() ([]byte, error) {
-	b, err := transportTimeout(
-		*t.BaseTransportArgs.TimeoutTransport,
-		t.read,
-		ReadSize,
-	)
-
-	if err != nil {
-		logging.LogError(
-			FormatLogMessage(t.BaseTransportArgs, "error", "timed out reading from transport"),
-		)
-
-		return b, err
-	}
-
-	return b, nil
-}
-
-// ReadN reads N bytes from the transport.
-func (t *System) ReadN(n int) ([]byte, error) {
-	b, err := transportTimeout(
-		*t.BaseTransportArgs.TimeoutTransport,
-		t.read,
-		n,
-	)
-
-	if err != nil {
-		logging.LogError(
-			FormatLogMessage(t.BaseTransportArgs, "error", "timed out reading from transport"),
-		)
-
-		return b, err
-	}
-
-	return b, nil
-}
-
-// Write writes bytes to the transport.
 func (t *System) Write(channelInput []byte) error {
 	_, err := t.fileObj.Write(channelInput)
-	if err != nil {
-		return err
-	}
 
-	return nil
-}
-
-// IsAlive indicates if the transport is alive or not.
-func (t *System) IsAlive() bool {
-	return t.fileObj != nil
+	return err
 }

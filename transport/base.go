@@ -7,7 +7,6 @@ import (
 	"github.com/scrapli/scrapligo/logging"
 )
 
-// constants for basic transport values.
 const (
 	ReadSize              = 65_535
 	SystemTransportName   = "system"
@@ -34,38 +33,143 @@ var ErrUnsupportedOperation = errors.New("unsupported operation for this transpo
 
 // BaseTransportArgs struct for attributes that are required for any transport type.
 type BaseTransportArgs struct {
-	Host         string
-	Port         int
-	AuthUsername string
-	// passed as pointers so they can be modified at the driver layer
+	Host             string
+	Port             int
+	AuthUsername     string
 	TimeoutSocket    *time.Duration
 	TimeoutTransport *time.Duration
 	PtyHeight        int
 	PtyWidth         int
 }
 
-type transportResult struct {
-	result []byte
-	error  error
+type ReadResult struct {
+	Result []byte
+	Error  error
 }
 
-// BaseTransport interface defining required methods for any transport type.
-type BaseTransport interface {
-	Open() error
-	OpenNetconf() error
+// Implementation defines an interface that any transport plugins must implement.
+type Implementation interface {
+	Open(baseArgs *BaseTransportArgs) error
+	OpenNetconf(baseArgs *BaseTransportArgs) error
 	Close() error
 	IsAlive() bool
-	Read() ([]byte, error)
-	ReadN(int) ([]byte, error)
+	Read(n int) *ReadResult
 	Write([]byte) error
+}
+
+// Transport interface defining required methods for any transport type.
+type Transport struct {
+	Impl              Implementation
+	BaseTransportArgs *BaseTransportArgs
+}
+
+// Open opens the transport in "normal" mode (usually telnet/ssh).
+func (t *Transport) Open() error {
+	err := t.Impl.Open(t.BaseTransportArgs)
+
+	if err != nil {
+		logging.LogError(
+			FormatLogMessage(
+				t.BaseTransportArgs,
+				"error",
+				"failed opening transport connection to host",
+			),
+		)
+	} else {
+		logging.LogDebug(
+			FormatLogMessage(t.BaseTransportArgs, "debug", "transport connection to host opened"),
+		)
+	}
+
+	return err
+}
+
+// OpenNetconf opens a netconf connection.
+func (t *Transport) OpenNetconf() error {
+	err := t.Impl.OpenNetconf(t.BaseTransportArgs)
+
+	if err != nil {
+		logging.LogError(
+			FormatLogMessage(
+				t.BaseTransportArgs,
+				"error",
+				"failed opening netconf transport connection to host",
+			),
+		)
+	} else {
+		logging.LogDebug(
+			FormatLogMessage(t.BaseTransportArgs, "debug", "netconf transport connection to host opened"),
+		)
+	}
+
+	return err
+}
+
+// Close closes the transport connection.
+func (t *Transport) Close() error {
+	err := t.Impl.Close()
+
+	logging.LogDebug(
+		FormatLogMessage(t.BaseTransportArgs, "debug", "transport connection to host closed"),
+	)
+
+	return err
+}
+
+// IsAlive indicates if the transport is alive or not.
+func (t *Transport) IsAlive() bool {
+	return t.Impl.IsAlive()
+}
+
+// Read reads bytes from the transport.
+func (t *Transport) Read() ([]byte, error) {
+	b, err := transportTimeout(
+		*t.BaseTransportArgs.TimeoutTransport,
+		t.Impl.Read,
+		ReadSize,
+	)
+
+	if err != nil {
+		logging.LogError(
+			FormatLogMessage(t.BaseTransportArgs, "error", "timed out reading from transport"),
+		)
+
+		return b, err
+	}
+
+	return b, nil
+}
+
+// ReadN reads N bytes from the transport.
+func (t *Transport) ReadN(n int) ([]byte, error) {
+	b, err := transportTimeout(
+		*t.BaseTransportArgs.TimeoutTransport,
+		t.Impl.Read,
+		n,
+	)
+
+	if err != nil {
+		logging.LogError(
+			FormatLogMessage(t.BaseTransportArgs, "error", "timed out reading from transport"),
+		)
+
+		return b, err
+	}
+
+	return b, nil
+}
+
+// Write writes bytes to the transport.
+func (t *Transport) Write(channelInput []byte) error {
+	return t.Impl.Write(channelInput)
 }
 
 func transportTimeout(
 	timeout time.Duration,
-	f func(int) *transportResult,
+	f func(int) *ReadResult,
 	n int,
 ) ([]byte, error) {
-	c := make(chan *transportResult)
+	c := make(chan *ReadResult)
 
 	go func() {
 		r := f(n)
@@ -81,7 +185,7 @@ func transportTimeout(
 
 	select {
 	case r := <-c:
-		return r.result, r.error
+		return r.Result, r.Error
 	case <-timer.C:
 		return []byte{}, ErrTransportTimeout
 	}

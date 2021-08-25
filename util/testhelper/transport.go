@@ -9,7 +9,6 @@ import (
 
 // TestingTransport patched transport for testing.
 type TestingTransport struct {
-	*transport.System
 	BaseTransportArgs *transport.BaseTransportArgs
 	FakeSession       *os.File
 	CapturedWrites    [][]byte
@@ -17,12 +16,14 @@ type TestingTransport struct {
 }
 
 // Open do nothing!
-func (t *TestingTransport) Open() error {
+func (t *TestingTransport) Open(baseArgs *transport.BaseTransportArgs) error {
+	_ = baseArgs
 	return nil
 }
 
 // OpenNetconf do nothing!
-func (t *TestingTransport) OpenNetconf() error {
+func (t *TestingTransport) OpenNetconf(baseArgs *transport.BaseTransportArgs) error {
+	_ = baseArgs
 	return nil
 }
 
@@ -31,11 +32,8 @@ func (t *TestingTransport) Close() error {
 	return nil
 }
 
-// Read read from the fake session.
-func (t *TestingTransport) Read() ([]byte, error) {
-	// need to read one byte at a time so we dont auto read past prompts and commands and such
-	// its sorta strange that 65535 works for scrapli IRL but i guess its just consuming a byte at
-	// a time out of a stream rather than just reading an already present file?
+func (t *TestingTransport) Read(n int) *transport.ReadResult {
+	_ = n
 	readSize := 1
 
 	if t.ReadSize != nil {
@@ -45,16 +43,9 @@ func (t *TestingTransport) Read() ([]byte, error) {
 	b := make([]byte, readSize)
 	_, err := t.FakeSession.Read(b)
 
-	return b, err
+	return &transport.ReadResult{Result: b, Error: err}
 }
 
-// ReadN read from the fake session.
-func (t *TestingTransport) ReadN(n int) ([]byte, error) {
-	// not needed for testing at this time
-	return []byte{}, nil
-}
-
-// Write do nothing!
 func (t *TestingTransport) Write(channelInput []byte) error {
 	t.CapturedWrites = append(t.CapturedWrites, channelInput)
 	return nil
@@ -73,9 +64,15 @@ func WithPatchedTransport(sessionFile string) base.Option {
 			return err
 		}
 
-		d.Transport = &TestingTransport{
-			System:      &transport.System{},
-			FakeSession: f,
+		d.Transport = &transport.Transport{
+			Impl: &TestingTransport{
+				FakeSession: f,
+			},
+			BaseTransportArgs: &transport.BaseTransportArgs{
+				Host:             "localhost",
+				Port:             22,
+				TimeoutTransport: &d.TimeoutTransport,
+			},
 		}
 
 		return nil

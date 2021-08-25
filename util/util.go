@@ -36,6 +36,16 @@ func StrContainsAnySubStr(s string, l []string) string {
 	return ""
 }
 
+func ByteInSlice(b byte, s []byte) bool {
+	for _, i := range s {
+		if b == i {
+			return true
+		}
+	}
+
+	return false
+}
+
 // StripAnsi strips ansi characters from a byte slice.
 func StripAnsi(b []byte) []byte {
 	ap := getAnsiPattern()

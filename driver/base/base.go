@@ -49,7 +49,7 @@ type Driver struct {
 	CommsReturnChar    string
 
 	TransportType      string
-	Transport          transport.BaseTransport
+	Transport          *transport.Transport
 	transportPtyWidth  int
 	transportPtyHeight int
 

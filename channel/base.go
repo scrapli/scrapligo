@@ -41,7 +41,7 @@ const (
 
 // Channel struct representing the channel object.
 type Channel struct {
-	Transport              transport.BaseTransport
+	Transport              *transport.Transport
 	CommsPromptPattern     *regexp.Regexp
 	CommsReturnChar        *string
 	CommsPromptSearchDepth int

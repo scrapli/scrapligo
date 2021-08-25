@@ -58,9 +58,12 @@ func NewDriver(
 				SSHConfigFile:     d.SSHConfigFile,
 				SSHKnownHostsFile: d.SSHKnownHostsFile,
 			}
-			t := &transport.System{
-				BaseTransportArgs:   baseTransportArgs,
+			tImpl := &transport.System{
 				SystemTransportArgs: systemTransportArgs,
+			}
+			t := &transport.Transport{
+				Impl:              tImpl,
+				BaseTransportArgs: baseTransportArgs,
 			}
 			d.Transport = t
 		case transport.StandardTransportName:
@@ -71,16 +74,22 @@ func NewDriver(
 				SSHConfigFile:     d.SSHConfigFile,
 				SSHKnownHostsFile: d.SSHKnownHostsFile,
 			}
-			t := &transport.Standard{
-				BaseTransportArgs:     baseTransportArgs,
+			tImpl := &transport.Standard{
 				StandardTransportArgs: standardTransportArgs,
+			}
+			t := &transport.Transport{
+				Impl:              tImpl,
+				BaseTransportArgs: baseTransportArgs,
 			}
 			d.Transport = t
 		case transport.TelnetTransportName:
 			telnetTransportArgs := &transport.TelnetTransportArgs{}
-			t := &transport.Telnet{
-				BaseTransportArgs:   baseTransportArgs,
+			tImpl := &transport.Telnet{
 				TelnetTransportArgs: telnetTransportArgs,
+			}
+			t := &transport.Transport{
+				Impl:              tImpl,
+				BaseTransportArgs: baseTransportArgs,
 			}
 			d.Transport = t
 		default:
