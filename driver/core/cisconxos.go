@@ -3,6 +3,8 @@ package core
 import (
 	"strings"
 
+	"github.com/scrapli/scrapligo/response"
+
 	"github.com/scrapli/scrapligo/driver/base"
 
 	"github.com/scrapli/scrapligo/driver/network"
@@ -123,7 +125,7 @@ func NXOSOnClose(d *network.Driver) error {
 }
 
 // NXOSAbortConfig abort NXOS configuration session.
-func NXOSAbortConfig(d *network.Driver) (*base.Response, error) {
+func NXOSAbortConfig(d *network.Driver) (*response.Response, error) {
 	if strings.Contains(d.CurrentPriv, "config\\-s") {
 		_, err := d.Channel.SendInput("abort", false, false, -1)
 		d.CurrentPriv = privExecPrivLevel

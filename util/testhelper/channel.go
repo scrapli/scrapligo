@@ -27,27 +27,21 @@ func NewPatchedChannel(t *testing.T, sessionFile *string) *channel.Channel {
 		transportImpl.FakeSession = f
 	}
 
-	timeoutTransport := 1 * time.Second
-
 	tr := &transport.Transport{
 		Impl: transportImpl,
 		BaseTransportArgs: &transport.BaseTransportArgs{
 			Host:             "localhost",
 			Port:             22,
-			TimeoutTransport: &timeoutTransport,
+			TimeoutTransport: 1 * time.Second,
 		},
 	}
 
-	returnChar := "\n"
-	commsPromptPattern := regexp.MustCompile(`(?im)^localhost#\s?$`)
-	timeoutOps := 30 * time.Second
-
 	c := &channel.Channel{
 		Transport:              tr,
-		CommsPromptPattern:     commsPromptPattern,
-		CommsReturnChar:        &returnChar,
+		CommsPromptPattern:     regexp.MustCompile(`(?im)^localhost#\s?$`),
+		CommsReturnChar:        "\n",
 		CommsPromptSearchDepth: 255,
-		TimeoutOps:             &timeoutOps,
+		TimeoutOps:             30 * time.Second,
 		Host:                   "localhost",
 		Port:                   22,
 	}

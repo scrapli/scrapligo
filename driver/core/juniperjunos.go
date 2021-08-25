@@ -3,6 +3,7 @@ package core
 import (
 	"github.com/scrapli/scrapligo/driver/base"
 	"github.com/scrapli/scrapligo/driver/network"
+	"github.com/scrapli/scrapligo/response"
 )
 
 // NewJUNOSDriver return a driver setup for operation with Junos devices.
@@ -140,7 +141,7 @@ func JUNOSOnClose(d *network.Driver) error {
 }
 
 // JUNOSAbortConfig abort Junos configuration session.
-func JUNOSAbortConfig(d *network.Driver) (*base.Response, error) {
+func JUNOSAbortConfig(d *network.Driver) (*response.Response, error) {
 	_, _ = d.Channel.SendInput("rollback 0", false, false, -1)
 	_, err := d.Channel.SendInput("exit", false, false, -1)
 	d.CurrentPriv = privExecPrivLevel

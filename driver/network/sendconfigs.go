@@ -3,13 +3,16 @@ package network
 import (
 	"errors"
 
+	"github.com/scrapli/scrapligo/response"
+	"github.com/scrapli/scrapligo/util"
+
 	"github.com/scrapli/scrapligo/driver/base"
 
 	"github.com/scrapli/scrapligo/channel"
 )
 
 // SendConfigs send configurations to the device.
-func (d *Driver) SendConfigs(c []string, o ...base.SendOption) (*base.MultiResponse, error) {
+func (d *Driver) SendConfigs(c []string, o ...base.SendOption) (*response.MultiResponse, error) {
 	finalOpts := d.ParseSendOptions(o)
 
 	if finalOpts.DesiredPrivilegeLevel == "" {
@@ -50,8 +53,8 @@ func (d *Driver) SendConfigs(c []string, o ...base.SendOption) (*base.MultiRespo
 func (d *Driver) SendConfigsFromFile(
 	f string,
 	o ...base.SendOption,
-) (*base.MultiResponse, error) {
-	c, err := base.LoadFileLines(f)
+) (*response.MultiResponse, error) {
+	c, err := util.LoadFileLines(f)
 	if err != nil {
 		return nil, err
 	}

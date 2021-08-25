@@ -4,6 +4,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/scrapli/scrapligo/response"
+
 	"github.com/scrapli/scrapligo/channel"
 )
 
@@ -14,8 +16,8 @@ func (d *Driver) FullSendInteractive(
 	failedWhenContains []string,
 	timeoutOps time.Duration,
 	joinedEventInputs string,
-) (*Response, error) {
-	r := NewResponse(d.Host, d.Port, joinedEventInputs, failedWhenContains)
+) (*response.Response, error) {
+	r := response.NewResponse(d.Host, d.Port, joinedEventInputs, failedWhenContains)
 
 	rawResult, err := d.Channel.SendInteractive(events, interactionCompletePatterns, timeoutOps)
 
@@ -29,7 +31,7 @@ func (d *Driver) FullSendInteractive(
 func (d *Driver) SendInteractive(
 	events []*channel.SendInteractiveEvent,
 	o ...SendOption,
-) (*Response, error) {
+) (*response.Response, error) {
 	finalOpts := d.ParseSendOptions(o)
 	joinedEventInputs := JoinEventInputs(events)
 

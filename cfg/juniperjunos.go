@@ -6,6 +6,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/scrapli/scrapligo/response"
+
 	"github.com/scrapli/scrapligo/logging"
 
 	"github.com/scrapli/scrapligo/driver/base"
@@ -77,8 +79,8 @@ func (p *JUNOSCfg) ClearConfigSession() {
 }
 
 // GetVersion get the version from the device.
-func (p *JUNOSCfg) GetVersion() (string, []*base.Response, error) {
-	var versionResult *base.Response
+func (p *JUNOSCfg) GetVersion() (string, []*response.Response, error) {
+	var versionResult *response.Response
 
 	var err error
 
@@ -92,12 +94,16 @@ func (p *JUNOSCfg) GetVersion() (string, []*base.Response, error) {
 		return "", nil, err
 	}
 
-	return p.VersionPattern.FindString(versionResult.Result), []*base.Response{versionResult}, nil
+	return p.VersionPattern.FindString(
+			versionResult.Result,
+		), []*response.Response{
+			versionResult,
+		}, nil
 }
 
 // GetConfig get the configuration of a source datastore from the device.
-func (p *JUNOSCfg) GetConfig(source string) (string, []*base.Response, error) {
-	var configResult *base.Response
+func (p *JUNOSCfg) GetConfig(source string) (string, []*response.Response, error) {
+	var configResult *response.Response
 
 	var err error
 
@@ -111,7 +117,7 @@ func (p *JUNOSCfg) GetConfig(source string) (string, []*base.Response, error) {
 		return "", nil, err
 	}
 
-	return configResult.Result, []*base.Response{configResult}, nil
+	return configResult.Result, []*response.Response{configResult}, nil
 }
 
 func (p *JUNOSCfg) prepareConfigPayload(config string) string {
@@ -135,8 +141,8 @@ func (p *JUNOSCfg) LoadConfig(
 	config string,
 	replace bool,
 	options *OperationOptions,
-) ([]*base.Response, error) {
-	var scrapliResponses []*base.Response
+) ([]*response.Response, error) {
+	var scrapliResponses []*response.Response
 
 	// the actual value is irrelevant, if there is a key "set" w/ any value we assume user is
 	// loading a "set" style config
@@ -189,15 +195,15 @@ func (p *JUNOSCfg) LoadConfig(
 	return scrapliResponses, nil
 }
 
-func (p *JUNOSCfg) deleteCandidateConfigFile() (*base.Response, error) {
+func (p *JUNOSCfg) deleteCandidateConfigFile() (*response.Response, error) {
 	deleteCommand := fmt.Sprintf("rm %s%s", p.Filesystem, p.candidateConfigFilename)
 
 	return p.conn.SendConfig(deleteCommand, base.WithDesiredPrivilegeLevel("root_shell"))
 }
 
 // AbortConfig abort the loaded candidate configuration.
-func (p *JUNOSCfg) AbortConfig() ([]*base.Response, error) {
-	var scrapliResponses []*base.Response
+func (p *JUNOSCfg) AbortConfig() ([]*response.Response, error) {
+	var scrapliResponses []*response.Response
 
 	rollbackResponse, err := p.conn.SendConfig("rollback 0")
 	if err != nil {
@@ -217,8 +223,8 @@ func (p *JUNOSCfg) AbortConfig() ([]*base.Response, error) {
 }
 
 // CommitConfig commit the loaded candidate configuration.
-func (p *JUNOSCfg) CommitConfig(source string) ([]*base.Response, error) {
-	var scrapliResponses []*base.Response
+func (p *JUNOSCfg) CommitConfig(source string) ([]*response.Response, error) {
+	var scrapliResponses []*response.Response
 
 	commitResult, err := p.conn.SendConfig("commit")
 
@@ -260,11 +266,11 @@ func (p *JUNOSCfg) normalizeSourceAndCandidateConfigs(
 // DiffConfig diff the candidate configuration against a source config.
 func (p *JUNOSCfg) DiffConfig(
 	source, candidateConfig string,
-) (responses []*base.Response,
+) (responses []*response.Response,
 	normalizedSourceConfig,
 	normalizedCandidateConfig,
 	deviceDiff string, err error) {
-	var scrapliResponses []*base.Response
+	var scrapliResponses []*response.Response
 
 	diffResult, diffErr := p.conn.SendConfig("show | compare")
 	if diffErr != nil {

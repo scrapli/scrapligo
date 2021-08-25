@@ -122,7 +122,7 @@ func (c *Channel) AuthenticateSSH(authPassword, authPassphrase string) ([]byte, 
 		close(_c)
 	}()
 
-	timer := time.NewTimer(c.DetermineOperationTimeout(*c.TimeoutOps))
+	timer := time.NewTimer(c.DetermineOperationTimeout(c.TimeoutOps))
 
 	select {
 	case r := <-_c:
@@ -228,7 +228,7 @@ func (c *Channel) AuthenticateTelnet(authUsername, authPassword string) ([]byte,
 		close(_c)
 	}()
 
-	timer := time.NewTimer(c.DetermineOperationTimeout(*c.TimeoutOps))
+	timer := time.NewTimer(c.DetermineOperationTimeout(c.TimeoutOps))
 
 	select {
 	case r := <-_c:

@@ -5,10 +5,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/scrapli/scrapligo/response"
+
 	"golang.org/x/term"
 
 	"github.com/carlmontanari/difflibgo/difflibgo"
-	"github.com/scrapli/scrapligo/driver/base"
 )
 
 const (
@@ -25,7 +26,7 @@ type Response struct {
 	StartTime        time.Time
 	EndTime          time.Time
 	ElapsedTime      float64
-	ScrapliResponses []*base.Response
+	ScrapliResponses []*response.Response
 	ErrorType        error
 	Failed           error
 }
@@ -49,7 +50,7 @@ func NewResponse(
 	return r
 }
 
-func (r *Response) Record(scrapliResponses []*base.Response, result string) {
+func (r *Response) Record(scrapliResponses []*response.Response, result string) {
 	r.EndTime = time.Now()
 	r.ElapsedTime = r.EndTime.Sub(r.StartTime).Seconds()
 

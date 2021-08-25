@@ -5,6 +5,8 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/scrapli/scrapligo/response"
+
 	"github.com/scrapli/scrapligo/logging"
 
 	"github.com/scrapli/scrapligo/channel"
@@ -100,8 +102,8 @@ func (p *IOSXRCfg) ClearConfigSession() {
 }
 
 // GetVersion get the version from the device.
-func (p *IOSXRCfg) GetVersion() (string, []*base.Response, error) {
-	var versionResult *base.Response
+func (p *IOSXRCfg) GetVersion() (string, []*response.Response, error) {
+	var versionResult *response.Response
 
 	var err error
 
@@ -115,17 +117,21 @@ func (p *IOSXRCfg) GetVersion() (string, []*base.Response, error) {
 		return "", nil, err
 	}
 
-	return p.VersionPattern.FindString(versionResult.Result), []*base.Response{versionResult}, nil
+	return p.VersionPattern.FindString(
+			versionResult.Result,
+		), []*response.Response{
+			versionResult,
+		}, nil
 }
 
 // GetConfig get the configuration of a source datastore from the device.
-func (p *IOSXRCfg) GetConfig(source string) (string, []*base.Response, error) {
+func (p *IOSXRCfg) GetConfig(source string) (string, []*response.Response, error) {
 	cmd, err := getConfigCommand(p.configCommandMap, source)
 	if err != nil {
 		return "", nil, err
 	}
 
-	var configResult *base.Response
+	var configResult *response.Response
 
 	if !p.configInProgress {
 		configResult, err = p.conn.SendCommand(cmd)
@@ -137,7 +143,7 @@ func (p *IOSXRCfg) GetConfig(source string) (string, []*base.Response, error) {
 		return "", nil, err
 	}
 
-	return configResult.Result, []*base.Response{configResult}, nil
+	return configResult.Result, []*response.Response{configResult}, nil
 }
 
 func (p *IOSXRCfg) prepareConfigPayloads(config string) (stdConfig, eagerConfig string) {
@@ -180,7 +186,7 @@ func (p *IOSXRCfg) LoadConfig(
 	config string,
 	replace bool,
 	options *OperationOptions,
-) ([]*base.Response, error) {
+) ([]*response.Response, error) {
 	p.replaceConfig = replace
 	p.configInProgress = true
 
@@ -191,7 +197,7 @@ func (p *IOSXRCfg) LoadConfig(
 		p.configPrivLevel = configExclusivePrivLevel
 	}
 
-	var scrapliResponses []*base.Response
+	var scrapliResponses []*response.Response
 
 	stdConfig, eagerConfig := p.prepareConfigPayloads(config)
 
@@ -224,10 +230,10 @@ func (p *IOSXRCfg) LoadConfig(
 }
 
 // AbortConfig abort the loaded candidate configuration.
-func (p *IOSXRCfg) AbortConfig() ([]*base.Response, error) {
-	var scrapliResponses []*base.Response
+func (p *IOSXRCfg) AbortConfig() ([]*response.Response, error) {
+	var scrapliResponses []*response.Response
 
-	_, err := p.conn.Channel.SendInput("abort", false, false, p.conn.TimeoutOps)
+	_, err := p.conn.Channel.SendInput("abort", false, false, p.conn.Channel.TimeoutOps)
 	if err != nil {
 		return scrapliResponses, err
 	}
@@ -239,10 +245,10 @@ func (p *IOSXRCfg) AbortConfig() ([]*base.Response, error) {
 }
 
 // CommitConfig commit the loaded candidate configuration.
-func (p *IOSXRCfg) CommitConfig(source string) ([]*base.Response, error) {
-	var scrapliResponses []*base.Response
+func (p *IOSXRCfg) CommitConfig(source string) ([]*response.Response, error) {
+	var scrapliResponses []*response.Response
 
-	var commitResult *base.Response
+	var commitResult *response.Response
 
 	var err error
 
@@ -298,7 +304,7 @@ func (p *IOSXRCfg) normalizeSourceAndCandidateConfigs(
 // DiffConfig diff the candidate configuration against a source config.
 func (p *IOSXRCfg) DiffConfig(
 	source, candidateConfig string,
-) (responses []*base.Response,
+) (responses []*response.Response,
 	normalizedSourceConfig,
 	normalizedCandidateConfig,
 	deviceDiff string, err error) {
@@ -312,7 +318,7 @@ func (p *IOSXRCfg) DiffConfig(
 		)
 	}
 
-	var scrapliResponses []*base.Response
+	var scrapliResponses []*response.Response
 
 	diffResult, err := p.conn.SendConfig(
 		p.getDiffCommand(), base.WithDesiredPrivilegeLevel(p.configPrivLevel),

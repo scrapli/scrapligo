@@ -4,15 +4,17 @@ import (
 	"strings"
 	"time"
 
+	"github.com/scrapli/scrapligo/response"
+
 	"github.com/scrapli/scrapligo/driver/base"
 )
 
 // SendConfig send configuration string to the device.
-func (d *Driver) SendConfig(c string, o ...base.SendOption) (*base.Response, error) {
+func (d *Driver) SendConfig(c string, o ...base.SendOption) (*response.Response, error) {
 	sc := strings.Split(c, "\n")
 	m, err := d.SendConfigs(sc, o...)
 
-	r := base.NewResponse(d.Host, d.Port, c, m.Responses[0].FailedWhenContains)
+	r := response.NewResponse(d.Host, d.Port, c, m.Responses[0].FailedWhenContains)
 
 	if err != nil {
 		return r, err

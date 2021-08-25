@@ -6,6 +6,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/scrapli/scrapligo/response"
+
 	"github.com/scrapli/scrapligo/logging"
 
 	"github.com/scrapli/scrapligo/driver/base"
@@ -73,17 +75,21 @@ func (p *EOSCfg) ClearConfigSession() {
 }
 
 // GetVersion get the version from the device.
-func (p *EOSCfg) GetVersion() (string, []*base.Response, error) {
+func (p *EOSCfg) GetVersion() (string, []*response.Response, error) {
 	versionResult, err := p.conn.SendCommand("show version | i Software image version")
 	if err != nil {
 		return "", nil, err
 	}
 
-	return p.VersionPattern.FindString(versionResult.Result), []*base.Response{versionResult}, nil
+	return p.VersionPattern.FindString(
+			versionResult.Result,
+		), []*response.Response{
+			versionResult,
+		}, nil
 }
 
 // GetConfig get the configuration of a source datastore from the device.
-func (p *EOSCfg) GetConfig(source string) (string, []*base.Response, error) {
+func (p *EOSCfg) GetConfig(source string) (string, []*response.Response, error) {
 	cmd, err := getConfigCommand(p.configCommandMap, source)
 	if err != nil {
 		return "", nil, err
@@ -95,7 +101,7 @@ func (p *EOSCfg) GetConfig(source string) (string, []*base.Response, error) {
 		return "", nil, err
 	}
 
-	return configResult.Result, []*base.Response{configResult}, nil
+	return configResult.Result, []*response.Response{configResult}, nil
 }
 
 func (p *EOSCfg) prepareConfigPayloads(config string) (stdConfig, eagerConfig string) {
@@ -153,8 +159,8 @@ func (p *EOSCfg) RegisterConfigSession(sessionName string) error {
 func (p *EOSCfg) loadConfig(
 	stdConfig, eagerConfig string,
 	replace bool,
-) ([]*base.Response, error) {
-	var scrapliResponses []*base.Response
+) ([]*response.Response, error) {
+	var scrapliResponses []*response.Response
 
 	if replace {
 		rollbackCleanConfigResult, rollbackErr := p.conn.SendConfig("rollback clean-config",
@@ -200,7 +206,7 @@ func (p *EOSCfg) LoadConfig(
 	config string,
 	replace bool,
 	options *OperationOptions,
-) ([]*base.Response, error) {
+) ([]*response.Response, error) {
 	// options are unused for eos load config
 	_ = options
 
@@ -227,15 +233,15 @@ func (p *EOSCfg) LoadConfig(
 }
 
 // AbortConfig abort the loaded candidate configuration.
-func (p *EOSCfg) AbortConfig() ([]*base.Response, error) {
-	var scrapliResponses []*base.Response
+func (p *EOSCfg) AbortConfig() ([]*response.Response, error) {
+	var scrapliResponses []*response.Response
 
 	err := p.conn.AcquirePriv(p.configSessionName)
 	if err != nil {
 		return scrapliResponses, err
 	}
 
-	_, err = p.conn.Channel.SendInput("abort", false, false, p.conn.TimeoutOps)
+	_, err = p.conn.Channel.SendInput("abort", false, false, p.conn.Channel.TimeoutOps)
 	if err != nil {
 		return scrapliResponses, err
 	}
@@ -246,7 +252,7 @@ func (p *EOSCfg) AbortConfig() ([]*base.Response, error) {
 }
 
 // CommitConfig commit the loaded candidate configuration.
-func (p *EOSCfg) CommitConfig(source string) ([]*base.Response, error) {
+func (p *EOSCfg) CommitConfig(source string) ([]*response.Response, error) {
 	if source != runningConfig {
 		logging.LogDebug(
 			FormatLogMessage(
@@ -258,7 +264,7 @@ func (p *EOSCfg) CommitConfig(source string) ([]*base.Response, error) {
 		)
 	}
 
-	var scrapliResponses []*base.Response
+	var scrapliResponses []*response.Response
 
 	commands := []string{
 		fmt.Sprintf("configure session %s commit", p.configSessionName),
@@ -299,7 +305,7 @@ func (p *EOSCfg) normalizeSourceAndCandidateConfigs(
 // DiffConfig diff the candidate configuration against a source config.
 func (p *EOSCfg) DiffConfig(
 	source, candidateConfig string,
-) (responses []*base.Response,
+) (responses []*response.Response,
 	normalizedSourceConfig,
 	normalizedCandidateConfig,
 	deviceDiff string, err error) {
@@ -313,7 +319,7 @@ func (p *EOSCfg) DiffConfig(
 		)
 	}
 
-	var scrapliResponses []*base.Response
+	var scrapliResponses []*response.Response
 
 	diffResult, err := p.conn.SendConfig(
 		"show session-config diffs",

@@ -4,7 +4,7 @@ import (
 	"regexp"
 	"strconv"
 
-	"github.com/scrapli/scrapligo/driver/base"
+	"github.com/scrapli/scrapligo/response"
 )
 
 const (
@@ -24,7 +24,7 @@ func getConfigCommand(configCommandMap map[string]string, source string) (string
 
 func parseSpaceAvail(
 	bytesFreePattern *regexp.Regexp,
-	filesystemSizeResult *base.Response,
+	filesystemSizeResult *response.Response,
 ) (int, error) {
 	var err error
 

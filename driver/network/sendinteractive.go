@@ -3,6 +3,7 @@ package network
 import (
 	"github.com/scrapli/scrapligo/channel"
 	"github.com/scrapli/scrapligo/driver/base"
+	"github.com/scrapli/scrapligo/response"
 )
 
 // SendInteractive send interactive commands to a device, accepts a slice of `SendInteractiveEvent`
@@ -10,7 +11,7 @@ import (
 func (d *Driver) SendInteractive(
 	events []*channel.SendInteractiveEvent,
 	o ...base.SendOption,
-) (*base.Response, error) {
+) (*response.Response, error) {
 	finalOpts := d.ParseSendOptions(o)
 	joinedEventInputs := base.JoinEventInputs(events)
 

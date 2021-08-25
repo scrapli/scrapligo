@@ -1,15 +1,16 @@
-package base_test
+package response_test
 
 import (
 	"os"
 	"testing"
 
+	"github.com/scrapli/scrapligo/response"
+
 	"github.com/google/go-cmp/cmp"
-	"github.com/scrapli/scrapligo/driver/base"
 )
 
 func TestTextFsmParse(t *testing.T) {
-	r := base.NewResponse("localhost", 22, "show version", []string{})
+	r := response.NewResponse("localhost", 22, "show version", []string{})
 
 	f, err := os.ReadFile("../../test_data/driver/network/sendcommand/cisco_iosxe_expected")
 	if err != nil {

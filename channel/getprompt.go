@@ -46,7 +46,7 @@ func (c *Channel) GetPrompt() (string, error) {
 		close(_c)
 	}()
 
-	timer := time.NewTimer(c.DetermineOperationTimeout(*c.TimeoutOps))
+	timer := time.NewTimer(c.DetermineOperationTimeout(c.TimeoutOps))
 
 	select {
 	case r := <-_c:

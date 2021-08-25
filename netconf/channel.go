@@ -35,7 +35,7 @@ func (c *Channel) OpenNetconf(authenticationBuf []byte) error {
 			close(_c)
 		}()
 
-		timer := time.NewTimer(*c.BaseChannel.TimeoutOps)
+		timer := time.NewTimer(c.BaseChannel.TimeoutOps)
 
 		select {
 		case r := <-_c:

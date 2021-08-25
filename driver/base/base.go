@@ -2,7 +2,6 @@ package base
 
 import (
 	"fmt"
-	"io"
 	"regexp"
 	"time"
 
@@ -43,18 +42,13 @@ type Driver struct {
 
 	TimeoutSocket    time.Duration
 	TimeoutTransport time.Duration
-	TimeoutOps       time.Duration
-
-	CommsPromptPattern *regexp.Regexp
-	CommsReturnChar    string
 
 	TransportType      string
 	Transport          *transport.Transport
 	transportPtyWidth  int
 	transportPtyHeight int
 
-	Channel    *channel.Channel
-	channelLog io.Writer
+	Channel *channel.Channel
 
 	FailedWhenContains []string
 
@@ -64,7 +58,7 @@ type Driver struct {
 	NetconfEcho *bool
 }
 
-// Open open the connection.
+// Open opens the connection.
 func (d *Driver) Open() error {
 	logging.LogDebug(
 		d.FormatLogMessage(
@@ -98,7 +92,7 @@ func (d *Driver) Open() error {
 	return nil
 }
 
-// Close close the connection.
+// Close closes the connection.
 func (d *Driver) Close() error {
 	logging.LogDebug(
 		d.FormatLogMessage(

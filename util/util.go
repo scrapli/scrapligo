@@ -1,9 +1,18 @@
 package util
 
 import (
+	"bufio"
+	"errors"
+	"fmt"
+	"os"
 	"regexp"
 	"strings"
+
+	"github.com/scrapli/scrapligo/logging"
 )
+
+// ErrFileNotFound error for being unable to find requested file.
+var ErrFileNotFound = errors.New("file not found")
 
 const ansi = "[\u001B\u009B][[\\]()#;?]*(?:(?:(?:[a-zA-Z\\d]*(?:;[a-zA-Z\\d]*)*)?" +
 	"\u0007)|(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PRZcf-ntqry=><~]))"
@@ -50,4 +59,54 @@ func ByteInSlice(b byte, s []byte) bool {
 func StripAnsi(b []byte) []byte {
 	ap := getAnsiPattern()
 	return ap.pattern.ReplaceAll(b, []byte{})
+}
+
+func resolveFilePath(f string) (string, error) {
+	if _, err := os.Stat(f); err == nil {
+		return f, nil
+	}
+
+	// if didnt stat a fully qualified file, strip user dir (if exists) and then check there
+	f = strings.TrimPrefix(f, "~/")
+	homeDir, err := os.UserHomeDir()
+
+	if err != nil {
+		logging.LogError(fmt.Sprintf("couldnt determine users home directory: %v", err))
+
+		return "", err
+	}
+
+	f = fmt.Sprintf("%s/%s", homeDir, f)
+
+	if _, err = os.Stat(f); err == nil {
+		return f, nil
+	}
+
+	return "", ErrFileNotFound
+}
+
+// LoadFileLines convenience function to load a file and return slice of strings of lines in that
+// file.
+func LoadFileLines(f string) ([]string, error) {
+	resolvedFile, err := resolveFilePath(f)
+
+	if err != nil {
+		return []string{}, err
+	}
+
+	file, err := os.Open(resolvedFile)
+	if err != nil {
+		return []string{}, err
+	}
+
+	scanner := bufio.NewScanner(file)
+	scanner.Split(bufio.ScanLines)
+
+	var lines []string
+
+	for scanner.Scan() {
+		lines = append(lines, scanner.Text())
+	}
+
+	return lines, nil
 }

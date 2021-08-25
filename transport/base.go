@@ -36,18 +36,19 @@ type BaseTransportArgs struct {
 	Host             string
 	Port             int
 	AuthUsername     string
-	TimeoutSocket    *time.Duration
-	TimeoutTransport *time.Duration
+	TimeoutSocket    time.Duration
+	TimeoutTransport time.Duration
 	PtyHeight        int
 	PtyWidth         int
 }
 
+// ReadResult is an object used to return from the read goroutine.
 type ReadResult struct {
 	Result []byte
 	Error  error
 }
 
-// Implementation defines an interface that any transport plugins must implement.
+// Implementation defines an interface that a transport plugins must implement.
 type Implementation interface {
 	Open(baseArgs *BaseTransportArgs) error
 	OpenNetconf(baseArgs *BaseTransportArgs) error
@@ -123,8 +124,7 @@ func (t *Transport) IsAlive() bool {
 
 // Read reads bytes from the transport.
 func (t *Transport) Read() ([]byte, error) {
-	b, err := transportTimeout(
-		*t.BaseTransportArgs.TimeoutTransport,
+	b, err := t.transportTimeout(
 		t.Impl.Read,
 		ReadSize,
 	)
@@ -142,8 +142,7 @@ func (t *Transport) Read() ([]byte, error) {
 
 // ReadN reads N bytes from the transport.
 func (t *Transport) ReadN(n int) ([]byte, error) {
-	b, err := transportTimeout(
-		*t.BaseTransportArgs.TimeoutTransport,
+	b, err := t.transportTimeout(
 		t.Impl.Read,
 		n,
 	)
@@ -164,8 +163,7 @@ func (t *Transport) Write(channelInput []byte) error {
 	return t.Impl.Write(channelInput)
 }
 
-func transportTimeout(
-	timeout time.Duration,
+func (t *Transport) transportTimeout(
 	f func(int) *ReadResult,
 	n int,
 ) ([]byte, error) {
@@ -177,7 +175,8 @@ func transportTimeout(
 		close(c)
 	}()
 
-	if timeout <= 0 {
+	timeout := t.BaseTransportArgs.TimeoutTransport
+	if t.BaseTransportArgs.TimeoutTransport <= 0 {
 		timeout = MaxTimeout * time.Second
 	}
 

@@ -9,10 +9,10 @@ import (
 
 // TestingTransport patched transport for testing.
 type TestingTransport struct {
-	BaseTransportArgs *transport.BaseTransportArgs
-	FakeSession       *os.File
-	CapturedWrites    [][]byte
-	ReadSize          *int
+	*transport.System
+	FakeSession    *os.File
+	CapturedWrites [][]byte
+	ReadSize       *int
 }
 
 // Open do nothing!
@@ -58,23 +58,27 @@ func (t *TestingTransport) IsAlive() bool {
 
 // WithPatchedTransport option to use to patch a driver transport.
 func WithPatchedTransport(sessionFile string) base.Option {
-	return func(d *base.Driver) error {
+	return func(o interface{}) error {
 		f, err := os.Open(sessionFile)
 		if err != nil {
 			return err
 		}
 
-		d.Transport = &transport.Transport{
-			Impl: &TestingTransport{
-				FakeSession: f,
-			},
-			BaseTransportArgs: &transport.BaseTransportArgs{
-				Host:             "localhost",
-				Port:             22,
-				TimeoutTransport: &d.TimeoutTransport,
-			},
+		d, ok := o.(*base.Driver)
+
+		if ok {
+			d.Transport = &transport.Transport{
+				Impl: &TestingTransport{
+					FakeSession: f,
+				},
+				BaseTransportArgs: &transport.BaseTransportArgs{
+					Host:             "localhost",
+					Port:             22,
+					TimeoutTransport: d.TimeoutTransport,
+				},
+			}
 		}
 
-		return nil
+		return base.ErrIgnoredOption
 	}
 }

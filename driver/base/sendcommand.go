@@ -2,6 +2,8 @@ package base
 
 import (
 	"time"
+
+	"github.com/scrapli/scrapligo/response"
 )
 
 // FullSendCommand same as `SendCommand` but requiring explicit options.
@@ -10,8 +12,8 @@ func (d *Driver) FullSendCommand(
 	failedWhenContains []string,
 	stripPrompt, eager bool,
 	timeoutOps time.Duration,
-) (*Response, error) {
-	r := NewResponse(d.Host, d.Port, c, failedWhenContains)
+) (*response.Response, error) {
+	r := response.NewResponse(d.Host, d.Port, c, failedWhenContains)
 
 	rawResult, err := d.Channel.SendInput(c, stripPrompt, eager, timeoutOps)
 
@@ -21,7 +23,7 @@ func (d *Driver) FullSendCommand(
 }
 
 // SendCommand send a command to a device, accepts a string command and variadic of `SendOption`s.
-func (d *Driver) SendCommand(c string, o ...SendOption) (*Response, error) {
+func (d *Driver) SendCommand(c string, o ...SendOption) (*response.Response, error) {
 	finalOpts := d.ParseSendOptions(o)
 
 	return d.FullSendCommand(

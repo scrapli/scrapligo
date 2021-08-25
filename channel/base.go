@@ -43,9 +43,9 @@ const (
 type Channel struct {
 	Transport              *transport.Transport
 	CommsPromptPattern     *regexp.Regexp
-	CommsReturnChar        *string
+	CommsReturnChar        string
 	CommsPromptSearchDepth int
-	TimeoutOps             *time.Duration
+	TimeoutOps             time.Duration
 	Host                   string
 	Port                   int
 	ChannelLog             io.Writer
@@ -69,7 +69,7 @@ func (c *Channel) Write(channelInput []byte, redacted bool) error {
 
 // SendReturn convenience function to send the return character.
 func (c *Channel) SendReturn() error {
-	return c.Write([]byte(*c.CommsReturnChar), false)
+	return c.Write([]byte(c.CommsReturnChar), false)
 }
 
 // WriteAndReturn convenience function to write input and send the return character.
@@ -193,7 +193,7 @@ func (c *Channel) RestructureOutput(output []byte, stripPrompt bool) []byte {
 
 // DetermineOperationTimeout determine timeout to use for channel operation.
 func (c *Channel) DetermineOperationTimeout(timeoutOps time.Duration) time.Duration {
-	opTimeout := *c.TimeoutOps
+	opTimeout := c.TimeoutOps
 
 	if timeoutOps > 0 {
 		opTimeout = timeoutOps

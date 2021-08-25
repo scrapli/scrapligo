@@ -3,10 +3,9 @@
 package base
 
 import (
-	"regexp"
+	"errors"
 	"time"
 
-	"github.com/scrapli/scrapligo/channel"
 	"github.com/scrapli/scrapligo/transport"
 )
 
@@ -22,9 +21,6 @@ func NewDriver(
 		AuthStrictKey:      true,
 		TimeoutSocket:      30 * time.Second,
 		TimeoutTransport:   45 * time.Second,
-		TimeoutOps:         60 * time.Second,
-		CommsPromptPattern: regexp.MustCompile(`(?im)^[a-z0-9.\-@()/:]{1,48}[#>$]\s*$`),
-		CommsReturnChar:    "\n",
 		TransportType:      transport.StandardTransportName,
 		transportPtyHeight: 80,
 		transportPtyWidth:  256,
@@ -34,8 +30,14 @@ func NewDriver(
 	}
 
 	for _, option := range options {
-		if err := option(d); err != nil {
-			return nil, err
+		err := option(d)
+
+		if err != nil {
+			if errors.Is(err, ErrIgnoredOption) {
+				continue
+			} else {
+				return nil, err
+			}
 		}
 	}
 
@@ -43,8 +45,8 @@ func NewDriver(
 		Host:             d.Host,
 		Port:             d.Port,
 		AuthUsername:     d.AuthUsername,
-		TimeoutSocket:    &d.TimeoutSocket,
-		TimeoutTransport: &d.TimeoutTransport,
+		TimeoutSocket:    d.TimeoutSocket,
+		TimeoutTransport: d.TimeoutTransport,
 		PtyHeight:        d.transportPtyHeight,
 		PtyWidth:         d.transportPtyWidth,
 	}
@@ -82,14 +84,9 @@ func NewDriver(
 		}
 	}
 
-	c := &channel.Channel{
-		CommsPromptPattern: d.CommsPromptPattern,
-		CommsReturnChar:    &d.CommsReturnChar,
-		TimeoutOps:         &d.TimeoutOps,
-		Transport:          d.Transport,
-		Host:               d.Host,
-		Port:               d.Port,
-		ChannelLog:         d.channelLog,
+	c, err := NewChannel(d.Transport, options...)
+	if err != nil {
+		return nil, err
 	}
 
 	d.Channel = c

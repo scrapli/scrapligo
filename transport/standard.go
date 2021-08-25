@@ -172,7 +172,7 @@ func (t *Standard) openBase(baseArgs *BaseTransportArgs) error {
 	cfg := &ssh.ClientConfig{
 		User:            baseArgs.AuthUsername,
 		Auth:            authMethods,
-		Timeout:         *baseArgs.TimeoutSocket,
+		Timeout:         baseArgs.TimeoutSocket,
 		HostKeyCallback: hostKeyCallback,
 	}
 

@@ -7,6 +7,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/scrapli/scrapligo/response"
+
 	"github.com/scrapli/scrapligo/logging"
 
 	"github.com/scrapli/scrapligo/driver/base"
@@ -103,17 +105,21 @@ func (p *NXOSCfg) ClearConfigSession() {
 }
 
 // GetVersion get the version from the device.
-func (p *NXOSCfg) GetVersion() (string, []*base.Response, error) {
+func (p *NXOSCfg) GetVersion() (string, []*response.Response, error) {
 	versionResult, err := p.conn.SendCommand("show version | i \"NXOS: version\"")
 	if err != nil {
 		return "", nil, err
 	}
 
-	return p.VersionPattern.FindString(versionResult.Result), []*base.Response{versionResult}, nil
+	return p.VersionPattern.FindString(
+			versionResult.Result,
+		), []*response.Response{
+			versionResult,
+		}, nil
 }
 
 // GetConfig get the configuration of a source datastore from the device.
-func (p *NXOSCfg) GetConfig(source string) (string, []*base.Response, error) {
+func (p *NXOSCfg) GetConfig(source string) (string, []*response.Response, error) {
 	cmd, err := getConfigCommand(p.configCommandMap, source)
 	if err != nil {
 		return "", nil, err
@@ -125,7 +131,7 @@ func (p *NXOSCfg) GetConfig(source string) (string, []*base.Response, error) {
 		return "", nil, err
 	}
 
-	return configResult.Result, []*base.Response{configResult}, nil
+	return configResult.Result, []*response.Response{configResult}, nil
 }
 
 func (p *NXOSCfg) getFilesystemSpaceAvail() (int, error) {
@@ -168,10 +174,10 @@ func (p *NXOSCfg) LoadConfig(
 	config string,
 	replace bool,
 	options *OperationOptions,
-) ([]*base.Response, error) {
+) ([]*response.Response, error) {
 	p.replaceConfig = replace
 
-	var scrapliResponses []*base.Response
+	var scrapliResponses []*response.Response
 
 	filesystemBytesAvail, err := p.getFilesystemSpaceAvail()
 	if err != nil {
@@ -225,7 +231,7 @@ func (p *NXOSCfg) LoadConfig(
 	return scrapliResponses, nil
 }
 
-func (p *NXOSCfg) deleteCandidateConfigFile() (*base.MultiResponse, error) {
+func (p *NXOSCfg) deleteCandidateConfigFile() (*response.MultiResponse, error) {
 	deleteCommands := []string{
 		"terminal dont-ask",
 		fmt.Sprintf("delete %s%s", p.Filesystem, p.candidateConfigFilename),
@@ -235,8 +241,8 @@ func (p *NXOSCfg) deleteCandidateConfigFile() (*base.MultiResponse, error) {
 }
 
 // AbortConfig abort the loaded candidate configuration.
-func (p *NXOSCfg) AbortConfig() ([]*base.Response, error) {
-	scrapliResponses := make([]*base.Response, 0)
+func (p *NXOSCfg) AbortConfig() ([]*response.Response, error) {
+	scrapliResponses := make([]*response.Response, 0)
 
 	r, err := p.deleteCandidateConfigFile()
 	if err != nil {
@@ -248,15 +254,15 @@ func (p *NXOSCfg) AbortConfig() ([]*base.Response, error) {
 	return scrapliResponses, err
 }
 
-func (p *NXOSCfg) SaveConfig() (*base.Response, error) {
+func (p *NXOSCfg) SaveConfig() (*response.Response, error) {
 	return p.conn.SendCommand("copy running-config startup-config")
 }
 
 // CommitConfig commit the loaded candidate configuration.
-func (p *NXOSCfg) CommitConfig(source string) ([]*base.Response, error) {
-	var scrapliResponses []*base.Response
+func (p *NXOSCfg) CommitConfig(source string) ([]*response.Response, error) {
+	var scrapliResponses []*response.Response
 
-	var commitResult *base.Response
+	var commitResult *response.Response
 
 	var err error
 
@@ -331,11 +337,11 @@ func (p *NXOSCfg) normalizeSourceAndCandidateConfigs(
 // DiffConfig diff the candidate configuration against a source config.
 func (p *NXOSCfg) DiffConfig(
 	source, candidateConfig string,
-) (responses []*base.Response,
+) (responses []*response.Response,
 	normalizedSourceConfig,
 	normalizedCandidateConfig,
 	deviceDiff string, err error) {
-	var scrapliResponses []*base.Response
+	var scrapliResponses []*response.Response
 
 	deviceDiff = ""
 

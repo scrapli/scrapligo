@@ -5,7 +5,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/scrapli/scrapligo/driver/base"
+	"github.com/scrapli/scrapligo/util"
+
+	"github.com/scrapli/scrapligo/response"
+
 	"github.com/scrapli/scrapligo/logging"
 
 	"github.com/scrapli/scrapligo/driver/network"
@@ -43,12 +46,12 @@ var ErrDiffConfigFailed = errors.New("diff config operation failed")
 // that this is also similar (but not the same!) to the same api surface of the Cfg object that
 // users see.
 type Platform interface {
-	GetVersion() (string, []*base.Response, error)
-	GetConfig(source string) (string, []*base.Response, error)
-	LoadConfig(config string, replace bool, options *OperationOptions) ([]*base.Response, error)
-	AbortConfig() ([]*base.Response, error)
-	CommitConfig(source string) ([]*base.Response, error)
-	DiffConfig(source, candidateConfig string) ([]*base.Response, string, string, string, error)
+	GetVersion() (string, []*response.Response, error)
+	GetConfig(source string) (string, []*response.Response, error)
+	LoadConfig(config string, replace bool, options *OperationOptions) ([]*response.Response, error)
+	AbortConfig() ([]*response.Response, error)
+	CommitConfig(source string) ([]*response.Response, error)
+	DiffConfig(source, candidateConfig string) ([]*response.Response, string, string, string, error)
 	ClearConfigSession()
 }
 
@@ -427,7 +430,7 @@ func (d *Cfg) LoadConfigFromFile(
 		FormatLogMessage(d.conn, "info", "load config from file requested"),
 	)
 
-	c, err := base.LoadFileLines(f)
+	c, err := util.LoadFileLines(f)
 	if err != nil {
 		return nil, err
 	}

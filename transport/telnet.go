@@ -64,8 +64,7 @@ func (t *Telnet) handleControlCharResponse(ctrlBuf []byte, c byte) ([]byte, erro
 }
 
 func (t *Telnet) handleControlChars(baseArgs *BaseTransportArgs) error {
-	socketTimeout := baseArgs.TimeoutSocket
-	d := *socketTimeout / 4
+	d := baseArgs.TimeoutSocket / 4
 
 	var handleErr error
 
@@ -78,7 +77,7 @@ func (t *Telnet) handleControlChars(baseArgs *BaseTransportArgs) error {
 		}
 
 		// speed up timeout after initial Read
-		d = *socketTimeout / 10
+		d = baseArgs.TimeoutSocket / 10
 
 		charBuf := make([]byte, 1)
 

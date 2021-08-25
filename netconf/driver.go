@@ -54,9 +54,7 @@ func NewNetconfDriver(
 	d.NetconfChannel = nc
 
 	// ignoring user input on comms prompt pattern too as we know what we need to look for
-	d.CommsPromptPattern = regexp.MustCompile(Version10DelimiterPattern)
-	// see also note in network NewNetworkDriver about similar thing...
-	d.NetconfChannel.BaseChannel.CommsPromptPattern = d.CommsPromptPattern
+	d.Channel.CommsPromptPattern = regexp.MustCompile(Version10DelimiterPattern)
 
 	// temp for appeasing linting until they are used
 	_ = d.readableDatastores
