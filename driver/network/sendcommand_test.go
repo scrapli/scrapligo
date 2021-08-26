@@ -5,26 +5,55 @@ import (
 	"os"
 	"testing"
 
+	"github.com/scrapli/scrapligo/driver/core"
+
 	"github.com/scrapli/scrapligo/driver/network"
 
 	"github.com/google/go-cmp/cmp"
 
 	"github.com/scrapli/scrapligo/transport"
 
-	"github.com/scrapli/scrapligo/driver/core"
-
 	"github.com/scrapli/scrapligo/util/testhelper"
 )
 
-func platformCommandMap() map[string]string {
+func platformCommandMapShort() map[string]string {
 	return map[string]string{
-		"cisco_iosxe":        "show version",
-		"cisco_iosxr":        "show version",
-		"cisco_nxos":         "show version",
-		"arista_eos":         "show version",
-		"juniper_junos":      "show version",
+		"cisco_iosxe":        "show run | i hostname",
+		"cisco_iosxr":        "show run | i MgmtEth0",
+		"cisco_nxos":         "show run | i scp-server",
+		"arista_eos":         "show run | i ZTP",
+		"juniper_junos":      "show configuration | match 10.0.0.15",
 		"nokia_sros":         "show version",
 		"nokia_sros_classic": "show version",
+	}
+}
+
+func platformCommandExpected() map[string][]byte {
+	return map[string][]byte{
+		"cisco_iosxe": []byte("hostname csr1000v"),
+		"cisco_iosxr": []byte(
+			"TIME_STAMP_REPLACED\nBuilding configuration...\ninterface MgmtEth0/RP0/CPU0/0",
+		),
+		"cisco_nxos":    []byte("feature scp-server"),
+		"arista_eos":    []byte("logging level ZTP informational"),
+		"juniper_junos": []byte("                address 10.0.0.15/24;"),
+		"nokia_sros": []byte(
+			"TiMOS-B-20.10.R3 both/x86_64 Nokia 7750 SR Copyright (c) 2000-2021 Nokia.\nAll " +
+				"rights reserved. All use subject to applicable license agreements.\nBuilt on " +
+				"Wed Jan 27 13:21:10 PST 2021 by builder in /builds/c/2010B/R3/panos/main/sros",
+		),
+		"nokia_sros_classic": []byte(
+			"TiMOS-B-20.10.R3 both/x86_64 Nokia 7750 SR Copyright (c) 2000-2021 Nokia.\nAll " +
+				"rights reserved. All use subject to applicable license agreements.\nBuilt on " +
+				"Wed Jan 27 13:21:10 PST 2021 by builder in /builds/c/2010B/R3/panos/main/sros",
+		),
+	}
+}
+
+func platformCommandMapLong() map[string]string {
+	return map[string]string{
+		"arista_eos":    "show run",
+		"juniper_junos": "show configuration",
 	}
 }
 
@@ -54,21 +83,13 @@ func testSendCommand(
 }
 
 func TestSendCommand(t *testing.T) {
-	commandMap := platformCommandMap()
+	commandMap := platformCommandMapShort()
+	expectedOutputMap := platformCommandExpected()
 
-	for _, platform := range core.SupportedPlatforms() {
-		command := commandMap[platform]
-
+	for platform, command := range commandMap {
 		sessionFile := fmt.Sprintf("../../test_data/driver/network/sendcommand/%s", platform)
-		expectedFile := fmt.Sprintf(
-			"../../test_data/driver/network/sendcommand/%s_expected",
-			platform,
-		)
 
-		expectedOutput, expectedErr := os.ReadFile(expectedFile)
-		if expectedErr != nil {
-			t.Fatalf("failed opening expected output file '%s' err: %v", expectedFile, expectedErr)
-		}
+		expectedOutput := expectedOutputMap[platform]
 
 		d, driverErr := core.NewCoreDriver(
 			"localhost",
@@ -80,21 +101,14 @@ func TestSendCommand(t *testing.T) {
 			t.Fatalf("failed creating test device: %v", driverErr)
 		}
 
-		f := testSendCommand(d, command, expectedOutput, testhelper.CleanResponseNoop)
+		f := testSendCommand(
+			d,
+			command,
+			expectedOutput,
+			testhelper.GetCleanFunc(platform, expectedOutput),
+		)
 
 		t.Run(fmt.Sprintf("Platform=%s", platform), f)
-	}
-}
-
-func platformFunctionalCommandMapShort() map[string]string {
-	return map[string]string{
-		"arista_eos": "show run | i ZTP",
-	}
-}
-
-func platformFunctionalCommandExpected() map[string][]byte {
-	return map[string][]byte{
-		"arista_eos": []byte("logging level ZTP informational"),
 	}
 }
 
@@ -103,8 +117,8 @@ func TestFunctionalSendCommandShort(t *testing.T) {
 		t.Skip("SKIP: functional tests skipped unless the '-functional' flag is passed")
 	}
 
-	commandMap := platformFunctionalCommandMapShort()
-	expectedOutputMap := platformFunctionalCommandExpected()
+	commandMap := platformCommandMapShort()
+	expectedOutputMap := platformCommandExpected()
 
 	for _, transportName := range transport.SupportedTransports() {
 		for platform, command := range commandMap {
@@ -112,7 +126,8 @@ func TestFunctionalSendCommandShort(t *testing.T) {
 
 			hostConnData, ok := testhelper.FunctionalTestHosts()[platform]
 			if !ok {
-				t.Fatalf("no host connection data for platform type %s\n", platform)
+				t.Logf("skip; no host connection data for platform type %s\n", platform)
+				continue
 			}
 
 			port := hostConnData.Port
@@ -128,16 +143,15 @@ func TestFunctionalSendCommandShort(t *testing.T) {
 				port,
 			)
 
-			f := testSendCommand(d, command, expectedOutput, testhelper.CleanResponseNoop)
+			f := testSendCommand(
+				d,
+				command,
+				expectedOutput,
+				testhelper.GetCleanFunc(platform, expectedOutput),
+			)
 
 			t.Run(fmt.Sprintf("Platform=%s;Transport=%s", platform, transportName), f)
 		}
-	}
-}
-
-func platformFunctionalCommandMapLong() map[string]string {
-	return map[string]string{
-		"arista_eos": "show run",
 	}
 }
 
@@ -146,12 +160,10 @@ func TestFunctionalSendCommandLong(t *testing.T) {
 		t.Skip("SKIP: functional tests skipped unless the '-functional' flag is passed")
 	}
 
-	commandMap := platformFunctionalCommandMapLong()
+	commandMap := platformCommandMapLong()
 
 	for _, transportName := range transport.SupportedTransports() {
 		for platform, command := range commandMap {
-			cleanFunc := testhelper.CleanResponseMap()[platform]
-
 			expectedFile := fmt.Sprintf(
 				"../../test_data/driver/network/sendcommand/%s_functional_expected",
 				platform,
@@ -168,7 +180,8 @@ func TestFunctionalSendCommandLong(t *testing.T) {
 
 			hostConnData, ok := testhelper.FunctionalTestHosts()[platform]
 			if !ok {
-				t.Fatalf("no host connection data for platform type %s\n", platform)
+				t.Logf("skip; no host connection data for platform type %s\n", platform)
+				continue
 			}
 
 			port := hostConnData.Port
@@ -184,7 +197,12 @@ func TestFunctionalSendCommandLong(t *testing.T) {
 				port,
 			)
 
-			f := testSendCommand(d, command, expectedOutput, cleanFunc)
+			f := testSendCommand(
+				d,
+				command,
+				expectedOutput,
+				testhelper.GetCleanFunc(platform, expectedOutput),
+			)
 
 			t.Run(fmt.Sprintf("Platform=%s;Transport=%s", platform, transportName), f)
 		}

@@ -182,13 +182,26 @@ func (c *Channel) Read() ([]byte, error) {
 
 // RestructureOutput strip prompt (if necessary) from output and trim any null space.
 func (c *Channel) RestructureOutput(output []byte, stripPrompt bool) []byte {
-	if stripPrompt {
-		output = c.CommsPromptPattern.ReplaceAll(output, []byte(""))
+	outputLines := bytes.Split(output, []byte("\n"))
+
+	cleanLines := make([][]byte, 0)
+
+	for _, l := range outputLines {
+		cl := bytes.TrimRight(l, " ")
+		cleanLines = append(cleanLines, cl)
 	}
 
-	output = bytes.TrimSpace(output)
+	cleanOutput := bytes.Join(cleanLines, []byte("\n"))
 
-	return output
+	if stripPrompt {
+		cleanOutput = c.CommsPromptPattern.ReplaceAll(cleanOutput, []byte(""))
+	}
+
+	cleanOutput = bytes.TrimLeft(cleanOutput, c.CommsReturnChar)
+	cleanOutput = bytes.TrimRight(cleanOutput, " ")
+	cleanOutput = bytes.TrimRight(cleanOutput, "\n")
+
+	return cleanOutput
 }
 
 // DetermineOperationTimeout determine timeout to use for channel operation.

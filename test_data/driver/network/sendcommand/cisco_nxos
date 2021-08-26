@@ -32,44 +32,7 @@ http://www.gnu.org/licenses/lgpl.html
 switch#
 switch# terminal length 0
 switch# terminal width 511
-switch# show version
-Cisco Nexus Operating System (NX-OS) Software
-TAC support: http://www.cisco.com/tac
-Documents: http://www.cisco.com/en/US/products/ps9372/tsd_products_support_series_home.html
-Copyright (c) 2002-2019, Cisco Systems, Inc. All rights reserved.
-The copyrights to certain works contained herein are owned by
-other third parties and are used and distributed under license.
-Some parts of this software are covered under the GNU Public
-License. A copy of the license is available at
-http://www.gnu.org/licenses/gpl.html.
-
-Nexus 9000v is a demo version of the Nexus Operating System
-
-Software
-  BIOS: version
- NXOS: version 9.2(4)
-  BIOS compile time:
-  NXOS image file is: bootflash:///nxos.9.2.4.bin
-  NXOS compile time:  8/20/2019 7:00:00 [08/20/2019 15:52:22]
-
-
-Hardware
-  cisco Nexus9000 9000v Chassis
-   with 8159680 kB of memory.
-  Processor Board ID 9HV124BGIKU
-
-  Device name: switch
-  bootflash:    3509454 kB
-Kernel uptime is 0 day(s), 0 hour(s), 11 minute(s), 1 second(s)
-
-Last reset
-  Reason: Unknown
-  System version:
-  Service:
-
-plugin
-  Core Plugin, Ethernet Plugin
-
-Active Package(s):
+switch# show run | i scp-server
+feature scp-server
 
 switch#
