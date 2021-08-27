@@ -3,7 +3,6 @@ package base
 import (
 	"fmt"
 	"regexp"
-	"time"
 
 	"github.com/scrapli/scrapligo/logging"
 
@@ -39,13 +38,8 @@ type Driver struct {
 	SSHConfigFile     string
 	SSHKnownHostsFile string
 
-	TimeoutSocket    time.Duration
-	TimeoutTransport time.Duration
-
-	TransportType      string
-	Transport          *transport.Transport
-	transportPtyWidth  int
-	transportPtyHeight int
+	TransportType string
+	Transport     *transport.Transport
 
 	Channel *channel.Channel
 

@@ -72,9 +72,8 @@ func WithPatchedTransport(sessionFile string) base.Option {
 					FakeSession: f,
 				},
 				BaseTransportArgs: &transport.BaseTransportArgs{
-					Host:             "localhost",
-					Port:             22,
-					TimeoutTransport: d.TimeoutTransport,
+					Host: "localhost",
+					Port: 22,
 				},
 			}
 		}

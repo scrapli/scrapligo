@@ -18,11 +18,7 @@ func NewDriver( //nolint:funlen
 	d := &Driver{
 		Host:               host,
 		AuthStrictKey:      true,
-		TimeoutSocket:      30 * time.Second,
-		TimeoutTransport:   45 * time.Second,
 		TransportType:      transport.SystemTransportName,
-		transportPtyHeight: 80,
-		transportPtyWidth:  256,
 		FailedWhenContains: []string{},
 		PrivilegeLevels:    map[string]*PrivilegeLevel{},
 		DefaultDesiredPriv: "",
@@ -42,11 +38,12 @@ func NewDriver( //nolint:funlen
 
 	baseTransportArgs := &transport.BaseTransportArgs{
 		Host:             d.Host,
+		Port:             22,
 		AuthUsername:     d.AuthUsername,
-		TimeoutSocket:    d.TimeoutSocket,
-		TimeoutTransport: d.TimeoutTransport,
-		PtyHeight:        d.transportPtyHeight,
-		PtyWidth:         d.transportPtyWidth,
+		TimeoutSocket:    30 * time.Second,
+		TimeoutTransport: 45 * time.Second,
+		PtyHeight:        80,
+		PtyWidth:         256,
 	}
 
 	if d.Transport == nil {

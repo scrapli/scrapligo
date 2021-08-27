@@ -83,7 +83,7 @@ func WithAuthPrivateKey(privateKey string, privateKeyPassphrase ...string) Optio
 }
 
 // WithAuthBypass provide bool indicating if auth should be "bypassed" -- only applicable for system
-// transport.
+// and telnet transports.
 func WithAuthBypass(bypass bool) Option {
 	return func(o interface{}) error {
 		d, ok := o.(*Driver)

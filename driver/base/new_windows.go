@@ -4,7 +4,6 @@ package base
 
 import (
 	"errors"
-	"time"
 
 	"github.com/scrapli/scrapligo/transport"
 )
@@ -17,13 +16,8 @@ func NewDriver(
 ) (*Driver, error) {
 	d := &Driver{
 		Host:               host,
-		Port:               22,
 		AuthStrictKey:      true,
-		TimeoutSocket:      30 * time.Second,
-		TimeoutTransport:   45 * time.Second,
 		TransportType:      transport.StandardTransportName,
-		transportPtyHeight: 80,
-		transportPtyWidth:  256,
 		FailedWhenContains: []string{},
 		PrivilegeLevels:    map[string]*PrivilegeLevel{},
 		DefaultDesiredPriv: "",
@@ -43,12 +37,12 @@ func NewDriver(
 
 	baseTransportArgs := &transport.BaseTransportArgs{
 		Host:             d.Host,
-		Port:             d.Port,
+		Port:             22,
 		AuthUsername:     d.AuthUsername,
 		TimeoutSocket:    d.TimeoutSocket,
 		TimeoutTransport: d.TimeoutTransport,
-		PtyHeight:        d.transportPtyHeight,
-		PtyWidth:         d.transportPtyWidth,
+		PtyHeight:        80,
+		PtyWidth:         256,
 	}
 
 	if d.Transport == nil {
