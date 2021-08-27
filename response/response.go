@@ -51,7 +51,7 @@ type Response struct {
 	// Failed returns an error if any of the `FailedWhenContains` substrings are seen in the output
 	// returned from the device. This error indicates that the operation has completed successfully,
 	// but that an input was bad/invalid or device failed to process it at that time
-	Failed *OperationError
+	Failed error
 }
 
 // NewResponse creates a new response object.

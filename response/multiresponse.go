@@ -33,7 +33,7 @@ type MultiResponse struct {
 	EndTime     time.Time
 	ElapsedTime float64
 	Responses   []*Response
-	Failed      *MultiOperationError
+	Failed      error
 }
 
 // NewMultiResponse creates a new MultiResponse object.
@@ -50,12 +50,17 @@ func NewMultiResponse(host string) *MultiResponse {
 
 // AppendResponse appends a response to the `Responses` attribute of the MultiResponse object.
 func (mr *MultiResponse) AppendResponse(r *Response) {
-	if r.Failed != nil {
+	re, _ := r.Failed.(*OperationError)
+
+	if re != nil {
 		if mr.Failed == nil {
 			mr.Failed = &MultiOperationError{}
 		}
 
-		mr.Failed.Operations = append(mr.Failed.Operations, r.Failed)
+		e, ok := mr.Failed.(*MultiOperationError)
+		if ok {
+			e.Operations = append(e.Operations, re)
+		}
 	}
 
 	mr.Responses = append(mr.Responses, r)
