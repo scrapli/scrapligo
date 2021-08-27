@@ -11,6 +11,8 @@ import (
 	"github.com/scrapli/scrapligo/logging"
 )
 
+const sshCmd = "ssh"
+
 // System the "system" (pty subprocess wrapper) transport option for scrapligo.
 type System struct {
 	SystemTransportArgs *SystemTransportArgs
@@ -102,7 +104,7 @@ func (t *System) Open(baseArgs *BaseTransportArgs) error {
 	}
 
 	if t.ExecCmd == "" {
-		t.ExecCmd = "ssh"
+		t.ExecCmd = sshCmd
 	}
 
 	logging.LogDebug(
@@ -132,13 +134,19 @@ func (t *System) Open(baseArgs *BaseTransportArgs) error {
 }
 
 func (t *System) OpenNetconf(baseArgs *BaseTransportArgs) error {
-	t.buildOpenCmd(baseArgs)
+	if t.OpenCmd == nil {
+		t.buildOpenCmd(baseArgs)
 
-	t.OpenCmd = append(t.OpenCmd,
-		"-tt",
-		"-s",
-		"netconf",
-	)
+		t.OpenCmd = append(t.OpenCmd,
+			"-tt",
+			"-s",
+			"netconf",
+		)
+	}
+
+	if t.ExecCmd == "" {
+		t.ExecCmd = sshCmd
+	}
 
 	logging.LogDebug(
 		FormatLogMessage(baseArgs,
@@ -150,7 +158,7 @@ func (t *System) OpenNetconf(baseArgs *BaseTransportArgs) error {
 		),
 	)
 
-	command := exec.Command("ssh", t.OpenCmd...) //nolint:gosec
+	command := exec.Command(t.ExecCmd, t.OpenCmd...) //nolint:gosec
 	fileObj, err := pty.Start(command)
 
 	if err == nil {
