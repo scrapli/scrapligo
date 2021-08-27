@@ -88,7 +88,7 @@ func TestRead(t *testing.T) {
 
 func TestRestructureOutput(t *testing.T) {
 	output := []byte("   some output\nlocalhost#   ")
-	expected := []byte("some output\nlocalhost#")
+	expected := []byte("   some output\nlocalhost#")
 
 	c := testhelper.NewPatchedChannel(t, nil)
 
@@ -101,7 +101,7 @@ func TestRestructureOutput(t *testing.T) {
 
 func TestRestructureOutputStripPrompt(t *testing.T) {
 	output := []byte("   some output   \nlocalhost# ")
-	expected := []byte("some output")
+	expected := []byte("   some output")
 
 	c := testhelper.NewPatchedChannel(t, nil)
 

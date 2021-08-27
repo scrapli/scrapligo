@@ -56,7 +56,7 @@ type Platform interface {
 }
 
 func FormatLogMessage(conn *network.Driver, level, msg string) string {
-	return logging.FormatLogMessage(level, conn.Host, conn.Port, msg)
+	return logging.FormatLogMessage(level, conn.Host, conn.Transport.BaseTransportArgs.Port, msg)
 }
 
 func setPlatformOptions(p Platform, options ...Option) error {

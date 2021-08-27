@@ -13,7 +13,7 @@ func (d *Driver) FullSendCommand(
 	stripPrompt, eager bool,
 	timeoutOps time.Duration,
 ) (*response.Response, error) {
-	r := response.NewResponse(d.Host, d.Port, c, failedWhenContains)
+	r := response.NewResponse(d.Host, d.Transport.BaseTransportArgs.Port, c, failedWhenContains)
 
 	rawResult, err := d.Channel.SendInput(c, stripPrompt, eager, timeoutOps)
 

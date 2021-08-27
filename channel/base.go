@@ -158,7 +158,10 @@ func (c *Channel) readUntilExplicitPrompt(prompts []*regexp.Regexp) ([]byte, err
 func (c *Channel) Read() ([]byte, error) {
 	chunk, err := c.Transport.Read()
 
-	b := bytes.Trim(chunk, "\x00")
+	// is there ever a time when we should *not* replace *all* null bytes? previously this was just
+	// a trim, but for some connections (nxos telnet in particular) null byte would sneak in and
+	// not be leading or trailing... it would cause chaos....
+	b := bytes.ReplaceAll(chunk, []byte("\x00"), []byte(""))
 	b = bytes.ReplaceAll(b, []byte("\r"), []byte(""))
 
 	if bytes.Contains(b, []byte("\x1b")) {

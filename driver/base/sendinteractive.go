@@ -17,7 +17,12 @@ func (d *Driver) FullSendInteractive(
 	timeoutOps time.Duration,
 	joinedEventInputs string,
 ) (*response.Response, error) {
-	r := response.NewResponse(d.Host, d.Port, joinedEventInputs, failedWhenContains)
+	r := response.NewResponse(
+		d.Host,
+		d.Transport.BaseTransportArgs.Port,
+		joinedEventInputs,
+		failedWhenContains,
+	)
 
 	rawResult, err := d.Channel.SendInteractive(events, interactionCompletePatterns, timeoutOps)
 

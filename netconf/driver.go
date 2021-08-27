@@ -123,7 +123,7 @@ func (d *Driver) finalizeAndSendMessage(
 		return NewNetconfResponse(
 			d.Host,
 			d.NetconfChannel.SelectedNetconfVersion,
-			d.Port,
+			d.Transport.BaseTransportArgs.Port,
 			[]byte(""),
 			netconfMessage,
 			d.StripNamespaces,
@@ -133,7 +133,7 @@ func (d *Driver) finalizeAndSendMessage(
 	r := NewNetconfResponse(
 		d.Host,
 		d.NetconfChannel.SelectedNetconfVersion,
-		d.Port,
+		d.Transport.BaseTransportArgs.Port,
 		bytesNetconfMessage,
 		netconfMessage,
 		d.StripNamespaces,

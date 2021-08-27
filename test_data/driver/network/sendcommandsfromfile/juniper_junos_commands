@@ -1,2 +1,2 @@
-show version
-show interfaces terse
+show configuration | match 10.0.0.15
+show configuration

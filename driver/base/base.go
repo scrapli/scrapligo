@@ -27,7 +27,6 @@ type PrivilegeLevel struct {
 // Driver primary/base driver struct.
 type Driver struct {
 	Host string
-	Port int
 
 	AuthUsername             string
 	AuthPassword             string
@@ -63,7 +62,11 @@ func (d *Driver) Open() error {
 	logging.LogDebug(
 		d.FormatLogMessage(
 			"info",
-			fmt.Sprintf("opening connection to '%s' on port '%d'", d.Host, d.Port),
+			fmt.Sprintf(
+				"opening connection to '%s' on port '%d'",
+				d.Host,
+				d.Transport.BaseTransportArgs.Port,
+			),
 		),
 	)
 
@@ -97,7 +100,11 @@ func (d *Driver) Close() error {
 	logging.LogDebug(
 		d.FormatLogMessage(
 			"info",
-			fmt.Sprintf("closing connection to '%s' on port '%d'", d.Host, d.Port),
+			fmt.Sprintf(
+				"closing connection to '%s' on port '%d'",
+				d.Host,
+				d.Transport.BaseTransportArgs.Port,
+			),
 		),
 	)
 
@@ -115,5 +122,5 @@ func (d *Driver) Close() error {
 
 // FormatLogMessage formats log message payload, adding contextual info about the host.
 func (d *Driver) FormatLogMessage(level, msg string) string {
-	return logging.FormatLogMessage(level, d.Host, d.Port, msg)
+	return logging.FormatLogMessage(level, d.Host, d.Transport.BaseTransportArgs.Port, msg)
 }

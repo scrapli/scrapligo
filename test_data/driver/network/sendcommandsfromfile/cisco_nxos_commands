@@ -1,2 +1,2 @@
-show version
-show ip int brie
+show run | i scp-server
+show run

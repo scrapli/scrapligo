@@ -1,7 +1,6 @@
 package testhelper
 
 import (
-	"bytes"
 	"regexp"
 )
 
@@ -10,14 +9,17 @@ func cleanResponseMap() map[string]func(r string) string {
 		"arista_eos":    aristaEosCleanResponse,
 		"cisco_iosxr":   ciscoIosxrCleanResponse,
 		"cisco_iosxe":   ciscoIosxeCleanResponse,
+		"cisco_nxos":    ciscoNxosCleanResponse,
 		"juniper_junos": juniperJunosCleanResponse,
 	}
 }
 
-func GetCleanFunc(platform string, expectedOutput []byte) func(r string) string {
-	cleanFunc := cleanResponseNoop
-	if bytes.Contains(expectedOutput, []byte("REPLACED")) {
-		cleanFunc = cleanResponseMap()[platform]
+func GetCleanFunc(platform string) func(r string) string {
+	cleanFuncs := cleanResponseMap()
+
+	cleanFunc, ok := cleanFuncs[platform]
+	if !ok {
+		return cleanResponseNoop
 	}
 
 	return cleanFunc
@@ -143,7 +145,40 @@ func ciscoIosxeCleanResponse(r string) string {
 	return r
 }
 
-// NXOS
+type ciscoNxosReplacePatterns struct {
+	datetimePattern *regexp.Regexp
+	cryptoPattern   *regexp.Regexp
+	resourcePattern *regexp.Regexp
+}
+
+var ciscoNxosReplacePatternsInstance *ciscoNxosReplacePatterns //nolint:gochecknoglobals
+
+func getCiscoNxosReplacePatterns() *ciscoNxosReplacePatterns {
+	if ciscoNxosReplacePatternsInstance == nil {
+		ciscoNxosReplacePatternsInstance = &ciscoNxosReplacePatterns{
+			datetimePattern: regexp.MustCompile(
+				`(?im)(mon|tue|wed|thu|fri|sat|sun)\s+` +
+					`(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\s+\d+\s+\d+:\d+:\d+\s\d+`,
+			),
+			cryptoPattern: regexp.MustCompile(`(?im)^(.*?\s(?:5|md5)\s)[\w$./]+.*$`),
+			resourcePattern: regexp.MustCompile(
+				`(?im)\d+\smaximum\s\d+$`,
+			),
+		}
+	}
+
+	return ciscoNxosReplacePatternsInstance
+}
+
+func ciscoNxosCleanResponse(r string) string {
+	replacePatterns := getCiscoNxosReplacePatterns()
+
+	r = replacePatterns.datetimePattern.ReplaceAllString(r, "TIME_STAMP_REPLACED")
+	r = replacePatterns.cryptoPattern.ReplaceAllString(r, "CRYPTO_REPLACED")
+	r = replacePatterns.resourcePattern.ReplaceAllString(r, "RESOURCES_REPLACED")
+
+	return r
+}
 
 type juniperJunosReplacePatterns struct {
 	datetimePattern *regexp.Regexp

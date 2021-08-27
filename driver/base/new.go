@@ -17,7 +17,6 @@ func NewDriver( //nolint:funlen
 ) (*Driver, error) {
 	d := &Driver{
 		Host:               host,
-		Port:               22,
 		AuthStrictKey:      true,
 		TimeoutSocket:      30 * time.Second,
 		TimeoutTransport:   45 * time.Second,
@@ -43,7 +42,6 @@ func NewDriver( //nolint:funlen
 
 	baseTransportArgs := &transport.BaseTransportArgs{
 		Host:             d.Host,
-		Port:             d.Port,
 		AuthUsername:     d.AuthUsername,
 		TimeoutSocket:    d.TimeoutSocket,
 		TimeoutTransport: d.TimeoutTransport,

@@ -28,32 +28,15 @@ func platformCommandMapShort() map[string]string {
 	}
 }
 
-func platformCommandExpected() map[string][]byte {
-	return map[string][]byte{
-		"cisco_iosxe": []byte("hostname csr1000v"),
-		"cisco_iosxr": []byte(
-			"TIME_STAMP_REPLACED\nBuilding configuration...\ninterface MgmtEth0/RP0/CPU0/0",
-		),
-		"cisco_nxos":    []byte("feature scp-server"),
-		"arista_eos":    []byte("logging level ZTP informational"),
-		"juniper_junos": []byte("                address 10.0.0.15/24;"),
-		"nokia_sros": []byte(
-			"TiMOS-B-20.10.R3 both/x86_64 Nokia 7750 SR Copyright (c) 2000-2021 Nokia.\nAll " +
-				"rights reserved. All use subject to applicable license agreements.\nBuilt on " +
-				"Wed Jan 27 13:21:10 PST 2021 by builder in /builds/c/2010B/R3/panos/main/sros",
-		),
-		"nokia_sros_classic": []byte(
-			"TiMOS-B-20.10.R3 both/x86_64 Nokia 7750 SR Copyright (c) 2000-2021 Nokia.\nAll " +
-				"rights reserved. All use subject to applicable license agreements.\nBuilt on " +
-				"Wed Jan 27 13:21:10 PST 2021 by builder in /builds/c/2010B/R3/panos/main/sros",
-		),
-	}
-}
-
 func platformCommandMapLong() map[string]string {
 	return map[string]string{
-		"arista_eos":    "show run",
-		"juniper_junos": "show configuration",
+		"cisco_iosxe":        "show run",
+		"cisco_iosxr":        "show run",
+		"cisco_nxos":         "show run",
+		"arista_eos":         "show run",
+		"juniper_junos":      "show configuration",
+		"nokia_sros":         "show router interface",
+		"nokia_sros_classic": "show router interface",
 	}
 }
 
@@ -64,7 +47,7 @@ func testSendCommand(
 	return func(t *testing.T) {
 		openErr := d.Open()
 		if openErr != nil {
-			t.Fatalf("failed opening patched driver: %v", openErr)
+			t.Fatalf("failed opening driver: %v", openErr)
 		}
 
 		r, cmdErr := d.SendCommand(command)
@@ -84,12 +67,26 @@ func testSendCommand(
 
 func TestSendCommand(t *testing.T) {
 	commandMap := platformCommandMapShort()
-	expectedOutputMap := platformCommandExpected()
 
 	for platform, command := range commandMap {
-		sessionFile := fmt.Sprintf("../../test_data/driver/network/sendcommand/%s", platform)
+		sessionFile := fmt.Sprintf(
+			"../../test_data/driver/network/sendcommand/%s_session_short",
+			platform,
+		)
 
-		expectedOutput := expectedOutputMap[platform]
+		expectedFile := fmt.Sprintf(
+			"../../test_data/driver/network/expected/%s_short_expected",
+			platform,
+		)
+
+		expectedOutput, expectedErr := os.ReadFile(expectedFile)
+		if expectedErr != nil {
+			t.Fatalf(
+				"failed opening expected output file '%s' err: %v",
+				expectedFile,
+				expectedErr,
+			)
+		}
 
 		d, driverErr := core.NewCoreDriver(
 			"localhost",
@@ -105,106 +102,104 @@ func TestSendCommand(t *testing.T) {
 			d,
 			command,
 			expectedOutput,
-			testhelper.GetCleanFunc(platform, expectedOutput),
+			testhelper.GetCleanFunc(platform),
 		)
 
 		t.Run(fmt.Sprintf("Platform=%s", platform), f)
 	}
 }
 
+func testFunctionalSendCommandCommon(
+	t *testing.T,
+	command, expectedFile, platform, transportName string,
+) {
+	if !testhelper.RunPlatform(platform) {
+		t.Logf("skip; platform %s deselected for testing\n", platform)
+		return
+	}
+
+	hostConnData, ok := testhelper.FunctionalTestHosts()[platform]
+	if !ok {
+		t.Logf("skip; no host connection data for platform type %s\n", platform)
+		return
+	}
+
+	expectedOutput, expectedErr := os.ReadFile(expectedFile)
+	if expectedErr != nil {
+		t.Fatalf(
+			"failed opening expected output file '%s' err: %v",
+			expectedFile,
+			expectedErr,
+		)
+	}
+
+	port := hostConnData.Port
+	if transportName == transport.TelnetTransportName {
+		port = hostConnData.TelnetPort
+	}
+
+	d := testhelper.NewFunctionalTestDriver(
+		t,
+		hostConnData.Host,
+		platform,
+		transportName,
+		port,
+	)
+
+	f := testSendCommand(
+		d,
+		command,
+		expectedOutput,
+		testhelper.GetCleanFunc(platform),
+	)
+
+	t.Run(fmt.Sprintf("Platform=%s;Transport=%s", platform, transportName), f)
+}
+
 func TestFunctionalSendCommandShort(t *testing.T) {
 	if !*testhelper.Functional {
-		t.Skip("SKIP: functional tests skipped unless the '-functional' flag is passed")
+		t.Skip("skip: functional tests skipped unless the '-functional' flag is passed")
 	}
 
 	commandMap := platformCommandMapShort()
-	expectedOutputMap := platformCommandExpected()
 
 	for _, transportName := range transport.SupportedTransports() {
+		if !testhelper.RunTransport(transportName) {
+			t.Logf("skip; transport %s deselected for testing\n", transportName)
+			continue
+		}
+
 		for platform, command := range commandMap {
-			expectedOutput := expectedOutputMap[platform]
-
-			hostConnData, ok := testhelper.FunctionalTestHosts()[platform]
-			if !ok {
-				t.Logf("skip; no host connection data for platform type %s\n", platform)
-				continue
-			}
-
-			port := hostConnData.Port
-			if transportName == transport.TelnetTransportName {
-				port = hostConnData.TelnetPort
-			}
-
-			d := testhelper.NewFunctionalTestDriver(
-				t,
-				hostConnData.Host,
+			expectedFile := fmt.Sprintf(
+				"../../test_data/driver/network/expected/%s_short_expected",
 				platform,
-				transportName,
-				port,
 			)
 
-			f := testSendCommand(
-				d,
-				command,
-				expectedOutput,
-				testhelper.GetCleanFunc(platform, expectedOutput),
-			)
-
-			t.Run(fmt.Sprintf("Platform=%s;Transport=%s", platform, transportName), f)
+			testFunctionalSendCommandCommon(t, command, expectedFile, platform, transportName)
 		}
 	}
 }
 
 func TestFunctionalSendCommandLong(t *testing.T) {
 	if !*testhelper.Functional {
-		t.Skip("SKIP: functional tests skipped unless the '-functional' flag is passed")
+		t.Skip("skip: functional tests skipped unless the '-functional' flag is passed")
 	}
 
 	commandMap := platformCommandMapLong()
 
 	for _, transportName := range transport.SupportedTransports() {
+		if !testhelper.RunTransport(transportName) {
+			t.Logf("skip; transport %s deselected for testing\n", transportName)
+			continue
+		}
+
 		for platform, command := range commandMap {
 			expectedFile := fmt.Sprintf(
-				"../../test_data/driver/network/sendcommand/%s_functional_expected",
+				"../../test_data/driver/network/expected/%s_long_expected",
 				platform,
 			)
 
-			expectedOutput, expectedErr := os.ReadFile(expectedFile)
-			if expectedErr != nil {
-				t.Fatalf(
-					"failed opening expected output file '%s' err: %v",
-					expectedFile,
-					expectedErr,
-				)
-			}
-
-			hostConnData, ok := testhelper.FunctionalTestHosts()[platform]
-			if !ok {
-				t.Logf("skip; no host connection data for platform type %s\n", platform)
-				continue
-			}
-
-			port := hostConnData.Port
-			if transportName == transport.TelnetTransportName {
-				port = hostConnData.TelnetPort
-			}
-
-			d := testhelper.NewFunctionalTestDriver(
-				t,
-				hostConnData.Host,
-				platform,
-				transportName,
-				port,
-			)
-
-			f := testSendCommand(
-				d,
-				command,
-				expectedOutput,
-				testhelper.GetCleanFunc(platform, expectedOutput),
-			)
-
-			t.Run(fmt.Sprintf("Platform=%s;Transport=%s", platform, transportName), f)
+			testFunctionalSendCommandCommon(t, command, expectedFile, platform, transportName)
 		}
 	}
 }

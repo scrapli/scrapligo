@@ -45,6 +45,18 @@ func StrContainsAnySubStr(s string, l []string) string {
 	return ""
 }
 
+// StrInSlice checks for any occurrence of `s` in slice of strings `l`. Returns true if `s` found,
+// otherwise false.
+func StrInSlice(s string, l []string) bool {
+	for _, i := range l {
+		if s == i {
+			return true
+		}
+	}
+
+	return false
+}
+
 func ByteInSlice(b byte, s []byte) bool {
 	for _, i := range s {
 		if b == i {

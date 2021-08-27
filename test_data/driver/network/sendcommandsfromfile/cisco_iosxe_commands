@@ -1,2 +1,2 @@
-show version
-show ip int brie
+show run | i hostname
+show run
