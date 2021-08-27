@@ -21,6 +21,12 @@ type System struct {
 	ExecCmd             string
 }
 
+// SystemTransport interface describes system transport specific methods.
+type SystemTransport interface {
+	SetOpenCmd([]string)
+	SetExecCmd(string)
+}
+
 // SystemTransportArgs struct representing attributes required for the System transport.
 type SystemTransportArgs struct {
 	AuthPrivateKey    string
@@ -28,6 +34,16 @@ type SystemTransportArgs struct {
 	SSHConfigFile     string
 	SSHKnownHostsFile string
 	NetconfForcePty   *bool
+}
+
+// SetOpenCmd sets the open command string slice; arguments used for opening the connection.
+func (t *System) SetOpenCmd(openCmd []string) {
+	t.OpenCmd = openCmd
+}
+
+// SetExecCmd sets the exec command string, binary used for opening the connection.
+func (t *System) SetExecCmd(execCmd string) {
+	t.ExecCmd = execCmd
 }
 
 func (t *System) buildOpenCmd(baseArgs *BaseTransportArgs) {

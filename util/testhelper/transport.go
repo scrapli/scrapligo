@@ -9,10 +9,19 @@ import (
 
 // TestingTransport patched transport for testing.
 type TestingTransport struct {
-	*transport.System
 	FakeSession    *os.File
 	CapturedWrites [][]byte
 	ReadSize       *int
+}
+
+// SetOpenCmd implements SystemTransport SetOpenCmd here for testing purposes.
+func (t *TestingTransport) SetOpenCmd(openCmd []string) {
+	_ = openCmd
+}
+
+// SetExecCmd implements SystemTransport SetOpenCmd here for testing purposes.
+func (t *TestingTransport) SetExecCmd(execCmd string) {
+	_ = execCmd
 }
 
 // Open do nothing!
