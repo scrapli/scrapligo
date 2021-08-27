@@ -4,38 +4,44 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/scrapli/scrapligo/driver/core"
+	"github.com/scrapli/scrapligo/driver/network"
 
-	"github.com/scrapli/scrapligo/util/testhelper"
+	"github.com/scrapli/scrapligo/driver/core"
 )
 
-func platformConfigsMap() map[string][]string {
-	return map[string][]string{
-		"cisco_iosxe": {"interface loopback0", "description tacocat", "no interface loopback0"},
-		"cisco_iosxr": {
-			"interface loopback0",
-			"description tacocat",
-			"no interface loopback0",
-			"commit",
-		},
-		"cisco_nxos": {"interface loopback0", "description tacocat", "no interface loopback0"},
-		"arista_eos": {"interface loopback0", "description tacocat", "no interface loopback0"},
-		"juniper_junos": {
-			"set interfaces fxp0.0 description tacocat",
-			"delete interfaces fxp0.0 description tacocat",
-			"commit",
-		},
-		"nokia_sros": {
-			`configure router interface "system" description "@ntdvps"`,
-			"configure system",
-			"location wide_internet",
-			"commit",
-		},
-		"nokia_sros_classic": {
-			`configure router interface "system" description "@ntdvps"`,
-			"configure system",
-			"location wide_internet",
-		},
+func testSendConfigs(d *network.Driver, config []string) func(t *testing.T) {
+	return func(t *testing.T) {
+		openErr := d.Open()
+		if openErr != nil {
+			t.Fatalf("failed opening driver: %v", openErr)
+		}
+
+		r, cmdErr := d.SendConfigs(config)
+		if cmdErr != nil {
+			t.Fatalf("failed sending config: %v", cmdErr)
+		}
+
+		if r.Failed != nil {
+			t.Fatalf("response object indicates failure; error: %+v\n", r.Failed)
+		}
+	}
+}
+
+func testSendConfigsFromFile(d *network.Driver, config string) func(t *testing.T) {
+	return func(t *testing.T) {
+		openErr := d.Open()
+		if openErr != nil {
+			t.Fatalf("failed opening driver: %v", openErr)
+		}
+
+		r, cmdErr := d.SendConfigsFromFile(config)
+		if cmdErr != nil {
+			t.Fatalf("failed sending config: %v", cmdErr)
+		}
+
+		if r.Failed != nil {
+			t.Fatalf("response object indicates failure; error: %+v\n", r.Failed)
+		}
 	}
 }
 
@@ -43,14 +49,26 @@ func TestSendConfigs(t *testing.T) {
 	configsMap := platformConfigsMap()
 
 	for _, platform := range core.SupportedPlatforms() {
-		f := testhelper.SendConfigsTestHelper(platform, configsMap[platform])
+		sessionFile := fmt.Sprintf("../../test_data/driver/network/sendconfigs/%s", platform)
+
+		d := createPatchedDriver(t, sessionFile, platform)
+
+		f := testSendConfigs(d, configsMap[platform])
 		t.Run(fmt.Sprintf("Platform=%s", platform), f)
 	}
 }
 
 func TestSendConfigsFromFile(t *testing.T) {
 	for _, platform := range core.SupportedPlatforms() {
-		f := testhelper.SendConfigsFromFileTestHelper(platform)
+		sessionFile := fmt.Sprintf("../../test_data/driver/network/sendconfigs/%s", platform)
+		configs := fmt.Sprintf(
+			"../../test_data/driver/network/sendconfigsfromfile/%s_configs",
+			platform,
+		)
+
+		d := createPatchedDriver(t, sessionFile, platform)
+
+		f := testSendConfigsFromFile(d, configs)
 		t.Run(fmt.Sprintf("Platform=%s", platform), f)
 	}
 }

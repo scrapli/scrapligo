@@ -114,15 +114,7 @@ func testSendCommandsCommon(
 		)
 	}
 
-	d, driverErr := core.NewCoreDriver(
-		"localhost",
-		platform,
-		testhelper.WithPatchedTransport(sessionFile),
-	)
-
-	if driverErr != nil {
-		t.Fatalf("failed creating test device: %v", driverErr)
-	}
+	d = createPatchedDriver(t, sessionFile, platform)
 
 	return d, [][]byte{expectedOutputOne, expectedOutputTwo}
 }
