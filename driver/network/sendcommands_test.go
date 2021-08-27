@@ -261,7 +261,7 @@ func TestFunctionalSendCommands(t *testing.T) {
 				testhelper.GetCleanFunc(platform),
 			)
 
-			t.Run(fmt.Sprintf("Platform=%s", platform), f)
+			t.Run(fmt.Sprintf("Platform=%s;Transport=%s", platform, transportName), f)
 		}
 	}
 }
@@ -299,7 +299,7 @@ func TestFunctionalSendCommandsFromFile(t *testing.T) {
 				testhelper.GetCleanFunc(platform),
 			)
 
-			t.Run(fmt.Sprintf("Platform=%s", platform), f)
+			t.Run(fmt.Sprintf("Platform=%s;Transport=%s", platform, transportName), f)
 		}
 	}
 }

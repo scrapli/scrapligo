@@ -27,6 +27,7 @@ type SystemTransportArgs struct {
 	AuthStrictKey     bool
 	SSHConfigFile     string
 	SSHKnownHostsFile string
+	NetconfForcePty   *bool
 }
 
 func (t *System) buildOpenCmd(baseArgs *BaseTransportArgs) {
@@ -137,8 +138,11 @@ func (t *System) OpenNetconf(baseArgs *BaseTransportArgs) error {
 	if t.OpenCmd == nil {
 		t.buildOpenCmd(baseArgs)
 
+		if t.SystemTransportArgs.NetconfForcePty == nil || *t.SystemTransportArgs.NetconfForcePty {
+			t.OpenCmd = append(t.OpenCmd, "-tt")
+		}
+
 		t.OpenCmd = append(t.OpenCmd,
-			"-tt",
 			"-s",
 			"netconf",
 		)

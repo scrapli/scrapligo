@@ -177,6 +177,12 @@ func (t *Standard) openBase(baseArgs *BaseTransportArgs) error {
 	}
 
 	err := t.openSession(baseArgs, cfg)
+
+	return err
+}
+
+func (t *Standard) Open(baseArgs *BaseTransportArgs) error {
+	err := t.openBase(baseArgs)
 	if err != nil {
 		return err
 	}
@@ -194,15 +200,6 @@ func (t *Standard) openBase(baseArgs *BaseTransportArgs) error {
 		baseArgs.PtyWidth,
 		modes,
 	)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (t *Standard) Open(baseArgs *BaseTransportArgs) error {
-	err := t.openBase(baseArgs)
 	if err != nil {
 		return err
 	}
