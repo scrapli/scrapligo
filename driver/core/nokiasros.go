@@ -3,7 +3,6 @@ package core
 import (
 	"github.com/scrapli/scrapligo/driver/base"
 	"github.com/scrapli/scrapligo/driver/network"
-	"github.com/scrapli/scrapligo/response"
 )
 
 // NewSROSDriver returns a driver setup for operation with Nokia SR OS devices.
@@ -109,7 +108,7 @@ func SROSOnClose(d *network.Driver) error {
 }
 
 // SROSAbortConfig aborts SR OS configuration session.
-func SROSAbortConfig(d *network.Driver) (*response.Response, error) {
+func SROSAbortConfig(d *network.Driver) (*base.Response, error) {
 	if _, err := d.Channel.SendInput("discard /", false, false, -1); err != nil {
 		return nil, err
 	}

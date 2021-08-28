@@ -6,8 +6,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/scrapli/scrapligo/response"
-
 	"github.com/scrapli/scrapligo/channel"
 
 	"github.com/scrapli/scrapligo/logging"
@@ -93,7 +91,7 @@ func (p *IOSXECfg) ClearConfigSession() {
 }
 
 // GetVersion get the version from the device.
-func (p *IOSXECfg) GetVersion() (string, []*response.Response, error) {
+func (p *IOSXECfg) GetVersion() (string, []*base.Response, error) {
 	versionResult, err := p.conn.SendCommand("show version | i Version")
 	if err != nil {
 		return "", nil, err
@@ -101,13 +99,13 @@ func (p *IOSXECfg) GetVersion() (string, []*response.Response, error) {
 
 	return p.VersionPattern.FindString(
 			versionResult.Result,
-		), []*response.Response{
+		), []*base.Response{
 			versionResult,
 		}, nil
 }
 
 // GetConfig get the configuration of a source datastore from the device.
-func (p *IOSXECfg) GetConfig(source string) (string, []*response.Response, error) {
+func (p *IOSXECfg) GetConfig(source string) (string, []*base.Response, error) {
 	cmd, err := getConfigCommand(p.configCommandMap, source)
 	if err != nil {
 		return "", nil, err
@@ -119,7 +117,7 @@ func (p *IOSXECfg) GetConfig(source string) (string, []*response.Response, error
 		return "", nil, err
 	}
 
-	return configResult.Result, []*response.Response{configResult}, nil
+	return configResult.Result, []*base.Response{configResult}, nil
 }
 
 func (p *IOSXECfg) cleanConfig(config string) string {
@@ -166,10 +164,10 @@ func (p *IOSXECfg) LoadConfig(
 	config string,
 	replace bool,
 	options *OperationOptions,
-) ([]*response.Response, error) {
+) ([]*base.Response, error) {
 	p.replaceConfig = replace
 
-	var scrapliResponses []*response.Response
+	var scrapliResponses []*base.Response
 
 	if options.AutoClean {
 		config = p.cleanConfig(config)
@@ -255,8 +253,8 @@ func (p *IOSXECfg) determineFilePromptMode() (string, error) {
 }
 
 // AbortConfig abort the loaded candidate configuration.
-func (p *IOSXECfg) AbortConfig() ([]*response.Response, error) {
-	var scrapliResponses []*response.Response
+func (p *IOSXECfg) AbortConfig() ([]*base.Response, error) {
+	var scrapliResponses []*base.Response
 
 	r, err := p.deleteCandidateConfigFile()
 
@@ -265,7 +263,7 @@ func (p *IOSXECfg) AbortConfig() ([]*response.Response, error) {
 	return scrapliResponses, err
 }
 
-func (p *IOSXECfg) commitConfigMerge() (*response.Response, error) {
+func (p *IOSXECfg) commitConfigMerge() (*base.Response, error) {
 	filePromptMode, err := p.determineFilePromptMode()
 	if err != nil {
 		return nil, err
@@ -324,7 +322,7 @@ func (p *IOSXECfg) commitConfigMerge() (*response.Response, error) {
 }
 
 // SaveConfig writes running config to startup config.
-func (p *IOSXECfg) SaveConfig() (*response.Response, error) {
+func (p *IOSXECfg) SaveConfig() (*base.Response, error) {
 	filePromptMode, err := p.determineFilePromptMode()
 	if err != nil {
 		return nil, err
@@ -376,7 +374,7 @@ func (p *IOSXECfg) SaveConfig() (*response.Response, error) {
 	return p.conn.SendInteractive(saveEvents)
 }
 
-func (p *IOSXECfg) deleteCandidateConfigFile() (*response.Response, error) {
+func (p *IOSXECfg) deleteCandidateConfigFile() (*base.Response, error) {
 	filePromptMode, err := p.determineFilePromptMode()
 	if err != nil {
 		return nil, err
@@ -425,10 +423,10 @@ func (p *IOSXECfg) deleteCandidateConfigFile() (*response.Response, error) {
 }
 
 // CommitConfig commit the loaded candidate configuration.
-func (p *IOSXECfg) CommitConfig(source string) ([]*response.Response, error) {
-	var scrapliResponses []*response.Response
+func (p *IOSXECfg) CommitConfig(source string) ([]*base.Response, error) {
+	var scrapliResponses []*base.Response
 
-	var commitResult *response.Response
+	var commitResult *base.Response
 
 	var err error
 
@@ -494,11 +492,11 @@ func (p *IOSXECfg) normalizeSourceAndCandidateConfigs(
 // DiffConfig diff the candidate configuration against a source config.
 func (p *IOSXECfg) DiffConfig(
 	source, candidateConfig string,
-) (responses []*response.Response,
+) (responses []*base.Response,
 	normalizedSourceConfig,
 	normalizedCandidateConfig,
 	deviceDiff string, err error) {
-	var scrapliResponses []*response.Response
+	var scrapliResponses []*base.Response
 
 	diffResult, err := p.conn.SendCommand(p.getDiffCommand(source))
 	if err != nil {

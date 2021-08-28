@@ -2,7 +2,6 @@ package network
 
 import (
 	"github.com/scrapli/scrapligo/driver/base"
-	"github.com/scrapli/scrapligo/response"
 	"github.com/scrapli/scrapligo/util"
 )
 
@@ -11,7 +10,7 @@ import (
 func (d *Driver) SendCommands(
 	c []string,
 	o ...base.SendOption,
-) (*response.MultiResponse, error) {
+) (*base.MultiResponse, error) {
 	finalOpts := d.ParseSendOptions(o)
 
 	if d.CurrentPriv != d.DefaultDesiredPriv {
@@ -36,7 +35,7 @@ func (d *Driver) SendCommands(
 func (d *Driver) SendCommandsFromFile(
 	f string,
 	o ...base.SendOption,
-) (*response.MultiResponse, error) {
+) (*base.MultiResponse, error) {
 	c, err := util.LoadFileLines(f)
 	if err != nil {
 		return nil, err

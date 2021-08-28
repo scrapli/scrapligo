@@ -5,8 +5,6 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/scrapli/scrapligo/response"
-
 	"github.com/scrapli/scrapligo/logging"
 
 	"github.com/scrapli/scrapligo/driver/base"
@@ -34,7 +32,7 @@ type Driver struct {
 	OnClose     func(*Driver) error
 	privGraph   map[string]map[string]bool
 	CurrentPriv string
-	Augments    map[string]func(d *Driver) (*response.Response, error)
+	Augments    map[string]func(d *Driver) (*base.Response, error)
 }
 
 // NewNetworkDriver returns a new driver of the network flavor.
@@ -57,7 +55,7 @@ func NewNetworkDriver(
 		Driver:   *newDriver,
 		OnOpen:   onOpen,
 		OnClose:  onClose,
-		Augments: map[string]func(d *Driver) (*response.Response, error){},
+		Augments: map[string]func(d *Driver) (*base.Response, error){},
 	}
 
 	if len(d.FailedWhenContains) == 0 {

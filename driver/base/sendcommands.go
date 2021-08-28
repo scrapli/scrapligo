@@ -3,7 +3,6 @@ package base
 import (
 	"time"
 
-	"github.com/scrapli/scrapligo/response"
 	"github.com/scrapli/scrapligo/util"
 
 	"github.com/scrapli/scrapligo/logging"
@@ -15,8 +14,8 @@ func (d *Driver) FullSendCommands(
 	failedWhenContains []string,
 	stripPrompt, stopOnFailed, eager bool,
 	timeoutOps time.Duration,
-) (*response.MultiResponse, error) {
-	mr := response.NewMultiResponse(d.Host)
+) (*MultiResponse, error) {
+	mr := NewMultiResponse(d.Host)
 
 	for _, command := range c[:len(c)-1] {
 		r, err := d.FullSendCommand(
@@ -62,7 +61,7 @@ func (d *Driver) FullSendCommands(
 func (d *Driver) SendCommands(
 	c []string,
 	o ...SendOption,
-) (*response.MultiResponse, error) {
+) (*MultiResponse, error) {
 	finalOpts := d.ParseSendOptions(o)
 
 	return d.FullSendCommands(
@@ -80,7 +79,7 @@ func (d *Driver) SendCommands(
 func (d *Driver) SendCommandsFromFile(
 	f string,
 	o ...SendOption,
-) (*response.MultiResponse, error) {
+) (*MultiResponse, error) {
 	finalOpts := d.ParseSendOptions(o)
 
 	c, err := util.LoadFileLines(f)

@@ -5,9 +5,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/scrapli/scrapligo/transport"
+	"github.com/scrapli/scrapligo/driver/base"
 
-	"github.com/scrapli/scrapligo/response"
+	"github.com/scrapli/scrapligo/transport"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/scrapli/scrapligo/driver/core"
@@ -17,7 +17,7 @@ import (
 
 func compareResults(
 	t *testing.T,
-	r *response.MultiResponse,
+	r *base.MultiResponse,
 	expectedOutput [][]byte,
 	cleanFunc func(r string) string,
 ) {

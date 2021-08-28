@@ -7,7 +7,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/scrapli/scrapligo/response"
+	"github.com/scrapli/scrapligo/driver/base"
+
 	"github.com/scrapli/scrapligo/util"
 
 	"github.com/scrapli/scrapligo/logging"
@@ -78,7 +79,7 @@ func (r *Response) Record(rawResult []byte) {
 
 	b := util.BytesContainsAnySubBytes(r.RawResult, r.FailedWhenContains)
 	if len(b) > 0 {
-		r.Failed = &response.OperationError{
+		r.Failed = &base.OperationError{
 			Input:       string(r.ChannelInput),
 			Output:      r.Result,
 			ErrorString: string(b),
@@ -109,7 +110,7 @@ func (r *Response) validateChunkSize(chunkSize int, chunk []byte) {
 			len(chunk)-1,
 			chunk)
 
-		r.Failed = &response.OperationError{
+		r.Failed = &base.OperationError{
 			Input:       string(r.ChannelInput),
 			Output:      r.Result,
 			ErrorString: errMsg,

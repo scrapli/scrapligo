@@ -117,11 +117,11 @@ issues:
         - dupl
     # ignoring complaint about iosxe/nxos cfg platforms having dupl lines
     - path: cfg/
-      text: "60-89 lines are duplicate"
+      text: "58-87 lines are duplicate"
       linters:
         - dupl
     - path: cfg/
-      text: "69-101 lines are duplicate"
+      text: "67-99 lines are duplicate"
       linters:
         - dupl
     # ignoring complaint about channel auth having dupl lines

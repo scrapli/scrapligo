@@ -3,7 +3,6 @@ package core
 import (
 	"github.com/scrapli/scrapligo/driver/base"
 	"github.com/scrapli/scrapligo/driver/network"
-	"github.com/scrapli/scrapligo/response"
 )
 
 // NewIOSXRDriver return a driver setup for operation with IOSXR devices.
@@ -109,7 +108,7 @@ func IOSXROnClose(d *network.Driver) error {
 }
 
 // IOSXRAbortConfig abort IOSXR configuration session.
-func IOSXRAbortConfig(d *network.Driver) (*response.Response, error) {
+func IOSXRAbortConfig(d *network.Driver) (*base.Response, error) {
 	_, err := d.Channel.SendInput("abort", false, false, -1)
 
 	d.CurrentPriv = privExecPrivLevel

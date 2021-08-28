@@ -3,8 +3,6 @@ package core
 import (
 	"strings"
 
-	"github.com/scrapli/scrapligo/response"
-
 	"github.com/scrapli/scrapligo/driver/base"
 
 	"github.com/scrapli/scrapligo/driver/network"
@@ -116,7 +114,7 @@ func EOSOnClose(d *network.Driver) error {
 }
 
 // EOSAbortConfig abort EOS configuration session.
-func EOSAbortConfig(d *network.Driver) (*response.Response, error) {
+func EOSAbortConfig(d *network.Driver) (*base.Response, error) {
 	if strings.Contains(d.CurrentPriv, "config\\-s") {
 		_, err := d.Channel.SendInput("abort", false, false, -1)
 		d.CurrentPriv = privExecPrivLevel

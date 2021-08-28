@@ -2,12 +2,11 @@ package network
 
 import (
 	"github.com/scrapli/scrapligo/driver/base"
-	"github.com/scrapli/scrapligo/response"
 )
 
 // SendCommand basically the same as the base driver flavor, but acquires the
 // `DefaultDesiredPriv` prior to sending the command.
-func (d *Driver) SendCommand(c string, o ...base.SendOption) (*response.Response, error) {
+func (d *Driver) SendCommand(c string, o ...base.SendOption) (*base.Response, error) {
 	finalOpts := d.ParseSendOptions(o)
 
 	if d.CurrentPriv != d.DefaultDesiredPriv {
