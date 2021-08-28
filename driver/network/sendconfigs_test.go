@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/scrapli/scrapligo/util/testhelper"
+
 	"github.com/scrapli/scrapligo/driver/network"
 
 	"github.com/scrapli/scrapligo/driver/core"
@@ -51,7 +53,7 @@ func TestSendConfigs(t *testing.T) {
 	for _, platform := range core.SupportedPlatforms() {
 		sessionFile := fmt.Sprintf("../../test_data/driver/network/sendconfigs/%s", platform)
 
-		d := createPatchedDriver(t, sessionFile, platform)
+		d := testhelper.CreatePatchedDriver(t, sessionFile, platform)
 
 		f := testSendConfigs(d, configsMap[platform])
 		t.Run(fmt.Sprintf("Platform=%s", platform), f)
@@ -66,7 +68,7 @@ func TestSendConfigsFromFile(t *testing.T) {
 			platform,
 		)
 
-		d := createPatchedDriver(t, sessionFile, platform)
+		d := testhelper.CreatePatchedDriver(t, sessionFile, platform)
 
 		f := testSendConfigsFromFile(d, configs)
 		t.Run(fmt.Sprintf("Platform=%s", platform), f)

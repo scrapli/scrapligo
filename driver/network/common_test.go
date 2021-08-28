@@ -3,9 +3,10 @@ package network_test
 import (
 	"testing"
 
+	"github.com/scrapli/scrapligo/driver/base"
+
 	"github.com/scrapli/scrapligo/driver/core"
 	"github.com/scrapli/scrapligo/driver/network"
-	"github.com/scrapli/scrapligo/util/testhelper"
 )
 
 func platformCommandMapShort() map[string]string {
@@ -62,11 +63,56 @@ func platformConfigsMap() map[string][]string {
 	}
 }
 
-func createPatchedDriver(t *testing.T, sessionFile, platform string) *network.Driver {
+type functionalTestHostConnData struct {
+	Host       string
+	Port       int
+	TelnetPort int
+}
+
+func functionalTestHosts() map[string]*functionalTestHostConnData {
+	return map[string]*functionalTestHostConnData{
+		"cisco_iosxe": {
+			Host:       "localhost",
+			Port:       21022,
+			TelnetPort: 21023,
+		},
+		"cisco_iosxr": {
+			Host:       "localhost",
+			Port:       23022,
+			TelnetPort: 23023,
+		},
+		"cisco_nxos": {
+			Host:       "localhost",
+			Port:       22022,
+			TelnetPort: 22023,
+		},
+		"arista_eos": {
+			Host:       "localhost",
+			Port:       24022,
+			TelnetPort: 24023,
+		},
+		"juniper_junos": {
+			Host:       "localhost",
+			Port:       25022,
+			TelnetPort: 25023,
+		},
+	}
+}
+
+func newFunctionalTestDriver(
+	t *testing.T,
+	host, platform, transportName string,
+	port int,
+) *network.Driver {
 	d, driverErr := core.NewCoreDriver(
-		"localhost",
+		host,
 		platform,
-		testhelper.WithPatchedTransport(sessionFile),
+		base.WithAuthUsername("boxen"),
+		base.WithAuthPassword("b0x3N-b0x3N"),
+		base.WithAuthSecondary("b0x3N-b0x3N"),
+		base.WithPort(port),
+		base.WithTransportType(transportName),
+		base.WithAuthStrictKey(false),
 	)
 
 	if driverErr != nil {

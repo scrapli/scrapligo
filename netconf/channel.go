@@ -15,6 +15,7 @@ type Channel struct {
 	BaseChannel             *channel.Channel
 	PreferredNetconfVersion string
 	SelectedNetconfVersion  string
+	ForceSelfClosingTag     bool
 	serverCapabilities      []string
 	serverEcho              *bool
 }

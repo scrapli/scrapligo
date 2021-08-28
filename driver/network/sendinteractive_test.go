@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/scrapli/scrapligo/util/testhelper"
+
 	"github.com/scrapli/scrapligo/driver/network"
 
 	"github.com/scrapli/scrapligo/channel"
@@ -99,7 +101,7 @@ func TestSendInteractive(t *testing.T) {
 
 		sessionFile := fmt.Sprintf("../../test_data/driver/network/sendinteractive/%s", platform)
 
-		d := createPatchedDriver(t, sessionFile, platform)
+		d := testhelper.CreatePatchedDriver(t, sessionFile, platform)
 
 		f := testSendInteractive(d, interactiveMap[platform])
 		t.Run(fmt.Sprintf("Platform=%s", platform), f)

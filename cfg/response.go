@@ -57,8 +57,8 @@ func (r *Response) Record(scrapliResponses []*response.Response, result string) 
 	r.Result = result
 	r.ScrapliResponses = scrapliResponses
 
-	for _, response := range r.ScrapliResponses {
-		if response.Failed != nil {
+	for _, resp := range r.ScrapliResponses {
+		if resp.Failed != nil {
 			r.Failed = r.ErrorType
 			break
 		}

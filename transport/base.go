@@ -21,6 +21,11 @@ func SupportedTransports() []string {
 	return []string{SystemTransportName, StandardTransportName, TelnetTransportName}
 }
 
+// SupportedNetconfTransports pseudo constant providing slice of supported netconf transport types.
+func SupportedNetconfTransports() []string {
+	return []string{SystemTransportName, StandardTransportName}
+}
+
 // ErrTransportFailure error for EOF/failure reading from the transport.
 var ErrTransportFailure = errors.New("error reading from transport, cannot continue")
 

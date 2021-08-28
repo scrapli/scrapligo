@@ -114,7 +114,7 @@ func testSendCommandsCommon(
 		)
 	}
 
-	d = createPatchedDriver(t, sessionFile, platform)
+	d = testhelper.CreatePatchedDriver(t, sessionFile, platform)
 
 	return d, [][]byte{expectedOutputOne, expectedOutputTwo}
 }
@@ -167,7 +167,7 @@ func testFunctionalSendCommandsCommon(
 		return
 	}
 
-	hostConnData, ok := testhelper.FunctionalTestHosts()[platform]
+	hostConnData, ok := functionalTestHosts()[platform]
 	if !ok {
 		t.Logf("skip; no host connection data for platform type %s\n", platform)
 		return
@@ -206,7 +206,7 @@ func testFunctionalSendCommandsCommon(
 		port = hostConnData.TelnetPort
 	}
 
-	d = testhelper.NewFunctionalTestDriver(
+	d = newFunctionalTestDriver(
 		t,
 		hostConnData.Host,
 		platform,

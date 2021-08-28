@@ -2,6 +2,7 @@ package netconf
 
 import (
 	"bytes"
+	"fmt"
 	"regexp"
 
 	"github.com/scrapli/scrapligo/logging"
@@ -105,6 +106,10 @@ func (c *Channel) sendClientCapabilities() error {
 	if c.SelectedNetconfVersion == Version10 {
 		clientCapabilities = Version10Capabilities
 	}
+
+	logging.LogDebug(c.BaseChannel.FormatLogMessage(
+		"info", fmt.Sprintf("sending client capabilities: %s\n", clientCapabilities)),
+	)
 
 	err := c.BaseChannel.Write([]byte(clientCapabilities), false)
 	if err != nil {
