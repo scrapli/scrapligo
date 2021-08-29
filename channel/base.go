@@ -56,7 +56,7 @@ type channelResult struct {
 	error  error
 }
 
-// Write write bytes input into the channel, redacted (currently unused) signals that the input
+// Write writes bytes input into the channel, redacted (currently unused) signals that the input
 // should not be written in the log output.
 func (c *Channel) Write(channelInput []byte, redacted bool) error {
 	// redacted unused for now, but want it in function signature so we can use it later
@@ -153,7 +153,7 @@ func (c *Channel) readUntilExplicitPrompt(prompts []*regexp.Regexp) ([]byte, err
 	}
 }
 
-// Read read bytes off the transport, handles some basic "massaging" of data to remove null bytes,
+// Read reads bytes off the transport, handles some basic "massaging" of data to remove null bytes,
 // \r characters, as well as stripping out any ANSI characters in the output.
 func (c *Channel) Read() ([]byte, error) {
 	chunk, err := c.Transport.Read()
@@ -183,7 +183,7 @@ func (c *Channel) Read() ([]byte, error) {
 	return b, err
 }
 
-// RestructureOutput strip prompt (if necessary) from output and trim any null space.
+// RestructureOutput strips prompt (if necessary) from output and trim any null space.
 func (c *Channel) RestructureOutput(output []byte, stripPrompt bool) []byte {
 	outputLines := bytes.Split(output, []byte("\n"))
 
@@ -207,7 +207,7 @@ func (c *Channel) RestructureOutput(output []byte, stripPrompt bool) []byte {
 	return cleanOutput
 }
 
-// DetermineOperationTimeout determine timeout to use for channel operation.
+// DetermineOperationTimeout determines timeout to use for channel operation.
 func (c *Channel) DetermineOperationTimeout(timeoutOps time.Duration) time.Duration {
 	opTimeout := c.TimeoutOps
 
