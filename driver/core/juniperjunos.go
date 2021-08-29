@@ -48,7 +48,7 @@ func NewJUNOSDriver(
 			EscalatePrompt: "",
 		},
 		"shell": {
-			Pattern:        `(?im)^%\s?$`,
+			Pattern:        `(?im)[%$]\s?$`,
 			Name:           "shell",
 			PreviousPriv:   execPrivLevel,
 			Deescalate:     "exit",
@@ -57,7 +57,7 @@ func NewJUNOSDriver(
 			EscalatePrompt: "",
 		},
 		"root_shell": {
-			Pattern:        `(?im)^root@%\s?$`,
+			Pattern:        `(?im)root@[[:ascii:]]*:[[:ascii:]]*[%#]\s?$`,
 			Name:           "root_shell",
 			PreviousPriv:   execPrivLevel,
 			Deescalate:     "exit",
