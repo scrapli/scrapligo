@@ -138,6 +138,8 @@ func (p *JUNOSCfg) LoadConfig(
 ) ([]*base.Response, error) {
 	var scrapliResponses []*base.Response
 
+	p.replaceConfig = replace
+
 	// the actual value is irrelevant, if there is a key "set" w/ any value we assume user is
 	// loading a "set" style config
 	_, ok := options.Kwargs["set"]
