@@ -59,8 +59,12 @@ type channelResult struct {
 // Write writes bytes input into the channel, redacted (currently unused) signals that the input
 // should not be written in the log output.
 func (c *Channel) Write(channelInput []byte, redacted bool) error {
-	// redacted unused for now, but want it in function signature so we can use it later
-	_ = redacted
+	logOutput := string(channelInput)
+	if redacted {
+		logOutput = "REDACTED"
+	}
+
+	logging.LogDebug(c.FormatLogMessage("write", fmt.Sprintf("write: %s", logOutput)))
 
 	err := c.Transport.Write(channelInput)
 
