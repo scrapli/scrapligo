@@ -3,6 +3,8 @@ package base
 import (
 	"time"
 
+	"github.com/scrapli/scrapligo/util"
+
 	"github.com/scrapli/scrapligo/logging"
 )
 
@@ -30,7 +32,7 @@ func (d *Driver) FullSendCommands(
 			return mr, err
 		}
 
-		if stopOnFailed && r.Failed {
+		if stopOnFailed && r.Failed != nil {
 			logging.LogDebug(
 				d.FormatLogMessage(
 					"info",
@@ -80,7 +82,7 @@ func (d *Driver) SendCommandsFromFile(
 ) (*MultiResponse, error) {
 	finalOpts := d.ParseSendOptions(o)
 
-	c, err := LoadFileLines(f)
+	c, err := util.LoadFileLines(f)
 	if err != nil {
 		return nil, err
 	}

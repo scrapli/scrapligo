@@ -92,7 +92,11 @@ func (p *JUNOSCfg) GetVersion() (string, []*base.Response, error) {
 		return "", nil, err
 	}
 
-	return p.VersionPattern.FindString(versionResult.Result), []*base.Response{versionResult}, nil
+	return p.VersionPattern.FindString(
+			versionResult.Result,
+		), []*base.Response{
+			versionResult,
+		}, nil
 }
 
 // GetConfig get the configuration of a source datastore from the device.
@@ -275,7 +279,7 @@ func (p *JUNOSCfg) DiffConfig(
 
 	scrapliResponses = append(scrapliResponses, diffResult)
 
-	if diffResult.Failed {
+	if diffResult.Failed != nil {
 		logging.LogError(
 			FormatLogMessage(
 				p.conn,
@@ -294,7 +298,7 @@ func (p *JUNOSCfg) DiffConfig(
 
 	scrapliResponses = append(scrapliResponses, getConfigR[0])
 
-	if getConfigR[0].Failed {
+	if getConfigR[0].Failed != nil {
 		logging.LogError(
 			FormatLogMessage(
 				p.conn,

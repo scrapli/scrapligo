@@ -2,6 +2,7 @@ package network
 
 import (
 	"github.com/scrapli/scrapligo/driver/base"
+	"github.com/scrapli/scrapligo/util"
 )
 
 // SendCommands basically the same as the base driver flavor, but acquires the
@@ -35,7 +36,7 @@ func (d *Driver) SendCommandsFromFile(
 	f string,
 	o ...base.SendOption,
 ) (*base.MultiResponse, error) {
-	c, err := base.LoadFileLines(f)
+	c, err := util.LoadFileLines(f)
 	if err != nil {
 		return nil, err
 	}

@@ -2,9 +2,7 @@ package base
 
 import (
 	"fmt"
-	"io"
 	"regexp"
-	"time"
 
 	"github.com/scrapli/scrapligo/logging"
 
@@ -28,7 +26,6 @@ type PrivilegeLevel struct {
 // Driver primary/base driver struct.
 type Driver struct {
 	Host string
-	Port int
 
 	AuthUsername             string
 	AuthPassword             string
@@ -41,20 +38,10 @@ type Driver struct {
 	SSHConfigFile     string
 	SSHKnownHostsFile string
 
-	TimeoutSocket    time.Duration
-	TimeoutTransport time.Duration
-	TimeoutOps       time.Duration
+	TransportType string
+	Transport     *transport.Transport
 
-	CommsPromptPattern *regexp.Regexp
-	CommsReturnChar    string
-
-	TransportType      string
-	Transport          transport.BaseTransport
-	transportPtyWidth  int
-	transportPtyHeight int
-
-	Channel    *channel.Channel
-	channelLog io.Writer
+	Channel *channel.Channel
 
 	FailedWhenContains []string
 
@@ -64,12 +51,16 @@ type Driver struct {
 	NetconfEcho *bool
 }
 
-// Open open the connection.
+// Open opens the connection.
 func (d *Driver) Open() error {
 	logging.LogDebug(
 		d.FormatLogMessage(
 			"info",
-			fmt.Sprintf("opening connection to '%s' on port '%d'", d.Host, d.Port),
+			fmt.Sprintf(
+				"opening connection to '%s' on port '%d'",
+				d.Host,
+				d.Transport.BaseTransportArgs.Port,
+			),
 		),
 	)
 
@@ -98,12 +89,16 @@ func (d *Driver) Open() error {
 	return nil
 }
 
-// Close close the connection.
+// Close closes the connection.
 func (d *Driver) Close() error {
 	logging.LogDebug(
 		d.FormatLogMessage(
 			"info",
-			fmt.Sprintf("closing connection to '%s' on port '%d'", d.Host, d.Port),
+			fmt.Sprintf(
+				"closing connection to '%s' on port '%d'",
+				d.Host,
+				d.Transport.BaseTransportArgs.Port,
+			),
 		),
 	)
 
@@ -121,5 +116,5 @@ func (d *Driver) Close() error {
 
 // FormatLogMessage formats log message payload, adding contextual info about the host.
 func (d *Driver) FormatLogMessage(level, msg string) string {
-	return logging.FormatLogMessage(level, d.Host, d.Port, msg)
+	return logging.FormatLogMessage(level, d.Host, d.Transport.BaseTransportArgs.Port, msg)
 }

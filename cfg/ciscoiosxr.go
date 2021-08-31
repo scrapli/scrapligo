@@ -115,7 +115,11 @@ func (p *IOSXRCfg) GetVersion() (string, []*base.Response, error) {
 		return "", nil, err
 	}
 
-	return p.VersionPattern.FindString(versionResult.Result), []*base.Response{versionResult}, nil
+	return p.VersionPattern.FindString(
+			versionResult.Result,
+		), []*base.Response{
+			versionResult,
+		}, nil
 }
 
 // GetConfig get the configuration of a source datastore from the device.
@@ -198,7 +202,7 @@ func (p *IOSXRCfg) LoadConfig(
 	configResult, stdConfigErr := p.conn.SendConfig(
 		stdConfig, base.WithDesiredPrivilegeLevel(p.configPrivLevel),
 	)
-	if stdConfigErr != nil || configResult.Failed {
+	if stdConfigErr != nil || configResult.Failed != nil {
 		return scrapliResponses, stdConfigErr
 	}
 
@@ -209,9 +213,12 @@ func (p *IOSXRCfg) LoadConfig(
 		base.WithSendEager(true),
 		base.WithDesiredPrivilegeLevel(p.configPrivLevel),
 	)
+
 	if eagerConfigErr != nil {
 		return scrapliResponses, eagerConfigErr
-	} else if eagerResult.Failed {
+	}
+
+	if eagerResult.Failed != nil {
 		return scrapliResponses, eagerConfigErr
 	}
 
@@ -224,7 +231,7 @@ func (p *IOSXRCfg) LoadConfig(
 func (p *IOSXRCfg) AbortConfig() ([]*base.Response, error) {
 	var scrapliResponses []*base.Response
 
-	_, err := p.conn.Channel.SendInput("abort", false, false, p.conn.TimeoutOps)
+	_, err := p.conn.Channel.SendInput("abort", false, false, p.conn.Channel.TimeoutOps)
 	if err != nil {
 		return scrapliResponses, err
 	}
@@ -321,7 +328,7 @@ func (p *IOSXRCfg) DiffConfig(
 
 	scrapliResponses = append(scrapliResponses, diffResult)
 
-	if diffResult.Failed {
+	if diffResult.Failed != nil {
 		logging.LogError(
 			FormatLogMessage(
 				p.conn,
@@ -342,7 +349,7 @@ func (p *IOSXRCfg) DiffConfig(
 
 	scrapliResponses = append(scrapliResponses, getConfigR[0])
 
-	if getConfigR[0].Failed {
+	if getConfigR[0].Failed != nil {
 		logging.LogError(
 			FormatLogMessage(
 				p.conn,

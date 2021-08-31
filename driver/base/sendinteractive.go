@@ -15,15 +15,16 @@ func (d *Driver) FullSendInteractive(
 	timeoutOps time.Duration,
 	joinedEventInputs string,
 ) (*Response, error) {
-	r := NewResponse(d.Host, d.Port, joinedEventInputs, failedWhenContains)
+	r := NewResponse(
+		d.Host,
+		d.Transport.BaseTransportArgs.Port,
+		joinedEventInputs,
+		failedWhenContains,
+	)
 
 	rawResult, err := d.Channel.SendInteractive(events, interactionCompletePatterns, timeoutOps)
 
 	r.Record(rawResult, string(rawResult))
-
-	if err != nil {
-		r.Failed = true
-	}
 
 	return r, err
 }

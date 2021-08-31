@@ -1,12 +1,11 @@
+//go:build windows
 // +build windows
 
 package base
 
 import (
-	"regexp"
-	"time"
+	"errors"
 
-	"github.com/scrapli/scrapligo/channel"
 	"github.com/scrapli/scrapligo/transport"
 )
 
@@ -18,35 +17,33 @@ func NewDriver(
 ) (*Driver, error) {
 	d := &Driver{
 		Host:               host,
-		Port:               22,
 		AuthStrictKey:      true,
-		TimeoutSocket:      30 * time.Second,
-		TimeoutTransport:   45 * time.Second,
-		TimeoutOps:         60 * time.Second,
-		CommsPromptPattern: regexp.MustCompile(`(?im)^[a-z0-9.\-@()/:]{1,48}[#>$]\s*$`),
-		CommsReturnChar:    "\n",
 		TransportType:      transport.StandardTransportName,
-		transportPtyHeight: 80,
-		transportPtyWidth:  256,
 		FailedWhenContains: []string{},
 		PrivilegeLevels:    map[string]*PrivilegeLevel{},
 		DefaultDesiredPriv: "",
 	}
 
 	for _, option := range options {
-		if err := option(d); err != nil {
-			return nil, err
+		err := option(d)
+
+		if err != nil {
+			if errors.Is(err, ErrIgnoredOption) {
+				continue
+			} else {
+				return nil, err
+			}
 		}
 	}
 
 	baseTransportArgs := &transport.BaseTransportArgs{
 		Host:             d.Host,
-		Port:             d.Port,
+		Port:             22,
 		AuthUsername:     d.AuthUsername,
-		TimeoutSocket:    &d.TimeoutSocket,
-		TimeoutTransport: &d.TimeoutTransport,
-		PtyHeight:        d.transportPtyHeight,
-		PtyWidth:         d.transportPtyWidth,
+		TimeoutSocket:    d.TimeoutSocket,
+		TimeoutTransport: d.TimeoutTransport,
+		PtyHeight:        80,
+		PtyWidth:         256,
 	}
 
 	if d.Transport == nil {
@@ -59,16 +56,22 @@ func NewDriver(
 				SSHConfigFile:     d.SSHConfigFile,
 				SSHKnownHostsFile: d.SSHKnownHostsFile,
 			}
-			t := &transport.Standard{
-				BaseTransportArgs:     baseTransportArgs,
+			tImpl := &transport.Standard{
 				StandardTransportArgs: standardTransportArgs,
+			}
+			t := &transport.Transport{
+				Impl:              tImpl,
+				BaseTransportArgs: baseTransportArgs,
 			}
 			d.Transport = t
 		case transport.TelnetTransportName:
 			telnetTransportArgs := &transport.TelnetTransportArgs{}
-			t := &transport.Telnet{
-				BaseTransportArgs:   baseTransportArgs,
+			tImpl := &transport.Telnet{
 				TelnetTransportArgs: telnetTransportArgs,
+			}
+			t := &transport.Transport{
+				Impl:              tImpl,
+				BaseTransportArgs: baseTransportArgs,
 			}
 			d.Transport = t
 		default:
@@ -76,14 +79,21 @@ func NewDriver(
 		}
 	}
 
-	c := &channel.Channel{
-		CommsPromptPattern: d.CommsPromptPattern,
-		CommsReturnChar:    &d.CommsReturnChar,
-		TimeoutOps:         &d.TimeoutOps,
-		Transport:          d.Transport,
-		Host:               d.Host,
-		Port:               d.Port,
-		ChannelLog:         d.channelLog,
+	for _, option := range options {
+		err := option(d.Transport)
+
+		if err != nil {
+			if errors.Is(err, ErrIgnoredOption) {
+				continue
+			} else {
+				return nil, err
+			}
+		}
+	}
+
+	c, err := NewChannel(d.Transport, options...)
+	if err != nil {
+		return nil, err
 	}
 
 	d.Channel = c

@@ -6,6 +6,9 @@ import (
 	"strings"
 
 	"github.com/scrapli/scrapligo/driver/base"
+
+	"github.com/scrapli/scrapligo/util"
+
 	"github.com/scrapli/scrapligo/logging"
 
 	"github.com/scrapli/scrapligo/driver/network"
@@ -53,7 +56,7 @@ type Platform interface {
 }
 
 func FormatLogMessage(conn *network.Driver, level, msg string) string {
-	return logging.FormatLogMessage(level, conn.Host, conn.Port, msg)
+	return logging.FormatLogMessage(level, conn.Host, conn.Transport.BaseTransportArgs.Port, msg)
 }
 
 func setPlatformOptions(p Platform, options ...Option) error {
@@ -196,7 +199,7 @@ func (d *Cfg) operationOk() error {
 }
 
 func (d *Cfg) validateAndSetVersion(versionResponse *Response) error {
-	if versionResponse.Failed {
+	if versionResponse.Failed != nil {
 		logging.LogError(FormatLogMessage(d.conn, "error", "failed getting version from device"))
 		return ErrVersionError
 	}
@@ -341,7 +344,7 @@ func (d *Cfg) GetVersion() (*Response, error) {
 
 	r.Record(scrapliResponses, versionString)
 
-	if r.Failed {
+	if r.Failed != nil {
 		logging.LogDebug(FormatLogMessage(d.conn, "warning", "failed to fetch device version"))
 	}
 
@@ -377,7 +380,7 @@ func (d *Cfg) GetConfig(source string) (*Response, error) {
 
 	r.Record(scrapliResponses, cfgString)
 
-	if r.Failed {
+	if r.Failed != nil {
 		logging.LogError(FormatLogMessage(d.conn, "debug", "failed to fetch config from device"))
 	}
 
@@ -408,7 +411,7 @@ func (d *Cfg) LoadConfig(
 
 	r.Record(scrapliResponses, "")
 
-	if r.Failed {
+	if r.Failed != nil {
 		logging.LogError(
 			FormatLogMessage(d.conn, "error", "failed to load candidate configuration"),
 		)
@@ -427,7 +430,7 @@ func (d *Cfg) LoadConfigFromFile(
 		FormatLogMessage(d.conn, "info", "load config from file requested"),
 	)
 
-	c, err := base.LoadFileLines(f)
+	c, err := util.LoadFileLines(f)
 	if err != nil {
 		return nil, err
 	}
@@ -464,7 +467,7 @@ func (d *Cfg) AbortConfig() (*Response, error) {
 
 	r.Record(scrapliResponses, "")
 
-	if r.Failed {
+	if r.Failed != nil {
 		logging.LogError(
 			FormatLogMessage(d.conn, "error", "failed to abort candidate configuration"),
 		)
@@ -510,7 +513,7 @@ func (d *Cfg) CommitConfig(options ...OperationOption) (*Response, error) {
 
 	r.Record(scrapliResponses, "")
 
-	if r.Failed {
+	if r.Failed != nil {
 		logging.LogError(
 			FormatLogMessage(d.conn, "error", "failed to commit candidate configuration"),
 		)
@@ -560,7 +563,7 @@ func (d *Cfg) DiffConfig(options ...OperationOption) (*DiffResponse, error) {
 	r.Record(scrapliResponses, "")
 	r.RecordDiff(sourceConfig, candidateConfig, deviceDiff)
 
-	if r.Failed {
+	if r.Failed != nil {
 		logging.LogError(
 			FormatLogMessage(d.conn, "error", "failed to diff configuration"),
 		)

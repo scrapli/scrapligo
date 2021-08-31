@@ -1,3 +1,4 @@
+//go:build !windows
 // +build !windows
 
 package transport
@@ -7,18 +8,24 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/scrapli/scrapligo/logging"
-
 	"github.com/creack/pty"
+	"github.com/scrapli/scrapligo/logging"
 )
+
+const sshCmd = "ssh"
 
 // System the "system" (pty subprocess wrapper) transport option for scrapligo.
 type System struct {
-	BaseTransportArgs   *BaseTransportArgs
 	SystemTransportArgs *SystemTransportArgs
 	fileObj             *os.File
 	OpenCmd             []string
 	ExecCmd             string
+}
+
+// SystemTransport interface describes system transport specific methods.
+type SystemTransport interface {
+	SetOpenCmd([]string)
+	SetExecCmd(string)
 }
 
 // SystemTransportArgs struct representing attributes required for the System transport.
@@ -27,20 +34,31 @@ type SystemTransportArgs struct {
 	AuthStrictKey     bool
 	SSHConfigFile     string
 	SSHKnownHostsFile string
+	NetconfForcePty   *bool
 }
 
-func (t *System) buildOpenCmd() {
-	// base open command arguments; the exec command itself will be passed in Open()
+// SetOpenCmd sets the open command string slice; arguments used for opening the connection.
+func (t *System) SetOpenCmd(openCmd []string) {
+	t.OpenCmd = openCmd
+}
+
+// SetExecCmd sets the exec command string, binary used for opening the connection.
+func (t *System) SetExecCmd(execCmd string) {
+	t.ExecCmd = execCmd
+}
+
+func (t *System) buildOpenCmd(baseArgs *BaseTransportArgs) {
+	// base open command arguments; the exec command itself will be passed in open()
 	// need to add user arguments could go here at some point
 	t.OpenCmd = append(
 		t.OpenCmd,
-		t.BaseTransportArgs.Host,
+		baseArgs.Host,
 		"-p",
-		fmt.Sprintf("%d", t.BaseTransportArgs.Port),
+		fmt.Sprintf("%d", baseArgs.Port),
 		"-o",
-		fmt.Sprintf("ConnectTimeout=%d", int(t.BaseTransportArgs.TimeoutSocket.Seconds())),
+		fmt.Sprintf("ConnectTimeout=%d", int(baseArgs.TimeoutSocket.Seconds())),
 		"-o",
-		fmt.Sprintf("ServerAliveInterval=%d", int(t.BaseTransportArgs.TimeoutTransport.Seconds())),
+		fmt.Sprintf("ServerAliveInterval=%d", int(baseArgs.TimeoutTransport.Seconds())),
 	)
 
 	if t.SystemTransportArgs.AuthPrivateKey != "" {
@@ -51,11 +69,11 @@ func (t *System) buildOpenCmd() {
 		)
 	}
 
-	if t.BaseTransportArgs.AuthUsername != "" {
+	if baseArgs.AuthUsername != "" {
 		t.OpenCmd = append(
 			t.OpenCmd,
 			"-l",
-			t.BaseTransportArgs.AuthUsername,
+			baseArgs.AuthUsername,
 		)
 	}
 
@@ -98,19 +116,17 @@ func (t *System) buildOpenCmd() {
 	}
 }
 
-// Open opens a standard connection -- typically `ssh`, but users can set the `ExecCommand` to spawn
-// different types of programs such as `docker exec` or `kubectl exec`.
-func (t *System) Open() error {
+func (t *System) Open(baseArgs *BaseTransportArgs) error {
 	if t.OpenCmd == nil {
-		t.buildOpenCmd()
+		t.buildOpenCmd(baseArgs)
 	}
 
 	if t.ExecCmd == "" {
-		t.ExecCmd = "ssh"
+		t.ExecCmd = sshCmd
 	}
 
 	logging.LogDebug(
-		t.FormatLogMessage(
+		FormatLogMessage(baseArgs,
 			"debug",
 			fmt.Sprintf(
 				"\"attempting to open transport connection with the following command: %s",
@@ -123,36 +139,38 @@ func (t *System) Open() error {
 	fileObj, err := pty.StartWithSize(
 		command,
 		&pty.Winsize{
-			Rows: uint16(t.BaseTransportArgs.PtyHeight),
-			Cols: uint16(t.BaseTransportArgs.PtyWidth),
+			Rows: uint16(baseArgs.PtyHeight),
+			Cols: uint16(baseArgs.PtyWidth),
 		},
 	)
 
-	if err != nil {
-		logging.LogError(t.FormatLogMessage("error", "failed opening transport connection to host"))
-
-		return err
+	if err == nil {
+		t.fileObj = fileObj
 	}
-
-	logging.LogDebug(t.FormatLogMessage("debug", "transport connection to host opened"))
-
-	t.fileObj = fileObj
 
 	return err
 }
 
-// OpenNetconf opens a netconf connection.
-func (t *System) OpenNetconf() error {
-	t.buildOpenCmd()
+func (t *System) OpenNetconf(baseArgs *BaseTransportArgs) error {
+	if t.OpenCmd == nil {
+		t.buildOpenCmd(baseArgs)
 
-	t.OpenCmd = append(t.OpenCmd,
-		"-tt",
-		"-s",
-		"netconf",
-	)
+		if t.SystemTransportArgs.NetconfForcePty == nil || *t.SystemTransportArgs.NetconfForcePty {
+			t.OpenCmd = append(t.OpenCmd, "-tt")
+		}
+
+		t.OpenCmd = append(t.OpenCmd,
+			"-s",
+			"netconf",
+		)
+	}
+
+	if t.ExecCmd == "" {
+		t.ExecCmd = sshCmd
+	}
 
 	logging.LogDebug(
-		t.FormatLogMessage(
+		FormatLogMessage(baseArgs,
 			"debug",
 			fmt.Sprintf(
 				"\"attempting to open netconf transport connection with the following command: %s",
@@ -161,98 +179,46 @@ func (t *System) OpenNetconf() error {
 		),
 	)
 
-	command := exec.Command("ssh", t.OpenCmd...) //nolint:gosec
+	command := exec.Command(t.ExecCmd, t.OpenCmd...) //nolint:gosec
 	fileObj, err := pty.Start(command)
 
-	if err != nil {
-		logging.LogError(
-			t.FormatLogMessage("error", "failed opening netconf transport connection to host"),
-		)
-
-		return err
+	if err == nil {
+		t.fileObj = fileObj
 	}
-
-	logging.LogDebug(t.FormatLogMessage("debug", "netconf transport connection to host opened"))
-
-	t.fileObj = fileObj
 
 	return err
 }
 
-// Close closes the transport connection to the device.
 func (t *System) Close() error {
 	err := t.fileObj.Close()
 	t.fileObj = nil
-	logging.LogDebug(t.FormatLogMessage("debug", "transport connection to host closed"))
 
 	return err
 }
 
-func (t *System) read(n int) *transportResult {
-	b := make([]byte, n)
-	_, err := t.fileObj.Read(b)
-
-	if err != nil {
-		return &transportResult{
-			result: nil,
-			error:  ErrTransportFailure,
-		}
-	}
-
-	return &transportResult{
-		result: b,
-		error:  nil,
-	}
-}
-
-// Read read bytes from the transport.
-func (t *System) Read() ([]byte, error) {
-	b, err := transportTimeout(
-		*t.BaseTransportArgs.TimeoutTransport,
-		t.read,
-		ReadSize,
-	)
-
-	if err != nil {
-		logging.LogError(t.FormatLogMessage("error", "timed out reading from transport"))
-		return b, err
-	}
-
-	return b, nil
-}
-
-// ReadN reads N bytes from the transport.
-func (t *System) ReadN(n int) ([]byte, error) {
-	b, err := transportTimeout(
-		*t.BaseTransportArgs.TimeoutTransport,
-		t.read,
-		n,
-	)
-
-	if err != nil {
-		logging.LogError(t.FormatLogMessage("error", "timed out reading from transport"))
-		return b, err
-	}
-
-	return b, nil
-}
-
-// Write writes bytes to the transport.
-func (t *System) Write(channelInput []byte) error {
-	_, err := t.fileObj.Write(channelInput)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// IsAlive indicates if the transport is alive or not.
 func (t *System) IsAlive() bool {
 	return t.fileObj != nil
 }
 
-// FormatLogMessage formats log message payload, adding contextual info about the host.
-func (t *System) FormatLogMessage(level, msg string) string {
-	return logging.FormatLogMessage(level, t.BaseTransportArgs.Host, t.BaseTransportArgs.Port, msg)
+func (t *System) Read(n int) *ReadResult {
+	b := make([]byte, n)
+	_, err := t.fileObj.Read(b)
+
+	if err != nil {
+		return &ReadResult{
+			Result: nil,
+			Error:  ErrTransportFailure,
+		}
+	}
+
+	return &ReadResult{
+		Result: b,
+		Error:  nil,
+	}
+}
+
+func (t *System) Write(channelInput []byte) error {
+	_, err := t.fileObj.Write(channelInput)
+
+	return err
 }

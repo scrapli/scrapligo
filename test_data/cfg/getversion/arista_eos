@@ -22,3 +22,4 @@ localhost#show version | i Software image version
 Software image version: 4.22.1F
 localhost#show version | i Software image version
 Software image version: 4.22.1F
+localhost#

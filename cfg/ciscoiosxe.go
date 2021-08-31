@@ -97,7 +97,11 @@ func (p *IOSXECfg) GetVersion() (string, []*base.Response, error) {
 		return "", nil, err
 	}
 
-	return p.VersionPattern.FindString(versionResult.Result), []*base.Response{versionResult}, nil
+	return p.VersionPattern.FindString(
+			versionResult.Result,
+		), []*base.Response{
+			versionResult,
+		}, nil
 }
 
 // GetConfig get the configuration of a source datastore from the device.
@@ -200,7 +204,7 @@ func (p *IOSXECfg) LoadConfig(
 
 	config = p.prepareConfigPayload(config)
 
-	originalReturnChar := p.conn.CommsReturnChar
+	originalReturnChar := p.conn.Channel.CommsReturnChar
 	tclCommsReturnChar := "\r"
 
 	err = p.conn.AcquirePriv("tclsh")
@@ -208,7 +212,7 @@ func (p *IOSXECfg) LoadConfig(
 		return nil, err
 	}
 
-	p.conn.Channel.CommsReturnChar = &tclCommsReturnChar
+	p.conn.Channel.CommsReturnChar = tclCommsReturnChar
 
 	r, err := p.conn.SendConfig(config, base.WithDesiredPrivilegeLevel("tclsh"))
 	if err != nil {
@@ -222,7 +226,7 @@ func (p *IOSXECfg) LoadConfig(
 		return scrapliResponses, err
 	}
 
-	p.conn.Channel.CommsReturnChar = &originalReturnChar
+	p.conn.Channel.CommsReturnChar = originalReturnChar
 
 	return scrapliResponses, nil
 }
@@ -501,7 +505,7 @@ func (p *IOSXECfg) DiffConfig(
 
 	scrapliResponses = append(scrapliResponses, diffResult)
 
-	if diffResult.Failed {
+	if diffResult.Failed != nil {
 		logging.LogError(
 			FormatLogMessage(
 				p.conn,
@@ -522,7 +526,7 @@ func (p *IOSXECfg) DiffConfig(
 
 	scrapliResponses = append(scrapliResponses, getConfigR[0])
 
-	if getConfigR[0].Failed {
+	if getConfigR[0].Failed != nil {
 		logging.LogError(
 			FormatLogMessage(
 				p.conn,

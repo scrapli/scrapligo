@@ -3,6 +3,8 @@ package network
 import (
 	"errors"
 
+	"github.com/scrapli/scrapligo/util"
+
 	"github.com/scrapli/scrapligo/driver/base"
 
 	"github.com/scrapli/scrapligo/channel"
@@ -37,7 +39,7 @@ func (d *Driver) SendConfigs(c []string, o ...base.SendOption) (*base.MultiRespo
 		return m, err
 	}
 
-	if finalOpts.StopOnFailed && m.Failed() {
+	if finalOpts.StopOnFailed && m.Failed != nil {
 		if f, ok := d.Augments["abortConfig"]; ok {
 			_, err = f(d)
 		}
@@ -51,7 +53,7 @@ func (d *Driver) SendConfigsFromFile(
 	f string,
 	o ...base.SendOption,
 ) (*base.MultiResponse, error) {
-	c, err := base.LoadFileLines(f)
+	c, err := util.LoadFileLines(f)
 	if err != nil {
 		return nil, err
 	}

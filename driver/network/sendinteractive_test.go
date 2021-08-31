@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/scrapli/scrapligo/util/testhelper"
+
+	"github.com/scrapli/scrapligo/driver/network"
+
 	"github.com/scrapli/scrapligo/channel"
 
 	"github.com/scrapli/scrapligo/driver/core"
-
-	"github.com/scrapli/scrapligo/util/testhelper"
 )
 
 func platformInteractiveMap() map[string][]*channel.SendInteractiveEvent {
@@ -52,31 +54,56 @@ func platformInteractiveMap() map[string][]*channel.SendInteractiveEvent {
 	}
 }
 
+func testSendInteractive(
+	d *network.Driver,
+	events []*channel.SendInteractiveEvent,
+) func(t *testing.T) {
+	return func(t *testing.T) {
+		openErr := d.Open()
+		if openErr != nil {
+			t.Fatalf("failed opening patched driver: %v", openErr)
+		}
+
+		r, interactErr := d.SendInteractive(events)
+		if interactErr != nil {
+			t.Fatalf("failed sending interactive: %v", interactErr)
+		}
+
+		if r.Failed != nil {
+			t.Fatalf("response object indicates failure; error: %+v\n", r.Failed)
+		}
+	}
+}
+
 func TestSendInteractive(t *testing.T) {
 	interactiveMap := platformInteractiveMap()
 
 	for _, platform := range core.SupportedPlatforms() {
 		if platform == "cisco_nxos" {
-			// gotta figure out a interactive command on nxos
+			// gotta figure out an interactive command on nxos
 			continue
 		}
 
 		if platform == "juniper_junos" {
-			// gotta figure out a interactive command on junos
+			// gotta figure out an interactive command on junos
 			continue
 		}
 
 		if platform == "nokia_sros" {
-			// gotta figure out a interactive command on sros
+			// gotta figure out an interactive command on sros
 			continue
 		}
 
 		if platform == "nokia_sros_classic" {
-			// gotta figure out a interactive command on sros
+			// gotta figure out an interactive command on sros
 			continue
 		}
 
-		f := testhelper.SendInteractiveTestHelper(platform, interactiveMap[platform])
+		sessionFile := fmt.Sprintf("../../test_data/driver/network/sendinteractive/%s", platform)
+
+		d := testhelper.CreatePatchedDriver(t, sessionFile, platform)
+
+		f := testSendInteractive(d, interactiveMap[platform])
 		t.Run(fmt.Sprintf("Platform=%s", platform), f)
 	}
 }

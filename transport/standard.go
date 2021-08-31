@@ -15,7 +15,6 @@ import (
 
 // Standard the "standard" (standard library) transport option for scrapligo.
 type Standard struct {
-	BaseTransportArgs     *BaseTransportArgs
 	StandardTransportArgs *StandardTransportArgs
 	client                *ssh.Client
 	session               *ssh.Session
@@ -63,17 +62,21 @@ func trustedHostKeyCallback(trustedKey string) ssh.HostKeyCallback {
 	}
 }
 
-func (t *Standard) open(cfg *ssh.ClientConfig) error {
+func (t *Standard) openSession(baseArgs *BaseTransportArgs, cfg *ssh.ClientConfig) error {
 	var err error
 	t.client, err = ssh.Dial(
 		"tcp",
-		fmt.Sprintf("%s:%d", t.BaseTransportArgs.Host, t.BaseTransportArgs.Port),
+		fmt.Sprintf("%s:%d", baseArgs.Host, baseArgs.Port),
 		cfg,
 	)
 
 	if err != nil {
 		logging.LogError(
-			t.FormatLogMessage("error", fmt.Sprintf("error connecting to host: %v", err)),
+			FormatLogMessage(
+				baseArgs,
+				"error",
+				fmt.Sprintf("error connecting to host: %v", err),
+			),
 		)
 
 		return err
@@ -82,7 +85,11 @@ func (t *Standard) open(cfg *ssh.ClientConfig) error {
 	t.session, err = t.client.NewSession()
 	if err != nil {
 		logging.LogError(
-			t.FormatLogMessage("error", fmt.Sprintf("error allocating session: %v", err)),
+			FormatLogMessage(
+				baseArgs,
+				"error",
+				fmt.Sprintf("error allocating session: %v", err),
+			),
 		)
 
 		return err
@@ -91,7 +98,11 @@ func (t *Standard) open(cfg *ssh.ClientConfig) error {
 	t.writer, err = t.session.StdinPipe()
 	if err != nil {
 		logging.LogError(
-			t.FormatLogMessage("error", fmt.Sprintf("error allocating writer: %v", err)),
+			FormatLogMessage(
+				baseArgs,
+				"error",
+				fmt.Sprintf("error allocating writer: %v", err),
+			),
 		)
 
 		return err
@@ -100,16 +111,18 @@ func (t *Standard) open(cfg *ssh.ClientConfig) error {
 	t.reader, err = t.session.StdoutPipe()
 	if err != nil {
 		logging.LogError(
-			t.FormatLogMessage("error", fmt.Sprintf("error allocating reader: %v", err)),
+			FormatLogMessage(
+				baseArgs,
+				"error",
+				fmt.Sprintf("error allocating reader: %v", err),
+			),
 		)
-
-		return err
 	}
 
-	return nil
+	return err
 }
 
-func (t *Standard) openBase() error {
+func (t *Standard) openBase(baseArgs *BaseTransportArgs) error {
 	/* #nosec G106 */
 	hostKeyCallback := ssh.InsecureIgnoreHostKey()
 	if t.StandardTransportArgs.AuthStrictKey {
@@ -129,7 +142,11 @@ func (t *Standard) openBase() error {
 
 		if err != nil {
 			logging.LogError(
-				t.FormatLogMessage("error", fmt.Sprintf("unable to parse private key: %v", err)),
+				FormatLogMessage(
+					baseArgs,
+					"error",
+					fmt.Sprintf("unable to parse private key: %v", err),
+				),
 			)
 
 			return err
@@ -153,13 +170,19 @@ func (t *Standard) openBase() error {
 	}
 
 	cfg := &ssh.ClientConfig{
-		User:            t.BaseTransportArgs.AuthUsername,
+		User:            baseArgs.AuthUsername,
 		Auth:            authMethods,
-		Timeout:         *t.BaseTransportArgs.TimeoutSocket,
+		Timeout:         baseArgs.TimeoutSocket,
 		HostKeyCallback: hostKeyCallback,
 	}
 
-	err := t.open(cfg)
+	err := t.openSession(baseArgs, cfg)
+
+	return err
+}
+
+func (t *Standard) Open(baseArgs *BaseTransportArgs) error {
+	err := t.openBase(baseArgs)
 	if err != nil {
 		return err
 	}
@@ -173,130 +196,60 @@ func (t *Standard) openBase() error {
 
 	err = t.session.RequestPty(
 		"xterm",
-		t.BaseTransportArgs.PtyHeight,
-		t.BaseTransportArgs.PtyWidth,
+		baseArgs.PtyHeight,
+		baseArgs.PtyWidth,
 		modes,
 	)
 	if err != nil {
 		return err
 	}
 
-	return nil
-}
-
-// Open open a standard ssh connection.
-func (t *Standard) Open() error {
-	err := t.openBase()
-	if err != nil {
-		return err
-	}
-
 	err = t.session.Shell()
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// OpenNetconf open a netconf connection.
-func (t *Standard) OpenNetconf() error {
-	err := t.openBase()
-	if err != nil {
-		logging.LogError(
-			fmt.Sprintf(
-				"failed opening base connection, cant attempt to open netconf connection; error: %v",
-				err,
-			),
-		)
-
-		return err
-	}
-
-	err = t.session.RequestSubsystem("netconf")
-	if err != nil {
-		logging.LogError(fmt.Sprintf("failed opening netconf subsystem; error: %v", err))
-		return err
-	}
-
-	return nil
-}
-
-// Close close the transport connection to the device.
-func (t *Standard) Close() error {
-	err := t.session.Close()
-	t.session = nil
-
-	logging.LogDebug(t.FormatLogMessage("debug", "transport connection to host closed"))
 
 	return err
 }
 
-func (t *Standard) read(n int) *transportResult {
-	b := make([]byte, n)
-	_, err := t.reader.Read(b)
-
-	if err != nil {
-		return &transportResult{
-			result: nil,
-			error:  ErrTransportFailure,
-		}
-	}
-
-	return &transportResult{
-		result: b,
-		error:  nil,
-	}
-}
-
-// Read read bytes from the transport.
-func (t *Standard) Read() ([]byte, error) {
-	b, err := transportTimeout(
-		*t.BaseTransportArgs.TimeoutTransport,
-		t.read,
-		ReadSize,
-	)
-
-	if err != nil {
-		logging.LogError(t.FormatLogMessage("error", "timed out reading from transport"))
-		return b, err
-	}
-
-	return b, nil
-}
-
-// ReadN read N bytes from the transport.
-func (t *Standard) ReadN(n int) ([]byte, error) {
-	b, err := transportTimeout(
-		*t.BaseTransportArgs.TimeoutTransport,
-		t.read,
-		n,
-	)
-
-	if err != nil {
-		logging.LogError(t.FormatLogMessage("error", "timed out reading from transport"))
-		return b, err
-	}
-
-	return b, nil
-}
-
-// Write write bytes to the transport.
-func (t *Standard) Write(channelInput []byte) error {
-	_, err := t.writer.Write(channelInput)
+func (t *Standard) OpenNetconf(baseArgs *BaseTransportArgs) error {
+	err := t.openBase(baseArgs)
 	if err != nil {
 		return err
 	}
 
-	return nil
+	err = t.session.RequestSubsystem("netconf")
+
+	return err
 }
 
-// IsAlive indicate if the transport is alive or not.
+func (t *Standard) Close() error {
+	err := t.session.Close()
+	t.session = nil
+
+	return err
+}
+
 func (t *Standard) IsAlive() bool {
 	return t.session != nil
 }
 
-// FormatLogMessage formats log message payload, adding contextual info about the host.
-func (t *Standard) FormatLogMessage(level, msg string) string {
-	return logging.FormatLogMessage(level, t.BaseTransportArgs.Host, t.BaseTransportArgs.Port, msg)
+func (t *Standard) Read(n int) *ReadResult {
+	b := make([]byte, n)
+	_, err := t.reader.Read(b)
+
+	if err != nil {
+		return &ReadResult{
+			Result: nil,
+			Error:  ErrTransportFailure,
+		}
+	}
+
+	return &ReadResult{
+		Result: b,
+		Error:  nil,
+	}
+}
+
+func (t *Standard) Write(channelInput []byte) error {
+	_, err := t.writer.Write(channelInput)
+
+	return err
 }

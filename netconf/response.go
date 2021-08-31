@@ -7,6 +7,10 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/scrapli/scrapligo/driver/base"
+
+	"github.com/scrapli/scrapligo/util"
+
 	"github.com/scrapli/scrapligo/logging"
 )
 
@@ -25,7 +29,7 @@ type Response struct {
 	EndTime            time.Time
 	ElapsedTime        float64
 	FailedWhenContains [][]byte
-	Failed             bool
+	Failed             error
 	StripNamespaces    bool
 	NetconfVersion     string
 	ErrorMessages      [][]string
@@ -58,7 +62,6 @@ func NewNetconfResponse(
 		StartTime:          time.Now(),
 		EndTime:            time.Time{},
 		ElapsedTime:        0,
-		Failed:             true,
 		NetconfVersion:     netconfVersion,
 		StripNamespaces:    stripNamespaces,
 		FailedWhenContains: failedWhenContains,
@@ -67,21 +70,19 @@ func NewNetconfResponse(
 	return r
 }
 
-// Record record a netconf response.
+// Record records a netconf response.
 func (r *Response) Record(rawResult []byte) {
 	r.EndTime = time.Now()
 	r.ElapsedTime = r.EndTime.Sub(r.StartTime).Seconds()
 
 	r.RawResult = rawResult
 
-	// at this point the command has completed, so only thing that can "fail" it is there being
-	// some bad output in the string matching a FailedWhenContains substr
-	r.Failed = false
-
-	for _, failedStr := range r.FailedWhenContains {
-		if bytes.Contains(r.RawResult, failedStr) {
-			r.Failed = true
-			break
+	b := util.BytesContainsAnySubBytes(r.RawResult, r.FailedWhenContains)
+	if len(b) > 0 {
+		r.Failed = &base.OperationError{
+			Input:       string(r.ChannelInput),
+			Output:      r.Result,
+			ErrorString: string(b),
 		}
 	}
 
@@ -104,17 +105,23 @@ func (r *Response) validateChunkSize(chunkSize int, chunk []byte) {
 	// chunk regex matches the newline before the chunk size or end of message delimiter, so we
 	// subtract one for that newline char
 	if len(chunk)-1 != chunkSize {
-		r.Failed = true
+		errMsg := fmt.Sprintf("return element lengh invalid, expted: %d, got %d for element: %s\n",
+			chunkSize,
+			len(chunk)-1,
+			chunk)
+
+		r.Failed = &base.OperationError{
+			Input:       string(r.ChannelInput),
+			Output:      r.Result,
+			ErrorString: errMsg,
+		}
 
 		logging.LogError(
 			logging.FormatLogMessage(
 				"info",
 				r.Host,
 				r.Port,
-				fmt.Sprintf("return element lengh invalid, expted: %d, got %d for element: %s\n",
-					chunkSize,
-					len(chunk)-1,
-					chunk),
+				errMsg,
 			),
 		)
 	}

@@ -1,9 +1,29 @@
 package base
 
 import (
+	"fmt"
 	"strings"
 	"time"
 )
+
+type MultiOperationError struct {
+	Operations []*OperationError
+}
+
+func (e *MultiOperationError) Error() string {
+	if len(e.Operations) == 1 {
+		return fmt.Sprintf(
+			"operation error from input '%s'. indicated error '%s'",
+			e.Operations[0].Input,
+			e.Operations[0].ErrorString,
+		)
+	}
+
+	return fmt.Sprintf(
+		"operation error from multiple inputs. %d indicated errors",
+		len(e.Operations),
+	)
+}
 
 // MultiResponse defines a response object for plural operations -- contains a slice of `Responses`
 // for each operation.
@@ -13,9 +33,10 @@ type MultiResponse struct {
 	EndTime     time.Time
 	ElapsedTime float64
 	Responses   []*Response
+	Failed      error
 }
 
-// NewMultiResponse create a new MultiResponse object.
+// NewMultiResponse creates a new MultiResponse object.
 func NewMultiResponse(host string) *MultiResponse {
 	r := &MultiResponse{
 		Host:        host,
@@ -27,14 +48,27 @@ func NewMultiResponse(host string) *MultiResponse {
 	return r
 }
 
-// AppendResponse append a response to the `Responses` attribute of the MultiResponse object.
+// AppendResponse appends a response to the `Responses` attribute of the MultiResponse object.
 func (mr *MultiResponse) AppendResponse(r *Response) {
+	re, _ := r.Failed.(*OperationError)
+
+	if re != nil {
+		if mr.Failed == nil {
+			mr.Failed = &MultiOperationError{}
+		}
+
+		e, ok := mr.Failed.(*MultiOperationError)
+		if ok {
+			e.Operations = append(e.Operations, re)
+		}
+	}
+
 	mr.Responses = append(mr.Responses, r)
 }
 
-// JoinedResult convenience method to print out a single unified/joined result -- this is basically
-// all of the channel output for each individual response in the MultiResponse joined by newline
-// characters.
+// JoinedResult is a convenience method to print out a single unified/joined result -- this is
+// basically all the channel output for each individual response in the MultiResponse joined by
+// newline characters.
 func (mr *MultiResponse) JoinedResult() string {
 	resultsSlice := make([]string, len(mr.Responses))
 
@@ -43,19 +77,4 @@ func (mr *MultiResponse) JoinedResult() string {
 	}
 
 	return strings.Join(resultsSlice, "\n")
-}
-
-// Failed method indicating if the MultiResponse is failed -- if any Response in the MultiResponse
-// is failed, return true.
-func (mr *MultiResponse) Failed() bool {
-	// can this be made a property or property-like in python? dont see an obvious way to
-	//  have this be an attribute of the struct as it doesnt seem like it can take the receiver
-	//  that points to the object itself?
-	for _, r := range mr.Responses {
-		if r.Failed {
-			return true
-		}
-	}
-
-	return false
 }

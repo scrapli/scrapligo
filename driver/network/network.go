@@ -76,7 +76,7 @@ func NewNetworkDriver(
 	return d, nil
 }
 
-// Open opens a connection; calls the base driver `Open` method, but additionally executes the
+// Open opens a connection; calls the base driver `open` method, but additionally executes the
 // `OnOpen` callable.
 func (d *Driver) Open() error {
 	err := d.Driver.Open()
@@ -118,10 +118,5 @@ func (d *Driver) generateJoinedCommsPromptPattern() {
 
 	joinedPattern := strings.Join(allPatterns, "|")
 
-	d.CommsPromptPattern = regexp.MustCompile(joinedPattern)
-	// need to update the channel to point to the network driver's CommsPromptPattern memory addr
-	// this way if users update the driver's comms pattern, the channel is updated... there needs
-	// to be a "refreshPatterns" or something similar to scrapli for when we add dynamic priv levels
-	// for things like config sessions and such
-	d.Channel.CommsPromptPattern = d.CommsPromptPattern
+	d.Channel.CommsPromptPattern = regexp.MustCompile(joinedPattern)
 }

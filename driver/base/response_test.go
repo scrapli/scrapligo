@@ -4,14 +4,17 @@ import (
 	"os"
 	"testing"
 
-	"github.com/google/go-cmp/cmp"
 	"github.com/scrapli/scrapligo/driver/base"
+
+	"github.com/google/go-cmp/cmp"
 )
 
 func TestTextFsmParse(t *testing.T) {
 	r := base.NewResponse("localhost", 22, "show version", []string{})
 
-	f, err := os.ReadFile("../../test_data/driver/network/sendcommand/cisco_iosxe_expected")
+	f, err := os.ReadFile(
+		"../../test_data/driver/network/expected/cisco_iosxe_show_version_textfsm",
+	)
 	if err != nil {
 		t.Fatalf("failed opening channel output file")
 	}

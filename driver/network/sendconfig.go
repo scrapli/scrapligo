@@ -12,7 +12,12 @@ func (d *Driver) SendConfig(c string, o ...base.SendOption) (*base.Response, err
 	sc := strings.Split(c, "\n")
 	m, err := d.SendConfigs(sc, o...)
 
-	r := base.NewResponse(d.Host, d.Port, c, m.Responses[0].FailedWhenContains)
+	r := base.NewResponse(
+		d.Host,
+		d.Transport.BaseTransportArgs.Port,
+		c,
+		m.Responses[0].FailedWhenContains,
+	)
 
 	if err != nil {
 		return r, err
@@ -27,7 +32,6 @@ func (d *Driver) SendConfig(c string, o ...base.SendOption) (*base.Response, err
 	r.EndTime = time.Now()
 	r.ElapsedTime = r.EndTime.Sub(r.StartTime).Seconds()
 	r.Result = strings.Join(individualResponses, "\n")
-	r.Failed = m.Failed()
 
 	return r, nil
 }

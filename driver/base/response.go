@@ -4,8 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"strings"
 	"time"
+
+	"github.com/scrapli/scrapligo/util"
 
 	"github.com/scrapli/scrapligo/logging"
 	"github.com/sirikothe/gotextfsm"
@@ -17,7 +18,26 @@ var ErrFailedOpeningTemplate = errors.New("failed opening provided path to textf
 // ErrFailedParsingTemplate error for failure of parsing a textfsm template.
 var ErrFailedParsingTemplate = errors.New("failed parsing textfsm template")
 
-// Response response object that gets returned from scrapli send operations.
+// OperationError is an error object returned when a scrapli operation completes "successfully" --
+// as in does not have an EOF/timeout or otherwise unrecoverable error -- but contains output in the
+// device's response indicating that an input was bad/invalid or device failed to process it at
+// that time.
+type OperationError struct {
+	Input       string
+	Output      string
+	ErrorString string
+}
+
+// Error returns an error string for the OperationError object.
+func (e *OperationError) Error() string {
+	return fmt.Sprintf(
+		"operation error from input '%s'. indicated error '%s'",
+		e.Input,
+		e.ErrorString,
+	)
+}
+
+// Response is a response object that gets returned from scrapli send operations.
 type Response struct {
 	Host               string
 	Port               int
@@ -28,10 +48,13 @@ type Response struct {
 	EndTime            time.Time
 	ElapsedTime        float64
 	FailedWhenContains []string
-	Failed             bool
+	// Failed returns an error if any of the `FailedWhenContains` substrings are seen in the output
+	// returned from the device. This error indicates that the operation has completed successfully,
+	// but that an input was bad/invalid or device failed to process it at that time
+	Failed error
 }
 
-// NewResponse create a new response object.
+// NewResponse creates a new response object.
 func NewResponse(
 	host string,
 	port int,
@@ -47,7 +70,6 @@ func NewResponse(
 		StartTime:          time.Now(),
 		EndTime:            time.Time{},
 		ElapsedTime:        0,
-		Failed:             true,
 		FailedWhenContains: failedWhenContains,
 	}
 
@@ -62,14 +84,12 @@ func (r *Response) Record(rawResult []byte, result string) {
 	r.RawResult = rawResult
 	r.Result = result
 
-	// at this point the command has completed, so only thing that can "fail" it is there being
-	// some bad output in the string matching a FailedWhenContains substr
-	r.Failed = false
-
-	for _, failedStr := range r.FailedWhenContains {
-		if strings.Contains(r.Result, failedStr) {
-			r.Failed = true
-			break
+	s := util.StrContainsAnySubStr(r.Result, r.FailedWhenContains)
+	if len(s) > 0 {
+		r.Failed = &OperationError{
+			Input:       r.ChannelInput,
+			Output:      r.Result,
+			ErrorString: s,
 		}
 	}
 }

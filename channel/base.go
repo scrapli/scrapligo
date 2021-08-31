@@ -8,6 +8,8 @@ import (
 	"regexp"
 	"time"
 
+	"github.com/scrapli/scrapligo/util"
+
 	"github.com/scrapli/scrapligo/logging"
 
 	"github.com/scrapli/scrapligo/transport"
@@ -33,21 +35,17 @@ const (
 	loginSeenMax      = 2
 	passwordSeenMax   = 2
 	passphraseSeenMax = 2
-	ansi              = "[\u001B\u009B][[\\]()#;?]*(?:(?:(?:[a-zA-Z\\d]*(?:;[a-zA-Z\\d]*)*)?" +
-		"\u0007)|(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PRZcf-ntqry=><~]))"
 	// MaxTimeout maximum allowable timeout value -- one day.
 	MaxTimeout = 86_400
 )
 
-var ansiPattern = regexp.MustCompile(ansi)
-
 // Channel struct representing the channel object.
 type Channel struct {
-	Transport              transport.BaseTransport
+	Transport              *transport.Transport
 	CommsPromptPattern     *regexp.Regexp
-	CommsReturnChar        *string
+	CommsReturnChar        string
 	CommsPromptSearchDepth int
-	TimeoutOps             *time.Duration
+	TimeoutOps             time.Duration
 	Host                   string
 	Port                   int
 	ChannelLog             io.Writer
@@ -58,11 +56,15 @@ type channelResult struct {
 	error  error
 }
 
-// Write write bytes input into the channel, redacted (currently unused) signals that the input
+// Write writes bytes input into the channel, redacted (currently unused) signals that the input
 // should not be written in the log output.
 func (c *Channel) Write(channelInput []byte, redacted bool) error {
-	// redacted unused for now, but want it in function signature so we can use it later
-	_ = redacted
+	logOutput := string(channelInput)
+	if redacted {
+		logOutput = "REDACTED"
+	}
+
+	logging.LogDebug(c.FormatLogMessage("write", fmt.Sprintf("write: %s", logOutput)))
 
 	err := c.Transport.Write(channelInput)
 
@@ -71,7 +73,7 @@ func (c *Channel) Write(channelInput []byte, redacted bool) error {
 
 // SendReturn convenience function to send the return character.
 func (c *Channel) SendReturn() error {
-	return c.Write([]byte(*c.CommsReturnChar), false)
+	return c.Write([]byte(c.CommsReturnChar), false)
 }
 
 // WriteAndReturn convenience function to write input and send the return character.
@@ -155,18 +157,21 @@ func (c *Channel) readUntilExplicitPrompt(prompts []*regexp.Regexp) ([]byte, err
 	}
 }
 
-// Read read bytes off the transport, handles some basic "massaging" of data to remove null bytes,
+// Read reads bytes off the transport, handles some basic "massaging" of data to remove null bytes,
 // \r characters, as well as stripping out any ANSI characters in the output.
 func (c *Channel) Read() ([]byte, error) {
 	chunk, err := c.Transport.Read()
 
-	b := bytes.Trim(chunk, "\x00")
+	// is there ever a time when we should *not* replace *all* null bytes? previously this was just
+	// a trim, but for some connections (nxos telnet in particular) null byte would sneak in and
+	// not be leading or trailing... it would cause chaos....
+	b := bytes.ReplaceAll(chunk, []byte("\x00"), []byte(""))
 	b = bytes.ReplaceAll(b, []byte("\r"), []byte(""))
 
 	if bytes.Contains(b, []byte("\x1b")) {
 		logging.LogDebug(c.FormatLogMessage("debug", "stripping ansi chars..."))
 
-		b = stripAnsi(b)
+		b = util.StripAnsi(b)
 	}
 
 	logging.LogDebug(c.FormatLogMessage("debug", fmt.Sprintf("read: %s", b)))
@@ -182,20 +187,33 @@ func (c *Channel) Read() ([]byte, error) {
 	return b, err
 }
 
-// RestructureOutput strip prompt (if necessary) from output and trim any null space.
+// RestructureOutput strips prompt (if necessary) from output and trim any null space.
 func (c *Channel) RestructureOutput(output []byte, stripPrompt bool) []byte {
-	if stripPrompt {
-		output = c.CommsPromptPattern.ReplaceAll(output, []byte(""))
+	outputLines := bytes.Split(output, []byte("\n"))
+
+	cleanLines := make([][]byte, 0)
+
+	for _, l := range outputLines {
+		cl := bytes.TrimRight(l, " ")
+		cleanLines = append(cleanLines, cl)
 	}
 
-	output = bytes.TrimSpace(output)
+	cleanOutput := bytes.Join(cleanLines, []byte("\n"))
 
-	return output
+	if stripPrompt {
+		cleanOutput = c.CommsPromptPattern.ReplaceAll(cleanOutput, []byte(""))
+	}
+
+	cleanOutput = bytes.TrimLeft(cleanOutput, c.CommsReturnChar)
+	cleanOutput = bytes.TrimRight(cleanOutput, " ")
+	cleanOutput = bytes.TrimRight(cleanOutput, "\n")
+
+	return cleanOutput
 }
 
-// DetermineOperationTimeout determine timeout to use for channel operation.
+// DetermineOperationTimeout determines timeout to use for channel operation.
 func (c *Channel) DetermineOperationTimeout(timeoutOps time.Duration) time.Duration {
-	opTimeout := *c.TimeoutOps
+	opTimeout := c.TimeoutOps
 
 	if timeoutOps > 0 {
 		opTimeout = timeoutOps
@@ -211,8 +229,4 @@ func (c *Channel) DetermineOperationTimeout(timeoutOps time.Duration) time.Durat
 // FormatLogMessage formats log message payload, adding contextual info about the host.
 func (c *Channel) FormatLogMessage(level, msg string) string {
 	return logging.FormatLogMessage(level, c.Host, c.Port, msg)
-}
-
-func stripAnsi(b []byte) []byte {
-	return ansiPattern.ReplaceAll(b, []byte{})
 }

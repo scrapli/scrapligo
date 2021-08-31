@@ -1,0 +1,7 @@
+csr1000v#
+csr1000v#terminal length 0
+csr1000v#terminal width 512
+csr1000v#show run | i hostname
+hostname csr1000v
+
+csr1000v#
