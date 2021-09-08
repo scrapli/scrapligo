@@ -44,7 +44,7 @@ func (c *Channel) parseServerCapabilities(authenticationBuf []byte) error {
 
 	// rather than deal w/ xml like scrapli python does, just regex the caps out
 	serverCapabilitiesPattern := regexp.MustCompile(
-		`(?i)(?:<(?:\w+:)?capability>)(.*?)(?:</(?:\w+:)?capability>)`
+		`(?i)(?:<(?:\w+:)?capability>)(.*?)(?:</(?:\w+:)?capability>)`,
 	)
 	serverCapabilitiesMatches := serverCapabilitiesPattern.FindAllSubmatch(authenticationBuf, -1)
 
