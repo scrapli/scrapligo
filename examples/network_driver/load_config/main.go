@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"io/ioutil"
 
+	"github.com/scrapli/scrapligo/cfg"
 	"github.com/scrapli/scrapligo/driver/base"
 	"github.com/scrapli/scrapligo/driver/core"
-	"github.com/scrapli/scrapligo/cfg"
 )
 
 //Pushes config from a file to a file on device and

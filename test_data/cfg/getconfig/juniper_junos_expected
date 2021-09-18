@@ -2,14 +2,14 @@
 version 17.3R2.10;
 system {
     root-authentication {
-        encrypted-password "$6$RhR81Jm4$DEXKIbZNGjv.agJvM.FlIZWtFqX/966PZk0r4/Ps3LlS.OQZn9fHoVGuYJ7Q.hj2OQLyPJO6Mq7aQ3xLQiNrx/"; ## SECRET-DATA
+        encrypted-password "6RhR81Jm4DEXKIbZNGjv.agJvM.FlIZWtFqX/966PZk0r4/Ps3LlS.OQZn9fHoVGuYJ7Q.hj2OQLyPJO6Mq7aQ3xLQiNrx/"; ## SECRET-DATA
     }
     login {
         user boxen {
             uid 2000;
             class super-user;
             authentication {
-                encrypted-password "$6$iYt26fU9$gkt6bgxPs.VqHgCoLuSD6Kxv1JUHJLQzXJgzAEUIxobvxWwRErtpaOFvBOjIHr3KMI7sEo.V/7xLXzr0Ok20h0"; ## SECRET-DATA
+                encrypted-password "6iYt26fU9gkt6bgxPs.VqHgCoLuSD6Kxv1JUHJLQzXJgzAEUIxobvxWwRErtpaOFvBOjIHr3KMI7sEo.V/7xLXzr0Ok20h0"; ## SECRET-DATA
             }
         }
     }

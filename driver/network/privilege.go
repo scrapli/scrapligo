@@ -41,7 +41,11 @@ func (d *Driver) UpdatePrivilegeLevels() {
 }
 
 func (d *Driver) escalate(escalatePriv string) error {
-	if d.PrivilegeLevels[escalatePriv].EscalateAuth && len(d.AuthSecondary) > 0 {
+	var err error
+
+	if !d.PrivilegeLevels[escalatePriv].EscalateAuth {
+		_, err = d.Channel.SendInput(d.PrivilegeLevels[escalatePriv].Escalate, false, false, -1)
+	} else {
 		events := []*channel.SendInteractiveEvent{
 			{
 				ChannelInput:    d.PrivilegeLevels[escalatePriv].Escalate,
@@ -54,12 +58,8 @@ func (d *Driver) escalate(escalatePriv string) error {
 				HideInput:       true,
 			},
 		}
-		_, err := d.Channel.SendInteractive(events, nil, -1)
-
-		return err
+		_, err = d.Channel.SendInteractive(events, []string{d.PrivilegeLevels[escalatePriv].Pattern}, -1)
 	}
-
-	_, err := d.Channel.SendInput(d.PrivilegeLevels[escalatePriv].Escalate, false, false, -1)
 
 	return err
 }
