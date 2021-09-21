@@ -141,6 +141,23 @@ func WithFilesystem(fs string) Option {
 	}
 }
 
+// WithCandidateConfigFilename set the default candidate config filename
+// for your platform. Better to use only in the testing env where a
+// definite constant filename of config file on the device is helpful.
+func WithCandidateConfigFilename(fn string) Option {
+	return func(p interface{}) error {
+		err := setPlatformAttr("CandidateConfigFilename", fn, p)
+
+		if err != nil {
+			if !errors.Is(err, ErrIgnoredOption) {
+				return err
+			}
+		}
+
+		return nil
+	}
+}
+
 // operation specific options
 
 // OperationOptions struct for options for any "operation" (LoadConfig, CommitConfig, etc.).

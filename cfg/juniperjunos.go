@@ -36,7 +36,7 @@ type JUNOSCfg struct {
 	Filesystem              string
 	replaceConfig           bool
 	configInProgress        bool
-	candidateConfigFilename string
+	CandidateConfigFilename string
 	configSetStyle          bool
 }
 
@@ -60,6 +60,7 @@ func NewJUNOSCfg(
 	c.Platform = &JUNOSCfg{
 		conn:           conn,
 		VersionPattern: regexp.MustCompile(`\d+\.[\w-]+\.\w+`),
+		CandidateConfigFilename: "",
 	}
 
 	err = setPlatformOptions(c.Platform, options...)
@@ -71,7 +72,7 @@ func NewJUNOSCfg(
 }
 
 func (p *JUNOSCfg) ClearConfigSession() {
-	p.candidateConfigFilename = ""
+	p.CandidateConfigFilename = ""
 	p.configInProgress = false
 	p.configSetStyle = false
 }
@@ -124,7 +125,7 @@ func (p *JUNOSCfg) prepareConfigPayload(config string) string {
 	for _, configLine := range strings.Split(config, "\n") {
 		finalConfigs = append(
 			finalConfigs,
-			fmt.Sprintf("echo >> %s%s '%s'", p.Filesystem, p.candidateConfigFilename, configLine),
+			fmt.Sprintf("echo >> %s%s '%s'", p.Filesystem, p.CandidateConfigFilename, configLine),
 		)
 	}
 
@@ -151,8 +152,8 @@ func (p *JUNOSCfg) LoadConfig(
 		p.configSetStyle = true
 	}
 
-	if p.candidateConfigFilename == "" {
-		p.candidateConfigFilename = fmt.Sprintf("scrapli_cfg_%d", time.Now().Unix())
+	if p.CandidateConfigFilename == "" {
+		p.CandidateConfigFilename = fmt.Sprintf("scrapli_cfg_%d", time.Now().Unix())
 
 		logging.LogDebug(
 			FormatLogMessage(
@@ -160,7 +161,7 @@ func (p *JUNOSCfg) LoadConfig(
 				"debug",
 				fmt.Sprintf(
 					"candidate configuration filename name will be %s",
-					p.candidateConfigFilename,
+					p.CandidateConfigFilename,
 				),
 			),
 		)
@@ -177,11 +178,11 @@ func (p *JUNOSCfg) LoadConfig(
 
 	scrapliResponses = append(scrapliResponses, r)
 
-	loadCommand := fmt.Sprintf("load override %s%s", p.Filesystem, p.candidateConfigFilename)
+	loadCommand := fmt.Sprintf("load override %s%s", p.Filesystem, p.CandidateConfigFilename)
 	if !p.replaceConfig {
-		loadCommand = fmt.Sprintf("load merge %s%s", p.Filesystem, p.candidateConfigFilename)
+		loadCommand = fmt.Sprintf("load merge %s%s", p.Filesystem, p.CandidateConfigFilename)
 		if p.configSetStyle {
-			loadCommand = fmt.Sprintf("load set %s%s", p.Filesystem, p.candidateConfigFilename)
+			loadCommand = fmt.Sprintf("load set %s%s", p.Filesystem, p.CandidateConfigFilename)
 		}
 	}
 
@@ -196,7 +197,7 @@ func (p *JUNOSCfg) LoadConfig(
 }
 
 func (p *JUNOSCfg) deleteCandidateConfigFile() (*base.Response, error) {
-	deleteCommand := fmt.Sprintf("rm %s%s", p.Filesystem, p.candidateConfigFilename)
+	deleteCommand := fmt.Sprintf("rm %s%s", p.Filesystem, p.CandidateConfigFilename)
 
 	return p.conn.SendConfig(deleteCommand, base.WithDesiredPrivilegeLevel("root_shell"))
 }
