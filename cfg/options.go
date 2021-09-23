@@ -148,7 +148,7 @@ func WithFilesystem(fs string) Option {
 // same when using this option!
 func WithCandidateConfigFilename(fn string) Option {
 	return func(p interface{}) error {
-		err := setPlatformAttr("candidateConfigFilename", fn, p)
+		err := setPlatformAttr("CandidateConfigFilename", fn, p)
 
 		if err != nil {
 			if !errors.Is(err, ErrIgnoredOption) {
