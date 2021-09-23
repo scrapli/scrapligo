@@ -60,11 +60,12 @@ type NXOSCfg struct {
 	filesystemSpaceAvailBufferPerc float32
 	configCommandMap               map[string]string
 	replaceConfig                  bool
+	CandidateConfigFilename        string
 	candidateConfigFilename        string
 }
 
 // NewNXOSCfg return a cfg instance setup for an Cisco NXOS device.
-func NewNXOSCfg(
+func NewNXOSCfg( //nolint:dupl
 	conn *network.Driver,
 	options ...Option,
 ) (*Cfg, error) {
@@ -193,7 +194,7 @@ func (p *NXOSCfg) LoadConfig(
 	}
 
 	if p.candidateConfigFilename == "" {
-		p.candidateConfigFilename = fmt.Sprintf("scrapli_cfg_%d", time.Now().Unix())
+		p.candidateConfigFilename = determineCandidateConfigFilename(p.CandidateConfigFilename)
 
 		logging.LogDebug(
 			FormatLogMessage(

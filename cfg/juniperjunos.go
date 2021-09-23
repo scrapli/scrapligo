@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
-	"time"
 
 	"github.com/scrapli/scrapligo/logging"
 
@@ -36,6 +35,7 @@ type JUNOSCfg struct {
 	Filesystem              string
 	replaceConfig           bool
 	configInProgress        bool
+	CandidateConfigFilename string
 	candidateConfigFilename string
 	configSetStyle          bool
 }
@@ -58,8 +58,9 @@ func NewJUNOSCfg(
 	}
 
 	c.Platform = &JUNOSCfg{
-		conn:           conn,
-		VersionPattern: regexp.MustCompile(`\d+\.[\w-]+\.\w+`),
+		conn:                    conn,
+		VersionPattern:          regexp.MustCompile(`\d+\.[\w-]+\.\w+`),
+		candidateConfigFilename: "",
 	}
 
 	err = setPlatformOptions(c.Platform, options...)
@@ -152,7 +153,7 @@ func (p *JUNOSCfg) LoadConfig(
 	}
 
 	if p.candidateConfigFilename == "" {
-		p.candidateConfigFilename = fmt.Sprintf("scrapli_cfg_%d", time.Now().Unix())
+		p.candidateConfigFilename = determineCandidateConfigFilename(p.CandidateConfigFilename)
 
 		logging.LogDebug(
 			FormatLogMessage(

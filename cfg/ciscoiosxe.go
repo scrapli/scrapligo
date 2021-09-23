@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
-	"time"
 
 	"github.com/scrapli/scrapligo/channel"
 
@@ -50,6 +49,7 @@ type IOSXECfg struct {
 	Filesystem                     string
 	filesystemSpaceAvailBufferPerc float32
 	configCommandMap               map[string]string
+	CandidateConfigFilename        string
 	candidateConfigFilename        string
 	replaceConfig                  bool
 }
@@ -188,7 +188,7 @@ func (p *IOSXECfg) LoadConfig(
 	}
 
 	if p.candidateConfigFilename == "" {
-		p.candidateConfigFilename = fmt.Sprintf("scrapli_cfg_%d", time.Now().Unix())
+		p.candidateConfigFilename = determineCandidateConfigFilename(p.CandidateConfigFilename)
 
 		logging.LogDebug(
 			FormatLogMessage(

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/scrapli/scrapligo/driver/base"
 
@@ -85,6 +86,16 @@ func parseOperationOptions(o []OperationOption) *OperationOptions {
 	}
 
 	return opts
+}
+
+func determineCandidateConfigFilename(c string) string {
+	candidateConfigFilename := c
+
+	if c == "" {
+		candidateConfigFilename = fmt.Sprintf("scrapli_cfg_%d", time.Now().Unix())
+	}
+
+	return candidateConfigFilename
 }
 
 // Cfg primary/base cfg platform struct.
