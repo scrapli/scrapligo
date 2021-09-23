@@ -61,10 +61,11 @@ type NXOSCfg struct {
 	configCommandMap               map[string]string
 	replaceConfig                  bool
 	CandidateConfigFilename        string
+	candidateConfigFilename        string
 }
 
 // NewNXOSCfg return a cfg instance setup for an Cisco NXOS device.
-func NewNXOSCfg(
+func NewNXOSCfg( //nolint:dupl
 	conn *network.Driver,
 	options ...Option,
 ) (*Cfg, error) {
@@ -99,7 +100,7 @@ func NewNXOSCfg(
 }
 
 func (p *NXOSCfg) ClearConfigSession() {
-	p.CandidateConfigFilename = ""
+	p.candidateConfigFilename = ""
 }
 
 // GetVersion get the version from the device.
@@ -148,7 +149,7 @@ func (p *NXOSCfg) prepareConfigPayload(config string) string {
 	tcslhStartFile := fmt.Sprintf(
 		`set fl [open "%s%s" wb+]`,
 		tclshFilesystem,
-		p.CandidateConfigFilename,
+		p.candidateConfigFilename,
 	)
 
 	splitConfig := strings.Split(config, "\n")
@@ -192,8 +193,8 @@ func (p *NXOSCfg) LoadConfig(
 		return nil, ErrInsufficientSpaceAvailable
 	}
 
-	if p.CandidateConfigFilename == "" {
-		p.CandidateConfigFilename = fmt.Sprintf("scrapli_cfg_%d", time.Now().Unix())
+	if p.candidateConfigFilename == "" {
+		p.candidateConfigFilename = determineCandidateConfigFilename(p.CandidateConfigFilename)
 
 		logging.LogDebug(
 			FormatLogMessage(
@@ -201,7 +202,7 @@ func (p *NXOSCfg) LoadConfig(
 				"debug",
 				fmt.Sprintf(
 					"candidate configuration filename name will be %s",
-					p.CandidateConfigFilename,
+					p.candidateConfigFilename,
 				),
 			),
 		)
@@ -232,7 +233,7 @@ func (p *NXOSCfg) LoadConfig(
 func (p *NXOSCfg) deleteCandidateConfigFile() (*base.MultiResponse, error) {
 	deleteCommands := []string{
 		"terminal dont-ask",
-		fmt.Sprintf("delete %s%s", p.Filesystem, p.CandidateConfigFilename),
+		fmt.Sprintf("delete %s%s", p.Filesystem, p.candidateConfigFilename),
 	}
 
 	return p.conn.SendCommands(deleteCommands)
@@ -269,12 +270,12 @@ func (p *NXOSCfg) CommitConfig(source string) ([]*base.Response, error) {
 			fmt.Sprintf(
 				"rollback running-config file %s%s",
 				p.Filesystem,
-				p.CandidateConfigFilename,
+				p.candidateConfigFilename,
 			),
 		)
 	} else {
 		commitResult, err = p.conn.SendCommand(
-			fmt.Sprintf("copy %s%s running-config", p.Filesystem, p.CandidateConfigFilename),
+			fmt.Sprintf("copy %s%s running-config", p.Filesystem, p.candidateConfigFilename),
 		)
 	}
 
@@ -307,7 +308,7 @@ func (p *NXOSCfg) getDiffCommand(source string) string {
 			"show diff rollback-patch %s-config file %s%s",
 			source,
 			p.Filesystem,
-			p.CandidateConfigFilename,
+			p.candidateConfigFilename,
 		)
 	}
 
