@@ -58,8 +58,8 @@ func NewJUNOSCfg(
 	}
 
 	c.Platform = &JUNOSCfg{
-		conn:           conn,
-		VersionPattern: regexp.MustCompile(`\d+\.[\w-]+\.\w+`),
+		conn:                    conn,
+		VersionPattern:          regexp.MustCompile(`\d+\.[\w-]+\.\w+`),
 		CandidateConfigFilename: "",
 	}
 

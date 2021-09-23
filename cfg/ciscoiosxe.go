@@ -50,7 +50,7 @@ type IOSXECfg struct {
 	Filesystem                     string
 	filesystemSpaceAvailBufferPerc float32
 	configCommandMap               map[string]string
-	candidateConfigFilename        string
+	CandidateConfigFilename        string
 	replaceConfig                  bool
 }
 
@@ -87,7 +87,7 @@ func NewIOSXECfg(
 }
 
 func (p *IOSXECfg) ClearConfigSession() {
-	p.candidateConfigFilename = ""
+	p.CandidateConfigFilename = ""
 }
 
 // GetVersion get the version from the device.
@@ -141,7 +141,7 @@ func (p *IOSXECfg) prepareConfigPayload(config string) string {
 	tcslhStartFile := fmt.Sprintf(
 		`puts [open "%s%s" w+] {`,
 		p.Filesystem,
-		p.candidateConfigFilename,
+		p.CandidateConfigFilename,
 	)
 	tclshEndFile := "}"
 
@@ -187,8 +187,8 @@ func (p *IOSXECfg) LoadConfig(
 		return nil, ErrInsufficientSpaceAvailable
 	}
 
-	if p.candidateConfigFilename == "" {
-		p.candidateConfigFilename = fmt.Sprintf("scrapli_cfg_%d", time.Now().Unix())
+	if p.CandidateConfigFilename == "" {
+		p.CandidateConfigFilename = fmt.Sprintf("scrapli_cfg_%d", time.Now().Unix())
 
 		logging.LogDebug(
 			FormatLogMessage(
@@ -196,7 +196,7 @@ func (p *IOSXECfg) LoadConfig(
 				"debug",
 				fmt.Sprintf(
 					"candidate configuration filename name will be %s",
-					p.candidateConfigFilename,
+					p.CandidateConfigFilename,
 				),
 			),
 		)
@@ -277,7 +277,7 @@ func (p *IOSXECfg) commitConfigMerge() (*base.Response, error) {
 				ChannelInput: fmt.Sprintf(
 					"copy %s%s running-config",
 					p.Filesystem,
-					p.candidateConfigFilename,
+					p.CandidateConfigFilename,
 				),
 				ChannelResponse: "Destination filename",
 				HideInput:       false,
@@ -292,7 +292,7 @@ func (p *IOSXECfg) commitConfigMerge() (*base.Response, error) {
 		mergeEvents = []*channel.SendInteractiveEvent{
 			{
 				ChannelInput: fmt.Sprintf(
-					"copy %s%s running-config", p.Filesystem, p.candidateConfigFilename),
+					"copy %s%s running-config", p.Filesystem, p.CandidateConfigFilename),
 				ChannelResponse: "Source filename",
 				HideInput:       false,
 			},
@@ -311,7 +311,7 @@ func (p *IOSXECfg) commitConfigMerge() (*base.Response, error) {
 		mergeEvents = []*channel.SendInteractiveEvent{
 			{
 				ChannelInput: fmt.Sprintf(
-					"copy %s%s running-config", p.Filesystem, p.candidateConfigFilename),
+					"copy %s%s running-config", p.Filesystem, p.CandidateConfigFilename),
 				ChannelResponse: "",
 				HideInput:       false,
 			},
@@ -388,7 +388,7 @@ func (p *IOSXECfg) deleteCandidateConfigFile() (*base.Response, error) {
 				ChannelInput: fmt.Sprintf(
 					"delete %s%s",
 					p.Filesystem,
-					p.candidateConfigFilename,
+					p.CandidateConfigFilename,
 				),
 				ChannelResponse: "Delete filename",
 				HideInput:       false,
@@ -407,7 +407,7 @@ func (p *IOSXECfg) deleteCandidateConfigFile() (*base.Response, error) {
 	} else {
 		saveEvents = []*channel.SendInteractiveEvent{
 			{
-				ChannelInput:    fmt.Sprintf("delete %s%s", p.Filesystem, p.candidateConfigFilename),
+				ChannelInput:    fmt.Sprintf("delete %s%s", p.Filesystem, p.CandidateConfigFilename),
 				ChannelResponse: "[confirm]",
 				HideInput:       false,
 			},
@@ -432,7 +432,7 @@ func (p *IOSXECfg) CommitConfig(source string) ([]*base.Response, error) {
 
 	if p.replaceConfig {
 		commitResult, err = p.conn.SendCommand(
-			fmt.Sprintf("configure replace %s%s force", p.Filesystem, p.candidateConfigFilename),
+			fmt.Sprintf("configure replace %s%s force", p.Filesystem, p.CandidateConfigFilename),
 		)
 	} else {
 		commitResult, err = p.commitConfigMerge()
@@ -467,14 +467,14 @@ func (p *IOSXECfg) getDiffCommand(source string) string {
 			"show archive config differences system:%s-config %s%s",
 			source,
 			p.Filesystem,
-			p.candidateConfigFilename,
+			p.CandidateConfigFilename,
 		)
 	}
 
 	return fmt.Sprintf(
 		"show archive config incremental-diffs %s%s ignorecase",
 		p.Filesystem,
-		p.candidateConfigFilename,
+		p.CandidateConfigFilename,
 	)
 }
 
