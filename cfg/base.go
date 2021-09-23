@@ -91,7 +91,7 @@ func parseOperationOptions(o []OperationOption) *OperationOptions {
 func determineCandidateConfigFilename(c string) string {
 	candidateConfigFilename := c
 
-	if c != "" {
+	if c == "" {
 		candidateConfigFilename = fmt.Sprintf("scrapli_cfg_%d", time.Now().Unix())
 	}
 
