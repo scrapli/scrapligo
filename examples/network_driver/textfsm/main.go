@@ -18,9 +18,8 @@ func main() {
 	flag.Parse()
 
 	d, err := core.NewCoreDriver(
-		"ios-xe-mgmt.cisco.com",
+		"sandbox-iosxe-latest-1.cisco.com",
 		"cisco_iosxe",
-		base.WithPort(8181),
 		base.WithAuthStrictKey(false),
 		base.WithAuthUsername("developer"),
 		base.WithAuthPassword("C1sco12345"),

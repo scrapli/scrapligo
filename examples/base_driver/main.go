@@ -9,8 +9,7 @@ import (
 
 func main() {
 	d, err := base.NewDriver(
-		"ios-xe-mgmt.cisco.com",
-		base.WithPort(8181),
+		"sandbox-iosxe-latest-1.cisco.com",
 		base.WithAuthStrictKey(false),
 		base.WithAuthUsername("developer"),
 		base.WithAuthPassword("C1sco12345"),
