@@ -5,6 +5,7 @@ package base
 
 import (
 	"errors"
+	"time"
 
 	"github.com/scrapli/scrapligo/transport"
 )
@@ -40,8 +41,8 @@ func NewDriver(
 		Host:             d.Host,
 		Port:             22,
 		AuthUsername:     d.AuthUsername,
-		TimeoutSocket:    d.TimeoutSocket,
-		TimeoutTransport: d.TimeoutTransport,
+		TimeoutSocket:    30 * time.Second,
+		TimeoutTransport: 45 * time.Second,
 		PtyHeight:        80,
 		PtyWidth:         256,
 	}
