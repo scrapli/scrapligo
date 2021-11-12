@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/scrapli/scrapligo/logging"
 
@@ -227,7 +228,8 @@ func (p *JUNOSCfg) AbortConfig() ([]*base.Response, error) {
 func (p *JUNOSCfg) CommitConfig(source string) ([]*base.Response, error) {
 	var scrapliResponses []*base.Response
 
-	commitResult, err := p.conn.SendConfig("commit")
+	//large timeout in case if the config is very large
+	commitResult, err := p.conn.SendConfig("commit", base.WithSendTimeoutOps(300 * time.Second))
 
 	if err != nil {
 		return scrapliResponses, err
