@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/scrapli/scrapligo/logging"
@@ -18,16 +19,19 @@ type eosPatterns struct {
 	endPattern               *regexp.Regexp
 }
 
-var eosPatternsInstance *eosPatterns //nolint:gochecknoglobals
+var (
+	eosPatternsInstance     *eosPatterns //nolint:gochecknoglobals
+	eosPAtternsInstanceOnce sync.Once    //nolint:gochecknoglobals
+)
 
 func getEOSPatterns() *eosPatterns {
-	if eosPatternsInstance == nil {
+	eosPAtternsInstanceOnce.Do(func() {
 		eosPatternsInstance = &eosPatterns{
 			globalCommentLinePattern: regexp.MustCompile(`(?im)^! .*$`),
 			bannerPattern:            regexp.MustCompile(`(?ims)^banner.*EOF$`),
 			endPattern:               regexp.MustCompile(`end$`),
 		}
-	}
+	})
 
 	return eosPatternsInstance
 }

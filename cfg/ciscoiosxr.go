@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+	"sync"
 
 	"github.com/scrapli/scrapligo/logging"
 
@@ -23,10 +24,13 @@ type iosxrPatterns struct {
 	endPattern           *regexp.Regexp
 }
 
-var iosxrPatternsInstance *iosxrPatterns //nolint:gochecknoglobals
+var (
+	iosxrPatternsInstance     *iosxrPatterns //nolint:gochecknoglobals
+	iosxrPatternsInstanceOnce sync.Once      //nolint:gochecknoglobals
+)
 
 func getIOSXRPatterns() *iosxrPatterns {
-	if iosxrPatternsInstance == nil {
+	iosxrPatternsInstanceOnce.Do(func() {
 		iosxrPatternsInstance = &iosxrPatterns{
 			bannerDelimPattern: regexp.MustCompile(
 				`(?im)(^banner\s(?:exec|incoming|login|motd|prompt-timeout|slip-ppp)\s(.))`,
@@ -51,7 +55,7 @@ func getIOSXRPatterns() *iosxrPatterns {
 				iosxrPatternsInstance.configChangePattern.String(),
 			),
 		)
-	}
+	})
 
 	return iosxrPatternsInstance
 }

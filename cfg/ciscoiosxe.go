@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+	"sync"
 
 	"github.com/scrapli/scrapligo/channel"
 
@@ -25,10 +26,13 @@ type iosxePatterns struct {
 	outputHeaderPattern   *regexp.Regexp
 }
 
-var iosxePatternsInstance *iosxePatterns //nolint:gochecknoglobals
+var (
+	iosxePatternsInstance     *iosxePatterns //nolint:gochecknoglobals
+	iosxePatternsInstanceOnce sync.Once      //nolint:gochecknoglobals
+)
 
 func getIOSXEPatterns() *iosxePatterns {
-	if iosxePatternsInstance == nil {
+	iosxePatternsInstanceOnce.Do(func() {
 		iosxePatternsInstance = &iosxePatterns{
 			bytesFreePattern: regexp.MustCompile(
 				`(?i)(?P<bytes_available>\d+)(?: bytes free)`,
@@ -38,7 +42,7 @@ func getIOSXEPatterns() *iosxePatterns {
 			// string in the config so we can remove anything in front of it
 			outputHeaderPattern: regexp.MustCompile(`(?im)(^version \d+\.\d+$)`),
 		}
-	}
+	})
 
 	return iosxePatternsInstance
 }
@@ -54,8 +58,8 @@ type IOSXECfg struct {
 	replaceConfig                  bool
 }
 
-// NewIOSXECfg return a cfg instance setup for an Cisco IOSXE device.
-func NewIOSXECfg(
+// NewIOSXECfg return a cfg instance setup for a Cisco IOSXE device.
+func NewIOSXECfg( //nolint:dupl
 	conn *network.Driver,
 	options ...Option,
 ) (*Cfg, error) {
