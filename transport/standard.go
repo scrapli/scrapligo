@@ -4,9 +4,9 @@ import (
 	"encoding/base64"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net"
+	"os"
 
 	"github.com/scrapli/scrapligo/logging"
 
@@ -133,7 +133,7 @@ func (t *Standard) openBase(baseArgs *BaseTransportArgs) error {
 	authMethods := make([]ssh.AuthMethod, 0)
 
 	if t.StandardTransportArgs.AuthPrivateKey != "" {
-		key, err := ioutil.ReadFile(t.StandardTransportArgs.AuthPrivateKey)
+		key, err := os.ReadFile(t.StandardTransportArgs.AuthPrivateKey)
 		if err != nil {
 			return err
 		}

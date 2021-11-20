@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/scrapli/scrapligo/logging"
@@ -24,10 +25,13 @@ type nxosPatterns struct {
 	checkpointLinePattern *regexp.Regexp
 }
 
-var nxosPatternsInstance *nxosPatterns //nolint:gochecknoglobals
+var (
+	nxosPatternsInstance     *nxosPatterns //nolint:gochecknoglobals
+	nxosPatternsInstanceOnce sync.Once     //nolint:gochecknoglobals
+)
 
 func getNXOSPatterns() *nxosPatterns {
-	if nxosPatternsInstance == nil {
+	nxosPatternsInstanceOnce.Do(func() {
 		nxosPatternsInstance = &nxosPatterns{
 			bytesFreePattern: regexp.MustCompile(
 				`(?i)(?P<bytes_available>\d+)(?: bytes free)`,
@@ -48,7 +52,7 @@ func getNXOSPatterns() *nxosPatterns {
 				nxosPatternsInstance.configChangePattern.String(),
 			),
 		)
-	}
+	})
 
 	return nxosPatternsInstance
 }

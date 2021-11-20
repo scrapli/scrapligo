@@ -3,35 +3,41 @@ package channel
 import (
 	"bytes"
 	"regexp"
+	"sync"
 	"time"
 
 	"github.com/scrapli/scrapligo/logging"
 )
 
-type authPatterns struct {
+type AuthPatterns struct {
 	telnetLoginPattern *regexp.Regexp
 	passwordPattern    *regexp.Regexp
 	passphrasePattern  *regexp.Regexp
 }
 
-var authPatternsInstance *authPatterns //nolint:gochecknoglobals
+var (
+	AuthPatternsInstance     *AuthPatterns //nolint:gochecknoglobals
+	authPatternsInstanceOnce sync.Once     //nolint:gochecknoglobals
+)
 
-func getAuthPatterns() *authPatterns {
-	if authPatternsInstance == nil {
-		authPatternsInstance = &authPatterns{
+func GetAuthPatterns() *AuthPatterns {
+	authPatternsInstanceOnce.Do(func() {
+		AuthPatternsInstance = &AuthPatterns{
 			telnetLoginPattern: regexp.MustCompile(`(?im)^(.*username:)|(.*login:)\s?$`),
 			passwordPattern:    regexp.MustCompile(`(?im)^(.*@.*)?password:\s?$`),
 			passphrasePattern:  regexp.MustCompile(`(?i)enter passphrase for key`),
 		}
-	}
+	})
 
-	return authPatternsInstance
+	return AuthPatternsInstance
 }
 
-func (c *Channel) authenticateSSH(authPassword, authPassphrase []byte) *channelResult {
+func (c *Channel) authenticateSSH( //nolint:dupl
+	authPassword, authPassphrase []byte,
+) *channelResult {
 	logging.LogDebug(c.FormatLogMessage("debug", "attempting in channel ssh authentication"))
 
-	patterns := getAuthPatterns()
+	patterns := GetAuthPatterns()
 	passwordPattern := patterns.passwordPattern
 	passphrasePattern := patterns.passphrasePattern
 
@@ -134,10 +140,12 @@ func (c *Channel) AuthenticateSSH(authPassword, authPassphrase string) ([]byte, 
 	}
 }
 
-func (c *Channel) authenticateTelnet(authUsername, authPassword []byte) *channelResult {
+func (c *Channel) authenticateTelnet( //nolint:dupl
+	authUsername, authPassword []byte,
+) *channelResult {
 	logging.LogDebug(c.FormatLogMessage("debug", "attempting in channel telnet authentication"))
 
-	patterns := getAuthPatterns()
+	patterns := GetAuthPatterns()
 	usernamePattern := patterns.telnetLoginPattern
 	passwordPattern := patterns.passwordPattern
 

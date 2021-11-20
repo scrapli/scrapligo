@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+	"sync"
 
 	"github.com/scrapli/scrapligo/logging"
 
@@ -16,15 +17,18 @@ type junosPatterns struct {
 	editPattern         *regexp.Regexp
 }
 
-var junosPatternsInstance *junosPatterns //nolint:gochecknoglobals
+var (
+	junosPatternsInstance     *junosPatterns //nolint:gochecknoglobals
+	junosPatternsInstanceOnce sync.Once      //nolint:gochecknoglobals
+)
 
 func getJUNOSPatterns() *junosPatterns {
-	if junosPatternsInstance == nil {
+	junosPatternsInstanceOnce.Do(func() {
 		junosPatternsInstance = &junosPatterns{
 			outputHeaderPattern: regexp.MustCompile(`(?im)^## last commit.*$\nversion.*$`),
 			editPattern:         regexp.MustCompile(`(?m)^\[edit\]$`),
 		}
-	}
+	})
 
 	return junosPatternsInstance
 }
