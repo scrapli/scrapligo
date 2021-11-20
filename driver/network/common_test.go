@@ -18,6 +18,7 @@ func platformCommandMapShort() map[string]string {
 		"juniper_junos":      "show configuration | match 10.0.0.15",
 		"nokia_sros":         "show version",
 		"nokia_sros_classic": "show version",
+		"paloalto_panos":     "show clock",
 	}
 }
 
@@ -30,6 +31,7 @@ func platformCommandMapLong() map[string]string {
 		"juniper_junos":      "show configuration",
 		"nokia_sros":         "show router interface",
 		"nokia_sros_classic": "show router interface",
+		"paloalto_panos":     "show templates",
 	}
 }
 
@@ -59,6 +61,10 @@ func platformConfigsMap() map[string][]string {
 			`configure router interface "system" description "@ntdvps"`,
 			"configure system",
 			"location wide_internet",
+		},
+		"paloalto_panos": {
+			"set display-name BLAH",
+			"commit",
 		},
 	}
 }
