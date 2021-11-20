@@ -21,11 +21,11 @@ type eosPatterns struct {
 
 var (
 	eosPatternsInstance     *eosPatterns //nolint:gochecknoglobals
-	eosPAtternsInstanceOnce sync.Once    //nolint:gochecknoglobals
+	eosPatternsInstanceOnce sync.Once    //nolint:gochecknoglobals
 )
 
 func getEOSPatterns() *eosPatterns {
-	eosPAtternsInstanceOnce.Do(func() {
+	eosPatternsInstanceOnce.Do(func() {
 		eosPatternsInstance = &eosPatterns{
 			globalCommentLinePattern: regexp.MustCompile(`(?im)^! .*$`),
 			bannerPattern:            regexp.MustCompile(`(?ims)^banner.*EOF$`),
