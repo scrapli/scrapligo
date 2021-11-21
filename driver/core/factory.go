@@ -20,6 +20,7 @@ func SupportedPlatforms() []string {
 		"juniper_junos",
 		"nokia_sros",
 		"nokia_sros_classic",
+		"paloalto_panos",
 	}
 }
 
@@ -46,6 +47,8 @@ func newCoreDriver(
 		return NewSROSDriver(host, options...)
 	case "nokia_sros_classic":
 		return NewSROSClassicDriver(host, options...)
+	case "paloalto_panos":
+		return NewPanOSDriver(host, options...)
 	}
 
 	return nil, ErrUnknownPlatform
