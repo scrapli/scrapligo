@@ -58,7 +58,7 @@ func StrInSlice(s string, l []string) bool {
 	return false
 }
 
-// BytesContainsAnySubBytes checks byte `b` for any occurrences of substrings in `s`, returns first
+// BytesContainsAnySubBytes checks byte `b` for any occurrences of substrings in `l`, returns first
 // found substring if any, otherwise an empty string.
 func BytesContainsAnySubBytes(b []byte, l [][]byte) []byte {
 	for _, ss := range l {
