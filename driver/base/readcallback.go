@@ -2,10 +2,13 @@ package base
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"regexp"
 	"time"
 )
+
+var ErrCallbackAlreadyTriggered = errors.New("callback set to 'OnlyOnce', but already triggered")
 
 type ReadCallback struct {
 	Callback           func(*Driver, string) error
@@ -15,9 +18,13 @@ type ReadCallback struct {
 	containsReCompiled *regexp.Regexp
 	CaseInsensitive    bool
 	MultiLine          bool
-	ResetOutput        bool
-	Complete           bool
-	Name               string
+	// ResetOutput bool indicating if the output should be reset or not after callback execution.
+	ResetOutput bool
+	// OnlyOnce bool indicating if this callback should be executed only one time.
+	OnlyOnce  bool
+	triggered bool
+	Complete  bool
+	Name      string
 }
 
 func (r *ReadCallback) contains() []byte {
@@ -40,27 +47,48 @@ func (r *ReadCallback) containsRe() *regexp.Regexp {
 			flags = "(?m)"
 		}
 
-		r.containsReCompiled = regexp.MustCompile(fmt.Sprintf(`%s%s`, flags, r.contains()))
+		r.containsReCompiled = regexp.MustCompile(fmt.Sprintf(`%s%s`, flags, r.ContainsRe))
 	}
 
 	return r.containsReCompiled
 }
 
-func (d *Driver) ReadWithCallbacks( //nolint:gocognit
+func (d *Driver) executeCallback(
+	i int,
 	callbacks []*ReadCallback,
-	input string,
 	output []byte,
-	sleep time.Duration,
-) error {
-	if input != "" {
-		err := d.Channel.WriteAndReturn([]byte(input), false)
-		if err != nil {
-			return err
+	readDelay time.Duration) error {
+	callback := callbacks[i]
+
+	if callback.OnlyOnce {
+		if callback.triggered {
+			return ErrCallbackAlreadyTriggered
 		}
 
-		return d.ReadWithCallbacks(callbacks, "", nil, sleep)
+		callback.triggered = true
 	}
 
+	err := callback.Callback(d, string(output))
+	if err != nil {
+		return err
+	}
+
+	if callback.Complete {
+		return nil
+	}
+
+	if callback.ResetOutput {
+		output = []byte{}
+	}
+
+	return d.readWithCallbacks(callbacks, output, readDelay)
+}
+
+func (d *Driver) readWithCallbacks(
+	callbacks []*ReadCallback,
+	output []byte,
+	readDelay time.Duration,
+) error {
 	for {
 		newOutput, err := d.Channel.Read()
 		if err != nil {
@@ -69,7 +97,7 @@ func (d *Driver) ReadWithCallbacks( //nolint:gocognit
 
 		output = append(output, newOutput...)
 
-		for _, callback := range callbacks {
+		for i, callback := range callbacks {
 			o := output
 			if callback.CaseInsensitive {
 				o = bytes.ToLower(output)
@@ -77,23 +105,25 @@ func (d *Driver) ReadWithCallbacks( //nolint:gocognit
 
 			if (callback.Contains != "" && bytes.Contains(o, callback.contains())) ||
 				(callback.ContainsRe != "" && callback.containsRe().Match(o)) {
-				err = callback.Callback(d, string(output))
-				if err != nil {
-					return err
-				}
-
-				if callback.Complete {
-					return nil
-				}
-
-				if callback.ResetOutput {
-					output = []byte{}
-				}
-
-				return d.ReadWithCallbacks(callbacks, "", output, sleep)
+				return d.executeCallback(i, callbacks, output, readDelay)
 			}
 		}
 
-		time.Sleep(sleep)
+		time.Sleep(readDelay)
 	}
+}
+
+func (d *Driver) ReadWithCallbacks(
+	callbacks []*ReadCallback,
+	input string,
+	readDelay time.Duration,
+) error {
+	if input != "" {
+		err := d.Channel.WriteAndReturn([]byte(input), false)
+		if err != nil {
+			return err
+		}
+	}
+
+	return d.readWithCallbacks(callbacks, []byte{}, readDelay)
 }
