@@ -50,6 +50,15 @@ func (d *Driver) BuildPayload(payload interface{}) *Message {
 	return baseElem
 }
 
+// BuildRPCElem creates an element for a rpc operation.
+func (d *Driver) BuildRPCElem(
+	filter string,
+) (*Message, error) {
+	netconfInput := d.BuildPayload(filter)
+
+	return netconfInput, nil
+}
+
 // datastore source
 
 // SourceElement struct representing the individual source message element.
