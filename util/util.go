@@ -86,7 +86,7 @@ func StripAnsi(b []byte) []byte {
 	return ap.pattern.ReplaceAll(b, []byte{})
 }
 
-func resolveFilePath(f string) (string, error) {
+func ResolveFilePath(f string) (string, error) {
 	if _, err := os.Stat(f); err == nil {
 		return f, nil
 	}
@@ -113,7 +113,7 @@ func resolveFilePath(f string) (string, error) {
 // LoadFileLines convenience function to load a file and return slice of strings of lines in that
 // file.
 func LoadFileLines(f string) ([]string, error) {
-	resolvedFile, err := resolveFilePath(f)
+	resolvedFile, err := ResolveFilePath(f)
 
 	if err != nil {
 		return []string{}, err

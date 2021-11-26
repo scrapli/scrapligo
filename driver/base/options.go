@@ -7,6 +7,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/scrapli/scrapligo/util"
+
 	"github.com/scrapli/scrapligo/channel"
 
 	"github.com/scrapli/scrapligo/transport"
@@ -119,7 +121,13 @@ func WithSSHConfigFile(sshConfigFile string) Option {
 		d, ok := o.(*Driver)
 
 		if ok {
-			d.SSHConfigFile = sshConfigFile
+			resolvedSSHConfigFile, err := util.ResolveFilePath(sshConfigFile)
+			if err != nil {
+				return err
+			}
+
+			d.SSHConfigFile = resolvedSSHConfigFile
+
 			return nil
 		}
 
@@ -133,7 +141,13 @@ func WithSSHKnownHostsFile(sshKnownHostsFile string) Option {
 		d, ok := o.(*Driver)
 
 		if ok {
-			d.SSHKnownHostsFile = sshKnownHostsFile
+			resolvedSSHKnownHostsFile, err := util.ResolveFilePath(sshKnownHostsFile)
+			if err != nil {
+				return err
+			}
+
+			d.SSHKnownHostsFile = resolvedSSHKnownHostsFile
+
 			return nil
 		}
 
