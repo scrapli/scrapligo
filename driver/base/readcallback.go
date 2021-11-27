@@ -153,6 +153,10 @@ type ReadCallback struct {
 func (r *ReadCallback) contains() []byte {
 	if len(r.containsBytes) == 0 {
 		r.containsBytes = []byte(r.Contains)
+
+		if r.CaseInsensitive {
+			r.containsBytes = bytes.ToLower(r.containsBytes)
+		}
 	}
 
 	return r.containsBytes
