@@ -22,6 +22,14 @@ func WithCallbackContains(contains string) ReadCallbackOption {
 	}
 }
 
+func WithCallbackNotContains(notContains string) ReadCallbackOption {
+	return func(r *ReadCallback) error {
+		r.NotContains = notContains
+
+		return nil
+	}
+}
+
 func WithCallbackContainsRe(contains string) ReadCallbackOption {
 	return func(r *ReadCallback) error {
 		r.ContainsRe = contains
@@ -133,6 +141,8 @@ type ReadCallback struct {
 	Callback           func(*Driver, string) error
 	Contains           string
 	containsBytes      []byte
+	NotContains        string
+	notContainsBytes   []byte
 	ContainsRe         string
 	containsReCompiled *regexp.Regexp
 	CaseInsensitive    bool
@@ -162,6 +172,18 @@ func (r *ReadCallback) contains() []byte {
 	return r.containsBytes
 }
 
+func (r *ReadCallback) notContains() []byte {
+	if len(r.notContainsBytes) == 0 {
+		r.notContainsBytes = []byte(r.NotContains)
+
+		if r.CaseInsensitive {
+			r.notContainsBytes = bytes.ToLower(r.notContainsBytes)
+		}
+	}
+
+	return r.notContainsBytes
+}
+
 func (r *ReadCallback) containsRe() *regexp.Regexp {
 	if r.containsReCompiled == nil {
 		flags := ""
@@ -178,6 +200,24 @@ func (r *ReadCallback) containsRe() *regexp.Regexp {
 	}
 
 	return r.containsReCompiled
+}
+
+func (r *ReadCallback) check(o []byte) bool {
+	if r.CaseInsensitive {
+		o = bytes.ToLower(o)
+	}
+
+	if (r.Contains != "" && bytes.Contains(o, r.contains())) &&
+		!(r.NotContains != "" && !bytes.Contains(o, r.notContains())) {
+		return true
+	}
+
+	if (r.ContainsRe != "" && r.containsRe().Match(o)) &&
+		!(r.NotContains != "" && !bytes.Contains(o, r.notContains())) {
+		return true
+	}
+
+	return false
 }
 
 type readCallbackResult struct {
@@ -253,13 +293,7 @@ func (d *Driver) readWithCallbacks(
 			output = append(output, newOutput...)
 
 			for i, callback := range callbacks {
-				o := output
-				if callback.CaseInsensitive {
-					o = bytes.ToLower(output)
-				}
-
-				if (callback.Contains != "" && bytes.Contains(o, callback.contains())) ||
-					(callback.ContainsRe != "" && callback.containsRe().Match(o)) {
+				if callback.check(output) {
 					c <- &readCallbackResult{
 						i:         i,
 						callbacks: callbacks,
