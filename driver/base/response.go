@@ -3,7 +3,10 @@ package base
 import (
 	"errors"
 	"fmt"
+	"io"
+	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/scrapli/scrapligo/util"
@@ -95,17 +98,50 @@ func (r *Response) Record(rawResult []byte, result string) {
 }
 
 // TextFsmParse parses recorded output w/ a provided textfsm template.
-func (r *Response) TextFsmParse(template string) ([]map[string]interface{}, error) {
-	t, err := os.ReadFile(template)
-	if err != nil {
-		logging.LogError(
-			r.FormatLogMessage(
-				"error",
-				fmt.Sprintf("Failed opening provided template, error: %s\n", err.Error()),
-			),
-		)
+// the argument is interpreted as URL or filesystem path, for example:
+// response.TextFsmParse("http://example.com/textfsm.template") or
+// response.TextFsmParse("./local/textfsm.template")
+func (r *Response) TextFsmParse(path string) ([]map[string]interface{}, error) {
+	var t []byte
+	var err error
+	switch {
+	case strings.HasPrefix(path, "http://") || strings.HasPrefix(path, "https://"):
+		resp, err := http.Get(path)
+		if err != nil {
+			logging.LogError(
+				r.FormatLogMessage(
+					"error",
+					fmt.Sprintf("Failed downloading template, error: %s\n", err.Error()),
+				),
+			)
+			return []map[string]interface{}{}, ErrFailedOpeningTemplate
+		}
+		defer resp.Body.Close()
 
-		return []map[string]interface{}{}, ErrFailedOpeningTemplate
+		t, err = io.ReadAll(resp.Body)
+		if err != nil {
+			logging.LogError(
+				r.FormatLogMessage(
+					"error",
+					fmt.Sprintf("Failed reading downloaded template, error: %s\n", err.Error()),
+				),
+			)
+			return []map[string]interface{}{}, ErrFailedOpeningTemplate
+		}
+
+	default: // fall-through to local filesystem
+		t, err = os.ReadFile(path)
+		if err != nil {
+			logging.LogError(
+				r.FormatLogMessage(
+					"error",
+					fmt.Sprintf("Failed opening provided template, error: %s\n", err.Error()),
+				),
+			)
+
+			return []map[string]interface{}{}, ErrFailedOpeningTemplate
+		}
+
 	}
 
 	fsm := gotextfsm.TextFSM{}
