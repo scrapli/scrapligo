@@ -100,13 +100,13 @@ func (r *Response) Record(rawResult []byte, result string) {
 // TextFsmParse parses recorded output w/ a provided textfsm template.
 // the argument is interpreted as URL or filesystem path, for example:
 // response.TextFsmParse("http://example.com/textfsm.template") or
-// response.TextFsmParse("./local/textfsm.template")
+// response.TextFsmParse("./local/textfsm.template").
 func (r *Response) TextFsmParse(path string) ([]map[string]interface{}, error) {
 	var t []byte
-	var err error
+
 	switch {
 	case strings.HasPrefix(path, "http://") || strings.HasPrefix(path, "https://"):
-		resp, err := http.Get(path)
+		resp, err := http.Get(path) // nolint:gosec,noctx
 		if err != nil {
 			logging.LogError(
 				r.FormatLogMessage(
@@ -114,8 +114,10 @@ func (r *Response) TextFsmParse(path string) ([]map[string]interface{}, error) {
 					fmt.Sprintf("Failed downloading template, error: %s\n", err.Error()),
 				),
 			)
+
 			return []map[string]interface{}{}, ErrFailedOpeningTemplate
 		}
+
 		defer resp.Body.Close()
 
 		t, err = io.ReadAll(resp.Body)
@@ -126,10 +128,13 @@ func (r *Response) TextFsmParse(path string) ([]map[string]interface{}, error) {
 					fmt.Sprintf("Failed reading downloaded template, error: %s\n", err.Error()),
 				),
 			)
+
 			return []map[string]interface{}{}, ErrFailedOpeningTemplate
 		}
 
 	default: // fall-through to local filesystem
+		var err error
+
 		t, err = os.ReadFile(path)
 		if err != nil {
 			logging.LogError(
@@ -141,12 +146,11 @@ func (r *Response) TextFsmParse(path string) ([]map[string]interface{}, error) {
 
 			return []map[string]interface{}{}, ErrFailedOpeningTemplate
 		}
-
 	}
 
 	fsm := gotextfsm.TextFSM{}
 
-	err = fsm.ParseString(string(t))
+	err := fsm.ParseString(string(t))
 	if err != nil {
 		logging.LogError(
 			r.FormatLogMessage(
