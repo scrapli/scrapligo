@@ -448,3 +448,47 @@ func WithChannelLog(log io.Writer) Option {
 		return ErrIgnoredOption
 	}
 }
+
+// ChannelAuth options
+
+// WithChannelAuthUsernamePattern overrides the default in channel username regexp.
+func WithChannelAuthUsernamePattern(p *regexp.Regexp) Option {
+	return func(o interface{}) error {
+		c, ok := o.(*channel.Channel)
+
+		if ok {
+			c.AuthUsernamePattern = p
+			return nil
+		}
+
+		return ErrIgnoredOption
+	}
+}
+
+// WithChannelAuthPasswordPattern overrides the default in channel password regexp.
+func WithChannelAuthPasswordPattern(p *regexp.Regexp) Option {
+	return func(o interface{}) error {
+		c, ok := o.(*channel.Channel)
+
+		if ok {
+			c.AuthPasswordPattern = p
+			return nil
+		}
+
+		return ErrIgnoredOption
+	}
+}
+
+// WithChannelAuthPassphrasePattern overrides the default in channel username regexp.
+func WithChannelAuthPassphrasePattern(p *regexp.Regexp) Option {
+	return func(o interface{}) error {
+		c, ok := o.(*channel.Channel)
+
+		if ok {
+			c.AuthUsernamePattern = p
+			return nil
+		}
+
+		return ErrIgnoredOption
+	}
+}

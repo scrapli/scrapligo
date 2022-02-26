@@ -81,7 +81,7 @@ func (d *Driver) Open() error {
 			d.FormatLogMessage("error", "authentication failed, connection not opened"),
 		)
 
-		return err
+		return authErr
 	}
 
 	logging.LogDebug(d.FormatLogMessage("info", "connection to device opened successfully"))

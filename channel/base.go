@@ -49,6 +49,11 @@ type Channel struct {
 	Host                   string
 	Port                   int
 	ChannelLog             io.Writer
+
+	// fields to override default in channel authentication patterns
+	AuthUsernamePattern   *regexp.Regexp
+	AuthPasswordPattern   *regexp.Regexp
+	AuthPassphrasePattern *regexp.Regexp
 }
 
 type channelResult struct {
