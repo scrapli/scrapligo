@@ -12,16 +12,16 @@ func (d *Driver) SendConfig(c string, o ...base.SendOption) (*base.Response, err
 	sc := strings.Split(c, "\n")
 	m, err := d.SendConfigs(sc, o...)
 
+	if err != nil {
+		return nil, err
+	}
+
 	r := base.NewResponse(
 		d.Host,
 		d.Transport.BaseTransportArgs.Port,
 		c,
 		m.Responses[0].FailedWhenContains,
 	)
-
-	if err != nil {
-		return r, err
-	}
 
 	individualResponses := make([]string, len(sc))
 	for _, response := range m.Responses {
