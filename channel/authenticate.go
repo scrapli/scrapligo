@@ -41,6 +41,14 @@ func (c *Channel) authenticateSSH( //nolint:dupl
 	passwordPattern := patterns.passwordPattern
 	passphrasePattern := patterns.passphrasePattern
 
+	if c.AuthPasswordPattern != nil {
+		passwordPattern = c.AuthPasswordPattern
+	}
+
+	if c.AuthPassphrasePattern != nil {
+		passphrasePattern = c.AuthPassphrasePattern
+	}
+
 	var passwordCount = 0
 
 	var passphraseCount = 0
@@ -148,6 +156,14 @@ func (c *Channel) authenticateTelnet( //nolint:dupl
 	patterns := GetAuthPatterns()
 	usernamePattern := patterns.telnetLoginPattern
 	passwordPattern := patterns.passwordPattern
+
+	if c.AuthUsernamePattern != nil {
+		usernamePattern = c.AuthUsernamePattern
+	}
+
+	if c.AuthPasswordPattern != nil {
+		passwordPattern = c.AuthPasswordPattern
+	}
 
 	var usernameCount = 0
 
