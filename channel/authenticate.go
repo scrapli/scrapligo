@@ -24,7 +24,7 @@ func GetAuthPatterns() *AuthPatterns {
 	authPatternsInstanceOnce.Do(func() {
 		AuthPatternsInstance = &AuthPatterns{
 			telnetLoginPattern: regexp.MustCompile(`(?im)^(.*username:)|(.*login:)\s?$`),
-			passwordPattern:    regexp.MustCompile(`(?im)^(.*@.*)?password:\s?$`),
+			passwordPattern:    regexp.MustCompile(`(?im)(.*@.*)?password:\s?$`),
 			passphrasePattern:  regexp.MustCompile(`(?i)enter passphrase for key`),
 		}
 	})
