@@ -104,6 +104,11 @@ func TestSendInteractive(t *testing.T) {
 			continue
 		}
 
+		if platform == "sonic_sonic" {
+			// gotta figure out an interactive command on sros
+			continue
+		}
+
 		sessionFile := fmt.Sprintf("../../test_data/driver/network/sendinteractive/%s", platform)
 
 		d := testhelper.CreatePatchedDriver(t, sessionFile, platform)

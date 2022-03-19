@@ -19,6 +19,7 @@ func platformCommandMapShort() map[string]string {
 		"nokia_sros":         "show version",
 		"nokia_sros_classic": "show version",
 		"paloalto_panos":     "show clock",
+		"sonic_sonic":        "show platfrom summary",
 	}
 }
 
@@ -32,6 +33,7 @@ func platformCommandMapLong() map[string]string {
 		"nokia_sros":         "show router interface",
 		"nokia_sros_classic": "show router interface",
 		"paloalto_panos":     "show templates",
+		"sonic_sonic":        "show version",
 	}
 }
 
