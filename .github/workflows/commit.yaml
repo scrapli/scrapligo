@@ -13,9 +13,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: set up go ${{ matrix.version }}
-        uses: golangci/golangci-lint-action@v2
+        uses: golangci/golangci-lint-action@v3
         with:
-          version: v1.43
+          version: v1.45
       - name: golangci-lint
         run: golangci-lint run
       - name: tests
