@@ -37,6 +37,8 @@ const (
 	passphraseSeenMax = 2
 	// MaxTimeout maximum allowable timeout value -- one day.
 	MaxTimeout = 86_400
+
+	redactedLog = "REDACTED"
 )
 
 // Channel struct representing the channel object.
@@ -66,7 +68,7 @@ type channelResult struct {
 func (c *Channel) Write(channelInput []byte, redacted bool) error {
 	logOutput := string(channelInput)
 	if redacted {
-		logOutput = "REDACTED"
+		logOutput = redactedLog
 	}
 
 	logging.LogDebug(c.FormatLogMessage("write", fmt.Sprintf("write: %s", logOutput)))
