@@ -58,7 +58,16 @@ func (d *Driver) escalate(escalatePriv string) error {
 				HideInput:       true,
 			},
 		}
-		_, err = d.Channel.SendInteractive(events, []string{d.PrivilegeLevels[escalatePriv].Pattern}, -1)
+		_, err = d.Channel.SendInteractive(
+			events,
+			[]string{
+				// check for the current (previous priv) and escalate (desired priv) patterns,
+				// either would indicate we are "good to go".
+				d.PrivilegeLevels[d.PrivilegeLevels[escalatePriv].PreviousPriv].Pattern,
+				d.PrivilegeLevels[escalatePriv].Pattern,
+			},
+			-1,
+		)
 	}
 
 	return err

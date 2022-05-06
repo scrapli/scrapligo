@@ -38,12 +38,17 @@ func (c *Channel) sendInteractive(
 
 		hideInput := event.HideInput
 
+		logChannelInput := string(channelInput)
+		if hideInput {
+			logChannelInput = redactedLog
+		}
+
 		logging.LogDebug(
 			c.FormatLogMessage(
 				"info",
 				fmt.Sprintf(
 					"\"sending interactive input: %s; expecting: %s; hidden input: %v",
-					channelInput,
+					logChannelInput,
 					channelResponse,
 					hideInput,
 				),
