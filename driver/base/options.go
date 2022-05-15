@@ -220,12 +220,12 @@ func WithNetconfServerEcho(echo bool) Option {
 
 // WithNetconfForceSelfClosingTags forces empty tags to the form </tag> -- only applicable for
 // netconf, and *probably* only for junos.
-func WithNetconfForceSelfClosingTags(echo bool) Option {
+func WithNetconfForceSelfClosingTags(forceSelfClosingTags bool) Option {
 	return func(o interface{}) error {
 		d, ok := o.(*Driver)
 
 		if ok {
-			d.NetconfForceSelfClosingTags = &echo
+			d.NetconfForceSelfClosingTags = &forceSelfClosingTags
 			return nil
 		}
 
