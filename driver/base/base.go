@@ -48,7 +48,8 @@ type Driver struct {
 	PrivilegeLevels    map[string]*PrivilegeLevel
 	DefaultDesiredPriv string
 
-	NetconfEcho *bool
+	NetconfEcho                 *bool
+	NetconfForceSelfClosingTags *bool
 }
 
 // Open opens the connection.

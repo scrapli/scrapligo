@@ -16,7 +16,7 @@ func (c *Channel) BuildFinalMessage(xmlMessage interface{}) ([]byte, error) {
 
 	message = append([]byte(XMLHeader), message...)
 
-	if c.ForceSelfClosingTag {
+	if *c.ForceSelfClosingTag {
 		// this grossness is 100% only for junos who seem to have lost their ever loving mind...
 		// `<source><running></running></source>` will cause junos (at least 17.x) to return an
 		// error whilst `<source><running/></source>` will not. functionally 100% identical but

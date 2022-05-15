@@ -47,8 +47,9 @@ func NewNetconfDriver(
 	}
 
 	nc := &Channel{
-		BaseChannel: d.Channel,
-		serverEcho:  d.NetconfEcho,
+		BaseChannel:         d.Channel,
+		serverEcho:          d.NetconfEcho,
+		ForceSelfClosingTag: d.NetconfForceSelfClosingTags,
 	}
 
 	d.NetconfChannel = nc

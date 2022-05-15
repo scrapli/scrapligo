@@ -48,7 +48,8 @@ func TestFunctionalGetConfig(t *testing.T) {
 			d := newFunctionalTestDriver(t, connectionData.Host, transportName, connectionData.Port)
 
 			if strings.Contains(platform, "junos") {
-				d.NetconfChannel.ForceSelfClosingTag = true
+				t := true
+				d.NetconfChannel.ForceSelfClosingTag = &t
 			}
 
 			f := testFunctionalGetConfig(d)
