@@ -8,6 +8,9 @@ import (
 
 	"github.com/scrapli/scrapligo/driver/generic"
 
+	"github.com/scrapli/scrapligo/channel"
+	"github.com/scrapli/scrapligo/logging"
+
 	"github.com/scrapli/scrapligo/transport"
 	"github.com/scrapli/scrapligo/util"
 )
@@ -105,13 +108,20 @@ func NewDriver(
 ) (*Driver, error) {
 	opts = append(opts, withNetconfConnection(true))
 
+	// create the generic driver just to yoink the transport and channel out of it, by doing this
+	// all the "normal" options get applied, then we just take the parts we care about. we very much
+	// do *not* want the "normal" driver here because then users may use things like GetPrompt and
+	// the like that would break netconf-y things.
 	gd, err := generic.NewDriver(host, opts...)
 	if err != nil {
 		return nil, err
 	}
 
 	d := &Driver{
-		Driver:    gd,
+		TransportType: gd.TransportType,
+		Transport:     gd.Transport,
+		Channel:       gd.Channel,
+
 		messageID: 101,
 
 		messages:     map[int][]byte{},
@@ -132,6 +142,18 @@ func NewDriver(
 		}
 	}
 
+	if d.Logger == nil {
+		// set a default logging instance w/ no assigned loggers (a noop basically)
+		var l *logging.Instance
+
+		l, err = logging.NewInstance()
+		if err != nil {
+			return nil, err
+		}
+
+		d.Logger = l
+	}
+
 	ncPatterns := getNetconfPatterns()
 
 	d.Channel.PromptPattern = ncPatterns.v1Dot0Delim
@@ -141,7 +163,12 @@ func NewDriver(
 
 // Driver embeds generic.Driver and adds "netconf" centric functionality.
 type Driver struct {
-	*generic.Driver
+	Logger *logging.Instance
+
+	TransportType string
+	Transport     *transport.Transport
+
+	Channel *channel.Channel
 
 	PreferredVersion string
 	SelectedVersion  string
@@ -165,7 +192,13 @@ type Driver struct {
 // Open opens the underlying generic.Driver, and by extension the channel.Channel and Transport
 // objects. This should be called prior to executing any RPC methods of the Driver.
 func (d *Driver) Open() error {
-	err := d.Driver.Open()
+	d.Logger.Debugf(
+		"opening connection to host '%s' on port '%d'",
+		d.Transport.Args.Host,
+		d.Transport.Args.Port,
+	)
+
+	err := d.Channel.Open()
 	if err != nil {
 		return err
 	}
@@ -186,6 +219,24 @@ func (d *Driver) Open() error {
 	}
 
 	go d.read()
+
+	return nil
+}
+
+// Close closes the underlying channel.Channel and Transport objects.
+func (d *Driver) Close() error {
+	d.Logger.Debugf(
+		"closing connection to host '%s' on port '%d'",
+		d.Transport.Args.Host,
+		d.Transport.Args.Port,
+	)
+
+	err := d.Transport.Close()
+	if err != nil {
+		return err
+	}
+
+	d.Logger.Info("connection closed successfully")
 
 	return nil
 }

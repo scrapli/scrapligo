@@ -96,7 +96,7 @@ func (d *Driver) sendRPC(
 	case err = <-d.errs:
 		return nil, err
 	case <-timer.C:
-		d.Driver.Logger.Critical("channel timeout sending input to device")
+		d.Logger.Critical("channel timeout sending input to device")
 
 		return nil, fmt.Errorf("%w: channel timeout sending input to device", util.ErrTimeoutError)
 	case <-done:
