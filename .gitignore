@@ -20,12 +20,10 @@
 
 # private dir for notes and such
 private/
+.private/
 
 # log output
 *.log
-
-# mkdocs site
-site/*
 
 # vscode
 .vscode
