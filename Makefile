@@ -10,7 +10,6 @@ lint: ## Run linters
 	golangci-lint run
 
 test: ## Run unit tests
-	#go test ./... -v
 	gotestsum --format testname -- -coverprofile=cover.out ./...
 
 test-race: ## Run unit tests with race flag

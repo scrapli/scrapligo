@@ -22,6 +22,6 @@ jobs:
         with:
           version: v1.45
       - name: install gotestsum
-        run: go get gotest.tools/gotestsum@latest
+        run: go install gotest.tools/gotestsum@latest
       - name: tests
-        run: make test-race
+        run: gotestsum --format testname -race
