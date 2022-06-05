@@ -124,7 +124,7 @@ func (d *Driver) Close() error {
 		}
 	}
 
-	err := d.Transport.Close()
+	err := d.Channel.Close()
 	if err != nil {
 		return err
 	}

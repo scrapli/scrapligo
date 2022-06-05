@@ -231,7 +231,7 @@ func (d *Driver) Close() error {
 		d.Transport.Args.Port,
 	)
 
-	err := d.Transport.Close()
+	err := d.Channel.Close()
 	if err != nil {
 		return err
 	}

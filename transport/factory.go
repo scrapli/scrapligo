@@ -71,6 +71,7 @@ func NewTransport(
 	t := &Transport{
 		Args:        args,
 		Impl:        i,
+		implLock:    &sync.Mutex{},
 		timeoutLock: &sync.Mutex{},
 	}
 

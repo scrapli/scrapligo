@@ -138,6 +138,7 @@ type transportImpl interface {
 type Transport struct {
 	Args        *Args
 	Impl        transportImpl
+	implLock    *sync.Mutex
 	timeoutLock *sync.Mutex
 }
 
@@ -168,6 +169,9 @@ func (t *Transport) Open() error {
 
 // Close closes the underlying transportImpl transport object.
 func (t *Transport) Close() error {
+	t.implLock.Lock()
+	defer t.implLock.Unlock()
+
 	return t.Impl.Close()
 }
 
@@ -180,6 +184,9 @@ func (t *Transport) read(n int) ([]byte, error) {
 	c := make(chan *readResult)
 
 	go func() {
+		t.implLock.Lock()
+		defer t.implLock.Unlock()
+
 		b, err := t.Impl.Read(n)
 
 		c <- &readResult{

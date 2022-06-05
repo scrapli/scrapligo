@@ -60,8 +60,9 @@ func NewChannel(
 		PromptPattern: getPromptPattern(),
 		ReturnChar:    []byte(DefaultReturnChar),
 
-		Q: util.NewQueue(),
+		done: make(chan bool),
 
+		Q:    util.NewQueue(),
 		Errs: make(chan error),
 
 		ChannelLog: nil,
@@ -97,6 +98,8 @@ type Channel struct {
 
 	PromptPattern *regexp.Regexp
 	ReturnChar    []byte
+
+	done chan bool
 
 	Q    *util.Queue
 	Errs chan error
@@ -149,6 +152,13 @@ func (c *Channel) Open() error {
 	}
 
 	return nil
+}
+
+// Close signals to stop the channel read loop and closes the underlying Transport object.
+func (c *Channel) Close() error {
+	c.done <- true
+
+	return c.t.Close()
 }
 
 type result struct {

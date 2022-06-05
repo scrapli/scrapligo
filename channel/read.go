@@ -10,6 +10,12 @@ import (
 
 func (c *Channel) read() {
 	for {
+		select {
+		case <-c.done:
+			return
+		default:
+		}
+
 		b, err := c.t.Read()
 		if err != nil {
 			// we got a transport error, put it into the error channel for processing during
