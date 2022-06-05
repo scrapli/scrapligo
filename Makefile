@@ -19,19 +19,19 @@ test-functional: ## Run functional tests against "full" test topology
 	gotestsum --format testname --hide-summary=skipped -- ./... -functional
 
 test-ci: ## Run functional tests against "ci" test topology with race flag
-	gotestsum --format testname --hide-summary=skipped -- ./... -functional -platforms nokia_srlinux -race
+	gotestsum --format testname --hide-summary=skipped -- ./... -functional -platforms nokia_srl -race
 
 cov:  ## Produce html coverage report
 	go tool cover -html=cover.out
 
 deploy-clab-full: ## Deploy "full" test topology
-	cd clab && sudo clab deploy -t topo-full.yaml
+	cd .clab && sudo clab deploy -t topo-full.yaml
 
 destroy-clab-full: ## Destroy "full" test topology
-	cd clab && sudo clab destroy -t topo-full.yaml
+	cd .clab && sudo clab destroy -t topo-full.yaml
 
 deploy-clab-ci: ## Deploy "ci" test topology
-	cd clab && sudo clab deploy -t topo-ci.yaml
+	cd .clab && sudo clab deploy -t topo-ci.yaml
 
 destroy-clab-ci: ## Destroy "ci" test topology
-	cd clab && sudo clab destroy -t topo-ci.yaml
+	cd .clab && sudo clab destroy -t topo-ci.yaml
