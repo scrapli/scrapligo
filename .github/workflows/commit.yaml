@@ -13,10 +13,10 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v3
-      - name: set up go ${{ matrix.version }}
+      - name: set up go ${{ matrix.go-version }}
         uses: actions/setup-go@v3
         with:
-          go-version: ${{ matrix.version }}
+          go-version: ${{ matrix.go-version }}
       - name: lint
         uses: golangci/golangci-lint-action@v3
         with:
