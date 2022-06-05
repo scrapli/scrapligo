@@ -10,16 +10,16 @@ lint: ## Run linters
 	golangci-lint run
 
 test: ## Run unit tests
-	gotestsum --format testname -- -coverprofile=cover.out ./...
+	gotestsum --format testname --hide-summary=skipped -- -coverprofile=cover.out ./...
 
 test-race: ## Run unit tests with race flag
-	gotestsum --format testname -- -coverprofile=cover.out ./... -race
+	gotestsum --format testname --hide-summary=skipped -- -coverprofile=cover.out ./... -race
 
 test-functional: ## Run functional tests against "full" test topology
-	gotestsum --format testname -- ./... -functional
+	gotestsum --format testname --hide-summary=skipped -- ./... -functional
 
 test-ci: ## Run functional tests against "ci" test topology with race flag
-	gotestsum --format testname -- ./... -functional -platforms nokia_srlinux -race
+	gotestsum --format testname --hide-summary=skipped -- ./... -functional -platforms nokia_srlinux -race
 
 cov:  ## Produce html coverage report
 	go tool cover -html=cover.out
