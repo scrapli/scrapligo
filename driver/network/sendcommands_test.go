@@ -1,297 +1,301 @@
 package network_test
 
 import (
+	"bytes"
 	"fmt"
-	"os"
 	"testing"
 
-	"github.com/scrapli/scrapligo/driver/base"
+	"github.com/scrapli/scrapligo/util"
 
+	"github.com/scrapli/scrapligo/platform"
 	"github.com/scrapli/scrapligo/transport"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/scrapli/scrapligo/driver/core"
-	"github.com/scrapli/scrapligo/driver/network"
-	"github.com/scrapli/scrapligo/util/testhelper"
 )
 
-func compareResults(
-	t *testing.T,
-	r *base.MultiResponse,
-	expectedOutput [][]byte,
-	cleanFunc func(r string) string,
-) {
-	if r.Failed != nil {
-		t.Fatalf("response object indicates failure; error: %+v\n", r.Failed)
-	}
-
-	rOne := r.Responses[0].Result
-	rTwo := r.Responses[1].Result
-
-	if diff := cmp.Diff(cleanFunc(rOne), string(expectedOutput[0])); diff != "" {
-		t.Errorf("actual result one and expected result do not match (-want +got):\n%s", diff)
-	}
-
-	if diff := cmp.Diff(cleanFunc(rTwo), string(expectedOutput[1])); diff != "" {
-		t.Errorf("actual result two and expected result do not match (-want +got):\n%s", diff)
-	}
+type sendCommandsTestCase struct {
+	description string
+	commands    []string
+	payloadFile string
+	stripPrompt bool
+	eager       bool
 }
 
-func testSendCommands(
-	d *network.Driver, commands []string,
-	expectedOutput [][]byte, cleanFunc func(r string) string,
-) func(t *testing.T) {
+func testSendCommands(testName string, testCase *sendCommandsTestCase) func(t *testing.T) {
 	return func(t *testing.T) {
-		openErr := d.Open()
-		if openErr != nil {
-			t.Fatalf("failed opening driver: %v", openErr)
+		t.Logf("%s: starting", testName)
+
+		d, fileTransportObj := prepareDriver(t, testName, testCase.payloadFile)
+
+		r, err := d.SendCommands(testCase.commands)
+		if err != nil {
+			t.Fatalf(
+				"%s: encountered error running generic Driver SendCommands, error: %s",
+				testName,
+				err,
+			)
 		}
 
-		r, cmdErr := d.SendCommands(commands)
-		if cmdErr != nil {
-			t.Fatalf("failed sending commands: %v", cmdErr)
+		if r.Failed != nil {
+			t.Fatalf("%s: response object indicates failure",
+				testName)
 		}
 
-		compareResults(t, r, expectedOutput, cleanFunc)
-	}
-}
+		actualOut := r.JoinedResult()
+		actualIn := bytes.Join(fileTransportObj.Writes, []byte("\n"))
 
-func testSendCommandsFromFile(
-	d *network.Driver,
-	commandsFile string,
-	expectedOutput [][]byte,
-	cleanFunc func(r string) string,
-) func(t *testing.T) {
-	return func(t *testing.T) {
-		openErr := d.Open()
-		if openErr != nil {
-			t.Fatalf("failed opening driver: %v", openErr)
+		if *update {
+			writeGolden(t, testName, actualIn, actualOut)
 		}
 
-		r, cmdErr := d.SendCommandsFromFile(commandsFile)
-		if cmdErr != nil {
-			t.Fatalf("failed sending commands: %v", cmdErr)
+		expectedIn := readFile(t, fmt.Sprintf("golden/%s-in.txt", testName))
+		expectedOut := readFile(t, fmt.Sprintf("golden/%s-out.txt", testName))
+
+		if !cmp.Equal(actualIn, expectedIn) {
+			t.Fatalf(
+				"%s: actual and expected inputs do not match\nactual: %s\nexpected:%s",
+				testName,
+				actualIn,
+				expectedIn,
+			)
 		}
 
-		compareResults(t, r, expectedOutput, cleanFunc)
+		if !cmp.Equal(actualOut, string(expectedOut)) {
+			t.Fatalf(
+				"%s: actual and expected outputs do not match\nactual: %s\nexpected:%s",
+				testName,
+				actualOut,
+				expectedOut,
+			)
+		}
 	}
-}
-
-func testSendCommandsCommon(
-	t *testing.T,
-	platform string,
-) (d *network.Driver, expectedOutputs [][]byte) {
-	sessionFile := fmt.Sprintf(
-		"../../test_data/driver/network/sendcommands/%s_session",
-		platform,
-	)
-
-	expectedFileOne := fmt.Sprintf(
-		"../../test_data/driver/network/expected/%s_short_expected",
-		platform,
-	)
-
-	expectedFileTwo := fmt.Sprintf(
-		"../../test_data/driver/network/expected/%s_long_expected",
-		platform,
-	)
-
-	expectedOutputOne, expectedErr := os.ReadFile(expectedFileOne)
-	if expectedErr != nil {
-		t.Fatalf(
-			"failed opening expected output file '%s' err: %v",
-			expectedFileOne,
-			expectedErr,
-		)
-	}
-
-	expectedOutputTwo, expectedErr := os.ReadFile(expectedFileTwo)
-	if expectedErr != nil {
-		t.Fatalf(
-			"failed opening expected output file '%s' err: %v",
-			expectedFileTwo,
-			expectedErr,
-		)
-	}
-
-	d = testhelper.CreatePatchedDriver(t, sessionFile, platform)
-
-	return d, [][]byte{expectedOutputOne, expectedOutputTwo}
 }
 
 func TestSendCommands(t *testing.T) {
-	commandMapShort := platformCommandMapShort()
-	commandMapLong := platformCommandMapLong()
+	cases := map[string]*sendCommandsTestCase{
+		"send-commands-simple": {
+			description: "simple send commands test",
+			commands:    []string{"show run int vlan1", "show run int vlan1"},
+			payloadFile: "send-commands-simple.txt",
+			stripPrompt: false,
+			eager:       false,
+		},
+	}
 
-	for _, platform := range core.SupportedPlatforms() {
-		commandOne := commandMapShort[platform]
-		commandTwo := commandMapLong[platform]
+	for testName, testCase := range cases {
+		f := testSendCommands(testName, testCase)
 
-		d, expectedOutputs := testSendCommandsCommon(t, platform)
+		t.Run(testName, f)
+	}
+}
 
-		f := testSendCommands(
-			d,
-			[]string{commandOne, commandTwo},
-			expectedOutputs,
-			testhelper.GetCleanFunc(platform),
-		)
+type sendCommandsFromFileTestCase struct {
+	description string
+	f           string
+	payloadFile string
+	stripPrompt bool
+	eager       bool
+}
 
-		t.Run(fmt.Sprintf("Platform=%s", platform), f)
+func testSendCommandsFromFile(
+	testName string,
+	testCase *sendCommandsFromFileTestCase,
+) func(t *testing.T) {
+	return func(t *testing.T) {
+		t.Logf("%s: starting", testName)
+
+		d, fileTransportObj := prepareDriver(t, testName, testCase.payloadFile)
+
+		r, err := d.SendCommandsFromFile(resolveFile(t, testCase.f))
+		if err != nil {
+			t.Errorf(
+				"%s: encountered error running generic Driver GetPrompt, error: %s",
+				testName,
+				err,
+			)
+		}
+
+		if r.Failed != nil {
+			t.Fatalf("%s: response object indicates failure",
+				testName)
+		}
+
+		actualOut := r.JoinedResult()
+		actualIn := bytes.Join(fileTransportObj.Writes, []byte("\n"))
+
+		if *update {
+			writeGolden(t, testName, actualIn, actualOut)
+		}
+
+		expectedIn := readFile(t, fmt.Sprintf("golden/%s-in.txt", testName))
+		expectedOut := readFile(t, fmt.Sprintf("golden/%s-out.txt", testName))
+
+		if !cmp.Equal(actualIn, expectedIn) {
+			t.Fatalf(
+				"%s: actual and expected inputs do not match\nactual: %s\nexpected:%s",
+				testName,
+				actualIn,
+				expectedIn,
+			)
+		}
+
+		if !cmp.Equal(actualOut, string(expectedOut)) {
+			t.Fatalf(
+				"%s: actual and expected outputs do not match\nactual: %s\nexpected:%s",
+				testName,
+				actualOut,
+				expectedOut,
+			)
+		}
 	}
 }
 
 func TestSendCommandsFromFile(t *testing.T) {
-	for _, platform := range core.SupportedPlatforms() {
-		d, expectedOutputs := testSendCommandsCommon(t, platform)
+	cases := map[string]*sendCommandsFromFileTestCase{
+		"send-commands-from-file-simple": {
+			description: "simple send commands test",
+			f:           "send-commands-from-file-simple-inputs.txt",
+			payloadFile: "send-commands-from-file-simple.txt",
+			stripPrompt: false,
+			eager:       false,
+		},
+	}
 
-		f := testSendCommandsFromFile(
-			d,
-			fmt.Sprintf(
-				"../../test_data/driver/network/sendcommandsfromfile/%s_commands",
-				platform,
-			),
-			expectedOutputs,
-			testhelper.GetCleanFunc(platform),
-		)
+	for testName, testCase := range cases {
+		f := testSendCommandsFromFile(testName, testCase)
 
-		t.Run(fmt.Sprintf("Platform=%s", platform), f)
+		t.Run(testName, f)
 	}
 }
 
-func testFunctionalSendCommandsCommon(
-	t *testing.T,
-	platform, transportName string,
-) (d *network.Driver, expectedOutputs [][]byte) {
-	if !testhelper.RunPlatform(platform) {
-		t.Logf("skip; platform %s deselected for testing\n", platform)
-		return
+type sendCommandsFunctionalTestcase struct {
+	description string
+	stripPrompt bool
+	eager       bool
+}
+
+func getTestSendCommandsFunctionalCommand(t *testing.T, testName, platformName string) []string {
+	commands := map[string][]string{
+		platform.CiscoIosxe:   {"show run", "show ip interface brief"},
+		platform.CiscoIosxr:   {"show run", "show interfaces brief"},
+		platform.CiscoNxos:    {"show run", "show interface status"},
+		platform.AristaEos:    {"show run", "show ip interface brief"},
+		platform.JuniperJunos: {"show configuration", "show version"},
+		platform.NokiaSrl:     {"show interface all", "show platform environment"},
 	}
 
-	hostConnData, ok := functionalTestHosts()[platform]
+	c, ok := commands[platformName]
 	if !ok {
-		t.Logf("skip; no host connection data for platform type %s\n", platform)
-		return
+		t.Skipf("%s: skipping platform '%s', no command in commands map", testName, platformName)
 	}
 
-	expectedFileOne := fmt.Sprintf(
-		"../../test_data/driver/network/expected/%s_short_expected",
-		platform,
-	)
-
-	expectedFileTwo := fmt.Sprintf(
-		"../../test_data/driver/network/expected/%s_long_expected",
-		platform,
-	)
-
-	expectedOutputOne, expectedErr := os.ReadFile(expectedFileOne)
-	if expectedErr != nil {
-		t.Fatalf(
-			"failed opening expected output file '%s' err: %v",
-			expectedFileOne,
-			expectedErr,
-		)
-	}
-
-	expectedOutputTwo, expectedErr := os.ReadFile(expectedFileTwo)
-	if expectedErr != nil {
-		t.Fatalf(
-			"failed opening expected output file '%s' err: %v",
-			expectedFileTwo,
-			expectedErr,
-		)
-	}
-
-	port := hostConnData.Port
-	if transportName == transport.TelnetTransportName {
-		port = hostConnData.TelnetPort
-	}
-
-	d = newFunctionalTestDriver(
-		t,
-		hostConnData.Host,
-		platform,
-		transportName,
-		port,
-	)
-
-	return d, [][]byte{expectedOutputOne, expectedOutputTwo}
+	return c
 }
 
-func TestFunctionalSendCommands(t *testing.T) {
-	if !*testhelper.Functional {
-		t.Skip("skip: functional tests skipped unless the '-functional' flag is passed")
-	}
+func testSendCommandsFunctional(
+	testName, platformName, transportName string,
+	testCase *sendCommandsFunctionalTestcase,
+) func(t *testing.T) {
+	return func(t *testing.T) {
+		t.Logf("%s: starting", testName)
 
-	commandMapShort := platformCommandMapShort()
-	commandMapLong := platformCommandMapLong()
+		d := prepareFunctionalDriver(t, testName, platformName, transportName)
 
-	for _, transportName := range transport.SupportedTransports() {
-		if !testhelper.RunTransport(transportName) {
-			t.Logf("skip; transport %s deselected for testing\n", transportName)
-			continue
+		r, err := d.SendCommands(
+			getTestSendCommandsFunctionalCommand(t, testName, platformName),
+		)
+		if err != nil {
+			t.Errorf(
+				"%s: encountered error running network Driver SendCommand, error: %s",
+				testName,
+				err,
+			)
 		}
 
-		for _, platform := range core.SupportedPlatforms() {
-			if !testhelper.RunPlatform(platform) {
-				t.Logf("skip; platform %s deselected for testing\n", platform)
-				continue
-			}
+		if r.Failed != nil {
+			t.Fatalf("%s: response object indicates failure",
+				testName)
+		}
 
-			commandOne := commandMapShort[platform]
-			commandTwo := commandMapLong[platform]
+		err = d.Close()
+		if err != nil {
+			t.Fatalf("%s: failed closing connection",
+				testName)
+		}
 
-			d, expectedOutputs := testFunctionalSendCommandsCommon(t, platform, transportName)
-			if d == nil {
-				// no connection data or some reason to skip
-				continue
-			}
+		actualOut := r.JoinedResult()
 
-			f := testSendCommands(
-				d,
-				[]string{commandOne, commandTwo},
-				expectedOutputs,
-				testhelper.GetCleanFunc(platform),
+		if *update {
+			writeGoldenFunctional(
+				t,
+				fmt.Sprintf("%s-%s-%s", testName, platformName, transportName),
+				actualOut,
 			)
+		}
 
-			t.Run(fmt.Sprintf("Platform=%s;Transport=%s", platform, transportName), f)
+		cleanF := util.GetCleanFunc(platformName)
+
+		expectedOut := readFile(
+			t,
+			fmt.Sprintf("golden/%s-%s-%s-out.txt", testName, platformName, transportName),
+		)
+
+		if !cmp.Equal(
+			util.GetCleanFunc(platformName)(actualOut),
+			cleanF(string(expectedOut)),
+		) {
+			t.Fatalf(
+				"%s: actual and expected outputs do not match\nactual: %s\nexpected:%s",
+				testName,
+				actualOut,
+				expectedOut,
+			)
 		}
 	}
 }
 
-func TestFunctionalSendCommandsFromFile(t *testing.T) {
-	if !*testhelper.Functional {
-		t.Skip("skip: functional tests skipped unless the '-functional' flag is passed")
+func TestSendCommandsFunctional(t *testing.T) {
+	cases := map[string]*sendCommandsFunctionalTestcase{
+		"functional-send-commands-simple": {
+			description: "simple send command test",
+			stripPrompt: false,
+			eager:       false,
+		},
 	}
 
-	for _, transportName := range transport.SupportedTransports() {
-		if !testhelper.RunTransport(transportName) {
-			t.Logf("skip; transport %s deselected for testing\n", transportName)
-			continue
-		}
+	if !*functional {
+		t.Skip("skip: functional tests skipped without the '-functional' flag being passed")
+	}
 
-		for _, platform := range core.SupportedPlatforms() {
-			if !testhelper.RunPlatform(platform) {
-				t.Logf("skip; platform %s deselected for testing\n", platform)
+	for testName, testCase := range cases {
+		for _, platformName := range platform.GetPlatformNames() {
+			if !util.PlatformOK(platforms, platformName) {
+				t.Logf("%s: skipping platform '%s'", testName, platformName)
+
 				continue
 			}
 
-			d, expectedOutputs := testFunctionalSendCommandsCommon(t, platform, transportName)
-			if d == nil {
-				// no connection data or some reason to skip
-				continue
+			for _, transportName := range transport.GetTransportNames() {
+				if !util.TransportOK(transports, transportName) {
+					t.Logf("%s: skipping transport '%s'", testName, transportName)
+
+					continue
+				}
+
+				f := testSendCommandsFunctional(testName, platformName, transportName, testCase)
+
+				t.Run(
+					fmt.Sprintf(
+						"%s;platform=%s;transport=%s",
+						testName,
+						platformName,
+						transportName,
+					),
+					f,
+				)
+
+				interTestSleep()
 			}
-
-			f := testSendCommandsFromFile(
-				d,
-				fmt.Sprintf(
-					"../../test_data/driver/network/sendcommandsfromfile/%s_commands",
-					platform,
-				),
-				expectedOutputs,
-				testhelper.GetCleanFunc(platform),
-			)
-
-			t.Run(fmt.Sprintf("Platform=%s;Transport=%s", platform, transportName), f)
 		}
 	}
 }

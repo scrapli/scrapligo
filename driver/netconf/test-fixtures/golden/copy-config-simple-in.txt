@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<hello xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+     <capabilities>
+         <capability>urn:ietf:params:netconf:base:1.1</capability>
+     </capabilities>
+</hello>]]>]]>
+
+
+#213
+<?xml version="1.0" encoding="UTF-8"?><rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="101"><copy-config><target><running></running></target><source><running></running></source></copy-config></rpc>
+##
+
+
+

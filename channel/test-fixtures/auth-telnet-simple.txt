@@ -1,0 +1,10 @@
+Connected to c3560.
+Escape character is '^]'.
+
+
+User Access Verification
+
+Username: Kerberos: No default realm defined for Kerberos!
+some-username
+Password:
+C3560CX#

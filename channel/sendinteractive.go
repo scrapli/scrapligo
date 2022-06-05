@@ -5,133 +5,103 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/scrapli/scrapligo/logging"
+	"github.com/scrapli/scrapligo/util"
 )
 
-// SendInteractiveEvent struct used to represent each iteration of a `SendInteractive` operation.
+// SendInteractiveEvent is a struct representing a single "event" that can be sent to
+// SendInteractive this event contains the input to send, the response to expect, and whether
+// scrapligo should expect to see the input or if it is hidden (as is the case with passwords for
+// privilege escalation).
 type SendInteractiveEvent struct {
 	ChannelInput    string
 	ChannelResponse string
 	HideInput       bool
 }
 
-func (c *Channel) sendInteractive(
-	events []*SendInteractiveEvent,
-	interactionCompletePatterns []string,
-) *channelResult {
-	var b []byte
-
-	for _, event := range events {
-		channelInput := []byte(event.ChannelInput)
-		channelResponse := event.ChannelResponse
-
-		prompts := make([]*regexp.Regexp, 0)
-		if len(channelResponse) > 0 {
-			prompts = append(prompts, regexp.MustCompile(channelResponse))
-		} else {
-			prompts = append(prompts, c.CommsPromptPattern)
-		}
-
-		for _, interactionCompletePattern := range interactionCompletePatterns {
-			prompts = append(prompts, regexp.MustCompile(interactionCompletePattern))
-		}
-
-		hideInput := event.HideInput
-
-		logChannelInput := string(channelInput)
-		if hideInput {
-			logChannelInput = redactedLog
-		}
-
-		logging.LogDebug(
-			c.FormatLogMessage(
-				"info",
-				fmt.Sprintf(
-					"\"sending interactive input: %s; expecting: %s; hidden input: %v",
-					logChannelInput,
-					channelResponse,
-					hideInput,
-				),
-			),
-		)
-
-		err := c.Write(channelInput, hideInput)
-		if err != nil {
-			return &channelResult{
-				result: []byte(""),
-				error:  err,
-			}
-		}
-
-		if channelResponse == "" || hideInput {
-			returnErr := c.SendReturn()
-			if returnErr != nil {
-				return &channelResult{
-					result: []byte(""),
-					error:  returnErr,
-				}
-			}
-		} else {
-			newBuf, readErr := c.readUntilInput(channelInput)
-			if readErr != nil {
-				return &channelResult{
-					result: []byte(""),
-					error:  readErr,
-				}
-			}
-			b = append(b, newBuf...)
-			returnErr := c.SendReturn()
-			if returnErr != nil {
-				return &channelResult{
-					result: []byte(""),
-					error:  returnErr,
-				}
-			}
-		}
-
-		postInputBuf, err := c.readUntilExplicitPrompt(prompts)
-		if err != nil {
-			return &channelResult{
-				result: []byte(""),
-				error:  nil,
-			}
-		}
-
-		b = append(b, postInputBuf...)
-	}
-
-	return &channelResult{
-		result: c.RestructureOutput(b, false),
-		error:  nil,
-	}
-}
-
-// SendInteractive send "interactive" inputs to a device. Accepts a slice of `SendInteractiveEvent`
-// which is basically a struct defining the input and what the expected output of that command is.
-// Used for dealing with "prompting" from a target device.
+// SendInteractive sends a slice of SendInteractiveEvent to the device. This is typically used to
+// handle any well understood "interactive" prompts on a device -- things like "clear logging" which
+// prompts the user to confirm, or handling privilege escalation where there is a password prompt.
 func (c *Channel) SendInteractive(
 	events []*SendInteractiveEvent,
-	interactionCompletePatterns []string,
-	timeoutOps time.Duration,
+	opts ...util.Option,
 ) ([]byte, error) {
-	_c := make(chan *channelResult)
+	c.l.Debugf("channel SendInteractive requested, processing events '%v'", events)
+
+	op, err := NewOperation(opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	cr := make(chan *result)
+
+	var b []byte
 
 	go func() {
-		r := c.sendInteractive(events, interactionCompletePatterns)
-		_c <- r
-		close(_c)
+		for _, e := range events {
+			prompts := op.CompletePatterns
+			if e.ChannelResponse != "" {
+				prompts = append(prompts, regexp.MustCompile(e.ChannelResponse))
+			} else {
+				prompts = append(prompts, c.PromptPattern)
+			}
+
+			err = c.Write([]byte(e.ChannelInput), e.HideInput)
+			if err != nil {
+				cr <- &result{b: nil, err: err}
+
+				return
+			}
+
+			if e.ChannelResponse != "" && !e.HideInput {
+				var nb []byte
+
+				nb, err = c.ReadUntilInput([]byte(e.ChannelInput))
+				if err != nil {
+					cr <- &result{b: nil, err: err}
+
+					return
+				}
+
+				b = append(b, nb...)
+			}
+
+			err = c.WriteReturn()
+			if err != nil {
+				cr <- &result{b: nil, err: err}
+
+				return
+			}
+
+			var pb []byte
+
+			pb, err = c.ReadUntilAnyPrompt(prompts)
+			if err != nil {
+				cr <- &result{b: nil, err: err}
+
+				return
+			}
+
+			b = append(b, pb...)
+		}
+
+		cr <- &result{b: c.processOut(b, false), err: nil}
 	}()
 
-	timer := time.NewTimer(c.DetermineOperationTimeout(timeoutOps))
+	timer := time.NewTimer(c.GetTimeout(op.Timeout))
 
 	select {
-	case r := <-_c:
-		return r.result, r.error
-	case <-timer.C:
-		logging.LogError(
-			c.FormatLogMessage("error", "timed out sending interactive input to device"),
-		)
+	case r := <-cr:
+		if r.err != nil {
+			return nil, r.err
+		}
 
-		return []byte{}, ErrChannelTimeout
+		return r.b, nil
+	case <-timer.C:
+		c.l.Critical("channel timeout sending interactive input to device")
+
+		return nil, fmt.Errorf(
+			"%w: channel timeout sending interactive input to device",
+			util.ErrTimeoutError,
+		)
 	}
 }

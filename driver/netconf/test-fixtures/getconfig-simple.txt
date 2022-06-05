@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hello xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+<capabilities>
+<capability>urn:ietf:params:netconf:base:1.0</capability>
+<capability>urn:ietf:params:netconf:base:1.1</capability>
+<capability>urn:ietf:params:netconf:capability:writable-running:1.0</capability>
+<capability>urn:ietf:params:netconf:capability:xpath:1.0</capability>
+<capability>urn:ietf:params:netconf:capability:validate:1.0</capability>
+<capability>urn:ietf:params:netconf:capability:validate:1.1</capability>
+<capability>urn:ietf:params:netconf:capability:rollback-on-error:1.0</capability>
+<capability>urn:ietf:params:netconf:capability:notification:1.0</capability>
+<capability>urn:ietf:params:netconf:capability:interleave:1.0</capability>
+<capability>urn:ietf:params:netconf:capability:with-defaults:1.0?basic-mode=explicit&amp;also-supported=report-all-tagged</capability>
+<capability>urn:ietf:params:netconf:capability:yang-library:1.0?revision=2016-06-21&amp;module-set-id=9ba76f016f7eb0d15cc6fb677efc3fee</capability>
+<capability>urn:ietf:params:xml:ns:netconf:base:1.0?module=ietf-netconf&amp;revision=2011-06-01</capability>
+<capability>urn:ietf:params:xml:ns:yang:ietf-netconf-with-defaults?module=ietf-netconf-with-defaults&amp;revision=2011-06-01</capability>
+<capability>
+        urn:ietf:params:netconf:capability:notification:1.1
+      </capability>
+</capabilities>
+<session-id>25</session-id></hello>]]>]]><?xml version="1.0" encoding="utf-8"?>
+<hello xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+     <capabilities>
+         <capability>urn:ietf:params:netconf:base:1.1</capability>
+     </capabilities>
+</hello>]]>]]>
+#175
+<?xml version="1.0" encoding="UTF-8"?><rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="101"><get-config><source><running></running></source></get-config></rpc>
+##
+
+
+#4117
+<?xml version="1.0" encoding="UTF-8"?>
+<rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="101"><data><native xmlns="http://cisco.com/ns/yang/Cisco-IOS-XE-native"><version>16.12</version><boot-start-marker/><boot-end-marker/><memory><free><low-watermark><processor>72329</processor></low-watermark></free></memory><call-home><contact-email-addr xmlns="http://cisco.com/ns/yang/Cisco-IOS-XE-call-home">sch-smart-licensing@cisco.com</contact-email-addr><profile xmlns="http://cisco.com/ns/yang/Cisco-IOS-XE-call-home"><profile-name>CiscoTAC-1</profile-name><active>true</active></profile></call-home><service><timestamps><debug><datetime><msec></msec></datetime></debug><log><datetime><msec/></datetime></log></timestamps><call-home/></service><platform><console xmlns="http://cisco.com/ns/yang/Cisco-IOS-XE-platform"><output>serial</output></console><punt-keepalive xmlns="http://cisco.com/ns/yang/Cisco-IOS-XE-platform"><disable-kernel-core>true</disable-kernel-core></punt-keepalive></platform><hostname>vr-csr</hostname><enable><secret><type>9</type><secret>$9$DMRPw.t5RJvNDU$a.T0PIE8re5vNfvDil83cxu24Uuf.wyrbEs.RCsdJYo</secret></secret></enable><username><name>admin</name><privilege>15</privilege><password><password>admin</password></password></username><username><name>boxen</name><privilege>15</privilege><password><encryption>0</encryption><password>b0x3N-b0x3N</password></password></username><ip><domain><name>boxen.box</name></domain><forward-protocol><protocol>nd</protocol></forward-protocol><multicast><route-limit xmlns="http://cisco.com/ns/yang/Cisco-IOS-XE-multicast">2147483647</route-limit></multicast><pim><autorp-container xmlns="http://cisco.com/ns/yang/Cisco-IOS-XE-multicast"><autorp>false</autorp></autorp-container></pim><access-list><extended xmlns="http://cisco.com/ns/yang/Cisco-IOS-XE-acl"><name>meraki-fqdn-dns</name></extended></access-list><http xmlns="http://cisco.com/ns/yang/Cisco-IOS-XE-http"><server>false</server><secure-server>true</secure-server></http></ip><interface><GigabitEthernet><name>1</name><ip><address><primary><address>10.0.0.15</address><mask>255.255.255.0</mask></primary></address></ip><mop><enabled>false</enabled><sysid>false</sysid></mop><negotiation xmlns="http://cisco.com/ns/yang/Cisco-IOS-XE-ethernet"><auto>true</auto></negotiation></GigabitEthernet><GigabitEthernet><name>10</name><shutdown/><mop><enabled>false</enabled><sysid>false</sysid></mop><negotiation xmlns="http://cisco.com/ns/yang/Cisco-IOS-XE-ethernet"><auto>true</auto></negotiation></GigabitEthernet><GigabitEthernet><name>2</name><shutdown/><mop><enabled>false</enabled><sysid>false</sysid></mop><negotiation xmlns="http://cisco.com/ns/yang/Cisco-IOS-XE-ethernet"><auto>true</auto></negotiation></GigabitEthernet><GigabitEthernet><name>3</name><shutdown/><mop><enabled>false</enabled><sysid>false</sysid></mop><negotiation xmlns="http://cisco.com/ns/yang/Cisco-IOS-XE-ethernet"><auto>true</auto></negotiation></GigabitEthernet><GigabitEthernet><name>4</name><shutdown/><mop><enabled>false</enabled><sysid>false</sysid></mop><negotiation xmlns="http://cisco.com/ns/yang/Cisco-IOS-XE-ethernet"><auto>true</auto></negotiation></GigabitEthernet><GigabitEthernet><name>5</name><shutdown/><mop><enabled>false</enabled><sysid>false</sysid></mop><negotiation xmlns="http://cisco.com/ns/yang/Cisco-IOS-XE-ethernet"><auto>true</auto></negotiation></GigabitEthernet><GigabitEthernet><name>6</name><shutdown/><mop><enabled>false</enabled><sysid>false</sysid></mop><negotiation xmlns="http://cisco.com/ns/yang/Cisco-IOS-XE-ethernet"><auto>true</auto></negotiation></GigabitEthernet><GigabitEthernet><name>7</name><shutdown/><mop><enabled>false</enabled><sysid>false</sysid></mop><negotiation xmlns="http://cisco.com/ns/yang/Cisco-IOS-XE-ethernet"><auto>true</auto></negotiation></GigabitEthernet><GigabitEthernet><name>8</name><shutdown/><mop><enabled>false</enabled><sysid>false</sysid></mop><negotiation xmlns="http://cisco.com/ns/yang/Cisco-IOS-XE-ethernet"><auto>true</auto></negotiation></GigabitEthernet><GigabitEthernet><name>9</name><shutdown/><mop><enabled>false</enabled>
+#832
+</ipv4><ipv6 xmlns="urn:ietf:params:xml:ns:yang:ietf-ip"></ipv6></interface></interfaces><nacm xmlns="urn:ietf:params:xml:ns:yang:ietf-netconf-acm"><enable-nacm>true</enable-nacm><read-default>deny</read-default><write-default>deny</write-default><exec-default>deny</exec-default><enable-external-groups>true</enable-external-groups><rule-list><name>admin</name><group>PRIV15</group><rule><name>permit-all</name><module-name>*</module-name><access-operations>*</access-operations><action>permit</action></rule></rule-list></nacm><routing xmlns="urn:ietf:params:xml:ns:yang:ietf-routing"><routing-instance><name>default</name><description>default-vrf [read-only]</description><routing-protocols><routing-protocol><type>static</type><name>1</name></routing-protocol></routing-protocols></routing-instance></routing></data></rpc-reply>
+##

@@ -9,216 +9,191 @@ import (
 	"os/exec"
 
 	"github.com/creack/pty"
-	"github.com/scrapli/scrapligo/logging"
 )
 
-const sshCmd = "ssh"
+const (
+	// SystemTransport is the default "system" (/bin/ssh wrapper) transport for scrapligo.
+	SystemTransport = "system"
 
-// System the "system" (pty subprocess wrapper) transport option for scrapligo.
+	defaultOpenBin = "ssh"
+)
+
+// NewSystemTransport returns an instance of System transport.
+func NewSystemTransport(a *SSHArgs) (*System, error) {
+	t := &System{
+		SSHArgs:  a,
+		openBin:  defaultOpenBin,
+		openArgs: make([]string, 0),
+		fd:       nil,
+	}
+
+	return t, nil
+}
+
+// System is the default (/bin/ssh wrapper) transport object.
 type System struct {
-	SystemTransportArgs *SystemTransportArgs
-	fileObj             *os.File
-	OpenCmd             []string
-	ExecCmd             string
+	SSHArgs   *SSHArgs
+	ExtraArgs []string
+	openBin   string
+	openArgs  []string
+	fd        *os.File
 }
 
-// SystemTransport interface describes system transport specific methods.
-type SystemTransport interface {
-	SetOpenCmd([]string)
-	SetExecCmd(string)
-}
+func (t *System) buildOpenArgs(a *Args) {
+	if len(t.openArgs) > 0 {
+		t.openArgs = []string{}
+	}
 
-// SystemTransportArgs struct representing attributes required for the System transport.
-type SystemTransportArgs struct {
-	AuthPrivateKey    string
-	AuthStrictKey     bool
-	SSHConfigFile     string
-	SSHKnownHostsFile string
-	NetconfForcePty   *bool
-}
-
-// SetOpenCmd sets the open command string slice; arguments used for opening the connection.
-func (t *System) SetOpenCmd(openCmd []string) {
-	t.OpenCmd = openCmd
-}
-
-// SetExecCmd sets the exec command string, binary used for opening the connection.
-func (t *System) SetExecCmd(execCmd string) {
-	t.ExecCmd = execCmd
-}
-
-func (t *System) buildOpenCmd(baseArgs *BaseTransportArgs) {
-	// base open command arguments; the exec command itself will be passed in open()
-	// need to add user arguments could go here at some point
-	t.OpenCmd = append(
-		t.OpenCmd,
-		baseArgs.Host,
+	t.openArgs = []string{
+		a.Host,
 		"-p",
-		fmt.Sprintf("%d", baseArgs.Port),
+		fmt.Sprintf("%d", a.Port),
 		"-o",
-		fmt.Sprintf("ConnectTimeout=%d", int(baseArgs.TimeoutSocket.Seconds())),
+		fmt.Sprintf("ConnectTimeout=%d", int(a.TimeoutSocket.Seconds())),
 		"-o",
-		fmt.Sprintf("ServerAliveInterval=%d", int(baseArgs.TimeoutTransport.Seconds())),
-	)
-
-	if t.SystemTransportArgs.AuthPrivateKey != "" {
-		t.OpenCmd = append(
-			t.OpenCmd,
-			"-i",
-			t.SystemTransportArgs.AuthPrivateKey,
-		)
+		fmt.Sprintf("ServerAliveInterval=%d", int(a.TimeoutSocket.Seconds())),
 	}
 
-	if baseArgs.AuthUsername != "" {
-		t.OpenCmd = append(
-			t.OpenCmd,
+	if a.User != "" {
+		t.openArgs = append(
+			t.openArgs,
 			"-l",
-			baseArgs.AuthUsername,
+			a.User,
 		)
 	}
 
-	if !t.SystemTransportArgs.AuthStrictKey {
-		t.OpenCmd = append(
-			t.OpenCmd,
+	if t.SSHArgs.StrictKey {
+		t.openArgs = append(
+			t.openArgs,
+			"-o",
+			"StrictHostKeyChecking=yes",
+		)
+
+		if t.SSHArgs.KnownHostsFile != "" {
+			t.openArgs = append(
+				t.openArgs,
+				"-o",
+				fmt.Sprintf("UserKnownHostsFile=%s", t.SSHArgs.KnownHostsFile),
+			)
+		}
+	} else {
+		t.openArgs = append(
+			t.openArgs,
 			"-o",
 			"StrictHostKeyChecking=no",
 			"-o",
 			"UserKnownHostsFile=/dev/null",
 		)
-	} else {
-		t.OpenCmd = append(
-			t.OpenCmd,
-			"-o",
-			"StrictHostKeyChecking=yes",
-		)
-
-		if t.SystemTransportArgs.SSHKnownHostsFile != "" {
-			t.OpenCmd = append(
-				t.OpenCmd,
-				"-o",
-				fmt.Sprintf("UserKnownHostsFile=%s", t.SystemTransportArgs.SSHKnownHostsFile),
-			)
-		}
 	}
 
-	if t.SystemTransportArgs.SSHConfigFile != "" {
-		t.OpenCmd = append(
-			t.OpenCmd,
+	if t.SSHArgs.ConfigFile != "" {
+		t.openArgs = append(
+			t.openArgs,
 			"-F",
-			t.SystemTransportArgs.SSHConfigFile,
+			t.SSHArgs.ConfigFile,
 		)
 	} else {
-		t.OpenCmd = append(
-			t.OpenCmd,
+		t.openArgs = append(
+			t.openArgs,
 			"-F",
 			"/dev/null",
 		)
 	}
-}
 
-func (t *System) Open(baseArgs *BaseTransportArgs) error {
-	if t.OpenCmd == nil {
-		t.buildOpenCmd(baseArgs)
-	}
-
-	if t.ExecCmd == "" {
-		t.ExecCmd = sshCmd
-	}
-
-	logging.LogDebug(
-		FormatLogMessage(baseArgs,
-			"debug",
-			fmt.Sprintf(
-				"\"attempting to open transport connection with the following command: %s",
-				t.OpenCmd,
-			),
-		),
-	)
-
-	command := exec.Command(t.ExecCmd, t.OpenCmd...) //nolint:gosec
-	fileObj, err := pty.StartWithSize(
-		command,
-		&pty.Winsize{
-			Rows: uint16(baseArgs.PtyHeight),
-			Cols: uint16(baseArgs.PtyWidth),
-		},
-	)
-
-	if err == nil {
-		t.fileObj = fileObj
-	}
-
-	return err
-}
-
-func (t *System) OpenNetconf(baseArgs *BaseTransportArgs) error {
-	if t.OpenCmd == nil {
-		t.buildOpenCmd(baseArgs)
-
-		if t.SystemTransportArgs.NetconfForcePty == nil || *t.SystemTransportArgs.NetconfForcePty {
-			t.OpenCmd = append(t.OpenCmd, "-tt")
-		}
-
-		t.OpenCmd = append(t.OpenCmd,
-			"-s",
-			"netconf",
+	if len(t.ExtraArgs) > 0 {
+		t.openArgs = append(
+			t.openArgs,
+			t.ExtraArgs...,
 		)
 	}
+}
 
-	if t.ExecCmd == "" {
-		t.ExecCmd = sshCmd
+func (t *System) open(a *Args) error {
+	if len(t.openArgs) == 0 {
+		t.buildOpenArgs(a)
 	}
 
-	logging.LogDebug(
-		FormatLogMessage(baseArgs,
-			"debug",
-			fmt.Sprintf(
-				"\"attempting to open netconf transport connection with the following command: %s",
-				t.OpenCmd,
-			),
-		),
+	a.l.Debugf("opening system transport with bin '%s' and args '%s'", t.openBin, t.openArgs)
+
+	c := exec.Command(t.openBin, t.openArgs...) //nolint:gosec
+
+	var err error
+
+	t.fd, err = pty.StartWithSize(
+		c,
+		&pty.Winsize{
+			Rows: uint16(a.TermHeight),
+			Cols: uint16(a.TermWidth),
+		},
 	)
+	if err != nil {
+		a.l.Criticalf("encountered error spawning pty, error: %s", err)
 
-	command := exec.Command(t.ExecCmd, t.OpenCmd...) //nolint:gosec
-	fileObj, err := pty.Start(command)
-
-	if err == nil {
-		t.fileObj = fileObj
+		return err
 	}
 
-	return err
+	return nil
 }
 
-func (t *System) Close() error {
-	err := t.fileObj.Close()
-	t.fileObj = nil
+func (t *System) openNetconf(a *Args) error {
+	if len(t.openArgs) == 0 {
+		t.buildOpenArgs(a)
+	}
 
-	return err
-}
+	t.openArgs = append(t.openArgs, "-s", "netconf")
 
-func (t *System) IsAlive() bool {
-	return t.fileObj != nil
-}
+	a.l.Debugf("opening system transport with bin '%s' and args '%s'", t.openBin, t.openArgs)
 
-func (t *System) Read(n int) *ReadResult {
-	b := make([]byte, n)
-	_, err := t.fileObj.Read(b)
+	c := exec.Command(t.openBin, t.openArgs...) //nolint:gosec
+
+	var err error
+
+	t.fd, err = pty.Start(c)
 
 	if err != nil {
-		return &ReadResult{
-			Result: nil,
-			Error:  ErrTransportFailure,
-		}
+		a.l.Criticalf("encountered error spawning pty, error: %s", err)
+
+		return err
 	}
 
-	return &ReadResult{
-		Result: b,
-		Error:  nil,
-	}
+	return nil
 }
 
-func (t *System) Write(channelInput []byte) error {
-	_, err := t.fileObj.Write(channelInput)
+// Open opens the System transport.
+func (t *System) Open(a *Args) error {
+	if t.SSHArgs.NetconfConnection {
+		return t.openNetconf(a)
+	}
+
+	return t.open(a)
+}
+
+// Close closes the System transport.
+func (t *System) Close() error {
+	err := t.fd.Close()
+
+	t.fd = nil
+
+	return err
+}
+
+// IsAlive returns true if the System transport file descriptor is not nil.
+func (t *System) IsAlive() bool {
+	return t.fd != nil
+}
+
+// Read reads n bytes from the transport.
+func (t *System) Read(n int) ([]byte, error) {
+	b := make([]byte, n)
+
+	_, err := t.fd.Read(b)
+
+	return b, err
+}
+
+// Write writes bytes b to the transport.
+func (t *System) Write(b []byte) error {
+	_, err := t.fd.Write(b)
 
 	return err
 }

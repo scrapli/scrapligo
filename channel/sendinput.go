@@ -4,90 +4,78 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/scrapli/scrapligo/logging"
+	"github.com/scrapli/scrapligo/util"
 )
 
-func (c *Channel) sendInput(channelInput []byte, stripPrompt, eager bool) *channelResult {
-	logging.LogDebug(
-		c.FormatLogMessage(
-			"info",
-			fmt.Sprintf(
-				"\"sending channelInput: %s; stripPrompt: %t; eager: %v",
-				channelInput,
-				stripPrompt,
-				eager,
-			),
-		),
-	)
+// SendInputB sends the given input bytes to the device and returns the bytes read.
+func (c *Channel) SendInputB(input []byte, opts ...util.Option) ([]byte, error) {
+	c.l.Debugf("channel SendInput requested, sending input '%s'", input)
 
-	var b []byte
-
-	err := c.Write(channelInput, false)
+	op, err := NewOperation(opts...)
 	if err != nil {
-		return &channelResult{
-			result: []byte(""),
-			error:  nil,
-		}
+		return nil, err
 	}
 
-	_, err = c.readUntilInput(channelInput)
-	if err != nil {
-		return &channelResult{
-			result: []byte(""),
-			error:  err,
+	cr := make(chan *result)
+
+	go func() {
+		var b []byte
+
+		err = c.Write(input, false)
+		if err != nil {
+			cr <- &result{b: b, err: err}
+
+			return
 		}
-	}
 
-	err = c.SendReturn()
-	if err != nil {
-		return &channelResult{
-			result: []byte(""),
-			error:  err,
+		_, err = c.ReadUntilInput(input)
+		if err != nil {
+			cr <- &result{b: b, err: err}
+
+			return
 		}
-	}
 
-	if !eager {
-		postInputBuf, readErr := c.readUntilPrompt()
+		err = c.WriteReturn()
+		if err != nil {
+			cr <- &result{b: b, err: err}
 
-		if readErr != nil {
-			return &channelResult{
-				result: []byte(""),
-				error:  readErr,
+			return
+		}
+
+		if !op.Eager {
+			var nb []byte
+
+			nb, err = c.ReadUntilPrompt()
+			if err != nil {
+				cr <- &result{b: b, err: err}
 			}
+
+			b = append(b, nb...)
 		}
 
-		b = append(b, postInputBuf...)
-	}
+		cr <- &result{
+			b:   c.processOut(b, op.StripPrompt),
+			err: nil,
+		}
+	}()
 
-	return &channelResult{
-		result: c.RestructureOutput(b, stripPrompt),
-		error:  nil,
+	timer := time.NewTimer(c.GetTimeout(op.Timeout))
+
+	select {
+	case r := <-cr:
+		if r.err != nil {
+			return nil, r.err
+		}
+
+		return r.b, nil
+	case <-timer.C:
+		c.l.Critical("channel timeout sending input to device")
+
+		return nil, fmt.Errorf("%w: channel timeout sending input to device", util.ErrTimeoutError)
 	}
 }
 
-// SendInput send input to the device, optionally strips prompt out of the returned output. Eager
-// flag should generally not be used unless you know what you are doing! The `timeoutOps` argument
-//  modifies the base timeout argument just for the duration of this send operation.
-func (c *Channel) SendInput(
-	channelInput string,
-	stripPrompt, eager bool,
-	timeoutOps time.Duration,
-) ([]byte, error) {
-	_c := make(chan *channelResult)
-
-	go func() {
-		r := c.sendInput([]byte(channelInput), stripPrompt, eager)
-		_c <- r
-		close(_c)
-	}()
-
-	timer := time.NewTimer(c.DetermineOperationTimeout(timeoutOps))
-
-	select {
-	case r := <-_c:
-		return r.result, r.error
-	case <-timer.C:
-		logging.LogError(c.FormatLogMessage("error", "timed out sending input to device"))
-		return []byte{}, ErrChannelTimeout
-	}
+// SendInput sends the input string to the target device. Any bytes output is returned.
+func (c *Channel) SendInput(input string, opts ...util.Option) ([]byte, error) {
+	return c.SendInputB([]byte(input), opts...)
 }

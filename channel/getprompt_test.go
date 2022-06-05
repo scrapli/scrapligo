@@ -1,26 +1,66 @@
 package channel_test
 
 import (
+	"bytes"
+	"fmt"
 	"testing"
 
+	"github.com/scrapli/scrapligo/util"
+
 	"github.com/google/go-cmp/cmp"
-	"github.com/scrapli/scrapligo/util/testhelper"
 )
 
+func testGetPrompt(testName string, testCase *util.PayloadTestCase) func(t *testing.T) {
+	return func(t *testing.T) {
+		t.Logf("%s: starting", testName)
+
+		c, fileTransportObj := prepareChannel(t, testName, testCase.PayloadFile)
+
+		actualOut, err := c.GetPrompt()
+		if err != nil {
+			t.Errorf("%s: encountered error running Channel GetPrompt, error: %s", testName, err)
+		}
+
+		actualIn := bytes.Join(fileTransportObj.Writes, []byte("\n"))
+
+		if *update {
+			writeGolden(t, testName, actualIn, actualOut)
+		}
+
+		expectedIn := readFile(t, fmt.Sprintf("golden/%s-in.txt", testName))
+		expectedOut := readFile(t, fmt.Sprintf("golden/%s-out.txt", testName))
+
+		if !cmp.Equal(actualIn, expectedIn) {
+			t.Fatalf(
+				"%s: actual and expected inputs do not match\nactual: %s\nexpected:%s",
+				testName,
+				actualIn,
+				expectedIn,
+			)
+		}
+
+		if !cmp.Equal(actualOut, expectedOut) {
+			t.Fatalf(
+				"%s: actual and expected outputs do not match\nactual: %s\nexpected:%s",
+				testName,
+				actualOut,
+				expectedOut,
+			)
+		}
+	}
+}
+
 func TestGetPrompt(t *testing.T) {
-	expected := "localhost#"
-
-	fakeSession := "getprompt"
-
-	c := testhelper.NewPatchedChannel(t, &fakeSession)
-
-	actual, promptErr := c.GetPrompt()
-
-	if promptErr != nil {
-		t.Fatalf("error getting prompt from mock channel: %v", promptErr)
+	cases := map[string]*util.PayloadTestCase{
+		"get-prompt-simple": {
+			Description: "simple get prompt test",
+			PayloadFile: "get-prompt-simple.txt",
+		},
 	}
 
-	if diff := cmp.Diff(expected, actual); diff != "" {
-		t.Errorf("actual result and expected result do not match (-want +got):\n%s", diff)
+	for testName, testCase := range cases {
+		f := testGetPrompt(testName, testCase)
+
+		t.Run(testName, f)
 	}
 }

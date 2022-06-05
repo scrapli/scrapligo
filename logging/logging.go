@@ -1,41 +1,126 @@
 package logging
 
-import "fmt"
+import (
+	"fmt"
 
-// Logger accepts logging interface to set as library logger(s).
-type Logger func(...interface{})
+	"github.com/scrapli/scrapligo/util"
+)
 
-// debugLog default DebugLog -- defaults to nil.
-var debugLog Logger //nolint:gochecknoglobals
+const (
+	// Debug is the debug log level.
+	Debug = "debug"
+	// Info is the info(rmational) log level.
+	Info = "info"
+	// Critical is the critical log level.
+	Critical = "critical"
+)
 
-// errorLog default ErrorLog -- defaults to nil.
-var errorLog Logger
+// NewInstance returns a new logging Instance.
+func NewInstance(opts ...util.Option) (*Instance, error) {
+	i := &Instance{
+		Level:     Info,
+		Formatter: DefaultFormatter,
+		Loggers:   nil,
+	}
 
-// SetDebugLogger function to set debug logger to something that implements `Logger`.
-func SetDebugLogger(logger Logger) {
-	debugLog = logger
+	for _, o := range opts {
+		err := o(i)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return i, nil
 }
 
-// SetErrorLogger function to set error logger to something that implements `Logger`.
-func SetErrorLogger(logger Logger) {
-	errorLog = logger
+// Instance is a simple logging object.
+type Instance struct {
+	Level     string
+	Formatter func(string, string) string
+	Loggers   []func(...interface{})
 }
 
-// LogDebug writes debug message to the debug log.
-func LogDebug(msg string) {
-	if debugLog != nil {
-		debugLog(msg)
+// Emit "emits" a logging message m to all the loggers in the Instance.
+func (i *Instance) Emit(m interface{}) {
+	for _, f := range i.Loggers {
+		f(m)
 	}
 }
 
-// LogError writes error message to the error log.
-func LogError(msg string) {
-	if errorLog != nil {
-		errorLog(msg)
+func (i *Instance) shouldLog(l string) bool {
+	if len(i.Loggers) == 0 {
+		return false
 	}
+
+	switch i.Level {
+	case Debug:
+		return true
+	case Info:
+		switch l {
+		case Info, Critical:
+			return true
+		default:
+			return false
+		}
+	case Critical:
+		if l == Critical {
+			return true
+		}
+	}
+
+	return false
 }
 
-// FormatLogMessage formats log message payload, adding contextual info about the host.
-func FormatLogMessage(level, host string, port int, msg string) string {
-	return fmt.Sprintf("%s::%s::%d::%s", level, host, port, msg)
+// Debug accepts a Debug level log message with no formatting.
+func (i *Instance) Debug(f string) {
+	if !i.shouldLog(Debug) {
+		return
+	}
+
+	i.Emit(i.Formatter(Debug, f))
+}
+
+// Debugf accepts a Debug level log message normal fmt.Sprintf type formatting.
+func (i *Instance) Debugf(f string, a ...interface{}) {
+	if !i.shouldLog(Debug) {
+		return
+	}
+
+	i.Emit(i.Formatter(Debug, fmt.Sprintf(f, a...)))
+}
+
+// Info accepts an Info level log message with no formatting.
+func (i *Instance) Info(f string) {
+	if !i.shouldLog(Info) {
+		return
+	}
+
+	i.Emit(i.Formatter(Info, f))
+}
+
+// Infof accepts an Info level log message normal fmt.Sprintf type formatting.
+func (i *Instance) Infof(f string, a ...interface{}) {
+	if !i.shouldLog(Info) {
+		return
+	}
+
+	i.Emit(i.Formatter(Info, fmt.Sprintf(f, a...)))
+}
+
+// Critical accepts a Critical level log message with no formatting.
+func (i *Instance) Critical(f string) {
+	if !i.shouldLog(Critical) {
+		return
+	}
+
+	i.Emit(i.Formatter(Critical, f))
+}
+
+// Criticalf accepts a Critical level log message normal fmt.Sprintf type formatting.
+func (i *Instance) Criticalf(f string, a ...interface{}) {
+	if !i.shouldLog(Critical) {
+		return
+	}
+
+	i.Emit(i.Formatter(Critical, fmt.Sprintf(f, a...)))
 }

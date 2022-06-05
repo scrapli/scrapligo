@@ -1,0 +1,15 @@
+
+
+enable
+
+
+
+
+terminal width 32767
+
+
+terminal length 0
+
+
+something
+

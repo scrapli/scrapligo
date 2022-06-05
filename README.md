@@ -62,51 +62,7 @@ Uptime: 18 minutes
 ## Code Example
 
 ```go
-package main
-
-import (
-	"fmt"
-
-	"github.com/scrapli/scrapligo/driver/base"
-	"github.com/scrapli/scrapligo/driver/core"
-)
-
-func main() {
-	d, err := core.NewCoreDriver(
-		"localhost",
-		"cisco_iosxe",
-		base.WithPort(21022),
-		base.WithAuthStrictKey(false),
-		base.WithAuthUsername("vrnetlab"),
-		base.WithAuthPassword("VR-netlab9"),
-		base.WithAuthSecondary("VR-netlab9"),
-	)
-
-	if err != nil {
-		fmt.Printf("failed to create driver; error: %+v\n", err)
-		return
-	}
-
-	err = d.Open()
-	if err != nil {
-		fmt.Printf("failed to open driver; error: %+v\n", err)
-		return
-	}
-	defer d.Close()
-
-	// send some configs
-	configs := []string{
-		"interface loopback0",
-		"interface loopback0 description tacocat",
-		"no interface loopback0",
-	}
-
-	_, err = d.SendConfigs(configs)
-	if err != nil {
-		fmt.Printf("failed to send configs; error: %+v\n", err)
-		return
-	}
-}
+// TODO
 ```
 
 <small>* gopher artwork by [@egonelbre](https://github.com/egonelbre/gophers)</small>

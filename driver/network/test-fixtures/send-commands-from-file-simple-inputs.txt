@@ -1,0 +1,2 @@
+show run int vlan1
+show run int vlan1

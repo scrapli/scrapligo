@@ -6,17 +6,22 @@ jobs:
   build_posix:
     runs-on: ${{ matrix.os }}
     strategy:
-      max-parallel: 2
+      max-parallel: 6
       matrix:
         os: [ubuntu-latest, macos-latest]
-        go-version: [1.16.x]
+        go-version: [1.16.x, 1.17.x, 1.18.x]
     steps:
-      - uses: actions/checkout@v2
+      - name: checkout
+        uses: actions/checkout@v3
       - name: set up go ${{ matrix.version }}
+        uses: actions/setup-go@v3
+        with:
+          go-version: ${{ matrix.version }}
+      - name: lint
         uses: golangci/golangci-lint-action@v3
         with:
           version: v1.45
-      - name: golangci-lint
-        run: golangci-lint run
+      - name: install gotestsum
+        run: go install gotest.tools/gotestsum@latest
       - name: tests
-        run: go test -cover -v ./channel/... ./driver/... ./netconf/... ./logging/... ./transport/...
+        run: make test-race

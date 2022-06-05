@@ -1,32 +1,99 @@
 package channel_test
 
 import (
-	"os"
+	"bytes"
+	"fmt"
 	"testing"
 
+	"github.com/scrapli/scrapligo/driver/opoptions"
+
+	"github.com/scrapli/scrapligo/util"
+
 	"github.com/google/go-cmp/cmp"
-	"github.com/scrapli/scrapligo/util/testhelper"
 )
 
+type sendInputTestcase struct {
+	description   string
+	input         string
+	payloadFile   string
+	noStripPrompt bool
+	eager         bool
+}
+
+func testSendInput(testName string, testCase *sendInputTestcase) func(t *testing.T) {
+	return func(t *testing.T) {
+		t.Logf("%s: starting", testName)
+
+		c, fileTransportObj := prepareChannel(t, testName, testCase.payloadFile)
+
+		var opts []util.Option
+
+		if testCase.eager {
+			opts = append(opts, opoptions.WithEager())
+		}
+
+		if testCase.noStripPrompt {
+			opts = append(opts, opoptions.WithNoStripPrompt())
+		}
+
+		actualOut, err := c.SendInput(
+			testCase.input,
+			opts...,
+		)
+		if err != nil {
+			t.Errorf("%s: encountered error running Channel SendInput, error: %s", testName, err)
+		}
+
+		actualIn := bytes.Join(fileTransportObj.Writes, []byte("\n"))
+
+		if *update {
+			writeGolden(t, testName, actualIn, actualOut)
+		}
+
+		expectedIn := readFile(t, fmt.Sprintf("golden/%s-in.txt", testName))
+		expectedOut := readFile(t, fmt.Sprintf("golden/%s-out.txt", testName))
+
+		if !cmp.Equal(actualIn, expectedIn) {
+			t.Fatalf(
+				"%s: actual and expected inputs do not match\nactual: %s\nexpected:%s",
+				testName,
+				actualIn,
+				expectedIn,
+			)
+		}
+
+		if !cmp.Equal(actualOut, expectedOut) {
+			t.Fatalf(
+				"%s: actual and expected outputs do not match\nactual: %s\nexpected:%s",
+				testName,
+				actualOut,
+				expectedOut,
+			)
+		}
+	}
+}
+
 func TestSendInput(t *testing.T) {
-	fakeSession := "sendinput"
-
-	expectedFile := "../test_data/channel/sendinput_expected"
-
-	expected, expectedErr := os.ReadFile(expectedFile)
-	if expectedErr != nil {
-		t.Fatalf("failed opening expected output file '%s' err: %v", expectedFile, expectedErr)
+	cases := map[string]*sendInputTestcase{
+		"send-input-simple": {
+			description:   "simple send input test",
+			input:         "show run int vlan1",
+			payloadFile:   "send-input-simple.txt",
+			noStripPrompt: true,
+			eager:         false,
+		},
+		"send-input-simple-strip-prompt": {
+			description:   "simple send input test",
+			input:         "show run int vlan1",
+			payloadFile:   "send-input-simple.txt",
+			noStripPrompt: false,
+			eager:         false,
+		},
 	}
 
-	c := testhelper.NewPatchedChannel(t, &fakeSession)
+	for testName, testCase := range cases {
+		f := testSendInput(testName, testCase)
 
-	actual, promptErr := c.SendInput("show version", false, false, 0)
-
-	if promptErr != nil {
-		t.Fatalf("error sending input to mock channel: %v", promptErr)
-	}
-
-	if diff := cmp.Diff(actual, expected); diff != "" {
-		t.Errorf("actual result and expected result do not match (-want +got):\n%s", diff)
+		t.Run(testName, f)
 	}
 }

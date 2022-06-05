@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<hello xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+     <capabilities>
+         <capability>urn:ietf:params:netconf:base:1.1</capability>
+     </capabilities>
+</hello>]]>]]>
+
+
+#453
+<?xml version="1.0" encoding="UTF-8"?><rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="101"><edit-config><target><candidate></candidate></target><config>
+    <cdp xmlns="http://cisco.com/ns/yang/Cisco-IOS-XR-cdp-cfg">
+        <timer>80</timer>
+        <enable>true</enable>
+        <log-adjacency></log-adjacency>
+        <hold-time>200</hold-time>
+        <advertise-v1-only></advertise-v1-only>
+    </cdp>
+</config></edit-config></rpc>
+##
+
+
+

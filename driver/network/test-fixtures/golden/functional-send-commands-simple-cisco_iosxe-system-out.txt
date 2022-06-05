@@ -1,0 +1,298 @@
+
+
+Building configuration...
+
+Current configuration : 6914 bytes
+!
+! Last configuration change at 21:46:31 UTC Mon May 30 2022 by admin
+!
+version 16.12
+service timestamps debug datetime msec
+service timestamps log datetime msec
+service call-home
+platform qfp utilization monitor load 80
+platform punt-keepalive disable-kernel-core
+platform console serial
+!
+hostname vr-csr
+!
+boot-start-marker
+boot-end-marker
+!
+!
+enable secret 9 $9$DMRPw.t5RJvNDU$a.T0PIE8re5vNfvDil83cxu24Uuf.wyrbEs.RCsdJYo
+!
+no aaa new-model
+call-home
+ ! If contact email address in call-home is configured as sch-smart-licensing@cisco.com
+ ! the email address configured in Cisco Smart License Portal will be used as contact email address to send SCH notifications.
+ contact-email-addr sch-smart-licensing@cisco.com
+ profile "CiscoTAC-1"
+  active
+  destination transport-method http
+  no destination transport-method email
+!
+!
+!
+!
+!
+!
+!
+ip domain name boxen.box
+!
+!
+!
+login on-success log
+!
+!
+!
+!
+!
+!
+!
+subscriber templating
+!
+!
+!
+!
+!
+!
+multilink bundle-name authenticated
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+crypto pki trustpoint TP-self-signed-3931320275
+ enrollment selfsigned
+ subject-name cn=IOS-Self-Signed-Certificate-3931320275
+ revocation-check none
+ rsakeypair TP-self-signed-3931320275
+!
+crypto pki trustpoint SLA-TrustPoint
+ enrollment pkcs12
+ revocation-check crl
+!
+!
+crypto pki certificate chain TP-self-signed-3931320275
+ certificate self-signed 01
+  30820330 30820218 A0030201 02020101 300D0609 2A864886 F70D0101 05050030
+  31312F30 2D060355 04031326 494F532D 53656C66 2D536967 6E65642D 43657274
+  69666963 6174652D 33393331 33323032 3735301E 170D3232 30353236 30333030
+  30325A17 0D333030 31303130 30303030 305A3031 312F302D 06035504 03132649
+  4F532D53 656C662D 5369676E 65642D43 65727469 66696361 74652D33 39333133
+  32303237 35308201 22300D06 092A8648 86F70D01 01010500 0382010F 00308201
+  0A028201 01009E57 0DA189C9 9CCCAACA 59CF064F 13C70FB4 15B31F13 42D71C11
+  0D6802AF 05AEF4B1 DF7F6D6F 4F323C06 70428157 4C313346 D5A7644F 23C97CBF
+  1FE8C97D D9B5BE05 7DD6D28C B6C86FC2 25E4B3F9 3C1D7133 83230A7C C4599005
+  51996444 EE011718 4608B861 F7E4BA3C CA86A216 E1AA1EDD AF4A59E4 11CA5649
+  769A7826 DF5DEAB8 75F988CF DE59508F B5012793 F7E7498E 3E17ADE2 6A735F4A
+  16CE74E0 A8D7104C 546B72DE 0E3574E9 4CEB5CA9 1F47089E 6E00BD74 405A7E60
+  4AD5587F 16226F22 E904EB55 66524E5C FCE2BE43 F50AEF53 22FE4324 DDCE6319
+  4B1A040E 7AE0DC6E 5A569A31 DD4B46A8 CDFF6B5F 42A71ABA A5299558 8F05B909
+  3FE23FA8 75C90203 010001A3 53305130 0F060355 1D130101 FF040530 030101FF
+  301F0603 551D2304 18301680 1430D3D8 7CF93B09 6E410104 ECD16AA6 A6BF652C
+  91301D06 03551D0E 04160414 30D3D87C F93B096E 410104EC D16AA6A6 BF652C91
+  300D0609 2A864886 F70D0101 05050003 82010100 0F3E4C19 D7055C12 A1B713EE
+  5D57954F F714E2DA 5BE041FB 0CFCA77C 142ABC0E 4A1402BC 86AAC2C3 D7AF5838
+  38E19773 FA32D1DF 1F081D90 065EC459 C938C82F 2B86706C 7CCC0791 80AA0BE8
+  B0DC7974 DC4A2634 4C66B43D A40ED691 F7472C34 0B69E1FA 3DCEA015 1DDD218F
+  E20FD56D 37575A4F D3658893 8F1944FD 9D95902A 0D7BF948 2F9395CF 612D5302
+  2BF8B110 CF65B706 CAD3B2F0 C284B9C4 96C20ED4 F0621C74 81169E30 62BD5AAC
+  E58C1F68 B12C56A6 D5F85373 12C32A7A B0C20969 825D9F8A E3B4068E 2763CA94
+  BCFE3406 7D8C214C 7ACD5725 839528A1 76988E2E 029F46EB A32AE1F7 D3281216
+  BC01E6F4 CE2FF6B4 5C80AE44 D7DC13FE A6480CD7
+  	quit
+crypto pki certificate chain SLA-TrustPoint
+ certificate ca 01
+  30820321 30820209 A0030201 02020101 300D0609 2A864886 F70D0101 0B050030
+  32310E30 0C060355 040A1305 43697363 6F312030 1E060355 04031317 43697363
+  6F204C69 63656E73 696E6720 526F6F74 20434130 1E170D31 33303533 30313934
+  3834375A 170D3338 30353330 31393438 34375A30 32310E30 0C060355 040A1305
+  43697363 6F312030 1E060355 04031317 43697363 6F204C69 63656E73 696E6720
+  526F6F74 20434130 82012230 0D06092A 864886F7 0D010101 05000382 010F0030
+  82010A02 82010100 A6BCBD96 131E05F7 145EA72C 2CD686E6 17222EA1 F1EFF64D
+  CBB4C798 212AA147 C655D8D7 9471380D 8711441E 1AAF071A 9CAE6388 8A38E520
+  1C394D78 462EF239 C659F715 B98C0A59 5BBB5CBD 0CFEBEA3 700A8BF7 D8F256EE
+  4AA4E80D DB6FD1C9 60B1FD18 FFC69C96 6FA68957 A2617DE7 104FDC5F EA2956AC
+  7390A3EB 2B5436AD C847A2C5 DAB553EB 69A9A535 58E9F3E3 C0BD23CF 58BD7188
+  68E69491 20F320E7 948E71D7 AE3BCC84 F10684C7 4BC8E00F 539BA42B 42C68BB7
+  C7479096 B4CB2D62 EA2F505D C7B062A4 6811D95B E8250FC4 5D5D5FB8 8F27D191
+  C55F0D76 61F9A4CD 3D992327 A8BB03BD 4E6D7069 7CBADF8B DF5F4368 95135E44
+  DFC7C6CF 04DD7FD1 02030100 01A34230 40300E06 03551D0F 0101FF04 04030201
+  06300F06 03551D13 0101FF04 05300301 01FF301D 0603551D 0E041604 1449DC85
+  4B3D31E5 1B3E6A17 606AF333 3D3B4C73 E8300D06 092A8648 86F70D01 010B0500
+  03820101 00507F24 D3932A66 86025D9F E838AE5C 6D4DF6B0 49631C78 240DA905
+  604EDCDE FF4FED2B 77FC460E CD636FDB DD44681E 3A5673AB 9093D3B1 6C9E3D8B
+  D98987BF E40CBD9E 1AECA0C2 2189BB5C 8FA85686 CD98B646 5575B146 8DFC66A8
+  467A3DF4 4D565700 6ADF0F0D CF835015 3C04FF7C 21E878AC 11BA9CD2 55A9232C
+  7CA7B7E6 C1AF74F6 152E99B7 B1FCF9BB E973DE7F 5BDDEB86 C71E3B49 1765308B
+  5FB0DA06 B92AFE7F 494E8A9E 07B85737 F3A58BE1 1A48A229 C37C1E69 39F08678
+  80DDCD16 D6BACECA EEBC7CF9 8428787B 35202CDC 60E4616A B623CDBD 230E3AFB
+  418616A9 4093E049 4D10AB75 27E86F73 932E35B5 8862FDAE 0275156F 719BB2F0
+  D697DF7F 28
+  	quit
+!
+license udi pid CSR1000V sn 91Z9HC2U43A
+diagnostic bootup level minimal
+memory free low-watermark processor 72329
+!
+!
+spanning-tree extend system-id
+!
+username boxen privilege 15 password 0 b0x3N-b0x3N
+username admin privilege 15 password 0 admin
+!
+redundancy
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+interface GigabitEthernet1
+ ip address 10.0.0.15 255.255.255.0
+ negotiation auto
+ no mop enabled
+ no mop sysid
+!
+interface GigabitEthernet2
+ no ip address
+ shutdown
+ negotiation auto
+ no mop enabled
+ no mop sysid
+!
+interface GigabitEthernet3
+ no ip address
+ shutdown
+ negotiation auto
+ no mop enabled
+ no mop sysid
+!
+interface GigabitEthernet4
+ no ip address
+ shutdown
+ negotiation auto
+ no mop enabled
+ no mop sysid
+!
+interface GigabitEthernet5
+ no ip address
+ shutdown
+ negotiation auto
+ no mop enabled
+ no mop sysid
+!
+interface GigabitEthernet6
+ no ip address
+ shutdown
+ negotiation auto
+ no mop enabled
+ no mop sysid
+!
+interface GigabitEthernet7
+ no ip address
+ shutdown
+ negotiation auto
+ no mop enabled
+ no mop sysid
+!
+interface GigabitEthernet8
+ no ip address
+ shutdown
+ negotiation auto
+ no mop enabled
+ no mop sysid
+!
+interface GigabitEthernet9
+ no ip address
+ shutdown
+ negotiation auto
+ no mop enabled
+ no mop sysid
+!
+interface GigabitEthernet10
+ no ip address
+ shutdown
+ negotiation auto
+ no mop enabled
+ no mop sysid
+!
+ip forward-protocol nd
+no ip http server
+ip http secure-server
+!
+!
+!
+!
+!
+!
+!
+!
+control-plane
+!
+!
+!
+!
+!
+!
+line con 0
+ stopbits 1
+line vty 0
+ login local
+ transport input all
+line vty 1
+ login local
+ length 0
+ transport input all
+line vty 2 4
+ login local
+ transport input all
+!
+!
+!
+!
+!
+!
+netconf-yang
+restconf
+end
+Interface              IP-Address      OK? Method Status                Protocol
+GigabitEthernet1       10.0.0.15       YES NVRAM  up                    up
+GigabitEthernet2       unassigned      YES NVRAM  administratively down down
+GigabitEthernet3       unassigned      YES NVRAM  administratively down down
+GigabitEthernet4       unassigned      YES NVRAM  administratively down down
+GigabitEthernet5       unassigned      YES NVRAM  administratively down down
+GigabitEthernet6       unassigned      YES NVRAM  administratively down down
+GigabitEthernet7       unassigned      YES NVRAM  administratively down down
+GigabitEthernet8       unassigned      YES NVRAM  administratively down down
+GigabitEthernet9       unassigned      YES NVRAM  administratively down down
+GigabitEthernet10      unassigned      YES NVRAM  administratively down down

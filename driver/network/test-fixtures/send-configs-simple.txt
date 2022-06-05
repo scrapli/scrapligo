@@ -1,0 +1,6 @@
+C3560CX#
+C3560CX#configure terminal
+C3560CX(config)#
+C3560CX(config)#interface loopback1
+C3560CX(config-if)#no interface loopback1
+C3560CX(config)#

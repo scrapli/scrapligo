@@ -1,0 +1,12 @@
+---
+name: scrapligo
+
+topology:
+  kinds:
+    srl:
+      image: ghcr.io/nokia/srlinux:21.11.3
+  nodes:
+    srl:
+      kind: srl
+      mgmt_ipv4: 172.20.20.16
+      mgmt_ipv6: 2001:172:20:20::16
