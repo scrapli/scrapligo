@@ -26,8 +26,7 @@ const (
 	readDelay = "read-delay"
 
 	// timeouts in seconds.
-	timeoutOps       = "timeout-ops"
-	timeoutTransport = "timeout-transport"
+	timeoutOps = "timeout-ops"
 
 	transportType = "transport-type"
 	// read size for transport read chunk.
@@ -72,10 +71,6 @@ func (o *optionDefinitions) asOptions() []util.Option { //nolint: gocyclo
 			)
 		case timeoutOps:
 			opts[i] = options.WithTimeoutOps(
-				time.Duration(opt.Value.(float64) * float64(time.Second)),
-			)
-		case timeoutTransport:
-			opts[i] = options.WithTimeoutTransport(
 				time.Duration(opt.Value.(float64) * float64(time.Second)),
 			)
 		case transportType:

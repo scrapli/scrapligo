@@ -230,15 +230,6 @@ func (d *Driver) SendWithCallbacks(
 		}
 	}
 
-	// for read callback we disable transport timeout
-	origTransportTimeout := d.Transport.GetTimeoutTransport()
-	d.Transport.SetTimeoutTransport(0)
-
-	// make sure we reset the transport timeout when we are done with the callback operation
-	defer func() {
-		d.Transport.SetTimeoutTransport(origTransportTimeout)
-	}()
-
 	b, err := d.handleCallbacks(callbacks, nil, nil, timeout)
 	if err != nil {
 		return nil, err

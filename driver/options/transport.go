@@ -1,8 +1,6 @@
 package options
 
 import (
-	"time"
-
 	"github.com/scrapli/scrapligo/transport"
 	"github.com/scrapli/scrapligo/util"
 )
@@ -34,21 +32,6 @@ func WithPort(i int) util.Option {
 		}
 
 		a.Port = i
-
-		return nil
-	}
-}
-
-// WithTimeoutTransport sets the timeout value of the transport.
-func WithTimeoutTransport(t time.Duration) util.Option {
-	return func(o interface{}) error {
-		a, ok := o.(*transport.Args)
-
-		if !ok {
-			return util.ErrIgnoredOption
-		}
-
-		a.TimeoutTransport = t
 
 		return nil
 	}

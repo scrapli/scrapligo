@@ -2,7 +2,6 @@ package transport
 
 import (
 	"errors"
-	"fmt"
 	"sync"
 	"time"
 
@@ -15,14 +14,13 @@ const (
 	// "system" transport.
 	DefaultTransport = "system"
 
-	defaultPort                    = 22
-	defaultTimeoutSocketSeconds    = 30
-	defaultTimeoutTransportSeconds = 30
-	defaultReadSize                = 65_535
-	defaultTermHeight              = 255
-	defaultTermWidth               = 80
-	defaultSSHStrictKey            = true
-	tcp                            = "tcp"
+	defaultPort                 = 22
+	defaultTimeoutSocketSeconds = 30
+	defaultReadSize             = 65_535
+	defaultTermHeight           = 255
+	defaultTermWidth            = 80
+	defaultSSHStrictKey         = true
+	tcp                         = "tcp"
 )
 
 // GetTransportNames is returns a slice of available transport type names.
@@ -40,14 +38,13 @@ func GetNetconfTransportNames() []string {
 // creation (which is called by the Driver creation).
 func NewArgs(l *logging.Instance, host string, options ...util.Option) (*Args, error) {
 	a := &Args{
-		l:                l,
-		Host:             host,
-		Port:             defaultPort,
-		TimeoutSocket:    defaultTimeoutSocketSeconds * time.Second,
-		TimeoutTransport: defaultTimeoutTransportSeconds * time.Second,
-		ReadSize:         defaultReadSize,
-		TermHeight:       defaultTermHeight,
-		TermWidth:        defaultTermWidth,
+		l:             l,
+		Host:          host,
+		Port:          defaultPort,
+		TimeoutSocket: defaultTimeoutSocketSeconds * time.Second,
+		ReadSize:      defaultReadSize,
+		TermHeight:    defaultTermHeight,
+		TermWidth:     defaultTermWidth,
 	}
 
 	for _, option := range options {
@@ -64,16 +61,15 @@ func NewArgs(l *logging.Instance, host string, options ...util.Option) (*Args, e
 
 // Args is a struct representing common transport arguments.
 type Args struct {
-	l                *logging.Instance
-	Host             string
-	Port             int
-	User             string
-	Password         string
-	TimeoutSocket    time.Duration
-	TimeoutTransport time.Duration
-	ReadSize         int
-	TermHeight       int
-	TermWidth        int
+	l             *logging.Instance
+	Host          string
+	Port          int
+	User          string
+	Password      string
+	TimeoutSocket time.Duration
+	ReadSize      int
+	TermHeight    int
+	TermWidth     int
 }
 
 // NewSSHArgs returns an instance of SSH arguments with provided options set. Just like NewArgs,
@@ -142,26 +138,6 @@ type Transport struct {
 	timeoutLock *sync.Mutex
 }
 
-// SetTimeoutTransport is a convenience function that acquires a lock on the timeoutLock and updates
-// the timeout transport value. Without this we may encounter data races when reading the timeout
-// value in the read loop (which is ultimately in a goroutine in the Channel read loop), and trying
-// to update the timeout value from elsewhere.
-func (t *Transport) SetTimeoutTransport(timeout time.Duration) {
-	t.timeoutLock.Lock()
-	defer t.timeoutLock.Unlock()
-
-	t.Args.TimeoutTransport = timeout
-}
-
-// GetTimeoutTransport fetches the current TimeoutTransport value for the Transport. See also
-// SetTimeoutTransport.
-func (t *Transport) GetTimeoutTransport() time.Duration {
-	t.timeoutLock.Lock()
-	defer t.timeoutLock.Unlock()
-
-	return t.Args.TimeoutTransport
-}
-
 // Open opens the underlying transportImpl transport object.
 func (t *Transport) Open() error {
 	return t.Impl.Open(t.Args)
@@ -181,38 +157,10 @@ func (t *Transport) IsAlive() bool {
 }
 
 func (t *Transport) read(n int) ([]byte, error) {
-	c := make(chan *readResult)
+	t.implLock.Lock()
+	defer t.implLock.Unlock()
 
-	go func() {
-		t.implLock.Lock()
-		defer t.implLock.Unlock()
-
-		b, err := t.Impl.Read(n)
-
-		c <- &readResult{
-			r:   b,
-			err: err,
-		}
-	}()
-
-	timeout := t.GetTimeoutTransport()
-
-	if timeout <= 0 {
-		t.Args.l.Debug("transport timeout is 0, using max timeout")
-
-		timeout = util.MaxTimeout * time.Second
-	}
-
-	timer := time.NewTimer(timeout)
-
-	select {
-	case r := <-c:
-		return r.r, r.err
-	case <-timer.C:
-		t.Args.l.Critical("timed out reading from transport")
-
-		return nil, fmt.Errorf("%w: timed out reading from transport", util.ErrTimeoutError)
-	}
+	return t.Impl.Read(n)
 }
 
 // Read reads the Transport Args ReadSize bytes from the transportImpl.
@@ -238,9 +186,4 @@ func (t *Transport) GetHost() string {
 // GetPort is a convenience method to return the Transport Args Port value.
 func (t *Transport) GetPort() int {
 	return t.Args.Port
-}
-
-type readResult struct {
-	r   []byte
-	err error
 }
