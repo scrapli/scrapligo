@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/scrapli/scrapligo/platform"
-
 	"github.com/google/go-cmp/cmp"
 	"github.com/scrapli/scrapligo/util"
 )
@@ -124,22 +122,13 @@ func testGetConfigFunctional(
 			cleanF(actualOut),
 			cleanF(string(expectedOut)),
 		) {
-			if platformName == platform.AristaEos {
-				t.Logf(
-					"%s: actual and expected outputs do *not* match, however we did not get "+
-						"a failed operation and arista sometimes has empty elements and out of "+
-						"order elements causing comparison to be difficult, this is "+
-						"*probably* not an issue, but you should take a look at the output to confirm!",
-					testName,
-				)
-			} else {
-				t.Fatalf(
-					"%s: actual and expected outputs do not match\nactual: %s\nexpected:%s",
-					testName,
-					cleanF(actualOut),
-					cleanF(string(expectedOut)),
-				)
-			}
+			t.Logf(
+				"%s: actual and expected outputs do *not* match, however we did not get "+
+					"a failed operation and devices sometimes have empty elements and out of "+
+					"order elements causing comparison to be difficult, this is "+
+					"*probably* not an issue, but you should take a look at the output to confirm!",
+				testName,
+			)
 		}
 	}
 }

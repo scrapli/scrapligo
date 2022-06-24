@@ -158,7 +158,7 @@ func (c *Channel) Open() error {
 func (c *Channel) Close() error {
 	c.done <- true
 
-	return c.t.Close()
+	return c.t.Close(false)
 }
 
 type result struct {

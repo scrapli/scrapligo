@@ -27,6 +27,12 @@ func (d *Driver) read() {
 	patterns := getNetconfPatterns()
 
 	for {
+		select {
+		case <-d.done:
+			return
+		default:
+		}
+
 		rb, err := d.Channel.Read()
 		if err != nil {
 			d.errs <- err

@@ -304,7 +304,7 @@ func interTestSleep() {
 	}
 
 	if *transports == util.All {
-		// when we run w/ all transports we do one trarnsport after another, so similar to above
+		// when we run w/ all transports we do one transport after another, so similar to above
 		// we just want to stagger things a bit.
 		time.Sleep(500 * time.Millisecond)
 

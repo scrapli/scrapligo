@@ -143,10 +143,14 @@ func (t *Transport) Open() error {
 	return t.Impl.Open(t.Args)
 }
 
-// Close closes the underlying transportImpl transport object.
-func (t *Transport) Close() error {
-	t.implLock.Lock()
-	defer t.implLock.Unlock()
+// Close closes the underlying transportImpl transport object. force option is required for netconf
+// as there will almost certainly always be a read in progress that we cannot stop and will block,
+// therefore we need a way to bypass the lock.
+func (t *Transport) Close(force bool) error {
+	if !force {
+		t.implLock.Lock()
+		defer t.implLock.Unlock()
+	}
 
 	return t.Impl.Close()
 }

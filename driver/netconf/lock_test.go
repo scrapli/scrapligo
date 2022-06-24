@@ -20,7 +20,7 @@ func testLockUnlock(testName string, testCase *util.PayloadTestCase) func(t *tes
 		lockr, err := d.Lock("running")
 		if err != nil {
 			t.Fatalf(
-				"%s: encountered error running network Driver getConfig, error: %s",
+				"%s: encountered error running netconf Driver lock, error: %s",
 				testName,
 				err,
 			)
@@ -34,7 +34,7 @@ func testLockUnlock(testName string, testCase *util.PayloadTestCase) func(t *tes
 		unlock, err := d.Unlock("running")
 		if err != nil {
 			t.Fatalf(
-				"%s: encountered error running network Driver getConfig, error: %s",
+				"%s: encountered error running netconf Driver unlock, error: %s",
 				testName,
 				err,
 			)

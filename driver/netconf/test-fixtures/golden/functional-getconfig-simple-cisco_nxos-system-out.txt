@@ -32,9 +32,6 @@
                                 </If-list>
                             </if-items>
                         </Dom-list>
-                        <Dom-list>
-                            <name>default</name>
-                        </Dom-list>
                     </dom-items>
                     <evpn_timeout>600</evpn_timeout>
                     <ipAdjRouteDistance>250</ipAdjRouteDistance>
@@ -11277,7 +11274,7 @@
                 <statClear-items>
                     <ethernet>0</ethernet>
                     <portChan>0</portChan>
-                    <timeStamp>2022-05-26T14:04:18.002+00:00</timeStamp>
+                    <timeStamp>2022-06-22T23:18:06.124+00:00</timeStamp>
                     <vlan>0</vlan>
                 </statClear-items>
                 <statsState>enabled</statsState>

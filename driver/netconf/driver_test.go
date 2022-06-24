@@ -264,8 +264,9 @@ func prepareFunctionalDriver(
 func interTestSleep() {
 	if len(strings.Split(*platforms, ",")) == 1 {
 		// when only running against a single platform, back to back tests tend to cause some issues
-		// so basically stagger things out so the device doesn't choke.
-		time.Sleep(750 * time.Millisecond)
+		// so basically stagger things out so the device doesn't choke. we stagger more for netconf
+		// than ssh/telnet as the xr box in particular seems to not appreciate this!
+		time.Sleep(1 * time.Second)
 
 		return
 	}
@@ -273,7 +274,7 @@ func interTestSleep() {
 	if *transports == util.All {
 		// when we run w/ all transports we do one transport after another, so similar to above
 		// we just want to stagger things a bit.
-		time.Sleep(750 * time.Millisecond)
+		time.Sleep(1 * time.Second)
 
 		return
 	}

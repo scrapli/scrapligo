@@ -131,6 +131,7 @@ func NewDriver(
 		subscriptionsLock: &sync.Mutex{},
 
 		errs: make(chan error),
+		done: make(chan bool),
 	}
 
 	for _, option := range opts {
@@ -187,6 +188,7 @@ type Driver struct {
 	subscriptionsLock *sync.Mutex
 
 	errs chan error
+	done chan bool
 }
 
 // Open opens the underlying generic.Driver, and by extension the channel.Channel and Transport
@@ -231,7 +233,9 @@ func (d *Driver) Close() error {
 		d.Transport.Args.Port,
 	)
 
-	err := d.Channel.Close()
+	d.done <- true
+
+	err := d.Transport.Close(true)
 	if err != nil {
 		return err
 	}

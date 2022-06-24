@@ -120,6 +120,7 @@ type ciscoIosxeReplacePatterns struct {
 	certLicensePattern *regexp.Regexp
 	serialNetconf      *regexp.Regexp
 	macAddrNetconf     *regexp.Regexp
+	cryptoNetconf      *regexp.Regexp
 }
 
 var ciscoIosxeReplacePatternsInstance *ciscoIosxeReplacePatterns //nolint:gochecknoglobals
@@ -132,7 +133,7 @@ func getCiscoIosxeReplacePatterns() *ciscoIosxeReplacePatterns {
 				`(?im)\d+:\d+:\d+\d+\s+[a-z]{3}\s+(mon|tue|wed|thu|fri|sat|sun)` +
 					`\s+(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\s+\d+\s+\d+`,
 			),
-			cryptoPattern: regexp.MustCompile(`(?im)^enable secret 5 (.*$)`),
+			cryptoPattern: regexp.MustCompile(`(?im)^enable secret 9 (.*$)`),
 			cfgByPattern: regexp.MustCompile(
 				`(?im)^! Last configuration change at TIME_STAMP_REPLACED by (\w+)$`,
 			),
@@ -144,6 +145,7 @@ func getCiscoIosxeReplacePatterns() *ciscoIosxeReplacePatterns {
 			),
 			serialNetconf:  regexp.MustCompile(`(?i)<sn>\w+</sn>`),
 			macAddrNetconf: regexp.MustCompile(`(?i)<mac-address>.*</mac-address>`),
+			cryptoNetconf:  regexp.MustCompile(`(?i)<secret>.*</secret>`),
 		}
 	}
 
@@ -169,6 +171,7 @@ type ciscoNxosReplacePatterns struct {
 	datetimePattern *regexp.Regexp
 	cryptoPattern   *regexp.Regexp
 	resourcePattern *regexp.Regexp
+	datetimeNetconf *regexp.Regexp
 }
 
 var ciscoNxosReplacePatternsInstance *ciscoNxosReplacePatterns //nolint:gochecknoglobals
@@ -184,6 +187,7 @@ func getCiscoNxosReplacePatterns() *ciscoNxosReplacePatterns {
 			resourcePattern: regexp.MustCompile(
 				`(?im)\d+\smaximum\s\d+$`,
 			),
+			datetimeNetconf: regexp.MustCompile(`<timeStamp>.*</timeStamp>`),
 		}
 	}
 
