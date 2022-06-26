@@ -31,7 +31,7 @@ func testLockUnlock(testName string, testCase *util.PayloadTestCase) func(t *tes
 				testName)
 		}
 
-		unlock, err := d.Unlock("running")
+		unlockr, err := d.Unlock("running")
 		if err != nil {
 			t.Fatalf(
 				"%s: encountered error running netconf Driver unlock, error: %s",
@@ -40,12 +40,12 @@ func testLockUnlock(testName string, testCase *util.PayloadTestCase) func(t *tes
 			)
 		}
 
-		if unlock.Failed != nil {
+		if unlockr.Failed != nil {
 			t.Fatalf("%s: response object indicates failure",
 				testName)
 		}
 
-		actualOut := lockr.Result + "\n" + unlock.Result
+		actualOut := lockr.Result + "\n" + unlockr.Result
 		actualIn := bytes.Join(fileTransportObj.Writes, []byte("\n"))
 
 		if *update {

@@ -241,14 +241,14 @@ func testSendCommandsFunctional(
 		)
 
 		if !cmp.Equal(
-			util.GetCleanFunc(platformName)(actualOut),
+			cleanF(actualOut),
 			cleanF(string(expectedOut)),
 		) {
 			t.Fatalf(
 				"%s: actual and expected outputs do not match\nactual: %s\nexpected:%s",
 				testName,
-				actualOut,
-				expectedOut,
+				cleanF(actualOut),
+				cleanF(string(expectedOut)),
 			)
 		}
 	}

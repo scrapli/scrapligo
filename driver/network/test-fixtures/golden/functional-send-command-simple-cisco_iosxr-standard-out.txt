@@ -1,18 +1,18 @@
-Fri May 27 19:36:25.684 UTC
+Sun Jun 26 22:46:55.235 UTC
 Building configuration...
 !! IOS XR Configuration version = 6.5.3
-!! Last configuration change at Fri May 27 18:06:27 2022 by boxen
+!! Last configuration change at Sun Jun 26 22:44:01 2022 by boxen
 !
 hostname vr-xrv9k
 username boxen
  group root-lr
  group cisco-support
- secret 5 $1$Nd4O$3wWOjN4m1wNUNIYDO9m67.
+ secret 5 $1$Eqd9$r77Xc5HHjEiT.ushQEHMu1
 !
 username clab
  group root-lr
  group cisco-support
- password 7 104D0518073743595F
+ password 7 1511070D060A7A767B
 !
 call-home
  service active
@@ -80,6 +80,7 @@ grpc
 netconf-yang agent
  ssh
 !
+ssh server rate-limit 600
 ssh server v2
 ssh server netconf vrf default
 end
