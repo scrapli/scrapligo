@@ -8,13 +8,13 @@ import (
 type Queue struct {
 	queue [][]byte
 	depth int
-	lock  *sync.Mutex
+	lock  *sync.RWMutex
 }
 
 // NewQueue returns a prepared Queue object.
 func NewQueue() *Queue {
 	return &Queue{
-		lock: &sync.Mutex{},
+		lock: &sync.RWMutex{},
 	}
 }
 
@@ -40,12 +40,14 @@ func (q *Queue) Enqueue(b []byte) {
 
 // Dequeue returns the first bytes in the queue.
 func (q *Queue) Dequeue() []byte {
-	q.lock.Lock()
-	defer q.lock.Unlock()
-
-	if len(q.queue) == 0 {
+	// check the depth before acquiring a full read/write lock which can cause deadlocks with tons
+	// of concurrent access to enqueue/deque.
+	if q.GetDepth() == 0 {
 		return nil
 	}
+
+	q.lock.Lock()
+	defer q.lock.Unlock()
 
 	b := q.queue[0]
 
@@ -57,5 +59,8 @@ func (q *Queue) Dequeue() []byte {
 
 // GetDepth returns the depth of the queue.
 func (q *Queue) GetDepth() int {
+	q.lock.RLock()
+	defer q.lock.RUnlock()
+
 	return q.depth
 }
