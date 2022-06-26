@@ -3,13 +3,11 @@ package generic_test
 import (
 	"flag"
 	"fmt"
+	"github.com/scrapli/scrapligo/driver/generic"
+	"github.com/scrapli/scrapligo/driver/options"
 	"os"
 	"path/filepath"
 	"testing"
-	"time"
-
-	"github.com/scrapli/scrapligo/driver/generic"
-	"github.com/scrapli/scrapligo/driver/options"
 
 	"github.com/scrapli/scrapligo/util"
 
@@ -82,7 +80,6 @@ func prepareDriver(
 		options.WithTransportType(transport.FileTransport),
 		options.WithFileTransportFile(resolveFile(t, payloadFile)),
 		options.WithTransportReadSize(1),
-		options.WithTimeoutOps(1*time.Second),
 		options.WithReadDelay(0),
 	)
 	if err != nil {
