@@ -24,6 +24,10 @@ topology:
       kind: vr-xrv9k
       mgmt_ipv4: 172.20.20.12
       mgmt_ipv6: 2001:172:20:20::12
+      binds:
+        - configs/xrv9k-startup.cfg:/startup.cfg
+      env:
+        STARTUP_CONFIG: /startup.cfg
     vr-n9kv:
       kind: vr-n9kv
       mgmt_ipv4: 172.20.20.13
