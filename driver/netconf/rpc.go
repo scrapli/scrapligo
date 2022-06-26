@@ -66,8 +66,6 @@ func (d *Driver) sendRPC(
 		d.SelectedVersion,
 	)
 
-	d.storeMessage(m.MessageID, nil)
-
 	err = d.Channel.WriteAndReturn(b, false)
 	if err != nil {
 		return nil, err
@@ -80,14 +78,21 @@ func (d *Driver) sendRPC(
 		}
 	}
 
-	done := make(chan bool)
+	done := make(chan []byte)
 
 	go func() {
-		for d.getMessage(m.MessageID) == nil {
-			time.Sleep(d.Channel.ReadDelay)
+		var data []byte
+
+		for {
+			data = d.getMessage(m.MessageID)
+			if data != nil {
+				break
+			}
+
+			time.Sleep(5 * time.Microsecond) //nolint: gomnd
 		}
 
-		done <- true
+		done <- data
 	}()
 
 	timer := time.NewTimer(d.Channel.GetTimeout(op.Timeout))
@@ -99,10 +104,9 @@ func (d *Driver) sendRPC(
 		d.Logger.Critical("channel timeout sending input to device")
 
 		return nil, fmt.Errorf("%w: channel timeout sending input to device", util.ErrTimeoutError)
-	case <-done:
+	case data := <-done:
+		r.Record(data)
 	}
-
-	r.Record(d.getMessage(m.MessageID))
 
 	return r, nil
 }
