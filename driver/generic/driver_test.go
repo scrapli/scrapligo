@@ -3,11 +3,12 @@ package generic_test
 import (
 	"flag"
 	"fmt"
-	"github.com/scrapli/scrapligo/driver/generic"
-	"github.com/scrapli/scrapligo/driver/options"
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/scrapli/scrapligo/driver/generic"
+	"github.com/scrapli/scrapligo/driver/options"
 
 	"github.com/scrapli/scrapligo/util"
 
