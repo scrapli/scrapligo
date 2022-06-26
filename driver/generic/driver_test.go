@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/scrapli/scrapligo/driver/generic"
 	"github.com/scrapli/scrapligo/driver/options"
@@ -81,6 +82,7 @@ func prepareDriver(
 		options.WithTransportType(transport.FileTransport),
 		options.WithFileTransportFile(resolveFile(t, payloadFile)),
 		options.WithTransportReadSize(1),
+		options.WithTimeoutOps(1*time.Second),
 		options.WithReadDelay(0),
 	)
 	if err != nil {

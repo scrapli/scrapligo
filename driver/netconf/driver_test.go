@@ -85,6 +85,7 @@ func prepareDriver(
 		options.WithTransportType(transport.FileTransport),
 		options.WithFileTransportFile(resolveFile(t, payloadFile)),
 		options.WithTransportReadSize(1),
+		options.WithTimeoutOps(1*time.Second),
 		options.WithReadDelay(0),
 	)
 	if err != nil {
