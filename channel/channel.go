@@ -16,9 +16,9 @@ import (
 const (
 	// DefaultTimeoutOpsSeconds is the default time value for operations -- 60 seconds.
 	DefaultTimeoutOpsSeconds = 60
-	// DefaultReadDelayMilliSeconds is the default value for the delay between reads of the
-	// transport -- 5 milliseconds.
-	DefaultReadDelayMilliSeconds = 5
+	// DefaultReadDelayMicroSeconds is the default value for the delay between reads of the
+	// transport -- 5 microseconds.
+	DefaultReadDelayMicroSeconds = 5
 	// DefaultReturnChar is the character used to send an "enter" key to the device, "\n".
 	DefaultReturnChar = "\n"
 
@@ -51,7 +51,7 @@ func NewChannel(
 		t: t,
 
 		TimeoutOps: DefaultTimeoutOpsSeconds * time.Second,
-		ReadDelay:  DefaultReadDelayMilliSeconds * time.Millisecond,
+		ReadDelay:  DefaultReadDelayMicroSeconds * time.Microsecond,
 
 		UsernamePattern:   patterns.username,
 		PasswordPattern:   patterns.password,
