@@ -269,7 +269,14 @@ func (d *Driver) getMessage(i int) []byte {
 	d.messagesLock.Lock()
 	defer d.messagesLock.Unlock()
 
-	return d.messages[i]
+	data := d.messages[i]
+
+	// no point keeping this in memory -- especially as some messages may be huge! we can also
+	// safely delete the key in the map as we should not be getting another message for the same
+	// id ever again (unlike with subscriptions).
+	delete(d.messages, i)
+
+	return data
 }
 
 func (d *Driver) storeSubscriptionMessage(i int, b []byte) {
