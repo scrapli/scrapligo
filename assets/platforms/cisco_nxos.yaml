@@ -43,6 +43,7 @@ default:
     - '% Incomplete command'
     - '% Invalid input detected'
     - '% Unknown command'
+    - 'ERROR:'
   textfsm-platform: 'cisco_nxos' # ignored in go because no ntc-templates
   network-on-open:
     - operation: 'acquire-priv' # targets default desired priv by default
