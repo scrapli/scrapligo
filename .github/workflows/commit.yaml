@@ -22,7 +22,7 @@ jobs:
       - name: lint
         uses: golangci/golangci-lint-action@v3
         with:
-          version: v1.45
+          version: v1.46
       - name: install gotestsum
         run: go install gotest.tools/gotestsum@latest
       - name: tests
