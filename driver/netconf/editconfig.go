@@ -28,6 +28,8 @@ func (d *Driver) buildEditConfigElem(
 
 // EditConfig executes the edit-config RPC pushing the provided config against the target datastore.
 func (d *Driver) EditConfig(target, config string) (*response.NetconfResponse, error) {
+	d.Logger.Infof("EditConfig RPC requested, target '%s'", target)
+
 	op, err := NewOperation()
 	if err != nil {
 		return nil, err

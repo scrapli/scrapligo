@@ -12,13 +12,13 @@ func WithAuthUsername(s string) util.Option {
 	return func(o interface{}) error {
 		a, ok := o.(*transport.Args)
 
-		if ok {
-			a.User = s
-
-			return nil
+		if !ok {
+			return util.ErrIgnoredOption
 		}
 
-		return util.ErrIgnoredOption
+		a.User = s
+
+		return nil
 	}
 }
 
@@ -27,13 +27,13 @@ func WithAuthPassword(s string) util.Option {
 	return func(o interface{}) error {
 		a, ok := o.(*transport.Args)
 
-		if ok {
-			a.Password = s
-
-			return nil
+		if !ok {
+			return util.ErrIgnoredOption
 		}
 
-		return util.ErrIgnoredOption
+		a.Password = s
+
+		return nil
 	}
 }
 
@@ -43,13 +43,13 @@ func WithAuthSecondary(s string) util.Option {
 	return func(o interface{}) error {
 		d, ok := o.(*network.Driver)
 
-		if ok {
-			d.AuthSecondary = s
-
-			return nil
+		if !ok {
+			return util.ErrIgnoredOption
 		}
 
-		return util.ErrIgnoredOption
+		d.AuthSecondary = s
+
+		return nil
 	}
 }
 
@@ -58,13 +58,13 @@ func WithAuthPassphrase(s string) util.Option {
 	return func(o interface{}) error {
 		a, ok := o.(*transport.SSHArgs)
 
-		if ok {
-			a.PrivateKeyPassPhrase = s
-
-			return nil
+		if !ok {
+			return util.ErrIgnoredOption
 		}
 
-		return util.ErrIgnoredOption
+		a.PrivateKeyPassPhrase = s
+
+		return nil
 	}
 }
 
@@ -77,12 +77,12 @@ func WithAuthBypass() util.Option {
 	return func(o interface{}) error {
 		c, ok := o.(*channel.Channel)
 
-		if ok {
-			c.AuthBypass = true
-
-			return nil
+		if !ok {
+			return util.ErrIgnoredOption
 		}
 
-		return util.ErrIgnoredOption
+		c.AuthBypass = true
+
+		return nil
 	}
 }

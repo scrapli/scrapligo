@@ -14,13 +14,13 @@ func WithLogger(l *logging.Instance) util.Option {
 	return func(o interface{}) error {
 		d, ok := o.(*generic.Driver)
 
-		if ok {
-			d.Logger = l
-
-			return nil
+		if !ok {
+			return util.ErrIgnoredOption
 		}
 
-		return util.ErrIgnoredOption
+		d.Logger = l
+
+		return nil
 	}
 }
 

@@ -41,6 +41,8 @@ func (d *Driver) buildGetConfigElem(
 
 // GetConfig executes a get-config RPC against the NETCONF server.
 func (d *Driver) GetConfig(source string, opts ...util.Option) (*response.NetconfResponse, error) {
+	d.Logger.Infof("GetConfig RPC requested, source '%s'", source)
+
 	op, err := NewOperation(opts...)
 	if err != nil {
 		return nil, err

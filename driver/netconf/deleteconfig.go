@@ -1,4 +1,4 @@
-package netconf
+package netconf //nolint: dupl
 
 import (
 	"encoding/xml"
@@ -27,6 +27,8 @@ func (d *Driver) buildDeleteConfigElem(
 // DeleteConfig executes the delete-config RPC against the NETCONF server deleting the target
 // datastore.
 func (d *Driver) DeleteConfig(target string) (*response.NetconfResponse, error) {
+	d.Logger.Infof("DeleteConfig RPC requested, target '%s'", target)
+
 	op, err := NewOperation()
 	if err != nil {
 		return nil, err

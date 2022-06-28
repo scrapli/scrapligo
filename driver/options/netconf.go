@@ -20,13 +20,13 @@ func WithNetconfPreferredVersion(s string) util.Option {
 
 		d, ok := o.(*netconf.Driver)
 
-		if ok {
-			d.PreferredVersion = s
-
-			return nil
+		if !ok {
+			return util.ErrIgnoredOption
 		}
 
-		return util.ErrIgnoredOption
+		d.PreferredVersion = s
+
+		return nil
 	}
 }
 
@@ -36,12 +36,12 @@ func WithNetconfForceSelfClosingTags() util.Option {
 	return func(o interface{}) error {
 		d, ok := o.(*netconf.Driver)
 
-		if ok {
-			d.ForceSelfClosingTags = true
-
-			return nil
+		if !ok {
+			return util.ErrIgnoredOption
 		}
 
-		return util.ErrIgnoredOption
+		d.ForceSelfClosingTags = true
+
+		return nil
 	}
 }

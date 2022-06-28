@@ -70,10 +70,14 @@ func (d *Driver) read() {
 				}
 
 				if messageID != 0 {
+					d.Logger.Debugf("Received message response for message ID '%d', storing", messageID)
+
 					d.storeMessage(messageID, b)
 				}
 
 				if subID != 0 {
+					d.Logger.Debugf("Received message response for subscription ID '%d', storing", subID)
+
 					d.storeSubscriptionMessage(subID, b)
 				}
 

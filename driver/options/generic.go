@@ -43,13 +43,13 @@ func WithFailedWhenContains(fw []string) util.Option {
 	return func(o interface{}) error {
 		d, ok := o.(*generic.Driver)
 
-		if ok {
-			d.FailedWhenContains = fw
-
-			return nil
+		if !ok {
+			return util.ErrIgnoredOption
 		}
 
-		return util.ErrIgnoredOption
+		d.FailedWhenContains = fw
+
+		return nil
 	}
 }
 
@@ -60,13 +60,13 @@ func WithOnOpen(f func(d *generic.Driver) error) util.Option {
 	return func(o interface{}) error {
 		d, ok := o.(*generic.Driver)
 
-		if ok {
-			d.OnOpen = f
-
-			return nil
+		if !ok {
+			return util.ErrIgnoredOption
 		}
 
-		return util.ErrIgnoredOption
+		d.OnOpen = f
+
+		return nil
 	}
 }
 
@@ -77,12 +77,12 @@ func WithOnClose(f func(d *generic.Driver) error) util.Option {
 	return func(o interface{}) error {
 		d, ok := o.(*generic.Driver)
 
-		if ok {
-			d.OnClose = f
-
-			return nil
+		if !ok {
+			return util.ErrIgnoredOption
 		}
 
-		return util.ErrIgnoredOption
+		d.OnClose = f
+
+		return nil
 	}
 }

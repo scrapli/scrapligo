@@ -30,6 +30,8 @@ func (d *Driver) buildCopyConfigElem(
 // CopyConfig executes a copy config RPC against the NETCONF server copying the source to the
 // target datastore.
 func (d *Driver) CopyConfig(source, target string) (*response.NetconfResponse, error) {
+	d.Logger.Infof("CopyConfig RPC requested, source '%s'/target '%s'", source, target)
+
 	op, err := NewOperation()
 	if err != nil {
 		return nil, err

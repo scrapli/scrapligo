@@ -56,8 +56,12 @@ func (d *Driver) sendRPC(
 	}
 
 	if d.ForceSelfClosingTags {
+		d.Logger.Debug("ForceSelfClosingTags is true, enforcing...")
+
 		b = forceSelfClosingTags(b)
 	}
+
+	d.Logger.Debugf("sending finalized rpc payload:\n%s", string(b))
 
 	r := response.NewNetconfResponse(
 		b,

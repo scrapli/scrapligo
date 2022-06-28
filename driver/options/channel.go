@@ -15,13 +15,13 @@ func WithPromptPattern(p *regexp.Regexp) util.Option {
 	return func(o interface{}) error {
 		c, ok := o.(*channel.Channel)
 
-		if ok {
-			c.PromptPattern = p
-
-			return nil
+		if !ok {
+			return util.ErrIgnoredOption
 		}
 
-		return util.ErrIgnoredOption
+		c.PromptPattern = p
+
+		return nil
 	}
 }
 
@@ -31,13 +31,13 @@ func WithUsernamePattern(p *regexp.Regexp) util.Option {
 	return func(o interface{}) error {
 		c, ok := o.(*channel.Channel)
 
-		if ok {
-			c.UsernamePattern = p
-
-			return nil
+		if !ok {
+			return util.ErrIgnoredOption
 		}
 
-		return util.ErrIgnoredOption
+		c.UsernamePattern = p
+
+		return nil
 	}
 }
 
@@ -47,13 +47,13 @@ func WithPasswordPattern(p *regexp.Regexp) util.Option {
 	return func(o interface{}) error {
 		c, ok := o.(*channel.Channel)
 
-		if ok {
-			c.PasswordPattern = p
-
-			return nil
+		if !ok {
+			return util.ErrIgnoredOption
 		}
 
-		return util.ErrIgnoredOption
+		c.PasswordPattern = p
+
+		return nil
 	}
 }
 
@@ -63,13 +63,13 @@ func WithPassphrasePattern(p *regexp.Regexp) util.Option {
 	return func(o interface{}) error {
 		c, ok := o.(*channel.Channel)
 
-		if ok {
-			c.PassphrasePattern = p
-
-			return nil
+		if !ok {
+			return util.ErrIgnoredOption
 		}
 
-		return util.ErrIgnoredOption
+		c.PassphrasePattern = p
+
+		return nil
 	}
 }
 
@@ -79,13 +79,13 @@ func WithReturnChar(s string) util.Option {
 	return func(o interface{}) error {
 		c, ok := o.(*channel.Channel)
 
-		if ok {
-			c.ReturnChar = []byte(s)
-
-			return nil
+		if !ok {
+			return util.ErrIgnoredOption
 		}
 
-		return util.ErrIgnoredOption
+		c.ReturnChar = []byte(s)
+
+		return nil
 	}
 }
 
@@ -96,13 +96,13 @@ func WithTimeoutOps(t time.Duration) util.Option {
 	return func(o interface{}) error {
 		c, ok := o.(*channel.Channel)
 
-		if ok {
-			c.TimeoutOps = t
-
-			return nil
+		if !ok {
+			return util.ErrIgnoredOption
 		}
 
-		return util.ErrIgnoredOption
+		c.TimeoutOps = t
+
+		return nil
 	}
 }
 
@@ -112,13 +112,13 @@ func WithReadDelay(t time.Duration) util.Option {
 	return func(o interface{}) error {
 		c, ok := o.(*channel.Channel)
 
-		if ok {
-			c.ReadDelay = t
-
-			return nil
+		if !ok {
+			return util.ErrIgnoredOption
 		}
 
-		return util.ErrIgnoredOption
+		c.ReadDelay = t
+
+		return nil
 	}
 }
 
@@ -127,12 +127,12 @@ func WithChannelLog(w io.Writer) util.Option {
 	return func(o interface{}) error {
 		c, ok := o.(*channel.Channel)
 
-		if ok {
-			c.ChannelLog = w
-
-			return nil
+		if !ok {
+			return util.ErrIgnoredOption
 		}
 
-		return util.ErrIgnoredOption
+		c.ChannelLog = w
+
+		return nil
 	}
 }

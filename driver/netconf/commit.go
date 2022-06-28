@@ -22,6 +22,8 @@ func (d *Driver) buildCommitElem() *message {
 
 // Commit executes a commit rpc against the NETCONF server.
 func (d *Driver) Commit() (*response.NetconfResponse, error) {
+	d.Logger.Info("Commit RPC requested")
+
 	op, err := NewOperation()
 	if err != nil {
 		return nil, err
@@ -46,6 +48,8 @@ func (d *Driver) buildDiscardElem() *message {
 
 // Discard executes a discard rpc against the NETCONF server.
 func (d *Driver) Discard() (*response.NetconfResponse, error) {
+	d.Logger.Info("Discard RPC requested")
+
 	op, err := NewOperation()
 	if err != nil {
 		return nil, err

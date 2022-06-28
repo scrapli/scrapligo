@@ -10,13 +10,13 @@ func WithPrivilegeLevels(privilegeLevels map[string]*network.PrivilegeLevel) uti
 	return func(o interface{}) error {
 		d, ok := o.(*network.Driver)
 
-		if ok {
-			d.PrivilegeLevels = privilegeLevels
-
-			return nil
+		if !ok {
+			return util.ErrIgnoredOption
 		}
 
-		return util.ErrIgnoredOption
+		d.PrivilegeLevels = privilegeLevels
+
+		return nil
 	}
 }
 
@@ -26,12 +26,12 @@ func WithDefaultDesiredPriv(s string) util.Option {
 	return func(o interface{}) error {
 		d, ok := o.(*network.Driver)
 
-		if ok {
-			d.DefaultDesiredPriv = s
-
-			return nil
+		if !ok {
+			return util.ErrIgnoredOption
 		}
 
-		return util.ErrIgnoredOption
+		d.DefaultDesiredPriv = s
+
+		return nil
 	}
 }

@@ -24,6 +24,8 @@ func (d *Driver) buildLockElem(target string) *message {
 
 // Lock executes the lock rpc for the target datastore against the NETCONF server.
 func (d *Driver) Lock(target string) (*response.NetconfResponse, error) {
+	d.Logger.Info("Lock RPC requested")
+
 	op, err := NewOperation()
 	if err != nil {
 		return nil, err
@@ -50,6 +52,8 @@ func (d *Driver) buildUnlockElem(target string) *message {
 
 // Unlock executes unlock rpc for the target datastore against the NETCONF server.
 func (d *Driver) Unlock(target string) (*response.NetconfResponse, error) {
+	d.Logger.Info("Unlock RPC requested")
+
 	op, err := NewOperation()
 	if err != nil {
 		return nil, err

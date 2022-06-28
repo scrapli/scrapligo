@@ -14,13 +14,13 @@ func WithNetworkOnOpen(f func(d *network.Driver) error) util.Option {
 	return func(o interface{}) error {
 		d, ok := o.(*network.Driver)
 
-		if ok {
-			d.OnOpen = f
-
-			return nil
+		if !ok {
+			return util.ErrIgnoredOption
 		}
 
-		return util.ErrIgnoredOption
+		d.OnOpen = f
+
+		return nil
 	}
 }
 
@@ -32,12 +32,12 @@ func WithNetworkOnClose(f func(d *network.Driver) error) util.Option {
 	return func(o interface{}) error {
 		d, ok := o.(*network.Driver)
 
-		if ok {
-			d.OnClose = f
-
-			return nil
+		if !ok {
+			return util.ErrIgnoredOption
 		}
 
-		return util.ErrIgnoredOption
+		d.OnClose = f
+
+		return nil
 	}
 }

@@ -33,6 +33,8 @@ func (d *Driver) buildGetElem(
 
 // Get executes a get RPC against the NETCONF server.
 func (d *Driver) Get(filter string, opts ...util.Option) (*response.NetconfResponse, error) {
+	d.Logger.Info("Get RPC requested")
+
 	op, err := NewOperation(opts...)
 	if err != nil {
 		return nil, err
