@@ -1,6 +1,7 @@
 package transport
 
 import (
+	"io"
 	"os"
 )
 
@@ -24,6 +25,8 @@ type File struct {
 	F  string
 	fd *os.File
 
+	content []byte
+
 	Writes [][]byte
 }
 
@@ -37,6 +40,13 @@ func (t *File) Open(a *Args) error {
 	}
 
 	t.fd = f
+
+	t.content, err = io.ReadAll(f)
+	if err != nil {
+		return err
+	}
+
+	_ = t.Close()
 
 	return nil
 }
@@ -52,17 +62,21 @@ func (t *File) IsAlive() bool {
 }
 
 // Read reads n bytes from the transport. File transport ignores EOF errors, see comment below.
-func (t *File) Read(n int) ([]byte, error) {
-	b := make([]byte, n)
+func (t *File) Read(_ int) ([]byte, error) {
+	if len(t.content) == 0 {
+		// we can just sleep here as this is getting called from a goroutine anyway, by blocking
+		// we will stop subsequent reads which means less things for race detector to look at.
+		// it seems to be *moderately* successful in speeding up tests in race mode. we need this
+		// because in unit tests we read *one* byte at a time -- some test data contains >10k bytes
+		// which causes a lot of locks/unlocks and such which makes the race detector have a party.
+		select {}
+	}
 
-	// we don't care about errors here, only one we really would get is EOF and since this should
-	// only ever be used for testing we can ignore that. in some test situations we could read too
-	// fast and not d-queue things fast enough, so we basically hit the EOF w/out actually "finding"
-	// the prompt we are looking for which of course causes issues. again, shouldn't matter for
-	// anything "real" since this is just for testing!
-	_, _ = t.fd.Read(b)
+	b := t.content[0]
 
-	return b, nil
+	t.content = t.content[1:]
+
+	return []byte{b}, nil
 }
 
 // Write writes bytes b to the transport.

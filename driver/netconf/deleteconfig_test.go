@@ -18,7 +18,7 @@ func testDeleteConfig(testName string, testCase *util.PayloadTestCase) func(t *t
 		r, err := d.DeleteConfig("startup")
 		if err != nil {
 			t.Fatalf(
-				"%s: encountered error running network Driver DeleteConfig, error: %s",
+				"%s: encountered error running netconf Driver DeleteConfig, error: %s",
 				testName,
 				err,
 			)

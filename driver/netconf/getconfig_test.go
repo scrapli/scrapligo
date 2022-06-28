@@ -18,7 +18,7 @@ func testGetConfig(testName string, testCase *util.PayloadTestCase) func(t *test
 		r, err := d.GetConfig("running")
 		if err != nil {
 			t.Fatalf(
-				"%s: encountered error running network Driver getConfig, error: %s",
+				"%s: encountered error running netconf Driver getConfig, error: %s",
 				testName,
 				err,
 			)

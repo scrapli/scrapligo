@@ -21,7 +21,7 @@ func testEditConfig(testName string, testCase *util.PayloadTestCase) func(t *tes
 		)
 		if err != nil {
 			t.Fatalf(
-				"%s: encountered error running network Driver Get, error: %s",
+				"%s: encountered error running netconf Driver Get, error: %s",
 				testName,
 				err,
 			)

@@ -18,7 +18,7 @@ func testCopyConfig(testName string, testCase *util.PayloadTestCase) func(t *tes
 		r, err := d.CopyConfig("running", "running")
 		if err != nil {
 			t.Fatalf(
-				"%s: encountered error running network Driver CopyConfig, error: %s",
+				"%s: encountered error running netconf Driver CopyConfig, error: %s",
 				testName,
 				err,
 			)

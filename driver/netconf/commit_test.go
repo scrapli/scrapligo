@@ -18,7 +18,7 @@ func testCommitDiscard(testName string, testCase *util.PayloadTestCase) func(t *
 		commitr, err := d.Commit()
 		if err != nil {
 			t.Fatalf(
-				"%s: encountered error running network Driver Commit, error: %s",
+				"%s: encountered error running netconf Driver Commit, error: %s",
 				testName,
 				err,
 			)
@@ -32,7 +32,7 @@ func testCommitDiscard(testName string, testCase *util.PayloadTestCase) func(t *
 		discardr, err := d.Discard()
 		if err != nil {
 			t.Fatalf(
-				"%s: encountered error running network Driver Discard, error: %s",
+				"%s: encountered error running netconf Driver Discard, error: %s",
 				testName,
 				err,
 			)

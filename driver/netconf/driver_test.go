@@ -84,7 +84,7 @@ func prepareDriver(
 		"dummy",
 		options.WithTransportType(transport.FileTransport),
 		options.WithFileTransportFile(resolveFile(t, payloadFile)),
-		options.WithTransportReadSize(1),
+		// options.WithTransportReadSize(1),
 		options.WithReadDelay(0),
 	)
 	if err != nil {
@@ -252,7 +252,7 @@ func prepareFunctionalDriver(
 	err = d.Open()
 	if err != nil {
 		t.Fatalf(
-			"%s: encountered error opening network driver, error: %s",
+			"%s: encountered error opening netconf driver, error: %s",
 			testName,
 			err,
 		)

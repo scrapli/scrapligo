@@ -18,7 +18,7 @@ func testValidate(testName string, testCase *util.PayloadTestCase) func(t *testi
 		r, err := d.Validate("candidate")
 		if err != nil {
 			t.Fatalf(
-				"%s: encountered error running network Driver Validate, error: %s",
+				"%s: encountered error running netconf Driver Validate, error: %s",
 				testName,
 				err,
 			)
