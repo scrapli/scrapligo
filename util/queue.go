@@ -1,6 +1,7 @@
 package util
 
 import (
+	"bytes"
 	"sync"
 )
 
@@ -55,6 +56,24 @@ func (q *Queue) Dequeue() []byte {
 	q.depth--
 
 	return b
+}
+
+// DequeueAll returns all bytes in the queue.
+func (q *Queue) DequeueAll() []byte {
+	if q.GetDepth() == 0 {
+		return nil
+	}
+
+	q.lock.Lock()
+	defer q.lock.Unlock()
+
+	b := q.queue
+
+	q.queue = nil
+
+	q.depth = 0
+
+	return bytes.Join(b, []byte{})
 }
 
 // GetDepth returns the depth of the queue.

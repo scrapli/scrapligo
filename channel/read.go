@@ -62,6 +62,23 @@ func (c *Channel) Read() ([]byte, error) {
 	return b, nil
 }
 
+// ReadAll reads and returns *all* available bytes form the channel Q object. If there are any
+// errors on the Errs channel  (these would come from the underlying transport), the error is
+// returned with nil for the byte slice. Be careful using this as it is possible to dequeue "too
+// much" from the channel causing us to not be able to "find" the prompt or inputs during normal
+// operations. In general, this should probably only be used when connecting to consoles/files.
+func (c *Channel) ReadAll() ([]byte, error) {
+	select {
+	case err := <-c.Errs:
+		return nil, err
+	default:
+	}
+
+	b := c.Q.DequeueAll()
+
+	return b, nil
+}
+
 // ReadUntilInput reads bytes out of the channel Q object until the "input" bytes b are "seen" in
 // the channel output. Once b is seen, all read bytes are returned.
 func (c *Channel) ReadUntilInput(b []byte) ([]byte, error) {
