@@ -21,7 +21,7 @@ type SendInteractiveEvent struct {
 // SendInteractive sends a slice of SendInteractiveEvent to the device. This is typically used to
 // handle any well understood "interactive" prompts on a device -- things like "clear logging" which
 // prompts the user to confirm, or handling privilege escalation where there is a password prompt.
-func (c *Channel) SendInteractive(
+func (c *Channel) SendInteractive( //nolint: gocognit,gocyclo
 	events []*SendInteractiveEvent,
 	opts ...util.Option,
 ) ([]byte, error) {
@@ -37,7 +37,7 @@ func (c *Channel) SendInteractive(
 	var b []byte
 
 	go func() {
-		for _, e := range events {
+		for i, e := range events {
 			prompts := op.CompletePatterns
 			if e.ChannelResponse != "" {
 				prompts = append(prompts, regexp.MustCompile(e.ChannelResponse))
@@ -82,6 +82,22 @@ func (c *Channel) SendInteractive(
 			}
 
 			b = append(b, pb...)
+
+			if i < len(events)-1 && len(op.CompletePatterns) > 0 {
+				var done bool
+
+				for _, p := range op.CompletePatterns {
+					if p.Match(pb) {
+						done = true
+
+						break
+					}
+				}
+
+				if done {
+					break
+				}
+			}
 		}
 
 		cr <- &result{b: c.processOut(b, false), err: nil}
