@@ -5,6 +5,10 @@ import (
 	"github.com/scrapli/scrapligo/util"
 )
 
+const (
+	defaultConfigurationPrivLevel = "configuration"
+)
+
 // SendConfigs sends a list of configs to the device. This method will auto acquire the
 // "configuration" privilege level. If your device does *not* have a "configuration" privilege
 // level this will fail. If your device has multiple "flavors" of configuration level (i.e.
@@ -19,7 +23,13 @@ func (d *Driver) SendConfigs(
 		return nil, err
 	}
 
-	err = d.AcquirePriv(op.PrivilegeLevel)
+	targetPriv := op.PrivilegeLevel
+
+	if targetPriv == "" {
+		targetPriv = defaultConfigurationPrivLevel
+	}
+
+	err = d.AcquirePriv(targetPriv)
 	if err != nil {
 		return nil, err
 	}
