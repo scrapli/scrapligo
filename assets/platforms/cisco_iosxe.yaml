@@ -17,7 +17,7 @@ default:
       deescalate: 'disable'
       escalate: 'enable'
       escalate-auth: true
-      escalate-prompt: '^(?:enable\s){0,1}password:\s?$'
+      escalate-prompt: '(?im)^(?:enable\s){0,1}password:\s?$'
     configuration:
       name: 'configuration'
       pattern: '(?im)^[\w.\-@/:]{1,63}\([\w.\-@/:+]{0,32}\)#$'
