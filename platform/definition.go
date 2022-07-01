@@ -49,7 +49,7 @@ func loadPlatformDefinitionFromAssets(f string) ([]byte, error) {
 func loadPlatformDefinition(f string) (*Definition, error) {
 	b, err := loadPlatformDefinitionFromAssets(f)
 	if err != nil {
-		b, err = util.ResolveAtFileOrURL(f) //nolint:gosec
+		b, err = util.ResolveAtFileOrURL(f)
 		if err != nil {
 			return nil, err
 		}
