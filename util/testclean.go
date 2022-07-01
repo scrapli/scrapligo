@@ -2,6 +2,7 @@ package util
 
 import (
 	"regexp"
+	"strings"
 )
 
 func cleanResponseMap() map[string]func(r string) string {
@@ -27,6 +28,10 @@ func GetCleanFunc(platform string) func(r string) string {
 	}
 
 	return cleanFunc
+}
+
+func replaceDoubleNewlines(s string) string {
+	return strings.Replace(s, "\n\n", "\n", -1)
 }
 
 func cleanResponseNoop(r string) string { return r }
@@ -60,11 +65,11 @@ func getAristaEosReplacePatterns() *aristaEosReplacePatterns {
 func aristaEosCleanResponse(r string) string {
 	replacePatterns := getAristaEosReplacePatterns()
 
-	r = replacePatterns.datetimePattern.ReplaceAllString(r, "TIME_STAMP_REPLACED")
-	r = replacePatterns.datetimePatternNetconf.ReplaceAllString(r, "TIME_STAMP_REPLACED")
-	r = replacePatterns.cryptoPattern.ReplaceAllString(r, "CRYPTO_REPLACED")
+	r = replacePatterns.datetimePattern.ReplaceAllString(r, "")
+	r = replacePatterns.datetimePatternNetconf.ReplaceAllString(r, "")
+	r = replacePatterns.cryptoPattern.ReplaceAllString(r, "")
 
-	return r
+	return replaceDoubleNewlines(r)
 }
 
 type ciscoIosxrReplacePatterns struct {
@@ -102,13 +107,13 @@ func getCiscoIosxrReplacePatterns() *ciscoIosxrReplacePatterns {
 func ciscoIosxrCleanResponse(r string) string {
 	replacePatterns := getCiscoIosxrReplacePatterns()
 
-	r = replacePatterns.datetimePattern.ReplaceAllString(r, "TIME_STAMP_REPLACED")
-	r = replacePatterns.cryptoPattern.ReplaceAllString(r, "CRYPTO_REPLACED")
-	r = replacePatterns.cfgByPattern.ReplaceAllString(r, "TIME_STAMP_REPLACED")
+	r = replacePatterns.datetimePattern.ReplaceAllString(r, "")
+	r = replacePatterns.cryptoPattern.ReplaceAllString(r, "")
+	r = replacePatterns.cfgByPattern.ReplaceAllString(r, "")
 	r = replacePatterns.commitInProgressPattern.ReplaceAllString(r, "")
-	r = replacePatterns.passwordNetconfPattern.ReplaceAllString(r, "PASSWORD_REPLACED")
+	r = replacePatterns.passwordNetconfPattern.ReplaceAllString(r, "")
 
-	return r
+	return replaceDoubleNewlines(r)
 }
 
 type ciscoIosxeReplacePatterns struct {
@@ -155,16 +160,16 @@ func getCiscoIosxeReplacePatterns() *ciscoIosxeReplacePatterns {
 func ciscoIosxeCleanResponse(r string) string {
 	replacePatterns := getCiscoIosxeReplacePatterns()
 
-	r = replacePatterns.configBytesPattern.ReplaceAllString(r, "CONFIG_BYTES_REPLACED")
-	r = replacePatterns.datetimePattern.ReplaceAllString(r, "TIME_STAMP_REPLACED")
-	r = replacePatterns.cryptoPattern.ReplaceAllString(r, "CRYPTO_REPLACED")
-	r = replacePatterns.cfgByPattern.ReplaceAllString(r, "TIME_STAMP_REPLACED")
-	r = replacePatterns.callHomePattern.ReplaceAllString(r, "CALL_HOME_REPLACED")
-	r = replacePatterns.certLicensePattern.ReplaceAllString(r, "CERT_LICENSE_REPLACED")
-	r = replacePatterns.serialNetconf.ReplaceAllString(r, "SERIAL_NUMBER_REPLACED")
-	r = replacePatterns.macAddrNetconf.ReplaceAllString(r, "MAC_ADDRESS_REPLACED")
+	r = replacePatterns.configBytesPattern.ReplaceAllString(r, "")
+	r = replacePatterns.datetimePattern.ReplaceAllString(r, "")
+	r = replacePatterns.cryptoPattern.ReplaceAllString(r, "")
+	r = replacePatterns.cfgByPattern.ReplaceAllString(r, "")
+	r = replacePatterns.callHomePattern.ReplaceAllString(r, "")
+	r = replacePatterns.certLicensePattern.ReplaceAllString(r, "")
+	r = replacePatterns.serialNetconf.ReplaceAllString(r, "")
+	r = replacePatterns.macAddrNetconf.ReplaceAllString(r, "")
 
-	return r
+	return replaceDoubleNewlines(r)
 }
 
 type ciscoNxosReplacePatterns struct {
@@ -197,11 +202,11 @@ func getCiscoNxosReplacePatterns() *ciscoNxosReplacePatterns {
 func ciscoNxosCleanResponse(r string) string {
 	replacePatterns := getCiscoNxosReplacePatterns()
 
-	r = replacePatterns.datetimePattern.ReplaceAllString(r, "TIME_STAMP_REPLACED")
-	r = replacePatterns.cryptoPattern.ReplaceAllString(r, "CRYPTO_REPLACED")
-	r = replacePatterns.resourcePattern.ReplaceAllString(r, "RESOURCES_REPLACED")
+	r = replacePatterns.datetimePattern.ReplaceAllString(r, "")
+	r = replacePatterns.cryptoPattern.ReplaceAllString(r, "")
+	r = replacePatterns.resourcePattern.ReplaceAllString(r, "")
 
-	return r
+	return replaceDoubleNewlines(r)
 }
 
 type juniperJunosReplacePatterns struct {
@@ -243,12 +248,12 @@ func getJuniperJunosReplacePatterns() *juniperJunosReplacePatterns {
 func juniperJunosCleanResponse(r string) string {
 	replacePatterns := getJuniperJunosReplacePatterns()
 
-	r = replacePatterns.datetimePattern.ReplaceAllString(r, "TIME_STAMP_REPLACED")
-	r = replacePatterns.cryptoPattern.ReplaceAllString(r, "CRYPTO_REPLACED")
-	r = replacePatterns.commitSecNetconfPattern.ReplaceAllString(r, "SECONDS_REPLACED")
-	r = replacePatterns.cryptoNetconfPattern.ReplaceAllString(r, "CRYPTO_REPLACED")
-	r = replacePatterns.datetimeNetconfPattern.ReplaceAllString(r, "TIME_STAMP_REPLACED")
-	r = replacePatterns.commitUserNetconfPattern.ReplaceAllString(r, "COMMIT_USER_REPLACED")
+	r = replacePatterns.datetimePattern.ReplaceAllString(r, "")
+	r = replacePatterns.cryptoPattern.ReplaceAllString(r, "")
+	r = replacePatterns.commitSecNetconfPattern.ReplaceAllString(r, "")
+	r = replacePatterns.cryptoNetconfPattern.ReplaceAllString(r, "")
+	r = replacePatterns.datetimeNetconfPattern.ReplaceAllString(r, "")
+	r = replacePatterns.commitUserNetconfPattern.ReplaceAllString(r, "")
 
-	return r
+	return replaceDoubleNewlines(r)
 }

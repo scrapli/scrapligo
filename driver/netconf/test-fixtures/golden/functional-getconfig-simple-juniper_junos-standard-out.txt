@@ -1,6 +1,6 @@
 <nc:rpc-reply xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" xmlns:junos="http://xml.juniper.net/junos/17.3R2/junos" xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="101">
 <nc:data>
-<configuration xmlns="http://yang.juniper.net/yang/1.1/jc/configuration/junos-es/17.3R2.10" junos:commit-seconds="1653940952" junos:commit-localtime="2022-05-30 20:02:32 UTC" junos:commit-user="boxen">
+<configuration xmlns="http://yang.juniper.net/yang/1.1/jc/configuration/junos-es/17.3R2.10" junos:commit-seconds="1656700654" junos:commit-localtime="2022-07-01 18:37:34 UTC" junos:commit-user="admin">
     <version>17.3R2.10</version>
     <system>
         <host-name>vr-vqfx</host-name>
@@ -13,7 +13,7 @@
                 <uid>2001</uid>
                 <class>super-user</class>
                 <authentication>
-                    <encrypted-password>$6$dvEEJFSr$8OTge9QQJZDHvxLzd5SKD302lqZ45oL.urLyZbQsZKUZKiu.m6C0TYRrbkonBOq9vSCzyfzlZMaFuKzpWXQdn0</encrypted-password>
+                    <encrypted-password>$6$5yOpGFyC$Std.eY2IiM6PcjP93ENVccVQ9TsvHI9rl11rNk2i./fwDTDR4cCIP5XWbiIyWoH3.iIl3HXkqAWMILWgBh7Ya/</encrypted-password>
                 </authentication>
             </user>
             <user>

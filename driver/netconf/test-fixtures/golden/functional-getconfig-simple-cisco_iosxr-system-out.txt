@@ -1,31 +1,16 @@
 <?xml version="1.0"?>
 <rpc-reply message-id="101" xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
  <data>
-  <grpc xmlns="http://cisco.com/ns/yang/Cisco-IOS-XR-man-ems-cfg">
-   <port>57400</port>
-   <no-tls></no-tls>
-   <enable></enable>
-  </grpc>
-  <call-home xmlns="http://cisco.com/ns/yang/Cisco-IOS-XR-call-home-cfg">
-   <active></active>
-   <contact-smart-licensing>true</contact-smart-licensing>
-   <profiles>
-    <profile>
-     <profile-name>CiscoTAC-1</profile-name>
-     <active></active>
-     <methods>
-      <method>
-       <method>email</method>
-       <enable>false</enable>
-      </method>
-      <method>
-       <method>http</method>
-       <enable>true</enable>
-      </method>
-     </methods>
-    </profile>
-   </profiles>
-  </call-home>
+  <host-names xmlns="http://cisco.com/ns/yang/Cisco-IOS-XR-shellutil-cfg">
+   <host-name>vr-xrv9k</host-name>
+  </host-names>
+  <netconf-yang xmlns="http://cisco.com/ns/yang/Cisco-IOS-XR-man-netconf-cfg">
+   <agent>
+    <ssh>
+     <enable></enable>
+    </ssh>
+   </agent>
+  </netconf-yang>
   <aaa xmlns="http://cisco.com/ns/yang/Cisco-IOS-XR-aaa-lib-cfg">
    <usernames xmlns="http://cisco.com/ns/yang/Cisco-IOS-XR-aaa-locald-cfg">
     <username>
@@ -150,16 +135,26 @@
     <shutdown></shutdown>
    </interface-configuration>
   </interface-configurations>
-  <host-names xmlns="http://cisco.com/ns/yang/Cisco-IOS-XR-shellutil-cfg">
-   <host-name>vr-xrv9k</host-name>
-  </host-names>
-  <netconf-yang xmlns="http://cisco.com/ns/yang/Cisco-IOS-XR-man-netconf-cfg">
-   <agent>
-    <ssh>
-     <enable></enable>
-    </ssh>
-   </agent>
-  </netconf-yang>
+  <call-home xmlns="http://cisco.com/ns/yang/Cisco-IOS-XR-call-home-cfg">
+   <active></active>
+   <contact-smart-licensing>true</contact-smart-licensing>
+   <profiles>
+    <profile>
+     <profile-name>CiscoTAC-1</profile-name>
+     <active></active>
+     <methods>
+      <method>
+       <method>email</method>
+       <enable>false</enable>
+      </method>
+      <method>
+       <method>http</method>
+       <enable>true</enable>
+      </method>
+     </methods>
+    </profile>
+   </profiles>
+  </call-home>
   <ssh xmlns="http://cisco.com/ns/yang/Cisco-IOS-XR-crypto-ssh-cfg">
    <server>
     <rate-limit>600</rate-limit>
@@ -172,5 +167,10 @@
     </netconf-vrf-table>
    </server>
   </ssh>
+  <grpc xmlns="http://cisco.com/ns/yang/Cisco-IOS-XR-man-ems-cfg">
+   <port>57400</port>
+   <no-tls></no-tls>
+   <enable></enable>
+  </grpc>
  </data>
 </rpc-reply>
