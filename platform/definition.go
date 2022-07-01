@@ -2,7 +2,6 @@ package platform
 
 import (
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/scrapli/scrapligo/assets"
@@ -50,7 +49,7 @@ func loadPlatformDefinitionFromAssets(f string) ([]byte, error) {
 func loadPlatformDefinition(f string) (*Definition, error) {
 	b, err := loadPlatformDefinitionFromAssets(f)
 	if err != nil {
-		b, err = os.ReadFile(f) //nolint:gosec
+		b, err = util.ResolveAtFileOrURL(f) //nolint:gosec
 		if err != nil {
 			return nil, err
 		}
