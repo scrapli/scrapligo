@@ -57,7 +57,5 @@ jobs:
         run: bash -c "$(curl -sL https://get.containerlab.dev)" -- -v 0.26.2
       - name: start clab ci topo
         run: make deploy-clab-ci
-      - name: wait for srlinux node
-        run: sleep 60
       - name: tests
         run: make test-ci
