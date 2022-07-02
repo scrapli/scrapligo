@@ -140,7 +140,7 @@ func getCiscoIosxeReplacePatterns() *ciscoIosxeReplacePatterns {
 			),
 			cryptoPattern: regexp.MustCompile(`(?im)^enable secret 9 (.*$)`),
 			cfgByPattern: regexp.MustCompile(
-				`(?im)^! Last configuration change at TIME_STAMP_REPLACED by (\w+)$`,
+				`(?im)^! Last configuration change at ([\w\s]+)?$`,
 			),
 			callHomePattern: regexp.MustCompile(
 				`(?im)^! Call-home is enabled by Smart-Licensing.$`,
