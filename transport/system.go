@@ -22,8 +22,8 @@ const (
 func NewSystemTransport(a *SSHArgs) (*System, error) {
 	t := &System{
 		SSHArgs:  a,
-		openBin:  defaultOpenBin,
-		openArgs: make([]string, 0),
+		OpenBin:  defaultOpenBin,
+		OpenArgs: make([]string, 0),
 		fd:       nil,
 	}
 
@@ -34,17 +34,17 @@ func NewSystemTransport(a *SSHArgs) (*System, error) {
 type System struct {
 	SSHArgs   *SSHArgs
 	ExtraArgs []string
-	openBin   string
-	openArgs  []string
+	OpenBin   string
+	OpenArgs  []string
 	fd        *os.File
 }
 
 func (t *System) buildOpenArgs(a *Args) {
-	if len(t.openArgs) > 0 {
-		t.openArgs = []string{}
+	if len(t.OpenArgs) > 0 {
+		t.OpenArgs = []string{}
 	}
 
-	t.openArgs = []string{
+	t.OpenArgs = []string{
 		a.Host,
 		"-p",
 		fmt.Sprintf("%d", a.Port),
@@ -55,30 +55,30 @@ func (t *System) buildOpenArgs(a *Args) {
 	}
 
 	if a.User != "" {
-		t.openArgs = append(
-			t.openArgs,
+		t.OpenArgs = append(
+			t.OpenArgs,
 			"-l",
 			a.User,
 		)
 	}
 
 	if t.SSHArgs.StrictKey {
-		t.openArgs = append(
-			t.openArgs,
+		t.OpenArgs = append(
+			t.OpenArgs,
 			"-o",
 			"StrictHostKeyChecking=yes",
 		)
 
 		if t.SSHArgs.KnownHostsFile != "" {
-			t.openArgs = append(
-				t.openArgs,
+			t.OpenArgs = append(
+				t.OpenArgs,
 				"-o",
 				fmt.Sprintf("UserKnownHostsFile=%s", t.SSHArgs.KnownHostsFile),
 			)
 		}
 	} else {
-		t.openArgs = append(
-			t.openArgs,
+		t.OpenArgs = append(
+			t.OpenArgs,
 			"-o",
 			"StrictHostKeyChecking=no",
 			"-o",
@@ -87,35 +87,35 @@ func (t *System) buildOpenArgs(a *Args) {
 	}
 
 	if t.SSHArgs.ConfigFile != "" {
-		t.openArgs = append(
-			t.openArgs,
+		t.OpenArgs = append(
+			t.OpenArgs,
 			"-F",
 			t.SSHArgs.ConfigFile,
 		)
 	} else {
-		t.openArgs = append(
-			t.openArgs,
+		t.OpenArgs = append(
+			t.OpenArgs,
 			"-F",
 			"/dev/null",
 		)
 	}
 
 	if len(t.ExtraArgs) > 0 {
-		t.openArgs = append(
-			t.openArgs,
+		t.OpenArgs = append(
+			t.OpenArgs,
 			t.ExtraArgs...,
 		)
 	}
 }
 
 func (t *System) open(a *Args) error {
-	if len(t.openArgs) == 0 {
+	if len(t.OpenArgs) == 0 {
 		t.buildOpenArgs(a)
 	}
 
-	a.l.Debugf("opening system transport with bin '%s' and args '%s'", t.openBin, t.openArgs)
+	a.l.Debugf("opening system transport with bin '%s' and args '%s'", t.OpenBin, t.OpenArgs)
 
-	c := exec.Command(t.openBin, t.openArgs...) //nolint:gosec
+	c := exec.Command(t.OpenBin, t.OpenArgs...) //nolint:gosec
 
 	var err error
 
@@ -136,15 +136,15 @@ func (t *System) open(a *Args) error {
 }
 
 func (t *System) openNetconf(a *Args) error {
-	if len(t.openArgs) == 0 {
+	if len(t.OpenArgs) == 0 {
 		t.buildOpenArgs(a)
 	}
 
-	t.openArgs = append(t.openArgs, "-s", "netconf")
+	t.OpenArgs = append(t.OpenArgs, "-s", "netconf")
 
-	a.l.Debugf("opening system transport with bin '%s' and args '%s'", t.openBin, t.openArgs)
+	a.l.Debugf("opening system transport with bin '%s' and args '%s'", t.OpenBin, t.OpenArgs)
 
-	c := exec.Command(t.openBin, t.openArgs...) //nolint:gosec
+	c := exec.Command(t.OpenBin, t.OpenArgs...) //nolint:gosec
 
 	var err error
 
