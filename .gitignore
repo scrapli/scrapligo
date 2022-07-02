@@ -11,7 +11,7 @@
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
 
-# goland
+# jetbrains goodies
 .idea
 
 # macos stuff
@@ -20,13 +20,17 @@
 
 # private dir for notes and such
 private/
+.private/
 
 # log output
 *.log
 
-# mkdocs site
-site/*
-
 # vscode
 .vscode
 .devcontainer
+
+# coverage
+cover.out
+
+# clab build dir
+.clab/clab-scrapligo

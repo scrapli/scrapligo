@@ -1,0 +1,6 @@
+C3560CX>enable
+C3560CX#
+C3560CX#terminal width 32767
+C3560CX#terminal length 0
+C3560CX#something
+C3560CX#

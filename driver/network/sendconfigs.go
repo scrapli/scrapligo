@@ -1,62 +1,52 @@
 package network
 
 import (
-	"errors"
-
+	"github.com/scrapli/scrapligo/response"
 	"github.com/scrapli/scrapligo/util"
-
-	"github.com/scrapli/scrapligo/driver/base"
-
-	"github.com/scrapli/scrapligo/channel"
 )
 
-// SendConfigs send configurations to the device.
-func (d *Driver) SendConfigs(c []string, o ...base.SendOption) (*base.MultiResponse, error) {
-	finalOpts := d.ParseSendOptions(o)
+const (
+	defaultConfigurationPrivLevel = "configuration"
+)
 
-	if finalOpts.DesiredPrivilegeLevel == "" {
-		finalOpts.DesiredPrivilegeLevel = "configuration"
+// SendConfigs sends a list of configs to the device. This method will auto acquire the
+// "configuration" privilege level. If your device does *not* have a "configuration" privilege
+// level this will fail. If your device has multiple "flavors" of configuration level (i.e.
+// exclusive or private) you can acquire that target privilege level for the configuration option
+// by passing the opoptions.WithPrivilegeLevel with the requested privilege level set.
+func (d *Driver) SendConfigs(
+	configs []string,
+	opts ...util.Option,
+) (*response.MultiResponse, error) {
+	op, err := NewOperation(opts...)
+	if err != nil {
+		return nil, err
 	}
 
-	if d.CurrentPriv != finalOpts.DesiredPrivilegeLevel {
-		err := d.AcquirePriv(finalOpts.DesiredPrivilegeLevel)
-		if err != nil {
-			return nil, err
-		}
+	targetPriv := op.PrivilegeLevel
+
+	if targetPriv == "" {
+		targetPriv = defaultConfigurationPrivLevel
 	}
 
-	m, err := d.Driver.FullSendCommands(c,
-		finalOpts.FailedWhenContains,
-		finalOpts.StripPrompt,
-		finalOpts.StopOnFailed,
-		finalOpts.Eager,
-		finalOpts.TimeoutOps,
-	)
-
-	if err != nil && !errors.Is(err, channel.ErrChannelTimeout) {
-		// if we encountered an error we *probably* cant abort anyway unless its a timeout error
-		// if its a timeout error we can at least try to keep going on, otherwise lets bail here
-		return m, err
+	err = d.AcquirePriv(targetPriv)
+	if err != nil {
+		return nil, err
 	}
 
-	if finalOpts.StopOnFailed && m.Failed != nil {
-		if f, ok := d.Augments["abortConfig"]; ok {
-			_, err = f(d)
-		}
-	}
-
-	return m, err
+	return d.Driver.SendCommands(configs, opts...)
 }
 
-// SendConfigsFromFile send configurations from a file to the device.
+// SendConfigsFromFile is a convenience wrapper that sends the lines of file f as config lines via
+// SendConfigs.
 func (d *Driver) SendConfigsFromFile(
 	f string,
-	o ...base.SendOption,
-) (*base.MultiResponse, error) {
+	opts ...util.Option,
+) (*response.MultiResponse, error) {
 	c, err := util.LoadFileLines(f)
 	if err != nil {
 		return nil, err
 	}
 
-	return d.SendConfigs(c, o...)
+	return d.SendConfigs(c, opts...)
 }

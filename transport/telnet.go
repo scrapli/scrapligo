@@ -6,38 +6,44 @@ import (
 	"time"
 
 	"github.com/scrapli/scrapligo/util"
-
-	"github.com/scrapli/scrapligo/logging"
 )
 
 const (
-	IAC  = byte(255)
-	DONT = byte(254)
-	DO   = byte(253)
-	WONT = byte(252)
-	WILL = byte(251)
-	SGA  = byte(3)
+	// TelnetTransport is the telnet transport for scrapligo.
+	TelnetTransport = "telnet"
+
+	iac  = byte(255)
+	dont = byte(254)
+	do   = byte(253)
+	wont = byte(252)
+	will = byte(251)
+	sga  = byte(3)
 )
 
-// Telnet the telnet transport option for scrapligo.
-type Telnet struct {
-	TelnetTransportArgs *TelnetTransportArgs
-	Conn                net.Conn
-	initialBuf          []byte
+// NewTelnetTransport returns an instance of Telnet transport.
+func NewTelnetTransport(a *TelnetArgs) (*Telnet, error) {
+	t := &Telnet{
+		TelnetArgs: a,
+	}
+
+	return t, nil
 }
 
-// TelnetTransportArgs struct representing attributes required for the Telnet transport.
-type TelnetTransportArgs struct {
+// Telnet is the telnet transport object.
+type Telnet struct {
+	TelnetArgs *TelnetArgs
+	c          net.Conn
+	initialBuf []byte
 }
 
 func (t *Telnet) handleControlCharResponse(ctrlBuf []byte, c byte) ([]byte, error) {
 	if len(ctrlBuf) == 0 { //nolint:nestif
-		if c != IAC {
+		if c != iac {
 			t.initialBuf = append(t.initialBuf, c)
 		} else {
 			ctrlBuf = append(ctrlBuf, c)
 		}
-	} else if len(ctrlBuf) == 1 && util.ByteInSlice(c, []byte{DO, DONT, WILL, WONT}) {
+	} else if len(ctrlBuf) == 1 && util.ByteIsAny(c, []byte{do, dont, will, wont}) {
 		ctrlBuf = append(ctrlBuf, c)
 	} else if len(ctrlBuf) == 2 { //nolint:gomnd
 		cmd := ctrlBuf[1:2][0]
@@ -45,14 +51,14 @@ func (t *Telnet) handleControlCharResponse(ctrlBuf []byte, c byte) ([]byte, erro
 
 		var writeErr error
 
-		if cmd == DO && c == SGA {
-			_, writeErr = t.Conn.Write([]byte{IAC, WILL, c})
-		} else if util.ByteInSlice(cmd, []byte{DO, DONT}) {
-			_, writeErr = t.Conn.Write([]byte{IAC, WONT, c})
-		} else if cmd == WILL {
-			_, writeErr = t.Conn.Write([]byte{IAC, DO, c})
-		} else if cmd == WONT {
-			_, writeErr = t.Conn.Write([]byte{IAC, DONT, c})
+		if cmd == do && c == sga {
+			_, writeErr = t.c.Write([]byte{iac, will, c})
+		} else if util.ByteIsAny(cmd, []byte{do, dont}) {
+			_, writeErr = t.c.Write([]byte{iac, wont, c})
+		} else if cmd == will {
+			_, writeErr = t.c.Write([]byte{iac, do, c})
+		} else if cmd == wont {
+			_, writeErr = t.c.Write([]byte{iac, dont, c})
 		}
 
 		if writeErr != nil {
@@ -63,31 +69,31 @@ func (t *Telnet) handleControlCharResponse(ctrlBuf []byte, c byte) ([]byte, erro
 	return ctrlBuf, nil
 }
 
-func (t *Telnet) handleControlChars(baseArgs *BaseTransportArgs) error {
-	d := baseArgs.TimeoutSocket / 4
+func (t *Telnet) handleControlChars(a *Args) error {
+	d := a.TimeoutSocket / 4
 
 	var handleErr error
 
 	ctrlBuf := make([]byte, 0)
 
 	for {
-		setDeadlineErr := t.Conn.SetReadDeadline(time.Now().Add(d))
+		setDeadlineErr := t.c.SetReadDeadline(time.Now().Add(d))
 		if setDeadlineErr != nil {
 			return setDeadlineErr
 		}
 
 		// speed up timeout after initial Read
-		d = baseArgs.TimeoutSocket / 10
+		d = a.TimeoutSocket / 10
 
 		charBuf := make([]byte, 1)
 
-		_, readErr := t.Conn.Read(charBuf)
-		if readErr != nil { //nolint:nestif
-			if opErr, ok := readErr.(*net.OpError); ok {
+		_, err := t.c.Read(charBuf)
+		if err != nil { //nolint:nestif
+			if opErr, ok := err.(*net.OpError); ok {
 				if opErr.Timeout() {
 					// timeout is good -- we want to be done reading control chars, so cancel the
 					// deadline by setting it to "zero"
-					cancelDeadlineErr := t.Conn.SetReadDeadline(time.Time{})
+					cancelDeadlineErr := t.c.SetReadDeadline(time.Time{})
 					if cancelDeadlineErr != nil {
 						return cancelDeadlineErr
 					}
@@ -98,7 +104,7 @@ func (t *Telnet) handleControlChars(baseArgs *BaseTransportArgs) error {
 				return opErr
 			}
 
-			return readErr
+			return err
 		}
 
 		ctrlBuf, handleErr = t.handleControlCharResponse(ctrlBuf, charBuf[0])
@@ -108,77 +114,52 @@ func (t *Telnet) handleControlChars(baseArgs *BaseTransportArgs) error {
 	}
 }
 
-func (t *Telnet) Open(baseArgs *BaseTransportArgs) error {
-	var dialErr error
+// Open opens the Telnet connection.
+func (t *Telnet) Open(a *Args) error {
+	var err error
 
-	t.Conn, dialErr = net.Dial(
-		"tcp",
-		fmt.Sprintf("%s:%d", baseArgs.Host, baseArgs.Port),
-	)
-	if dialErr != nil {
-		return dialErr
+	t.c, err = net.Dial(tcp, fmt.Sprintf("%s:%d", a.Host, a.Port))
+	if err != nil {
+		return err
 	}
 
-	logging.LogDebug(FormatLogMessage(baseArgs, "debug", "tcp socket to host opened"))
-
-	controlCharErr := t.handleControlChars(baseArgs)
-	if controlCharErr != nil {
-		return controlCharErr
+	err = t.handleControlChars(a)
+	if err != nil {
+		return err
 	}
-
-	logging.LogDebug(
-		FormatLogMessage(baseArgs, "debug", "telnet control characters exchanged"),
-	)
 
 	return nil
 }
 
-func (t *Telnet) OpenNetconf(baseArgs *BaseTransportArgs) error {
-	_ = baseArgs
-	return ErrUnsupportedOperation
-}
-
+// Close closes the Telnet connection.
 func (t *Telnet) Close() error {
-	err := t.Conn.Close()
-
-	t.Conn = nil
-
-	return err
+	return t.c.Close()
 }
 
+// IsAlive returns true if the connection (c) attribute of the Telnet object is not nil.
 func (t *Telnet) IsAlive() bool {
-	return t.Conn != nil
+	return t.c != nil
 }
 
-func (t *Telnet) Read(n int) *ReadResult {
+// Read reads n bytes from the transport.
+func (t *Telnet) Read(n int) ([]byte, error) {
 	if len(t.initialBuf) > 0 {
 		b := t.initialBuf
-		t.initialBuf = []byte{}
+		t.initialBuf = nil
 
-		return &ReadResult{
-			Result: b,
-			Error:  nil,
-		}
+		return b, nil
 	}
 
 	b := make([]byte, n)
-	_, err := t.Conn.Read(b)
 
-	if err != nil {
-		return &ReadResult{
-			Result: nil,
-			Error:  ErrTransportFailure,
-		}
-	}
+	_, err := t.c.Read(b)
 
-	return &ReadResult{
-		Result: b,
-		Error:  nil,
-	}
+	return b, err
 }
 
-func (t *Telnet) Write(channelInput []byte) error {
-	_, err := t.Conn.Write(channelInput)
+// Write writes bytes b to the transport.
+func (t *Telnet) Write(b []byte) error {
+	_, err := t.c.Write(b)
 
 	return err
 }

@@ -1,0 +1,12 @@
+C3560CX>enable
+C3560CX#
+C3560CX#show run int vlan1
+Building configuration...
+
+Current configuration : 38 bytes
+!
+interface Vlan1
+ no ip address
+end
+
+C3560CX#

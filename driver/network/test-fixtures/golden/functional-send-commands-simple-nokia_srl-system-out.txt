@@ -1,0 +1,146 @@
+
+
+================================================================================
+ethernet-1/1 is down, reason port-admin-disabled
+--------------------------------------------------------------------------------
+ethernet-1/2 is down, reason port-admin-disabled
+--------------------------------------------------------------------------------
+ethernet-1/3 is down, reason port-admin-disabled
+--------------------------------------------------------------------------------
+ethernet-1/4 is down, reason port-admin-disabled
+--------------------------------------------------------------------------------
+ethernet-1/5 is down, reason port-admin-disabled
+--------------------------------------------------------------------------------
+ethernet-1/6 is down, reason port-admin-disabled
+--------------------------------------------------------------------------------
+ethernet-1/7 is down, reason port-admin-disabled
+--------------------------------------------------------------------------------
+ethernet-1/8 is down, reason port-admin-disabled
+--------------------------------------------------------------------------------
+ethernet-1/9 is down, reason port-admin-disabled
+--------------------------------------------------------------------------------
+ethernet-1/10 is down, reason port-admin-disabled
+--------------------------------------------------------------------------------
+ethernet-1/11 is down, reason port-admin-disabled
+--------------------------------------------------------------------------------
+ethernet-1/12 is down, reason port-admin-disabled
+--------------------------------------------------------------------------------
+ethernet-1/13 is down, reason port-admin-disabled
+--------------------------------------------------------------------------------
+ethernet-1/14 is down, reason port-admin-disabled
+--------------------------------------------------------------------------------
+ethernet-1/15 is down, reason port-admin-disabled
+--------------------------------------------------------------------------------
+ethernet-1/16 is down, reason port-admin-disabled
+--------------------------------------------------------------------------------
+ethernet-1/17 is down, reason port-admin-disabled
+--------------------------------------------------------------------------------
+ethernet-1/18 is down, reason port-admin-disabled
+--------------------------------------------------------------------------------
+ethernet-1/19 is down, reason port-admin-disabled
+--------------------------------------------------------------------------------
+ethernet-1/20 is down, reason port-admin-disabled
+--------------------------------------------------------------------------------
+ethernet-1/21 is down, reason port-admin-disabled
+--------------------------------------------------------------------------------
+ethernet-1/22 is down, reason port-admin-disabled
+--------------------------------------------------------------------------------
+ethernet-1/23 is down, reason port-admin-disabled
+--------------------------------------------------------------------------------
+ethernet-1/24 is down, reason port-admin-disabled
+--------------------------------------------------------------------------------
+ethernet-1/25 is down, reason port-admin-disabled
+--------------------------------------------------------------------------------
+ethernet-1/26 is down, reason port-admin-disabled
+--------------------------------------------------------------------------------
+ethernet-1/27 is down, reason port-admin-disabled
+--------------------------------------------------------------------------------
+ethernet-1/28 is down, reason port-admin-disabled
+--------------------------------------------------------------------------------
+ethernet-1/29 is down, reason port-admin-disabled
+--------------------------------------------------------------------------------
+ethernet-1/30 is down, reason port-admin-disabled
+--------------------------------------------------------------------------------
+ethernet-1/31 is down, reason port-admin-disabled
+--------------------------------------------------------------------------------
+ethernet-1/32 is down, reason port-admin-disabled
+--------------------------------------------------------------------------------
+ethernet-1/33 is down, reason port-admin-disabled
+--------------------------------------------------------------------------------
+ethernet-1/34 is down, reason port-admin-disabled
+--------------------------------------------------------------------------------
+ethernet-1/35 is down, reason port-admin-disabled
+--------------------------------------------------------------------------------
+ethernet-1/36 is down, reason port-admin-disabled
+--------------------------------------------------------------------------------
+ethernet-1/37 is down, reason port-admin-disabled
+--------------------------------------------------------------------------------
+ethernet-1/38 is down, reason port-admin-disabled
+--------------------------------------------------------------------------------
+ethernet-1/39 is down, reason port-admin-disabled
+--------------------------------------------------------------------------------
+ethernet-1/40 is down, reason port-admin-disabled
+--------------------------------------------------------------------------------
+ethernet-1/41 is down, reason port-admin-disabled
+--------------------------------------------------------------------------------
+ethernet-1/42 is down, reason port-admin-disabled
+--------------------------------------------------------------------------------
+ethernet-1/43 is down, reason port-admin-disabled
+--------------------------------------------------------------------------------
+ethernet-1/44 is down, reason port-admin-disabled
+--------------------------------------------------------------------------------
+ethernet-1/45 is down, reason port-admin-disabled
+--------------------------------------------------------------------------------
+ethernet-1/46 is down, reason port-admin-disabled
+--------------------------------------------------------------------------------
+ethernet-1/47 is down, reason port-admin-disabled
+--------------------------------------------------------------------------------
+ethernet-1/48 is down, reason port-admin-disabled
+--------------------------------------------------------------------------------
+ethernet-1/49 is down, reason port-admin-disabled
+--------------------------------------------------------------------------------
+ethernet-1/50 is down, reason port-admin-disabled
+--------------------------------------------------------------------------------
+ethernet-1/51 is down, reason port-admin-disabled
+--------------------------------------------------------------------------------
+ethernet-1/52 is down, reason port-admin-disabled
+--------------------------------------------------------------------------------
+ethernet-1/53 is down, reason port-admin-disabled
+--------------------------------------------------------------------------------
+ethernet-1/54 is down, reason port-admin-disabled
+--------------------------------------------------------------------------------
+ethernet-1/55 is down, reason port-admin-disabled
+--------------------------------------------------------------------------------
+ethernet-1/56 is down, reason port-admin-disabled
+--------------------------------------------------------------------------------
+mgmt0 is up, speed 1G, type None
+  mgmt0.0 is up
+    Network-instance: mgmt
+    Encapsulation   : null
+    Type            : None
+    IPv4 addr    : 172.20.20.16/24 (dhcp, preferred)
+    IPv6 addr    : 2001:172:20:20::16/64 (dhcp, preferred)
+    IPv6 addr    : fe80::42:acff:fe14:1410/64 (link-layer, preferred)
+--------------------------------------------------------------------------------
+================================================================================
+Summary
+  0 loopback interfaces configured
+  0 ethernet interfaces are up, 56 are down
+  1 management interfaces are up, 0 are down
+  1 subinterfaces are up, 0 are down
+================================================================================
+  +--------------+----+-------------+--------------+-------------+-------------+
+  | Module Type  | ID | Admin State | Operational  |    Model    | Temperature |
+  |              |    |             |    State     |             |             |
+  +==============+====+=============+==============+=============+=============+
+  | control      | A  | N/A         | up           | imm48-25g-s | 50          |
+  |              |    |             |              | fp28+8-100g |             |
+  |              |    |             |              | -qsfp28     |             |
+  | linecard     | 1  | N/A         | empty        |             | 0           |
+  | fan-tray     | 1  | N/A         | empty        |             | 0           |
+  | fan-tray     | 2  | N/A         | empty        |             | 0           |
+  | fan-tray     | 3  | N/A         | empty        |             | 0           |
+  | fan-tray     | 4  | N/A         | empty        |             | 0           |
+  | power-supply | 1  | N/A         | empty        |             |             |
+  | power-supply | 2  | N/A         | empty        |             |             |
+  +--------------+----+-------------+--------------+-------------+-------------+

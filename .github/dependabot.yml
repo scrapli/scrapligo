@@ -3,8 +3,7 @@ updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "weekly"
-      day: "sunday"
+      interval: "monthly"
       timezone: "PST8PDT"
       time: "03:00"
-    target-branch: "develop"
+    target-branch: "main"

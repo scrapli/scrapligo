@@ -1,0 +1,9 @@
+
+
+enable
+
+
+
+
+show run int vlan1
+

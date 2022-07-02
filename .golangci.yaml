@@ -6,8 +6,6 @@ linters-settings:
   funlen:
     lines: 100
     statements: 50
-  gci:
-    local-prefixes: github.com/golangci/golangci-lint
   goconst:
     min-len: 2
     min-occurrences: 2
@@ -44,6 +42,9 @@ linters-settings:
           - (github.com/golangci/golangci-lint/pkg/logutils.Log).Fatalf
   lll:
     line-length: 100
+  stylecheck:
+    checks:
+      - "-ST1000"
   misspell:
     locale: US
   nolintlint:
@@ -51,11 +52,14 @@ linters-settings:
     allow-unused: false # report any unused nolint directives
     require-explanation: false # don't require an explanation for nolint directives
     require-specific: false # don't require nolint directives to be specific about which linter is being skipped
+  revive:
+    rules:
+      - name: exported
 linters:
-  # please, do not use `enable-all`: it's deprecated and will be removed soon.
-  # inverted configuration with `enable-all` and `disable` is not scalable during updates of golangci-lint
-  disable-all: true
   enable:
+    - nlreturn
+    - forbidigo
+    - gofumpt
     - bodyclose
     - deadcode
     - depguard
@@ -105,49 +109,30 @@ linters:
     - wsl
 
 issues:
-  # Excluding configuration per-path, per-linter, per-text and per-source
+  # https://github.com/golangci/golangci-lint/issues/2439#issuecomment-1002912465
+  exclude-use-default: false
   exclude-rules:
     - path: _test\.go
       linters:
         - gomnd
-    # ignoring complaint about junos/xr core drivers having dupl lines
-    - path: driver/core
-      text: "9-59 lines are duplicate"
-      linters:
         - dupl
-    # ignoring complaint about iosxe/nxos cfg platforms having dupl lines
-    - path: cfg/
-      text: "58-87 lines are duplicate"
+        - structcheck
+        - unused
+        - unparam
+    # ignoring long lines due to json/yaml tags in platform
+    - path: platform/definition.go
       linters:
-        - dupl
-    - path: cfg/
-      text: "67-99 lines are duplicate"
-      linters:
-        - dupl
-    # ignoring complaint about channel auth having dupl lines
-    - path: channel/
-      text: "31-135 lines are duplicate"
-      linters:
-        - dupl
-    - path: channel/
-      text: "137-241 lines are duplicate"
-      linters:
-        - dupl
-#    - text: "TODO/BUG/FIXME"
-#      linters:
-#        - godox
+        - lll
 
 run:
+  # running w/ 1.17 because we dont actually need/use 1.18 things and 1.18 breaks some linters.
+  go: '1.17'
   skip-dirs:
     - private
-    - test/testdata_etc
-    - internal/cache
-    - internal/renameio
-    - internal/robustio
 
 # golangci.com configuration
 # https://github.com/golangci/golangci/wiki/Configuration
 service:
-  golangci-lint-version: 1.45.x # use the fixed version to not introduce new linters unexpectedly
+  golangci-lint-version: 1.46.x # use the fixed version to not introduce new linters unexpectedly
   prepare:
     - echo "here I can run custom commands, but no preparation needed for this repo"

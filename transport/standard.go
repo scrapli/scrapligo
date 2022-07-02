@@ -1,153 +1,123 @@
 package transport
 
 import (
-	"encoding/base64"
 	"fmt"
 	"io"
-	"log"
-	"net"
 	"os"
 
-	"github.com/scrapli/scrapligo/logging"
+	"github.com/scrapli/scrapligo/util"
+
+	"golang.org/x/crypto/ssh/knownhosts"
 
 	"golang.org/x/crypto/ssh"
 )
 
-// Standard the "standard" (standard library) transport option for scrapligo.
+const (
+	// StandardTransport is the standard (crypto/ssh) transport for scrapligo.
+	StandardTransport = "standard"
+
+	termType = "xterm"
+)
+
+// NewStandardTransport returns an instance of Standard transport.
+func NewStandardTransport(s *SSHArgs) (*Standard, error) {
+	t := &Standard{
+		SSHArgs:      s,
+		client:       nil,
+		session:      nil,
+		writer:       nil,
+		reader:       nil,
+		ExtraCiphers: make([]string, 0),
+		ExtraKexs:    make([]string, 0),
+	}
+
+	return t, nil
+}
+
+// Standard is the standard (crypto/ssh) transport object.
 type Standard struct {
-	StandardTransportArgs *StandardTransportArgs
-	client                *ssh.Client
-	session               *ssh.Session
-	writer                io.WriteCloser
-	reader                io.Reader
+	SSHArgs      *SSHArgs
+	client       *ssh.Client
+	session      *ssh.Session
+	writer       io.WriteCloser
+	reader       io.Reader
+	ExtraCiphers []string
+	ExtraKexs    []string
 }
 
-// StandardTransportArgs struct representing attributes required for the Standard transport.
-type StandardTransportArgs struct {
-	AuthPassword      string
-	AuthPrivateKey    string
-	AuthStrictKey     bool
-	SSHConfigFile     string
-	SSHKnownHostsFile string
-}
-
-func keyString(k ssh.PublicKey) string {
-	return k.Type() + " " + base64.StdEncoding.EncodeToString(
-		k.Marshal(),
-	) // e.g. "ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTY...."
-}
-
-// https://stackoverflow.com/questions/44269142/ \
-// golang-ssh-getting-must-specify-hoskeycallback-error-despite-setting-it-to-n
-// basically need to parse ssh config like scrapli does... at some point.
-func trustedHostKeyCallback(trustedKey string) ssh.HostKeyCallback {
-	if trustedKey == "" {
-		return func(_ string, _ net.Addr, k ssh.PublicKey) error {
-			log.Printf(
-				"ssh key verification is *NOT* in effect: to fix, add this trustedKey: %q",
-				keyString(k),
-			)
-
-			return nil
-		}
-	}
-
-	return func(_ string, _ net.Addr, k ssh.PublicKey) error {
-		ks := keyString(k)
-		if trustedKey != ks {
-			return ErrKeyVerificationFailed
-		}
-
-		return nil
-	}
-}
-
-func (t *Standard) openSession(baseArgs *BaseTransportArgs, cfg *ssh.ClientConfig) error {
+func (t *Standard) openSession(a *Args, cfg *ssh.ClientConfig) error {
 	var err error
+
 	t.client, err = ssh.Dial(
-		"tcp",
-		fmt.Sprintf("%s:%d", baseArgs.Host, baseArgs.Port),
+		tcp,
+		fmt.Sprintf("%s:%d", a.Host, a.Port),
 		cfg,
 	)
-
 	if err != nil {
-		logging.LogError(
-			FormatLogMessage(
-				baseArgs,
-				"error",
-				fmt.Sprintf("error connecting to host: %v", err),
-			),
-		)
+		a.l.Criticalf("error creating crypto/ssh client, error: %s", err)
 
 		return err
 	}
 
 	t.session, err = t.client.NewSession()
 	if err != nil {
-		logging.LogError(
-			FormatLogMessage(
-				baseArgs,
-				"error",
-				fmt.Sprintf("error allocating session: %v", err),
-			),
-		)
+		a.l.Criticalf("error spawning crypto/ssh session, error: %s", err)
 
 		return err
 	}
 
 	t.writer, err = t.session.StdinPipe()
 	if err != nil {
-		logging.LogError(
-			FormatLogMessage(
-				baseArgs,
-				"error",
-				fmt.Sprintf("error allocating writer: %v", err),
-			),
-		)
+		a.l.Criticalf("error spawning crypto/ssh session stdin pipe, error: %s", err)
 
 		return err
 	}
 
 	t.reader, err = t.session.StdoutPipe()
 	if err != nil {
-		logging.LogError(
-			FormatLogMessage(
-				baseArgs,
-				"error",
-				fmt.Sprintf("error allocating reader: %v", err),
-			),
-		)
+		a.l.Criticalf("error spawning crypto/ssh session stdout pipe, error: %s", err)
+
+		return err
 	}
 
-	return err
+	return nil
 }
 
-func (t *Standard) openBase(baseArgs *BaseTransportArgs) error {
+func (t *Standard) openBase(a *Args) error {
 	/* #nosec G106 */
-	hostKeyCallback := ssh.InsecureIgnoreHostKey()
-	if t.StandardTransportArgs.AuthStrictKey {
-		// trustedKey will need to be gleaned from known hosts how scrapli does at some point
-		hostKeyCallback = trustedHostKeyCallback("")
-	}
+	keyCallback := ssh.InsecureIgnoreHostKey()
 
-	authMethods := make([]ssh.AuthMethod, 0)
+	if t.SSHArgs.StrictKey {
+		if t.SSHArgs.KnownHostsFile == "" {
+			a.l.Critical("strict host key checking requested, but no known hosts file provided")
 
-	if t.StandardTransportArgs.AuthPrivateKey != "" {
-		key, err := os.ReadFile(t.StandardTransportArgs.AuthPrivateKey)
+			return fmt.Errorf(
+				"%w: strict host key checking requested, but no known hosts file provided",
+				util.ErrBadOption,
+			)
+		}
+
+		knownHosts, err := knownhosts.New(t.SSHArgs.KnownHostsFile)
 		if err != nil {
 			return err
 		}
 
-		signer, err := ssh.ParsePrivateKey(key)
+		keyCallback = knownHosts
+	}
 
+	authMethods := make([]ssh.AuthMethod, 0)
+
+	if t.SSHArgs.PrivateKeyPath != "" {
+		k, err := os.ReadFile(t.SSHArgs.PrivateKeyPath)
 		if err != nil {
-			logging.LogError(
-				FormatLogMessage(
-					baseArgs,
-					"error",
-					fmt.Sprintf("unable to parse private key: %v", err),
-				),
-			)
+			a.l.Criticalf("error reading ssh key: %s", err)
+
+			return err
+		}
+
+		signer, err := ssh.ParsePrivateKey(k)
+		if err != nil {
+			a.l.Criticalf("error parsing ssh key: %s", err)
 
 			return err
 		}
@@ -155,13 +125,13 @@ func (t *Standard) openBase(baseArgs *BaseTransportArgs) error {
 		authMethods = append(authMethods, ssh.PublicKeys(signer))
 	}
 
-	if t.StandardTransportArgs.AuthPassword != "" {
-		authMethods = append(authMethods, ssh.Password(t.StandardTransportArgs.AuthPassword),
+	if a.Password != "" {
+		authMethods = append(authMethods, ssh.Password(a.Password),
 			ssh.KeyboardInteractive(
 				func(user, instruction string, questions []string, echos []bool) ([]string, error) {
 					answers := make([]string, len(questions))
 					for i := range answers {
-						answers[i] = t.StandardTransportArgs.AuthPassword
+						answers[i] = a.Password
 					}
 
 					return answers, nil
@@ -170,47 +140,50 @@ func (t *Standard) openBase(baseArgs *BaseTransportArgs) error {
 	}
 
 	cfg := &ssh.ClientConfig{
-		User:            baseArgs.AuthUsername,
+		User:            a.User,
 		Auth:            authMethods,
-		Timeout:         baseArgs.TimeoutSocket,
-		HostKeyCallback: hostKeyCallback,
+		Timeout:         a.TimeoutSocket,
+		HostKeyCallback: keyCallback,
 	}
 
-	err := t.openSession(baseArgs, cfg)
+	if len(t.ExtraCiphers) > 0 {
+		cfg.Config.Ciphers = append(cfg.Config.Ciphers, t.ExtraCiphers...)
+	}
 
-	return err
+	if len(t.ExtraKexs) > 0 {
+		cfg.Config.KeyExchanges = append(cfg.Config.KeyExchanges, t.ExtraKexs...)
+	}
+
+	return t.openSession(a, cfg)
 }
 
-func (t *Standard) Open(baseArgs *BaseTransportArgs) error {
-	err := t.openBase(baseArgs)
+func (t *Standard) open(a *Args) error {
+	err := t.openBase(a)
 	if err != nil {
 		return err
 	}
 
-	// not sure what to do about the tty speeds... figured lets just go fast?
-	modes := ssh.TerminalModes{
+	term := ssh.TerminalModes{
 		ssh.ECHO:          1,
 		ssh.TTY_OP_ISPEED: 115200,
 		ssh.TTY_OP_OSPEED: 115200,
 	}
 
 	err = t.session.RequestPty(
-		"xterm",
-		baseArgs.PtyHeight,
-		baseArgs.PtyWidth,
-		modes,
+		termType,
+		a.TermHeight,
+		a.TermWidth,
+		term,
 	)
 	if err != nil {
 		return err
 	}
 
-	err = t.session.Shell()
-
-	return err
+	return t.session.Shell()
 }
 
-func (t *Standard) OpenNetconf(baseArgs *BaseTransportArgs) error {
-	err := t.openBase(baseArgs)
+func (t *Standard) openNetconf(a *Args) error {
+	err := t.openBase(a)
 	if err != nil {
 		return err
 	}
@@ -220,6 +193,16 @@ func (t *Standard) OpenNetconf(baseArgs *BaseTransportArgs) error {
 	return err
 }
 
+// Open opens the Standard transport.
+func (t *Standard) Open(a *Args) error {
+	if t.SSHArgs.NetconfConnection {
+		return t.openNetconf(a)
+	}
+
+	return t.open(a)
+}
+
+// Close closes the Standard transport.
 func (t *Standard) Close() error {
 	err := t.session.Close()
 	t.session = nil
@@ -227,29 +210,23 @@ func (t *Standard) Close() error {
 	return err
 }
 
+// IsAlive returns true if the Standard transport session attribute is not nil.
 func (t *Standard) IsAlive() bool {
 	return t.session != nil
 }
 
-func (t *Standard) Read(n int) *ReadResult {
+// Read reads n bytes from the transport.
+func (t *Standard) Read(n int) ([]byte, error) {
 	b := make([]byte, n)
+
 	_, err := t.reader.Read(b)
 
-	if err != nil {
-		return &ReadResult{
-			Result: nil,
-			Error:  ErrTransportFailure,
-		}
-	}
-
-	return &ReadResult{
-		Result: b,
-		Error:  nil,
-	}
+	return b, err
 }
 
-func (t *Standard) Write(channelInput []byte) error {
-	_, err := t.writer.Write(channelInput)
+// Write writes bytes b to the transport.
+func (t *Standard) Write(b []byte) error {
+	_, err := t.writer.Write(b)
 
 	return err
 }

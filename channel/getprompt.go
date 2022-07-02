@@ -1,63 +1,46 @@
 package channel
 
 import (
+	"fmt"
 	"time"
 
-	"github.com/scrapli/scrapligo/logging"
+	"github.com/scrapli/scrapligo/util"
 )
 
-func (c *Channel) getPrompt() *channelResult {
-	err := c.SendReturn()
-	if err != nil {
-		return &channelResult{
-			error: err,
-		}
-	}
+// GetPrompt returns a byte slice containing the current "prompt" of the connected ssh/telnet
+// server.
+func (c *Channel) GetPrompt() ([]byte, error) {
+	c.l.Debug("channel GetPrompt requested")
 
-	var b []byte
-
-	for {
-		chunk, readErr := c.Read()
-		b = append(b, chunk...)
-
-		if readErr != nil {
-			return &channelResult{
-				error: readErr,
-			}
-		}
-
-		channelMatch := c.CommsPromptPattern.Match(b)
-		if channelMatch {
-			return &channelResult{
-				result: b,
-				error:  nil,
-			}
-		}
-	}
-}
-
-// GetPrompt fetch the current prompt.
-func (c *Channel) GetPrompt() (string, error) {
-	_c := make(chan *channelResult)
+	cr := make(chan *result)
 
 	go func() {
-		r := c.getPrompt()
-		_c <- r
-		close(_c)
-	}()
+		err := c.WriteReturn()
+		if err != nil {
+			cr <- &result{b: nil, err: err}
 
-	timer := time.NewTimer(c.DetermineOperationTimeout(c.TimeoutOps))
-
-	select {
-	case r := <-_c:
-		if r.error != nil {
-			return "", r.error
+			return
 		}
 
-		return string(r.result), nil
-	case <-timer.C:
-		logging.LogError(c.FormatLogMessage("error", "timed out sending getting prompt"))
+		var b []byte
 
-		return "", ErrChannelTimeout
+		b, err = c.ReadUntilPrompt()
+
+		cr <- &result{b: b, err: err}
+	}()
+
+	timer := time.NewTimer(c.TimeoutOps)
+
+	select {
+	case r := <-cr:
+		if r.err != nil {
+			return nil, r.err
+		}
+
+		return r.b, nil
+	case <-timer.C:
+		c.l.Critical("channel timeout fetching prompt")
+
+		return nil, fmt.Errorf("%w: channel timeout fetching prompt", util.ErrTimeoutError)
 	}
 }
