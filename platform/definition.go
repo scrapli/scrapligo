@@ -55,9 +55,13 @@ func loadPlatformDefinition(f string) (*Definition, error) {
 		}
 	}
 
+	return loadPlatformDefinitionFromBytes(b)
+}
+
+func loadPlatformDefinitionFromBytes(b []byte) (*Definition, error) {
 	pd := &Definition{}
 
-	err = yaml.Unmarshal(b, pd)
+	err := yaml.Unmarshal(b, pd)
 	if err != nil {
 		return nil, err
 	}
@@ -95,12 +99,27 @@ func setDriver(host string, p *Platform, opts ...util.Option) error {
 	return err
 }
 
-// NewPlatformVariant returns an instance of Platform from the platform definition file f. The
-// provided variant data is merged back into the "base" platform definition. The host and
+// NewPlatformVariant returns an instance of Platform from the platform definition f where f may be
+// a string representing a filepath or URL, or a byte slice of an already loaded YAML definition.
+// The provided variant data is merged back into the "base" platform definition. The host and
 // any provided options are stored and will be applied when fetching the generic or network driver
 // via the GetGenericDriver or GetNetworkDriver methods.
-func NewPlatformVariant(f, variant, host string, opts ...util.Option) (*Platform, error) {
-	pd, err := loadPlatformDefinition(f)
+func NewPlatformVariant(
+	f interface{},
+	variant, host string,
+	opts ...util.Option,
+) (*Platform, error) {
+	var pd *Definition
+
+	var err error
+
+	switch t := f.(type) {
+	case string:
+		pd, err = loadPlatformDefinition(t)
+	case []byte:
+		pd, err = loadPlatformDefinitionFromBytes(t)
+	}
+
 	if err != nil {
 		return nil, err
 	}
@@ -122,11 +141,22 @@ func NewPlatformVariant(f, variant, host string, opts ...util.Option) (*Platform
 	return p, nil
 }
 
-// NewPlatform returns an instance of Platform from the platform definition file f. The host and
-// any provided options are stored and will be applied when fetching the generic or network driver
-// via the GetGenericDriver or GetNetworkDriver methods.
-func NewPlatform(f, host string, opts ...util.Option) (*Platform, error) {
-	pd, err := loadPlatformDefinition(f)
+// NewPlatform returns an instance of Platform from the platform definition f where f may be
+// a string representing a filepath or URL, or a byte slice of an already loaded YAML definition.
+// The host and any provided options are stored and will be applied when fetching the generic or
+// network driver via the GetGenericDriver or GetNetworkDriver methods.
+func NewPlatform(f interface{}, host string, opts ...util.Option) (*Platform, error) {
+	var pd *Definition
+
+	var err error
+
+	switch t := f.(type) {
+	case string:
+		pd, err = loadPlatformDefinition(t)
+	case []byte:
+		pd, err = loadPlatformDefinitionFromBytes(t)
+	}
+
 	if err != nil {
 		return nil, err
 	}
