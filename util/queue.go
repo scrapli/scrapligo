@@ -7,15 +7,20 @@ import (
 
 // Queue is a simple queue structure to store and queue/requeue/dequeue bytes.
 type Queue struct {
-	queue [][]byte
-	depth int
-	lock  *sync.RWMutex
+	queue     [][]byte
+	depth     int
+	depthChan chan int
+	lock      *sync.RWMutex
 }
 
 // NewQueue returns a prepared Queue object.
 func NewQueue() *Queue {
+	depthChan := make(chan int, 1)
+	depthChan <- 0
+
 	return &Queue{
-		lock: &sync.RWMutex{},
+		depthChan: depthChan,
+		lock:      &sync.RWMutex{},
 	}
 }
 
@@ -28,6 +33,9 @@ func (q *Queue) Requeue(b []byte) {
 	q.queue = append(n, q.queue...)
 
 	q.depth++
+
+	<-q.depthChan
+	q.depthChan <- q.depth
 }
 
 // Enqueue queues some bytes at the end of the queue.
@@ -37,13 +45,16 @@ func (q *Queue) Enqueue(b []byte) {
 
 	q.queue = append(q.queue, b)
 	q.depth++
+
+	<-q.depthChan
+	q.depthChan <- q.depth
 }
 
 // Dequeue returns the first bytes in the queue.
 func (q *Queue) Dequeue() []byte {
 	// check the depth before acquiring a full read/write lock which can cause deadlocks with tons
 	// of concurrent access to enqueue/deque.
-	if q.GetDepth() == 0 {
+	if q.getDepth() == 0 {
 		return nil
 	}
 
@@ -55,12 +66,15 @@ func (q *Queue) Dequeue() []byte {
 	q.queue = q.queue[1:]
 	q.depth--
 
+	<-q.depthChan
+	q.depthChan <- q.depth
+
 	return b
 }
 
 // DequeueAll returns all bytes in the queue.
 func (q *Queue) DequeueAll() []byte {
-	if q.GetDepth() == 0 {
+	if q.getDepth() == 0 {
 		return nil
 	}
 
@@ -73,6 +87,9 @@ func (q *Queue) DequeueAll() []byte {
 
 	q.depth = 0
 
+	<-q.depthChan
+	q.depthChan <- q.depth
+
 	return bytes.Join(b, []byte{})
 }
 
@@ -82,4 +99,11 @@ func (q *Queue) GetDepth() int {
 	defer q.lock.RUnlock()
 
 	return q.depth
+}
+
+func (q *Queue) getDepth() int {
+	d := <-q.depthChan
+	q.depthChan <- d
+
+	return d
 }

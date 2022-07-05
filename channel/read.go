@@ -101,7 +101,13 @@ func (c *Channel) ReadUntilPrompt() ([]byte, error) {
 		default:
 		}
 
-		rb = append(rb, c.Q.Dequeue()...)
+		nb := c.Q.Dequeue()
+
+		if nb == nil {
+			continue
+		}
+
+		rb = append(rb, nb...)
 
 		if c.PromptPattern.Match(rb) {
 			c.l.Debugf("channel read %#v", string(rb))
@@ -123,7 +129,13 @@ func (c *Channel) ReadUntilAnyPrompt(prompts []*regexp.Regexp) ([]byte, error) {
 		default:
 		}
 
-		rb = append(rb, c.Q.Dequeue()...)
+		nb := c.Q.Dequeue()
+
+		if nb == nil {
+			continue
+		}
+
+		rb = append(rb, nb...)
 
 		for _, p := range prompts {
 			if p.Match(rb) {
@@ -147,7 +159,13 @@ func (c *Channel) ReadUntilExplicit(b []byte) ([]byte, error) {
 		default:
 		}
 
-		rb = append(rb, c.Q.Dequeue()...)
+		nb := c.Q.Dequeue()
+
+		if nb == nil {
+			continue
+		}
+
+		rb = append(rb, nb...)
 
 		if bytes.Contains(rb, b) {
 			c.l.Debugf("channel read %#v", string(rb))
