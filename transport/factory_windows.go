@@ -1,5 +1,5 @@
-//go:build !windows
-// +build !windows
+//go:build windows
+// +build windows
 
 package transport
 
@@ -13,12 +13,12 @@ import (
 
 // GetTransportNames is returns a slice of available transport type names.
 func GetTransportNames() []string {
-	return []string{SystemTransport, StandardTransport, TelnetTransport}
+	return []string{StandardTransport, TelnetTransport}
 }
 
 // GetNetconfTransportNames returns a slice of available NETCONF transport type names.
 func GetNetconfTransportNames() []string {
-	return []string{SystemTransport, StandardTransport}
+	return []string{StandardTransport}
 }
 
 // NewTransport returns an instance of Transport with the requested transport implementation (as
@@ -41,7 +41,7 @@ func NewTransport(
 	}
 
 	switch transportType {
-	case SystemTransport, StandardTransport:
+	case StandardTransport:
 		var sshArgs *SSHArgs
 
 		sshArgs, err = NewSSHArgs(options...)
@@ -50,8 +50,6 @@ func NewTransport(
 		}
 
 		switch transportType {
-		case SystemTransport:
-			i, err = NewSystemTransport(sshArgs)
 		case StandardTransport:
 			i, err = NewStandardTransport(sshArgs)
 		}

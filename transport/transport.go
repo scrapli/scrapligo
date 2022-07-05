@@ -23,16 +23,6 @@ const (
 	tcp                         = "tcp"
 )
 
-// GetTransportNames is returns a slice of available transport type names.
-func GetTransportNames() []string {
-	return []string{SystemTransport, StandardTransport, TelnetTransport}
-}
-
-// GetNetconfTransportNames returns a slice of available NETCONF transport type names.
-func GetNetconfTransportNames() []string {
-	return []string{SystemTransport, StandardTransport}
-}
-
 // NewArgs returns an instance of Args with the logging instance, host, and any provided args
 // set. Users should *generally* not need to call this function as this is called during Transport
 // creation (which is called by the Driver creation).
