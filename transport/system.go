@@ -197,3 +197,11 @@ func (t *System) Write(b []byte) error {
 
 	return err
 }
+
+func (t *System) inChannelAuthType() string {
+	return InChannelAuthSSH
+}
+
+func (t *System) getSSHArgs() *SSHArgs {
+	return t.SSHArgs
+}
