@@ -124,18 +124,23 @@ func (c *Channel) Open() error {
 	if !c.AuthBypass {
 		var b []byte
 
-		switch tt := c.t.Impl.(type) {
-		case *transport.System:
-			c.l.Debug("transport type is 'system', begin in channel ssh authentication")
+		authData := c.t.InChannelAuthData()
 
-			b, err = c.AuthenticateSSH([]byte(c.t.Args.Password), []byte(tt.SSHArgs.PrivateKeyPassPhrase))
+		switch authData.Type {
+		case transport.InChannelAuthSSH:
+			c.l.Debug("transport requests in channel ssh auth, starting...")
+
+			b, err = c.AuthenticateSSH(
+				[]byte(authData.Password),
+				[]byte(authData.PrivateKeyPassPhrase),
+			)
 			if err != nil {
 				return err
 			}
-		case *transport.Telnet:
-			c.l.Debug("transport type is 'telnet', begin in channel telnet authentication")
+		case transport.InChannelAuthTelnet:
+			c.l.Debug("transport requests in channel telnet auth, starting...")
 
-			b, err = c.AuthenticateTelnet([]byte(c.t.Args.User), []byte(c.t.Args.Password))
+			b, err = c.AuthenticateTelnet([]byte(authData.User), []byte(authData.Password))
 			if err != nil {
 				return err
 			}

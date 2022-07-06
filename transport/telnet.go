@@ -163,3 +163,7 @@ func (t *Telnet) Write(b []byte) error {
 
 	return err
 }
+
+func (t *Telnet) inChannelAuthType() string {
+	return InChannelAuthTelnet
+}
