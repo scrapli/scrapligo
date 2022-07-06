@@ -8,7 +8,7 @@
 
 **Source Code**: <a href="https://github.com/scrapli/scrapligo" target="_blank">https://github.com/scrapli/scrapligo</a>
 
-**Examples**: <a href="https://github.com/scrapli/scrapligo/tree/master/examples" target="_blank">https://github.com/scrapli/scrapligo/tree/master/examples</a>
+**Examples**: <a href="https://github.com/scrapli/scrapligo/tree/main/examples" target="_blank">https://github.com/scrapli/scrapligo/tree/main/examples</a>
 
 **Go Docs**: <a href="https://pkg.go.dev/github.com/scrapli/scrapligo" target="_blank">https://pkg.go.dev/github.com/scrapli/scrapligo</a>
 
