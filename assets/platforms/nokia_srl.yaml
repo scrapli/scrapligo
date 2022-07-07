@@ -1,4 +1,5 @@
 ---
+platform-type: 'nokia_srl'
 default:
   driver-type: 'network'
   privilege-levels:
