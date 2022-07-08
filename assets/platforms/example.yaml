@@ -78,3 +78,9 @@ default:
     - operation: 'channel.write'
       input: 'exit'
     - operation: 'channel.return'
+
+  # options is a list of options that contain a option name and a value, see platform/options.go
+  # for the available options
+  options:
+    - option: port
+      value: 2022
