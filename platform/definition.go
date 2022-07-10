@@ -162,6 +162,7 @@ func NewPlatform(f interface{}, host string, opts ...util.Option) (*Platform, er
 	}
 
 	p := pd.Default
+	p.platformType = pd.PlatformType
 
 	err = setDriver(host, p, opts...)
 	if err != nil {
@@ -173,15 +174,18 @@ func NewPlatform(f interface{}, host string, opts ...util.Option) (*Platform, er
 
 // Definition is a struct representing a JSON or YAML platform definition file.
 type Definition struct {
-	Default  *Platform            `json:"default"  yaml:"default"`
-	Variants map[string]*Platform `json:"variants" yaml:"variants"`
+	PlatformType string               `json:"platform-type" yaml:"platform-type"`
+	Default      *Platform            `json:"default"       yaml:"default"`
+	Variants     map[string]*Platform `json:"variants"      yaml:"variants"`
 }
 
 // Platform is a struct that contains JSON or YAML data that represent the attributes required to
 // create a generic or network driver to connect to a given device type.
 type Platform struct {
+	platformType string
+
 	// DriverType generic||network
-	DriverType string `yaml:"driver-type"`
+	DriverType string `json:"driver-type" yaml:"driver-type"`
 
 	FailedWhenContains []string       `json:"failed-when-contains" yaml:"failed-when-contains"`
 	OnOpen             onXDefinitions `json:"on-open"              yaml:"on-open"`
@@ -297,4 +301,10 @@ func (p *Platform) AsOptions() []util.Option {
 	opts = append(opts, p.Options.asOptions()...)
 
 	return opts
+}
+
+// GetPlatformType returns the string name of the platform definition/type, i.e. "cisco_iosxe" or
+// "nokia_srl".
+func (p *Platform) GetPlatformType() string {
+	return p.platformType
 }

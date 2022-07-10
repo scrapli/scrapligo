@@ -1,4 +1,5 @@
 ---
+platform-type: 'paloalto_panos'
 default:
   driver-type: 'network'
   privilege-levels:

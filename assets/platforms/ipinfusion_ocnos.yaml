@@ -1,4 +1,5 @@
 ---
+platform-type: 'ipinfusion_ocnos'
 default:
   driver-type: 'network'
   privilege-levels:

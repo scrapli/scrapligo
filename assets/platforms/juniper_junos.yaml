@@ -1,4 +1,5 @@
 ---
+platform-type: 'juniper_junos'
 default:
   driver-type: 'network'
   privilege-levels:

@@ -1,4 +1,5 @@
 ---
+platform-type: 'cisco_iosxr'
 default:
   driver-type: 'network'
   privilege-levels:

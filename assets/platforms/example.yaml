@@ -1,4 +1,7 @@
 ---
+# platform-type is the "name" or "type" of the platform -- it should match the name of the yaml file
+# if it is an embedded asset, it should be of the format vendor_os, i.e. cisco_iosxe, or nokia_srl.
+platform-type: 'scrapligo_example'
 default:
   # driver-type can be either "generic" or "network" for the corresponding scrapli driver base class
   driver-type: 'network'
@@ -75,3 +78,9 @@ default:
     - operation: 'channel.write'
       input: 'exit'
     - operation: 'channel.return'
+
+  # options is a list of options that contain a option name and a value, see platform/options.go
+  # for the available options
+  options:
+    - option: port
+      value: 2022
