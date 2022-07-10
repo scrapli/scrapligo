@@ -4,7 +4,7 @@ default:
   privilege-levels:
     exec:
       name: 'exec'
-      pattern: '(?im)^({\w+:\d}\n){0,1}[\w\-@()/:]{1,63}>\s?$'
+      pattern: '(?im)^({\w+:\d}\n){0,1}[\w\-@()/:\.]{1,63}>\s?$'
       previous-priv:
       deescalate:
       escalate:
@@ -12,7 +12,7 @@ default:
       escalate-prompt:
     configuration:
       name: 'configuration'
-      pattern: '(?im)^({\w+:\d}\[edit\]\n){0,1}[\w\-@()/:]{1,63}#\s?$'
+      pattern: '(?im)^({\w+:\d}\[edit\]\n){0,1}[\w\-@()/:\.]{1,63}#\s?$'
       previous-priv: 'exec'
       deescalate: 'exit configuration-mode'
       escalate: 'configure'
@@ -20,7 +20,7 @@ default:
       escalate-prompt:
     configuration-exclusive:
       name: 'configuration-exclusive'
-      pattern: '(?im)^({\w+:\d}\[edit\]\n){0,1}[\w\-@()/:]{1,63}#\s?$'
+      pattern: '(?im)^({\w+:\d}\[edit\]\n){0,1}[\w\-@()/:\.]{1,63}#\s?$'
       previous-priv: 'exec'
       deescalate: 'exit configuration-mode'
       escalate: 'configure exclusive'
@@ -28,7 +28,7 @@ default:
       escalate-prompt:
     configuration-private:
       name: 'configuration-private'
-      pattern: '(?im)^({\w+:\d}\[edit\]\n){0,1}[\w\-@()/:]{1,63}#\s?$'
+      pattern: '(?im)^({\w+:\d}\[edit\]\n){0,1}[\w\-@()/:\.]{1,63}#\s?$'
       previous-priv: 'exec'
       deescalate: 'exit configuration-mode'
       escalate: 'configure private'
