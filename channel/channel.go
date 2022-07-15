@@ -161,9 +161,23 @@ func (c *Channel) Open() error {
 
 // Close signals to stop the channel read loop and closes the underlying Transport object.
 func (c *Channel) Close() error {
-	c.done <- true
+	ch := make(chan struct{})
 
-	return c.t.Close(false)
+	go func() {
+		c.done <- true
+
+		ch <- struct{}{}
+	}()
+
+	select {
+	case <-ch:
+		return c.t.Close(false)
+	case <-time.After(2 * (c.ReadDelay * c.ReadDelay)): // nolint: gomnd
+		// channel is stuck in a blocking read, force close transport to finish closing connection,
+		// so give it 2*(c.ReadDelay squared) to "nicely" exit -- with defaults this ends up being
+		// 50ms.
+		return c.t.Close(true)
+	}
 }
 
 type result struct {
