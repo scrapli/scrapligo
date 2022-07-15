@@ -2,6 +2,7 @@ package logging
 
 import (
 	"fmt"
+	"sync"
 
 	"github.com/scrapli/scrapligo/util"
 )
@@ -42,9 +43,21 @@ type Instance struct {
 
 // Emit "emits" a logging message m to all the loggers in the Instance.
 func (i *Instance) Emit(m interface{}) {
+	wg := sync.WaitGroup{}
+
 	for _, f := range i.Loggers {
-		f(m)
+		wg.Add(1)
+
+		lf := f
+
+		go func() {
+			lf(m)
+
+			wg.Done()
+		}()
 	}
+
+	wg.Wait()
 }
 
 func (i *Instance) shouldLog(l string) bool {
