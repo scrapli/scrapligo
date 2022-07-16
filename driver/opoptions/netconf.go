@@ -34,3 +34,18 @@ func WithDefaultType(s string) util.Option {
 		return util.ErrIgnoredOption
 	}
 }
+
+// WithFilter allows for setting the filter for NETCONF operations.
+func WithFilter(s string) util.Option {
+	return func(o interface{}) error {
+		c, ok := o.(*netconf.OperationOptions)
+
+		if ok {
+			c.Filter = s
+
+			return nil
+		}
+
+		return util.ErrIgnoredOption
+	}
+}
