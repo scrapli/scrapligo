@@ -18,9 +18,9 @@ type OperationOptions struct {
 
 // NewOperation returns a new OperationOptions object with the defaults set and any provided options
 // applied.
-func NewOperation(options ...util.Option) (*OperationOptions, error) {
+func (d *Driver) NewOperation(options ...util.Option) (*OperationOptions, error) {
 	o := &OperationOptions{
-		FailedWhenContains: []string{},
+		FailedWhenContains: d.FailedWhenContains,
 		StopOnFailed:       defaultStopOnFailed,
 	}
 
