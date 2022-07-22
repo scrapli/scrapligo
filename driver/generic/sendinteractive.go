@@ -29,6 +29,10 @@ func (d *Driver) SendInteractive(
 		return nil, err
 	}
 
+	if len(op.FailedWhenContains) == 0 {
+		op.FailedWhenContains = d.FailedWhenContains
+	}
+
 	r := response.NewResponse(
 		joinInputEvents(events),
 		d.Transport.GetHost(),

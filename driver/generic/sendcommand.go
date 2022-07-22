@@ -12,6 +12,10 @@ func (d *Driver) sendCommand(
 ) (*response.Response, error) {
 	d.Logger.Infof("SendCommand requested, sending '%s'", command)
 
+	if len(driverOpts.FailedWhenContains) == 0 {
+		driverOpts.FailedWhenContains = d.FailedWhenContains
+	}
+
 	r := response.NewResponse(
 		command,
 		d.Transport.GetHost(),
