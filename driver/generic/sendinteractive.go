@@ -24,7 +24,7 @@ func (d *Driver) SendInteractive(
 	events []*channel.SendInteractiveEvent,
 	opts ...util.Option,
 ) (*response.Response, error) {
-	op, err := NewOperation(opts...)
+	op, err := d.NewOperation(opts...)
 	if err != nil {
 		return nil, err
 	}
