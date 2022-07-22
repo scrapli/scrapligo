@@ -31,7 +31,7 @@ func (d *Driver) sendCommand(
 
 // SendCommand sends the input string to the device and returns a response.Response object.
 func (d *Driver) SendCommand(command string, opts ...util.Option) (*response.Response, error) {
-	op, err := NewOperation(opts...)
+	op, err := d.NewOperation(opts...)
 	if err != nil {
 		return nil, err
 	}

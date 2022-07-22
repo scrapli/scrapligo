@@ -12,7 +12,7 @@ func (d *Driver) SendCommands(
 ) (*response.MultiResponse, error) {
 	d.Logger.Infof("SendCommands requested, sending '%s'", commands)
 
-	op, err := NewOperation(opts...)
+	op, err := d.NewOperation(opts...)
 	if err != nil {
 		return nil, err
 	}
