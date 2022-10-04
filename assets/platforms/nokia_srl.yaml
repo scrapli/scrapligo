@@ -24,6 +24,7 @@ default:
   default-desired-privilege-level: "exec"
   failed-when-contains:
     - "Error:"
+    - "error:" # wildcard catch for errors like `Validation error:`, `Parsing error:`
   textfsm-platform: "" # ignored in go because no ntc-templates
   network-on-open:
     - operation: "acquire-priv" # targets default desired priv by default
