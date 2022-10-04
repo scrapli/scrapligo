@@ -35,6 +35,7 @@ func (d *Driver) SendConfig(config string, opts ...util.Option) (*response.Respo
 	r.EndTime = time.Now()
 	r.ElapsedTime = r.EndTime.Sub(r.StartTime).Seconds()
 	r.Result = strings.Join(rOutputs, "\n")
+	r.Failed = m.Failed
 
 	return r, nil
 }
