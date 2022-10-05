@@ -55,7 +55,7 @@ jobs:
       - name: pull srlinux image
         run: docker pull ghcr.io/nokia/srlinux:21.11.3
       - name: install clab
-        run: bash -c "$(curl -sL https://get.containerlab.dev)" -- -v 0.32.2
+        run: bash -c "$(curl -sL https://get.containerlab.dev)" -- -v 0.32.1
       - name: start clab ci topo
         run: make deploy-clab-ci
       - name: tests
