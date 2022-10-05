@@ -61,7 +61,6 @@ linters:
     - forbidigo
     - gofumpt
     - bodyclose
-    - deadcode
     - depguard
     - dogsled
     - dupl
@@ -89,13 +88,11 @@ linters:
     - rowserrcheck
     - exportloopref
     - staticcheck
-    - structcheck
     - stylecheck
     - typecheck
     - unconvert
     - unparam
     - unused
-    - varcheck
     - whitespace
     - asciicheck
     - gochecknoglobals
@@ -133,6 +130,6 @@ run:
 # golangci.com configuration
 # https://github.com/golangci/golangci/wiki/Configuration
 service:
-  golangci-lint-version: 1.46.x # use the fixed version to not introduce new linters unexpectedly
+  golangci-lint-version: 1.49.x # use the fixed version to not introduce new linters unexpectedly
   prepare:
     - echo "here I can run custom commands, but no preparation needed for this repo"

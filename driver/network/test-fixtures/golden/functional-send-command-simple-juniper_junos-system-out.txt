@@ -1,4 +1,4 @@
-## Last commit: 2022-07-02 18:36:25 UTC by boxen
+## Last commit: 2022-10-05 03:54:13 UTC by admin
 version 17.3R2.10;
 system {
     host-name vr-vqfx;
@@ -10,7 +10,7 @@ system {
             uid 2001;
             class super-user;
             authentication {
-                encrypted-password "$6$TregNTlP$1KCLfHR7suzNfRhwa/8yrcRpVbBPuu9dtMseLfz/Ju5Q.e/MsA4RdQtUhnQxWS1u6SuUwV/Ss.4Lu89ddCND1."; ## SECRET-DATA
+                encrypted-password "$6$jcDlkYzC$KwQW/6nkLWAwLT.ssc2xhbS1PoLI9gGkxEa82GZJ4V0/CPn6SwRAbTNerKbNihd7whNmNJwDpA.taHpmJ3WCN/"; ## SECRET-DATA
             }
         }
         user boxen {
