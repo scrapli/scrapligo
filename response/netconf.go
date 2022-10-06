@@ -114,7 +114,7 @@ func (r *NetconfResponse) record1dot0() {
 	// trim space before trimming suffix because we usually have a trailing newline!
 	b = bytes.TrimSuffix(bytes.TrimSpace(b), []byte(v1Dot0Delim))
 
-	r.Result = string(b)
+	r.Result = string(bytes.TrimSpace(b))
 }
 
 func (r *NetconfResponse) validateChunk(i int, b []byte) {
