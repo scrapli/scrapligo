@@ -6,6 +6,8 @@ import (
 	"os/exec"
 
 	"github.com/creack/pty"
+	"github.com/scrapli/scrapligo/util"
+	"golang.org/x/crypto/ssh"
 )
 
 const (
@@ -97,6 +99,14 @@ func (t *System) buildOpenArgs(a *Args) {
 		)
 	}
 
+	if t.SSHArgs.PrivateKeyPath != "" {
+		t.OpenArgs = append(
+			t.OpenArgs,
+			"-i",
+			t.SSHArgs.PrivateKeyPath,
+		)
+	}
+
 	if len(t.ExtraArgs) > 0 {
 		t.OpenArgs = append(
 			t.OpenArgs,
@@ -158,6 +168,29 @@ func (t *System) openNetconf(a *Args) error {
 
 // Open opens the System transport.
 func (t *System) Open(a *Args) error {
+	// check that the  private key exists, is readable and is a ssh private key
+	if t.SSHArgs.PrivateKeyPath != "" {
+		if t.SSHArgs.PrivateKeyPassPhrase != "" {
+			a.l.Critical("password protected key with system transport is not supported")
+
+			return util.ErrBadOption
+		}
+
+		k, err := os.ReadFile(t.SSHArgs.PrivateKeyPath)
+		if err != nil {
+			a.l.Criticalf("error reading ssh key: %s", err)
+
+			return err
+		}
+
+		_, err = ssh.ParsePrivateKey(k)
+		if err != nil {
+			a.l.Criticalf("error parsing ssh key: %s", err)
+
+			return err
+		}
+	}
+
 	if t.SSHArgs.NetconfConnection {
 		return t.openNetconf(a)
 	}
