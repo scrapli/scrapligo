@@ -111,7 +111,8 @@ func (r *NetconfResponse) record1dot0() {
 	b := r.RawResult
 
 	b = bytes.TrimPrefix(b, []byte(xmlHeader))
-	b = bytes.TrimSuffix(b, []byte(v1Dot0Delim))
+	// trim space before trimming suffix because we usually have a trailing newline!
+	b = bytes.TrimSuffix(bytes.TrimSpace(b), []byte(v1Dot0Delim))
 
 	r.Result = string(bytes.TrimSpace(b))
 }

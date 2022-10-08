@@ -16,7 +16,7 @@ func ResolveAtFileOrURL(path string) ([]byte, error) {
 
 	switch {
 	case strings.HasPrefix(path, "http://") || strings.HasPrefix(path, "https://"):
-		resp, err := http.Get(path) // nolint:gosec,noctx
+		resp, err := http.Get(path) //nolint:gosec,noctx
 		if err != nil {
 			return nil, fmt.Errorf(
 				"%w: failed downloading file at path '%s', error: %s",
