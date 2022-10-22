@@ -204,10 +204,25 @@ func (t *Standard) Open(a *Args) error {
 
 // Close closes the Standard transport.
 func (t *Standard) Close() error {
-	err := t.session.Close()
-	t.session = nil
+	if t.session != nil {
+		err := t.session.Close()
+		if err != nil {
+			return err
+		}
 
-	return err
+		t.session = nil
+	}
+
+	if t.client != nil {
+		err := t.client.Close()
+		if err != nil {
+			return err
+		}
+
+		t.client = nil
+	}
+
+	return nil
 }
 
 // IsAlive returns true if the Standard transport session attribute is not nil.
