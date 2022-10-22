@@ -204,16 +204,23 @@ func (t *Standard) Open(a *Args) error {
 
 // Close closes the Standard transport.
 func (t *Standard) Close() error {
-	if err := t.session.Close(); err != nil {
-		return err
+	if t.session != nil {
+		err := t.session.Close()
+		if err != nil {
+			return err
+		}
+
+		t.session = nil
 	}
 
-	if err := t.client.Close(); err != nil {
-		return err
-	}
+	if t.client != nil {
+		err := t.client.Close()
+		if err != nil {
+			return err
+		}
 
-	t.session = nil
-	t.client = nil
+		t.client = nil
+	}
 
 	return nil
 }
