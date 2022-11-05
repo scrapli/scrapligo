@@ -240,6 +240,18 @@ func prepareFunctionalDriver(
 		options.WithAuthPassword(pass),
 		options.WithTransportType(transportName),
 		options.WithAuthNoStrictKey(),
+		// obviously only relevant for system transport, but will be ignored for others
+		// also should only be necessary for iosxe.
+		options.WithSystemTransportOpenArgs(
+			[]string{
+				"-o",
+				"KexAlgorithms=+diffie-hellman-group-exchange-sha1,diffie-hellman-group14-sha1",
+				"-o",
+				"PubKeyAcceptedAlgorithms=+ssh-rsa",
+				"-o",
+				"HostKeyAlgorithms=+ssh-dss,ssh-rsa,rsa-sha2-512,rsa-sha2-256,ssh-rsa,ssh-ed25519",
+			},
+		),
 	)
 	if err != nil {
 		t.Fatalf("%s: encountered error creating netconf driver, error: %s", testName, err)

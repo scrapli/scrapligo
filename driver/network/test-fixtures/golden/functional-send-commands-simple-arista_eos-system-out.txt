@@ -25,7 +25,6 @@ management api netconf
    transport ssh default
 !
 interface Ethernet1
-   description tacocat
 !
 interface Ethernet2
 !
