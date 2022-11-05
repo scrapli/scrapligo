@@ -81,24 +81,34 @@ func testGetConfigFunctional(
 
 		d := prepareFunctionalDriver(t, testName, platformName, transportName)
 
+		defer func() {
+			err := d.Close()
+			if err != nil {
+				t.Fatalf("%s: failed closing connection",
+					testName)
+			}
+		}()
+
 		r, err := d.GetConfig("running")
 		if err != nil {
-			t.Fatalf(
+			t.Logf(
 				"%s: encountered error running netconf Driver getConfig, error: %s",
 				testName,
 				err,
 			)
+
+			t.Fail()
+
+			return
 		}
 
 		if r.Failed != nil {
-			t.Fatalf("%s: response object indicates failure",
+			t.Logf("%s: response object indicates failure",
 				testName)
-		}
 
-		err = d.Close()
-		if err != nil {
-			t.Fatalf("%s: failed closing connection",
-				testName)
+			t.Fail()
+
+			return
 		}
 
 		actualOut := r.Result

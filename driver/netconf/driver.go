@@ -235,7 +235,7 @@ func (d *Driver) Close() error {
 
 	d.done <- true
 
-	err := d.Transport.Close(true)
+	err := d.Channel.Close()
 	if err != nil {
 		return err
 	}
