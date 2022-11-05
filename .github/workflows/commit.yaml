@@ -1,15 +1,24 @@
 name: Commit
 
-on: [push, pull_request, workflow_dispatch]
+on:
+  - push
+  - pull_request
+  - workflow_dispatch
 
 jobs:
   unit-test:
     runs-on: ${{ matrix.os }}
     strategy:
-      max-parallel: 6
+      max-parallel: 8
       matrix:
-        os: [ubuntu-latest, macos-latest]
-        go-version: ["1.16", "1.17", "1.18"]
+        os:
+          - ubuntu-latest
+          - macos-latest
+        go-version:
+          - "1.16"
+          - "1.17"
+          - "1.18"
+          - "1.19"
     steps:
       - name: checkout
         uses: actions/checkout@v3
@@ -22,7 +31,7 @@ jobs:
       - name: lint
         uses: golangci/golangci-lint-action@v3
         with:
-          version: v1.49
+          version: v1.50
           args: --timeout 5m
       - name: install gotestsum
         run: go install gotest.tools/gotestsum@latest
@@ -33,8 +42,10 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest]
-        go-version: ["1.18"]
+        os:
+          - ubuntu-latest
+        go-version:
+          - "1.19"
         runtime:
           - "docker"
     needs:
@@ -55,8 +66,12 @@ jobs:
       - name: pull srlinux image
         run: docker pull ghcr.io/nokia/srlinux:21.11.3
       - name: install clab
-        run: bash -c "$(curl -sL https://get.containerlab.dev)" -- -v 0.32.1
+        run: bash -c "$(curl -sL https://get.containerlab.dev)" -- -v 0.32.3
       - name: start clab ci topo
         run: make deploy-clab-ci
+
+      - name: Temporary tmate step for debugging srl connectivity
+        uses: mxschmitt/action-tmate@v3
+
       - name: tests
         run: make test-ci
