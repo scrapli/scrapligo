@@ -267,7 +267,10 @@ func prepareFunctionalDriver(
 				"-o",
 				"KexAlgorithms=+diffie-hellman-group-exchange-sha1,diffie-hellman-group14-sha1",
 				"-o",
-				"PubKeyAcceptedAlgorithms=+ssh-rsa",
+				// note that PubkeyAcceptedKeyTypes works on older versions of openssh, whereas
+				// PubKeyAcceptedAlgorithms is the option on >=8.5, runners in actions use older
+				// version so we'll roll with th older type here.
+				"PubkeyAcceptedKeyTypes=+ssh-rsa",
 				"-o",
 				"HostKeyAlgorithms=+ssh-dss,ssh-rsa,rsa-sha2-512,rsa-sha2-256,ssh-rsa,ssh-ed25519",
 			},

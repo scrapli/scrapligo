@@ -69,9 +69,5 @@ jobs:
         run: bash -c "$(curl -sL https://get.containerlab.dev)" -- -v 0.32.3
       - name: start clab ci topo
         run: make deploy-clab-ci
-
-      - name: Temporary tmate step for debugging srl connectivity
-        uses: mxschmitt/action-tmate@v3
-
       - name: tests
         run: make test-ci
