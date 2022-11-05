@@ -31,7 +31,7 @@ var (
 func getNetconfPatterns() *netconfPatterns {
 	netconfPatternsInstanceOnce.Do(func() {
 		netconfPatternsInstance = &netconfPatterns{
-			v1dot1Chunk: regexp.MustCompile(`(?ms)(\d+)\n(.*?)#`),
+			v1dot1Chunk: regexp.MustCompile(`(?ms)(\d+)\n(.*?)^#`), //nolint:gocritic
 			rpcErrors:   regexp.MustCompile(`(?s)<rpc-errors?>(.*)</rpc-errors?>`),
 		}
 	})
