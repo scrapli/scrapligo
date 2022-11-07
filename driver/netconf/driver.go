@@ -46,6 +46,8 @@ const (
 	messageIDPattern      = `(?i)(?:message-id="(\d+)")`
 	subscriptionIDPattern = `(?i)<subscription-id.*>(\d+)</subscription-id>`
 
+	subscriptionResultPattern = `(?i)<subscription-result.*>notif-bis:(.+)</subscription-result>`
+
 	emptyTagPattern = `<(\w+)></\w+>`
 
 	defaultNamespace = "urn:ietf:params:xml:ns:yang:ietf-netconf-with-defaults"
@@ -54,13 +56,14 @@ const (
 )
 
 type netconfPatterns struct {
-	v1Dot0Delim    *regexp.Regexp
-	v1Dot1Delim    *regexp.Regexp
-	hello          *regexp.Regexp
-	capability     *regexp.Regexp
-	messageID      *regexp.Regexp
-	subscriptionID *regexp.Regexp
-	emptyTags      *regexp.Regexp
+	v1Dot0Delim        *regexp.Regexp
+	v1Dot1Delim        *regexp.Regexp
+	hello              *regexp.Regexp
+	capability         *regexp.Regexp
+	messageID          *regexp.Regexp
+	subscriptionID     *regexp.Regexp
+	subscriptionResult *regexp.Regexp
+	emptyTags          *regexp.Regexp
 }
 
 var (
@@ -71,13 +74,14 @@ var (
 func getNetconfPatterns() *netconfPatterns {
 	netconfPatternsInstanceOnce.Do(func() {
 		netconfPatternsInstance = &netconfPatterns{
-			v1Dot0Delim:    regexp.MustCompile(v1Dot0Delim),
-			v1Dot1Delim:    regexp.MustCompile(v1Dot1Delim),
-			hello:          regexp.MustCompile(helloPattern),
-			capability:     regexp.MustCompile(capabilityPattern),
-			messageID:      regexp.MustCompile(messageIDPattern),
-			subscriptionID: regexp.MustCompile(subscriptionIDPattern),
-			emptyTags:      regexp.MustCompile(emptyTagPattern),
+			v1Dot0Delim:        regexp.MustCompile(v1Dot0Delim),
+			v1Dot1Delim:        regexp.MustCompile(v1Dot1Delim),
+			hello:              regexp.MustCompile(helloPattern),
+			capability:         regexp.MustCompile(capabilityPattern),
+			messageID:          regexp.MustCompile(messageIDPattern),
+			subscriptionID:     regexp.MustCompile(subscriptionIDPattern),
+			subscriptionResult: regexp.MustCompile(subscriptionResultPattern),
+			emptyTags:          regexp.MustCompile(emptyTagPattern),
 		}
 	})
 
