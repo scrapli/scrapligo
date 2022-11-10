@@ -13,7 +13,7 @@ default:
       escalate-prompt:
     configuration:
       name: 'configuration'
-      pattern: '(?im)^[\w.\-@/:]{1,63}\(config[\w.\-@/:]{0,32}\)#\s?$'
+      pattern: '(?im)^[\w.\-@/:]{1,63}\(config[\+\w.\-@/:]{0,32}\)#\s?$'
       previous-priv: 'exec'
       deescalate: 'end'
       escalate: 'configure terminal'
