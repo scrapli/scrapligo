@@ -21,7 +21,7 @@ default:
       escalate-prompt: '(?im)^(?:enable\s){0,1}password:\s?$'
     configuration:
       name: 'configuration'
-      pattern: '(?im)^[\w.\-@/:]{1,63}\([\w.\-@/:+]{0,32}\)#$'
+      pattern: '(?im)^[\w.\-@/:]{1,63}\([\+\w.\-@/:+]{0,32}\)#$'
       not-contains:
         - 'tcl)'
       previous-priv: 'privilege-exec'
