@@ -112,9 +112,5 @@ func (d *Driver) sendRPC(
 		r.Record(data)
 	}
 
-	if r.Failed != nil {
-		return nil, r.Failed
-	}
-
 	return r, nil
 }

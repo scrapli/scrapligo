@@ -40,6 +40,11 @@ func (d *Driver) EstablishPeriodicSubscription(
 		return nil, err
 	}
 
+	// sendRPC didn't error, but we got some failed message, subscription establishment failed...
+	if r.Failed != nil {
+		return r, r.Failed
+	}
+
 	patterns := getNetconfPatterns()
 
 	subscriptionResult := patterns.subscriptionResult.FindSubmatch(r.RawResult)
