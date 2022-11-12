@@ -45,7 +45,11 @@ func (d *Driver) EstablishPeriodicSubscription(
 	subscriptionResult := patterns.subscriptionResult.FindSubmatch(r.RawResult)
 
 	if string(subscriptionResult[1]) != "ok" {
-		return nil, fmt.Errorf("%w: subscription failed: %v", util.ErrNetconfError, string(subscriptionResult[1]))
+		return nil, fmt.Errorf(
+			"%w: subscription failed: %v",
+			util.ErrNetconfError,
+			string(subscriptionResult[1]),
+		)
 	}
 
 	match := patterns.subscriptionID.FindSubmatch(r.RawResult)
