@@ -2,9 +2,11 @@ package netconf
 
 import (
 	"encoding/xml"
+	"fmt"
 	"strconv"
 
 	"github.com/scrapli/scrapligo/response"
+	"github.com/scrapli/scrapligo/util"
 )
 
 type establishSubscription struct {
@@ -38,7 +40,22 @@ func (d *Driver) EstablishPeriodicSubscription(
 		return nil, err
 	}
 
+	// sendRPC didn't error, but we got some failed message, subscription establishment failed...
+	if r.Failed != nil {
+		return r, r.Failed
+	}
+
 	patterns := getNetconfPatterns()
+
+	subscriptionResult := patterns.subscriptionResult.FindSubmatch(r.RawResult)
+
+	if string(subscriptionResult[1]) != "ok" {
+		return nil, fmt.Errorf(
+			"%w: subscription failed: %v",
+			util.ErrNetconfError,
+			string(subscriptionResult[1]),
+		)
+	}
 
 	match := patterns.subscriptionID.FindSubmatch(r.RawResult)
 	subID, _ := strconv.Atoi(string(match[1]))
