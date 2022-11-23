@@ -23,6 +23,7 @@ default:
   failed-when-contains:
     - "Permission denied"
     - "ERROR:"
+    - "command not found"
   textfsm-platform: ""
   network-on-open:
     - operation: "acquire-priv"

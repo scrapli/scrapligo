@@ -31,8 +31,8 @@ default:
   failed-when-contains:
     - "Permission denied"
     - "ERROR:"
-    - "% Unknown command."
-    - "% Command incomplete."
+    - "% Unknown command"
+    - "% Command incomplete"
   textfsm-platform: ""
   network-on-open:
     - operation: "acquire-priv"
