@@ -30,6 +30,10 @@ func (d *Driver) sendCommand(
 
 	r.Record(b)
 
+	if r.Failed != nil {
+		return nil, r.Failed
+	}
+
 	return r, nil
 }
 
