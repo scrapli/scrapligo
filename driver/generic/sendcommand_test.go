@@ -83,3 +83,37 @@ func TestSendCommand(t *testing.T) {
 		t.Run(testName, f)
 	}
 }
+
+func testSendCommandFails(testName string, testCase *sendCommandTestCase) func(t *testing.T) {
+	return func(t *testing.T) {
+		t.Logf("%s: starting", testName)
+
+		d, _ := prepareDriver(t, testName, testCase.payloadFile)
+
+		_, err := d.SendCommand(testCase.command)
+		if err == nil {
+			t.Errorf(
+				"%s: expected error running network Driver SendCommand, got: %s",
+				testName,
+				err,
+			)
+		}
+	}
+}
+
+func TestSendCommandFails(t *testing.T) {
+	cases := map[string]*sendCommandTestCase{
+		"send-command-failure-simple": {
+			description: "simple send command failure test",
+			command:     "thiscommandshouldfail",
+			payloadFile: "send-command-failure-simple.txt",
+			stripPrompt: false,
+			eager:       false,
+		},
+	}
+
+	for testName, testCase := range cases {
+		f := testSendCommandFails(testName, testCase)
+		t.Run(testName, f)
+	}
+}

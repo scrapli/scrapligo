@@ -82,6 +82,12 @@ func prepareDriver(
 		options.WithFileTransportFile(resolveFile(t, payloadFile)),
 		options.WithTransportReadSize(1),
 		options.WithReadDelay(0),
+		options.WithFailedWhenContains([]string{
+			"% Ambiguous command",
+			"% Incomplete command",
+			"% Invalid input detected",
+			"% Unknown command",
+		}),
 	)
 	if err != nil {
 		t.Errorf("%s: encountered error creating generic Driver, error: %s", testName, err)
