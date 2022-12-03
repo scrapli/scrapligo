@@ -90,12 +90,16 @@ func testSendCommandFails(testName string, testCase *sendCommandTestCase) func(t
 
 		d, _ := prepareDriver(t, testName, testCase.payloadFile)
 
-		_, err := d.SendCommand(testCase.command)
-		if err == nil {
-			t.Errorf(
-				"%s: expected error running network Driver SendCommand, got: %s",
+		r, err := d.SendCommand(testCase.command)
+		if err != nil {
+			t.Fatalf("%s: response object indicates failure",
+				testName)
+		}
+
+		if r.Failed == nil {
+			t.Fatalf(
+				"%s: expected r.Failed to be set",
 				testName,
-				err,
 			)
 		}
 	}
