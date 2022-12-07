@@ -66,6 +66,7 @@ func main() {
 
 	// note that there is a convenience wrapper around send interactive in the generic driver as
 	// well, so you could simply do `d.SendInteractive` here rather than poking the channel directly
+	// remember to refer to `.Result` object in that case
 	interactiveOutput, err := d.Channel.SendInteractive(events)
 	if err != nil {
 		fmt.Printf("failed to send interactive input to device; error: %+v\n", err)
@@ -82,6 +83,10 @@ func main() {
 	r, err := d.SendCommand("show version | i uptime")
 	if err != nil {
 		fmt.Printf("failed to send command; error: %+v\n", err)
+		return
+	}
+	if r.Failed != nil {
+		fmt.Printf("response objects indicates failure: %+v\n", r.Failed)
 		return
 	}
 
