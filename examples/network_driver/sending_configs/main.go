@@ -48,6 +48,11 @@ func main() {
 
 		return
 	}
+	if r.Failed != nil {
+		fmt.Printf("response object indicates failure: %+v\n", r.Failed)
+
+		return
+	}
 
 	fmt.Printf("sending configs took %f seconds", r.ElapsedTime)
 }

@@ -103,6 +103,11 @@ func main() {
 
 		return
 	}
+	if interactiveOutput.Failed != nil {
+		fmt.Printf("response object indicates failure: %+v\n", interactiveOutput.Failed)
+
+		return
+	}
 
 	fmt.Printf("output received (SendInteractive):\n %s\n\n\n", interactiveOutput.Result)
 
@@ -113,6 +118,11 @@ func main() {
 	r, err := d.SendCommand("show version | i uptime")
 	if err != nil {
 		fmt.Printf("failed to send command; error: %+v\n", err)
+
+		return
+	}
+	if r.Failed != nil {
+		fmt.Printf("response object indicates failure: %+v\n", r.Failed)
 
 		return
 	}

@@ -1,0 +1,3 @@
+C3560CX#thiscommandshouldfail
+% Unknown command or computer name, or unable to find computer address
+C3560CX#

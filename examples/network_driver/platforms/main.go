@@ -83,6 +83,11 @@ func main() {
 	if err != nil {
 		fmt.Printf("failed to send interactive input to device; error: %+v\n", err)
 	}
+	if interactiveOutput.Failed != nil {
+		fmt.Printf("response object indicates failure: %+v\n", interactiveOutput.Failed)
+
+		return
+	}
 
 	fmt.Printf("output received (SendInteractive):\n %s\n\n\n", interactiveOutput.Result)
 
@@ -92,6 +97,11 @@ func main() {
 	r, err := d.SendCommand("show version")
 	if err != nil {
 		fmt.Printf("failed to send command; error: %+v\n", err)
+		return
+	}
+	if r.Failed != nil {
+		fmt.Printf("response object indicates failure: %+v\n", r.Failed)
+
 		return
 	}
 

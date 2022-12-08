@@ -50,6 +50,11 @@ func main() {
 
 		return
 	}
+	if r.Failed != nil {
+		fmt.Printf("response object indicates failure: %+v\n", r.Failed)
+
+		return
+	}
 
 	fmt.Printf("interact response:\n%s\n", r.Result)
 }
