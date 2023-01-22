@@ -48,7 +48,10 @@ const (
 
 	subscriptionResultPattern = `(?i)<subscription-result.*>notif-bis:(.+)</subscription-result>`
 
-	emptyTagPattern = `<(\w+)></\w+>`
+	// emptyTagPattern matches netconf empty tags to allow
+	// forcing of self-closing tags.
+	// See https://regex101.com/r/rmsS2E/3.
+	emptyTagPattern = `<([^>/]+?)(\s+[^>]+?)?>\s*</[\w-]+>`
 
 	defaultNamespace = "urn:ietf:params:xml:ns:yang:ietf-netconf-with-defaults"
 
