@@ -1,7 +1,9 @@
-package netconf
+package netconf_test
 
 import (
 	"testing"
+
+	"github.com/scrapli/scrapligo/driver/netconf"
 
 	"github.com/google/go-cmp/cmp"
 )
@@ -41,7 +43,7 @@ func TestForceSelfClosingTags(t *testing.T) {
 
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
-			got := forceSelfClosingTags(tt.got)
+			got := netconf.ForceSelfClosingTags(tt.got)
 			if !cmp.Equal(got, tt.want) {
 				t.Fatalf(
 					"%s: actual and expected values do not match\nactual: %s\nexpected:%s",
