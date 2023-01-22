@@ -26,24 +26,17 @@ func (d *Driver) RPC(opts ...util.Option) (*response.NetconfResponse, error) {
 	return d.sendRPC(d.buildRPCElem(op.Filter), op)
 }
 
-func forceSelfClosingTags(b []byte) []byte {
+// ForceSelfClosingTags accepts a netconf looking xml byte slice and forces any "empty" tags (tags
+// without attributes) to use self-closing tags. For example:
+// `<running> </running>`
+// Would be converted to:
+// `<running/>`.
+func ForceSelfClosingTags(b []byte) []byte {
 	ncPatterns := getNetconfPatterns()
 
-	emptyTagIdxs := ncPatterns.emptyTags.FindAllSubmatchIndex(b, -1)
+	r := ncPatterns.emptyTags.ReplaceAll(b, []byte("<$1$2/>"))
 
-	var nb []byte
-
-	for _, idx := range emptyTagIdxs {
-		// get everything in b up till the first of the submatch indexes (this is the start of an
-		// "empty" <thing></thing> tag), then get the name of the tag and put it in a self-closing
-		// tag.
-		nb = append(b[0:idx[0]], fmt.Sprintf("<%s/>", b[idx[2]:idx[3]])...) //nolint: gocritic
-
-		// finally, append everything *after* the submatch indexes
-		nb = append(nb, b[len(b)-(len(b)-idx[1]):]...)
-	}
-
-	return nb
+	return r
 }
 
 func (d *Driver) sendRPC(
@@ -58,7 +51,7 @@ func (d *Driver) sendRPC(
 	if d.ForceSelfClosingTags {
 		d.Logger.Debug("ForceSelfClosingTags is true, enforcing...")
 
-		b = forceSelfClosingTags(b)
+		b = ForceSelfClosingTags(b)
 	}
 
 	d.Logger.Debugf("sending finalized rpc payload:\n%s", string(b))
