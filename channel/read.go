@@ -98,26 +98,27 @@ func (c *Channel) ReadUntilInput(b []byte) ([]byte, error) {
 // pattern is seen in the output. Once that pattern is seen, all read bytes are returned.
 func (c *Channel) ReadUntilPrompt() ([]byte, error) {
 	var rb []byte
+	tick := time.NewTicker(c.ReadDelay)
+	defer tick.Stop()
 
 	for {
 		select {
 		case err := <-c.Errs:
 			return nil, err
-		default:
-		}
+		case <-tick.C:
+			nb := c.Q.DequeueAll()
 
-		nb := c.Q.Dequeue()
+			if nb == nil {
+				continue
+			}
 
-		if nb == nil {
-			continue
-		}
+			rb = append(rb, nb...)
 
-		rb = append(rb, nb...)
+			if c.PromptPattern.Match(rb) {
+				c.l.Debugf("channel read %#v", string(rb))
 
-		if c.PromptPattern.Match(rb) {
-			c.l.Debugf("channel read %#v", string(rb))
-
-			return rb, nil
+				return rb, nil
+			}
 		}
 	}
 }
@@ -126,27 +127,28 @@ func (c *Channel) ReadUntilPrompt() ([]byte, error) {
 // "prompts" argument are seen in the output. Once any pattern is seen, all read bytes are returned.
 func (c *Channel) ReadUntilAnyPrompt(prompts []*regexp.Regexp) ([]byte, error) {
 	var rb []byte
+	tick := time.NewTicker(c.ReadDelay)
+	defer tick.Stop()
 
 	for {
 		select {
 		case err := <-c.Errs:
 			return nil, err
-		default:
-		}
+		case <-tick.C:
+			nb := c.Q.DequeueAll()
 
-		nb := c.Q.Dequeue()
+			if nb == nil {
+				continue
+			}
 
-		if nb == nil {
-			continue
-		}
+			rb = append(rb, nb...)
 
-		rb = append(rb, nb...)
+			for _, p := range prompts {
+				if p.Match(rb) {
+					c.l.Debugf("channel read %#v", string(rb))
 
-		for _, p := range prompts {
-			if p.Match(rb) {
-				c.l.Debugf("channel read %#v", string(rb))
-
-				return rb, nil
+					return rb, nil
+				}
 			}
 		}
 	}
@@ -156,26 +158,27 @@ func (c *Channel) ReadUntilAnyPrompt(prompts []*regexp.Regexp) ([]byte, error) {
 // output. Once the bytes are seen all read bytes are returned.
 func (c *Channel) ReadUntilExplicit(b []byte) ([]byte, error) {
 	var rb []byte
+	tick := time.NewTicker(c.ReadDelay)
+	defer tick.Stop()
 
 	for {
 		select {
 		case err := <-c.Errs:
 			return nil, err
-		default:
-		}
+		case <-tick.C:
+			nb := c.Q.Dequeue()
 
-		nb := c.Q.Dequeue()
+			if nb == nil {
+				continue
+			}
 
-		if nb == nil {
-			continue
-		}
+			rb = append(rb, nb...)
 
-		rb = append(rb, nb...)
+			if bytes.Contains(rb, b) {
+				c.l.Debugf("channel read %#v", string(rb))
 
-		if bytes.Contains(rb, b) {
-			c.l.Debugf("channel read %#v", string(rb))
-
-			return rb, nil
+				return rb, nil
+			}
 		}
 	}
 }
