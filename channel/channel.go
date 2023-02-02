@@ -21,8 +21,10 @@ const (
 	DefaultReadDelayMicroSeconds = 5
 	// DefaultReturnChar is the character used to send an "enter" key to the device, "\n".
 	DefaultReturnChar = "\n"
-
-	redacted = "redacted"
+	// DefaultPromptSearchDepth -- is the default depth to search for the prompt in the received
+	// bytes.
+	DefaultPromptSearchDepth = 1_000
+	redacted                 = "redacted"
 )
 
 var (
@@ -57,8 +59,9 @@ func NewChannel(
 		PasswordPattern:   patterns.password,
 		PassphrasePattern: patterns.passphrase,
 
-		PromptPattern: getPromptPattern(),
-		ReturnChar:    []byte(DefaultReturnChar),
+		PromptSearchDepth: DefaultPromptSearchDepth,
+		PromptPattern:     getPromptPattern(),
+		ReturnChar:        []byte(DefaultReturnChar),
 
 		done: make(chan bool),
 
@@ -96,8 +99,9 @@ type Channel struct {
 	PasswordPattern   *regexp.Regexp
 	PassphrasePattern *regexp.Regexp
 
-	PromptPattern *regexp.Regexp
-	ReturnChar    []byte
+	PromptSearchDepth int
+	PromptPattern     *regexp.Regexp
+	ReturnChar        []byte
 
 	done chan bool
 

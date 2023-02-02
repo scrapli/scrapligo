@@ -18,6 +18,58 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
+func testWithPromptSearchDepth(testName string, testCase *optionsIntTestCase) func(t *testing.T) {
+	return func(t *testing.T) {
+		t.Logf("%s: starting", testName)
+
+		err := options.WithPromptSearchDepth(testCase.i)(testCase.o)
+		if err != nil {
+			if errors.Is(err, util.ErrIgnoredOption) && !testCase.isignored {
+				t.Fatalf(
+					"%s: option should be ignored, but returned different error",
+					testName,
+				)
+			}
+
+			return
+		}
+
+		oo, _ := testCase.o.(*channel.Channel)
+
+		if !cmp.Equal(oo.PromptSearchDepth, testCase.i) {
+			t.Fatalf(
+				"%s: actual and expected prompt search depths do not match\nactual: %d\nexpected:%d",
+				testName,
+				oo.PromptSearchDepth,
+				testCase.i,
+			)
+		}
+	}
+}
+
+func TestWithPromptSearchDepth(t *testing.T) {
+	cases := map[string]*optionsIntTestCase{
+		"set-prompt-pattern": {
+			description: "simple set option test",
+			i:           1,
+			o:           &channel.Channel{},
+			isignored:   false,
+		},
+		"ignored": {
+			description: "skipped due to ignored type",
+			i:           1,
+			o:           &network.Driver{},
+			isignored:   true,
+		},
+	}
+
+	for testName, testCase := range cases {
+		f := testWithPromptSearchDepth(testName, testCase)
+
+		t.Run(testName, f)
+	}
+}
+
 func testWithPromptPattern(testName string, testCase *optionsRegexpTestCase) func(t *testing.T) {
 	return func(t *testing.T) {
 		t.Logf("%s: starting", testName)
