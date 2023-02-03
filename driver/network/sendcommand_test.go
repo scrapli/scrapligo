@@ -292,9 +292,9 @@ func TestSendCommandFunctionalGiant(t *testing.T) {
 		// in seconds; realistically this looks like it finishes in ~10-12s pretty consistently in
 		// local tests, but we need to make sure it doesn't go kaboom in ci as well. also note that
 		// this is usually ran w/ race flag so that slows things down even more.
-		if r.ElapsedTime > 20 {
-			t.Fatalf("%s: test completed but was greater than maximum expected duration",
-				testName)
+		if r.ElapsedTime > 30 {
+			t.Fatalf("%s: test completed but was greater than maximum expected duration, took %fs",
+				testName, r.ElapsedTime)
 		}
 	}
 }
