@@ -120,6 +120,7 @@ func (c *Channel) ReadUntilPrompt() ([]byte, error) {
 		case err := <-c.Errs:
 			return nil, err
 		default:
+			time.Sleep(c.ReadDelay)
 		}
 
 		nb := c.Q.Dequeue()
@@ -148,6 +149,7 @@ func (c *Channel) ReadUntilAnyPrompt(prompts []*regexp.Regexp) ([]byte, error) {
 		case err := <-c.Errs:
 			return nil, err
 		default:
+			time.Sleep(c.ReadDelay)
 		}
 
 		nb := c.Q.Dequeue()
@@ -178,6 +180,7 @@ func (c *Channel) ReadUntilExplicit(b []byte) ([]byte, error) {
 		case err := <-c.Errs:
 			return nil, err
 		default:
+			time.Sleep(c.ReadDelay)
 		}
 
 		nb := c.Q.Dequeue()
