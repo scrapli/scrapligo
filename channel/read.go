@@ -115,25 +115,20 @@ func (c *Channel) processReadBuf(rb []byte) []byte {
 func (c *Channel) ReadUntilPrompt() ([]byte, error) {
 	var rb []byte
 
+	tick := time.NewTicker(10 * time.Microsecond)
+
 	for {
 		select {
 		case err := <-c.Errs:
 			return nil, err
-		default:
-		}
+		case <-tick.C:
+			rb = c.Q.DequeueAll()
 
-		nb := c.Q.Dequeue()
+			if c.PromptPattern.Match(c.processReadBuf(rb)) {
+				c.l.Debugf("channel read %#v", string(rb))
 
-		if nb == nil {
-			continue
-		}
-
-		rb = append(rb, nb...)
-
-		if c.PromptPattern.Match(c.processReadBuf(rb)) {
-			c.l.Debugf("channel read %#v", string(rb))
-
-			return rb, nil
+				return rb, nil
+			}
 		}
 	}
 }
@@ -143,26 +138,21 @@ func (c *Channel) ReadUntilPrompt() ([]byte, error) {
 func (c *Channel) ReadUntilAnyPrompt(prompts []*regexp.Regexp) ([]byte, error) {
 	var rb []byte
 
+	tick := time.NewTicker(10 * time.Microsecond)
+
 	for {
 		select {
 		case err := <-c.Errs:
 			return nil, err
-		default:
-		}
+		case <-tick.C:
+			rb = c.Q.DequeueAll()
 
-		nb := c.Q.Dequeue()
+			for _, p := range prompts {
+				if p.Match(rb) {
+					c.l.Debugf("channel read %#v", string(rb))
 
-		if nb == nil {
-			continue
-		}
-
-		rb = append(rb, nb...)
-
-		for _, p := range prompts {
-			if p.Match(rb) {
-				c.l.Debugf("channel read %#v", string(rb))
-
-				return rb, nil
+					return rb, nil
+				}
 			}
 		}
 	}
@@ -173,25 +163,20 @@ func (c *Channel) ReadUntilAnyPrompt(prompts []*regexp.Regexp) ([]byte, error) {
 func (c *Channel) ReadUntilExplicit(b []byte) ([]byte, error) {
 	var rb []byte
 
+	tick := time.NewTicker(10 * time.Microsecond)
+
 	for {
 		select {
 		case err := <-c.Errs:
 			return nil, err
-		default:
-		}
+		case <-tick.C:
+			rb = c.Q.DequeueAll()
 
-		nb := c.Q.Dequeue()
+			if bytes.Contains(rb, b) {
+				c.l.Debugf("channel read %#v", string(rb))
 
-		if nb == nil {
-			continue
-		}
-
-		rb = append(rb, nb...)
-
-		if bytes.Contains(rb, b) {
-			c.l.Debugf("channel read %#v", string(rb))
-
-			return rb, nil
+				return rb, nil
+			}
 		}
 	}
 }
