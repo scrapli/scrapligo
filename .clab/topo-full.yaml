@@ -45,6 +45,7 @@ topology:
       kind: srl
       mgmt_ipv4: 172.20.20.16
       mgmt_ipv6: 2001:172:20:20::16
+      startup-config: configs/srl-startup.json
   links:
     # forces "front panel port" for ceos, without this there is no ip routing
     - endpoints: ["ceos:eth1", "ceos:eth2"]

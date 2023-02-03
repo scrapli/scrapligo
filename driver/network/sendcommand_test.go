@@ -226,3 +226,75 @@ func TestSendCommandFunctional(t *testing.T) {
 		}
 	}
 }
+
+func TestSendCommandFunctionalGiant(t *testing.T) {
+	testName := "send-command-giant"
+	platformName := platform.NokiaSrl
+
+	if !*functional {
+		t.Skip("skip: functional tests skipped without the '-functional' flag being passed")
+	}
+
+	t.Logf("%s: starting", testName)
+
+	for _, transportName := range []string{transport.SystemTransport, transport.StandardTransport} {
+		d := prepareFunctionalDriver(t, testName, platformName, transportName)
+
+		r, err := d.SendCommand("info from running")
+		if err != nil {
+			t.Errorf(
+				"%s: encountered error running network Driver SendCommand (giant), error: %s",
+				testName,
+				err,
+			)
+		}
+
+		if r.Failed != nil {
+			t.Fatalf("%s: response object indicates failure",
+				testName)
+		}
+
+		err = d.Close()
+		if err != nil {
+			t.Fatalf("%s: failed closing connection",
+				testName)
+		}
+
+		actualOut := r.Result
+
+		if *update {
+			writeGoldenFunctional(
+				t,
+				fmt.Sprintf("%s-%s-%s", testName, platformName, transportName),
+				actualOut,
+			)
+		}
+
+		cleanF := util.GetCleanFunc(platformName)
+
+		expectedOut := readFile(
+			t,
+			fmt.Sprintf("golden/%s-%s-%s-out.txt", testName, platformName, transportName),
+		)
+
+		if !cmp.Equal(
+			cleanF(actualOut),
+			cleanF(string(expectedOut)),
+		) {
+			t.Fatalf(
+				"%s: actual and expected outputs do not match\nactual: %s\nexpected:%s",
+				testName,
+				cleanF(actualOut),
+				cleanF(string(expectedOut)),
+			)
+		}
+
+		// in seconds; realistically this looks like it finishes in ~10-12s pretty consistently in
+		// local tests, but we need to make sure it doesn't go kaboom in ci as well. also note that
+		// this is usually ran w/ race flag so that slows things down even more.
+		if r.ElapsedTime > 20 {
+			t.Fatalf("%s: test completed but was greater than maximum expected duration",
+				testName)
+		}
+	}
+}
