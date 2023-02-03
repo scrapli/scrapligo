@@ -17,12 +17,15 @@ const (
 	// DefaultTimeoutOpsSeconds is the default time value for operations -- 60 seconds.
 	DefaultTimeoutOpsSeconds = 60
 	// DefaultReadDelayMicroSeconds is the default value for the delay between reads of the
-	// transport -- 5 microseconds.
-	DefaultReadDelayMicroSeconds = 5
+	// transport -- 100 microseconds. Going very low is likely to lead to very high cpu and not
+	// yield any recognizable gains, so be careful changing this!
+	DefaultReadDelayMicroSeconds = 250
 	// DefaultReturnChar is the character used to send an "enter" key to the device, "\n".
 	DefaultReturnChar = "\n"
-
-	redacted = "redacted"
+	// DefaultPromptSearchDepth -- is the default depth to search for the prompt in the received
+	// bytes.
+	DefaultPromptSearchDepth = 1_000
+	redacted                 = "redacted"
 )
 
 var (
@@ -57,8 +60,9 @@ func NewChannel(
 		PasswordPattern:   patterns.password,
 		PassphrasePattern: patterns.passphrase,
 
-		PromptPattern: getPromptPattern(),
-		ReturnChar:    []byte(DefaultReturnChar),
+		PromptSearchDepth: DefaultPromptSearchDepth,
+		PromptPattern:     getPromptPattern(),
+		ReturnChar:        []byte(DefaultReturnChar),
 
 		done: make(chan bool),
 
@@ -96,8 +100,9 @@ type Channel struct {
 	PasswordPattern   *regexp.Regexp
 	PassphrasePattern *regexp.Regexp
 
-	PromptPattern *regexp.Regexp
-	ReturnChar    []byte
+	PromptSearchDepth int
+	PromptPattern     *regexp.Regexp
+	ReturnChar        []byte
 
 	done chan bool
 

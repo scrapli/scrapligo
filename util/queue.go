@@ -93,17 +93,20 @@ func (q *Queue) DequeueAll() []byte {
 	return bytes.Join(b, []byte{})
 }
 
+func (q *Queue) getDepth() int {
+	// rather than locking/unlocking to access the q.depth, we simply grab the depth from the
+	// depthChan and then put it back in and return the value we got. this should be slightly faster
+	// and less cpu than locking/unlocking
+	d := <-q.depthChan
+	q.depthChan <- d
+
+	return d
+}
+
 // GetDepth returns the depth of the queue.
 func (q *Queue) GetDepth() int {
 	q.lock.RLock()
 	defer q.lock.RUnlock()
 
 	return q.depth
-}
-
-func (q *Queue) getDepth() int {
-	d := <-q.depthChan
-	q.depthChan <- d
-
-	return d
 }

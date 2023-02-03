@@ -9,6 +9,25 @@ import (
 	"github.com/scrapli/scrapligo/util"
 )
 
+// WithPromptSearchDepth accepts an int that can be used to set the depth of the Channel prompt
+// search -- that is, the approximate amount of characters to search when trying to find the channel
+// prompt. The smaller this number is the faster the regex search operation will be, but the higher
+// the risk of accidentally missing the prompt, and thereby causing the connection to eventually
+// fail. Best to leave this default in most cases.
+func WithPromptSearchDepth(i int) util.Option {
+	return func(o interface{}) error {
+		c, ok := o.(*channel.Channel)
+
+		if !ok {
+			return util.ErrIgnoredOption
+		}
+
+		c.PromptSearchDepth = i
+
+		return nil
+	}
+}
+
 // WithPromptPattern allows for providing a custom regex pattern to use for the channel
 // PromptPattern.
 func WithPromptPattern(p *regexp.Regexp) util.Option {

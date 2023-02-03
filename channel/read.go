@@ -94,6 +94,22 @@ func (c *Channel) ReadUntilInput(b []byte) ([]byte, error) {
 	return c.ReadUntilExplicit(b)
 }
 
+func (c *Channel) processReadBuf(rb []byte) []byte {
+	if len(rb) <= c.PromptSearchDepth {
+		return rb
+	}
+
+	prb := rb[len(rb)-c.PromptSearchDepth:]
+
+	partitionIdx := bytes.Index(prb, []byte("\n"))
+
+	if partitionIdx > 0 {
+		prb = prb[partitionIdx:]
+	}
+
+	return prb
+}
+
 // ReadUntilPrompt reads bytes out of the channel Q object until the channel PromptPattern regex
 // pattern is seen in the output. Once that pattern is seen, all read bytes are returned.
 func (c *Channel) ReadUntilPrompt() ([]byte, error) {
@@ -104,6 +120,7 @@ func (c *Channel) ReadUntilPrompt() ([]byte, error) {
 		case err := <-c.Errs:
 			return nil, err
 		default:
+			time.Sleep(c.ReadDelay)
 		}
 
 		nb := c.Q.Dequeue()
@@ -114,7 +131,7 @@ func (c *Channel) ReadUntilPrompt() ([]byte, error) {
 
 		rb = append(rb, nb...)
 
-		if c.PromptPattern.Match(rb) {
+		if c.PromptPattern.Match(c.processReadBuf(rb)) {
 			c.l.Debugf("channel read %#v", string(rb))
 
 			return rb, nil
@@ -132,6 +149,7 @@ func (c *Channel) ReadUntilAnyPrompt(prompts []*regexp.Regexp) ([]byte, error) {
 		case err := <-c.Errs:
 			return nil, err
 		default:
+			time.Sleep(c.ReadDelay)
 		}
 
 		nb := c.Q.Dequeue()
@@ -162,6 +180,7 @@ func (c *Channel) ReadUntilExplicit(b []byte) ([]byte, error) {
 		case err := <-c.Errs:
 			return nil, err
 		default:
+			time.Sleep(c.ReadDelay)
 		}
 
 		nb := c.Q.Dequeue()

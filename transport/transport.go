@@ -23,7 +23,7 @@ const (
 
 	defaultPort                 = 22
 	defaultTimeoutSocketSeconds = 30
-	defaultReadSize             = 65_535
+	defaultReadSize             = 8_192
 	defaultTermHeight           = 255
 	defaultTermWidth            = 80
 	defaultSSHStrictKey         = true
