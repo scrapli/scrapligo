@@ -43,15 +43,13 @@ func (d *Driver) sendRPC(
 	m *message,
 	op *OperationOptions,
 ) (*response.NetconfResponse, error) {
-	b, err := m.serialize(d.SelectedVersion)
-	if err != nil {
-		return nil, err
-	}
-
 	if d.ForceSelfClosingTags {
 		d.Logger.Debug("ForceSelfClosingTags is true, enforcing...")
+	}
 
-		b = ForceSelfClosingTags(b)
+	b, err := m.serialize(d.SelectedVersion, d.ForceSelfClosingTags)
+	if err != nil {
+		return nil, err
 	}
 
 	d.Logger.Debugf("sending finalized rpc payload:\n%s", string(b))
