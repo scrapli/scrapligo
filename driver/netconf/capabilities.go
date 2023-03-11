@@ -53,7 +53,7 @@ func (d *Driver) determineVersion() error {
 
 	switch d.PreferredVersion {
 	case V1Dot0:
-		if !d.ServerHasCapability(v1Dot0Cap) {
+		if d.ServerHasCapability(v1Dot0Cap) {
 			d.SelectedVersion = V1Dot0
 		} else {
 			return fmt.Errorf(
@@ -62,7 +62,7 @@ func (d *Driver) determineVersion() error {
 			)
 		}
 	case V1Dot1:
-		if !d.ServerHasCapability(v1Dot1Cap) {
+		if d.ServerHasCapability(v1Dot1Cap) {
 			d.SelectedVersion = V1Dot1
 		} else {
 			return fmt.Errorf(
