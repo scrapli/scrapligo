@@ -12,21 +12,25 @@ type message struct {
 	Payload   interface{} `xml:",innerxml"`
 }
 
-func (m *message) serialize(v string) ([]byte, error) {
-	message, err := xml.Marshal(m)
+func (m *message) serialize(v string, forceSelfClosingTags bool) ([]byte, error) {
+	msg, err := xml.Marshal(m)
 	if err != nil {
 		return nil, err
 	}
 
-	message = append([]byte(xmlHeader), message...)
+	msg = append([]byte(xmlHeader), msg...)
+
+	if forceSelfClosingTags {
+		msg = ForceSelfClosingTags(msg)
+	}
 
 	switch v {
 	case V1Dot0:
-		message = append(message, []byte(v1Dot0Delim)...)
+		msg = append(msg, []byte(v1Dot0Delim)...)
 	case V1Dot1:
-		message = append([]byte(fmt.Sprintf("#%d\n", len(message))), message...)
-		message = append(message, []byte("\n##")...)
+		msg = append([]byte(fmt.Sprintf("#%d\n", len(msg))), msg...)
+		msg = append(msg, []byte("\n##")...)
 	}
 
-	return message, nil
+	return msg, nil
 }
