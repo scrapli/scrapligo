@@ -26,7 +26,7 @@ func ResolveAtFileOrURL(path string) ([]byte, error) {
 			)
 		}
 
-		defer resp.Body.Close() //nolint:errcheck
+		defer resp.Body.Close() //nolint
 
 		b, err = io.ReadAll(resp.Body)
 		if err != nil {

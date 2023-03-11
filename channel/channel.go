@@ -166,6 +166,8 @@ func (c *Channel) Open() error {
 
 // Close signals to stop the channel read loop and closes the underlying Transport object.
 func (c *Channel) Close() error {
+	c.l.Info("channel closing...")
+
 	ch := make(chan struct{})
 
 	go func() {
@@ -176,11 +178,15 @@ func (c *Channel) Close() error {
 
 	select {
 	case <-ch:
+		c.l.Debug("closing underlying transport...")
+
 		return c.t.Close(false)
-	case <-time.After(2 * (c.ReadDelay * c.ReadDelay)): //nolint: gomnd
-		// channel is stuck in a blocking read, force close transport to finish closing connection,
-		// so give it 2*(c.ReadDelay squared) to "nicely" exit -- with defaults this ends up being
-		// 50ms.
+	case <-time.After(c.ReadDelay * (c.ReadDelay / 1000)):
+		// channel is stuck in a blocking read (almost always the case for netconf!), force close
+		// transport to finish closing connection, so give it c.ReadDelay*(c.ReadDelay/1000) to
+		// "nicely" exit -- with defaults this ends up being 62.5ms.
+		c.l.Debug("force closing underlying transport...")
+
 		return c.t.Close(true)
 	}
 }
