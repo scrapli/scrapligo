@@ -31,7 +31,7 @@ func TestForceSelfClosingTags(t *testing.T) {
 		},
 		"empty_tag_with_attrs_and_spaces": {
 			got: []byte(
-				`<routing-policy xmlns="http://openconfig.net/yang/routing-policy">    </routing-policy>`,
+				`<routing-policy xmlns="http://openconfig.net/yang/routing-policy">    </routing-policy>`, //nolint: lll
 			),
 			want: []byte(`<routing-policy xmlns="http://openconfig.net/yang/routing-policy"/>`),
 		},

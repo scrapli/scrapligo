@@ -89,7 +89,7 @@ func TestLockUnlock(t *testing.T) {
 	}
 }
 
-func testLockUnlockFunctional( //nolint: funlen
+func testLockUnlockFunctional(
 	testName, platformName, transportName string,
 ) func(t *testing.T) {
 	return func(t *testing.T) {

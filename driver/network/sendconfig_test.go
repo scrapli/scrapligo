@@ -102,7 +102,7 @@ func getTestSendConfigFunctionalConfig(t *testing.T, testName, platformName stri
 
 func testSendConfigFunctional(
 	testName, platformName, transportName string,
-	testCase *sendConfigFunctionalTestCase,
+	_ *sendConfigFunctionalTestCase,
 ) func(t *testing.T) {
 	return func(t *testing.T) {
 		t.Logf("%s: starting", testName)

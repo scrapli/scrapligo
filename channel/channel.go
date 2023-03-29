@@ -26,6 +26,7 @@ const (
 	// bytes.
 	DefaultPromptSearchDepth = 1_000
 	redacted                 = "redacted"
+	readDelayDivisor         = 1_000
 )
 
 var (
@@ -181,7 +182,7 @@ func (c *Channel) Close() error {
 		c.l.Debug("closing underlying transport...")
 
 		return c.t.Close(false)
-	case <-time.After(c.ReadDelay * (c.ReadDelay / 1000)):
+	case <-time.After(c.ReadDelay * (c.ReadDelay / readDelayDivisor)): //nolint:durationcheck
 		// channel is stuck in a blocking read (almost always the case for netconf!), force close
 		// transport to finish closing connection, so give it c.ReadDelay*(c.ReadDelay/1000) to
 		// "nicely" exit -- with defaults this ends up being 62.5ms.

@@ -44,45 +44,110 @@ type optionDefinition struct {
 
 type optionDefinitions []*optionDefinition
 
-func (o *optionDefinitions) asOptions() []util.Option { //nolint: gocyclo
+func (o *optionDefinitions) asOptions() []util.Option { //nolint: gocyclo,gocognit,funlen
 	opts := make([]util.Option, len(*o))
 
 	for i, opt := range *o {
 		switch opt.Option {
 		case port:
-			opts[i] = options.WithPort(opt.Value.(int))
+			intVal, ok := opt.Value.(int)
+			if !ok {
+				panic("option port value must be an int")
+			}
+
+			opts[i] = options.WithPort(intVal)
 		case authBypass:
 			opts[i] = options.WithAuthBypass()
 		case authStrictKey:
 			opts[i] = options.WithAuthNoStrictKey()
 		case promptPattern:
-			opts[i] = options.WithPromptPattern(regexp.MustCompile(opt.Value.(string)))
+			strVal, ok := opt.Value.(string)
+			if !ok {
+				panic("option promptPattern value must be a string")
+			}
+
+			opts[i] = options.WithPromptPattern(regexp.MustCompile(strVal))
 		case usernamePattern:
-			opts[i] = options.WithUsernamePattern(regexp.MustCompile(opt.Value.(string)))
+			strVal, ok := opt.Value.(string)
+			if !ok {
+				panic("option usernamePattern value must be a string")
+			}
+
+			opts[i] = options.WithUsernamePattern(regexp.MustCompile(strVal))
 		case passwordPattern:
-			opts[i] = options.WithPasswordPattern(regexp.MustCompile(opt.Value.(string)))
+			strVal, ok := opt.Value.(string)
+			if !ok {
+				panic("option passwordPattern value must be a string")
+			}
+
+			opts[i] = options.WithPasswordPattern(regexp.MustCompile(strVal))
 		case passphrasePattern:
-			opts[i] = options.WithPassphrasePattern(regexp.MustCompile(opt.Value.(string)))
+			strVal, ok := opt.Value.(string)
+			if !ok {
+				panic("option passphrasePattern value must be a string")
+			}
+
+			opts[i] = options.WithPassphrasePattern(regexp.MustCompile(strVal))
 		case returnChar:
-			opts[i] = options.WithReturnChar(opt.Value.(string))
+			strVal, ok := opt.Value.(string)
+			if !ok {
+				panic("option returnChar value must be a string")
+			}
+
+			opts[i] = options.WithReturnChar(strVal)
 		case readDelay:
+			floatVal, ok := opt.Value.(float64)
+			if !ok {
+				panic("option readDelay value must be a float")
+			}
+
 			opts[i] = options.WithReadDelay(
-				time.Duration(opt.Value.(float64) * float64(time.Second)),
+				time.Duration(floatVal * float64(time.Second)),
 			)
 		case timeoutOps:
+			floatVal, ok := opt.Value.(float64)
+			if !ok {
+				panic("option timeoutOps value must be a float")
+			}
+
 			opts[i] = options.WithTimeoutOps(
-				time.Duration(opt.Value.(float64) * float64(time.Second)),
+				time.Duration(floatVal * float64(time.Second)),
 			)
 		case transportType:
-			opts[i] = options.WithTransportType(opt.Value.(string))
+			strVal, ok := opt.Value.(string)
+			if !ok {
+				panic("option transportType value must be a string")
+			}
+
+			opts[i] = options.WithTransportType(strVal)
 		case transportReadSize:
-			opts[i] = options.WithTransportReadSize(opt.Value.(int))
+			intVal, ok := opt.Value.(int)
+			if !ok {
+				panic("option transportReadSize value must be an int")
+			}
+
+			opts[i] = options.WithTransportReadSize(intVal)
 		case transportPtyHeight:
-			opts[i] = options.WithTermHeight(opt.Value.(int))
+			intVal, ok := opt.Value.(int)
+			if !ok {
+				panic("option transportPtyHeight value must be an int")
+			}
+
+			opts[i] = options.WithTermHeight(intVal)
 		case transportPtyWidth:
-			opts[i] = options.WithTermWidth(opt.Value.(int))
+			intVal, ok := opt.Value.(int)
+			if !ok {
+				panic("option transportPtyWidth value must be an int")
+			}
+
+			opts[i] = options.WithTermWidth(intVal)
 		case transportSystemOpenArgs:
-			opts[i] = options.WithSystemTransportOpenArgs(opt.Value.([]string))
+			strSliceVal, ok := opt.Value.([]string)
+			if !ok {
+				panic("option transportSystemOpenArgs value must be an array of strings")
+			}
+
+			opts[i] = options.WithSystemTransportOpenArgs(strSliceVal)
 		}
 	}
 

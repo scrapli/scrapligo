@@ -36,7 +36,8 @@ func (d *Driver) SendCommands(
 
 		if op.StopOnFailed && r.Failed != nil {
 			d.Logger.Info(
-				"encountered failed command, and stop on failed is true, discontinuing send commands operation",
+				"encountered failed command, and stop on failed is true," +
+					" discontinuing send commands operation",
 			)
 
 			return m, err

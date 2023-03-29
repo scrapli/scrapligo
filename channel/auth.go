@@ -38,7 +38,7 @@ func getAuthPatterns() *authPatterns {
 	return authPatternsInstance
 }
 
-func (c *Channel) authenticateSSH(p, pp []byte) *result { //nolint:dupl
+func (c *Channel) authenticateSSH(p, pp []byte) *result {
 	pCount := 0
 
 	ppCount := 0
@@ -87,13 +87,15 @@ func (c *Channel) authenticateSSH(p, pp []byte) *result { //nolint:dupl
 
 			if ppCount > passphraseSeenMax {
 				c.l.Critical(
-					"private key passphrase prompt seen multiple times, assuming authentication failed",
+					"private key passphrase prompt seen multiple times," +
+						" assuming authentication failed",
 				)
 
 				return &result{
 					nil,
 					fmt.Errorf(
-						"%w: private key passphrase prompt seen multiple times, assuming authentication failed",
+						"%w: private key passphrase prompt seen multiple times,"+
+							" assuming authentication failed",
 						util.ErrAuthError,
 					),
 				}
@@ -130,7 +132,7 @@ func (c *Channel) AuthenticateSSH(p, pp []byte) ([]byte, error) {
 	}
 }
 
-func (c *Channel) authenticateTelnet(u, p []byte) *result { //nolint:dupl
+func (c *Channel) authenticateTelnet(u, p []byte) *result {
 	uCount := 0
 
 	pCount := 0

@@ -229,7 +229,15 @@ func (t *Transport) InChannelAuthData() *InChannelAuthData {
 		return d
 	}
 
-	d.PrivateKeyPassPhrase = ti.(transportImplSSH).getSSHArgs().PrivateKeyPassPhrase
+	sshTransport, ok := ti.(transportImplSSH)
+	if !ok {
+		panic(
+			"in channel auth requested on a non telnet transport," +
+				" and transport does not implement transportImplSSH",
+		)
+	}
+
+	d.PrivateKeyPassPhrase = sshTransport.getSSHArgs().PrivateKeyPassPhrase
 
 	return d
 }

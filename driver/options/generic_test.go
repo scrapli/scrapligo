@@ -104,7 +104,8 @@ func testWithFailedWhenContains(
 
 		if !cmp.Equal(oo.FailedWhenContains, testCase.ss) {
 			t.Fatalf(
-				"%s: actual and expected failed when contains values do not match\nactual: %s\nexpected:%s",
+				"%s: actual and expected failed when contains values do not match\nactual:"+
+					" %s\nexpected:%s",
 				testName,
 				oo.FailedWhenContains,
 				testCase.ss,

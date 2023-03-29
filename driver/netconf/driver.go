@@ -56,6 +56,8 @@ const (
 	defaultNamespace = "urn:ietf:params:xml:ns:yang:ietf-netconf-with-defaults"
 
 	xmlHeader = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+
+	initialMessageID = 101
 )
 
 type netconfPatterns struct {
@@ -129,7 +131,7 @@ func NewDriver(
 		Transport:     gd.Transport,
 		Channel:       gd.Channel,
 
-		messageID: 101,
+		messageID: initialMessageID,
 
 		messages:     map[int][]byte{},
 		messagesLock: &sync.Mutex{},

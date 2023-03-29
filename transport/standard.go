@@ -17,6 +17,8 @@ const (
 	StandardTransport = "standard"
 
 	termType = "xterm"
+
+	defaultTTYSpeed = 115200
 )
 
 // NewStandardTransport returns an instance of Standard transport.
@@ -165,8 +167,8 @@ func (t *Standard) open(a *Args) error {
 
 	term := ssh.TerminalModes{
 		ssh.ECHO:          1,
-		ssh.TTY_OP_ISPEED: 115200,
-		ssh.TTY_OP_OSPEED: 115200,
+		ssh.TTY_OP_ISPEED: defaultTTYSpeed,
+		ssh.TTY_OP_OSPEED: defaultTTYSpeed,
 	}
 
 	err = t.session.RequestPty(

@@ -46,7 +46,12 @@ func (o *onXDefinitions) asGenericOnX() func(d *generic.Driver) error {
 		for _, op := range *o {
 			var err error
 
-			switch op["operation"].(string) {
+			opType, ok := op["operation"].(string)
+			if !ok {
+				panic("operation is invalid type, must be string!")
+			}
+
+			switch opType {
 			case OpChannelWrite:
 				err = channelWrite(op, d.Channel)
 			case OpChannelReturn:
@@ -67,7 +72,12 @@ func (o *onXDefinitions) asNetworkOnX() func(d *network.Driver) error {
 		for _, op := range *o {
 			var err error
 
-			switch op["operation"].(string) {
+			opType, ok := op["operation"].(string)
+			if !ok {
+				panic("operation is invalid type, must be string!")
+			}
+
+			switch opType {
 			case OpChannelWrite:
 				err = channelWrite(op, d.Channel)
 			case OpChannelReturn:

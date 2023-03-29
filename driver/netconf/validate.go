@@ -1,4 +1,4 @@
-package netconf //nolint: dupl
+package netconf
 
 import (
 	"encoding/xml"

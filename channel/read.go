@@ -2,6 +2,7 @@ package channel
 
 import (
 	"bytes"
+	"errors"
 	"io"
 	"regexp"
 	"time"
@@ -19,7 +20,7 @@ func (c *Channel) read() {
 
 		b, err := c.t.Read()
 		if err != nil {
-			if err == io.EOF {
+			if errors.Is(err, io.EOF) {
 				// the underlying transport was closed so just return
 				return
 			}
