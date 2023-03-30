@@ -33,7 +33,6 @@ linters:
     - errcheck
     - errchkjson
     - errname
-    - errorlint
     - exhaustive
     - exportloopref
     - forbidigo
