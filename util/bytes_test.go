@@ -82,7 +82,8 @@ func TestByteIsAny(t *testing.T) {
 
 func testByteContainsAny(testName string, b []byte, l [][]byte, expected bool) func(t *testing.T) {
 	return func(t *testing.T) {
-		t.Logf("%s: starting", testName)
+		t.Logf(
+			"%s: starting", testName)
 
 		if !cmp.Equal(util.ByteContainsAny(b, l), expected) {
 			t.Fatalf(

@@ -1,5 +1,3 @@
-
-
 Building configuration...
 
 Current configuration : 38 bytes

@@ -33,7 +33,8 @@ func testWithTransportReadSize(testName string, testCase *optionsIntTestCase) fu
 
 		if !cmp.Equal(oo.ReadSize, testCase.i) {
 			t.Fatalf(
-				"%s: actual and expected transport read sizes do not match\nactual: %d\nexpected:%d",
+				"%s: actual and expected transport read sizes do not match\nactual:"+
+					" %d\nexpected:%d",
 				testName,
 				oo.ReadSize,
 				testCase.i,

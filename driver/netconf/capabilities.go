@@ -43,7 +43,7 @@ func (d *Driver) processServerCapabilities() error {
 }
 
 func (d *Driver) determineVersion() error {
-	if d.ServerHasCapability(v1Dot1Cap) {
+	if d.ServerHasCapability(v1Dot1Cap) { //nolint: gocritic
 		d.SelectedVersion = V1Dot1
 	} else if d.ServerHasCapability(v1Dot0Cap) {
 		d.SelectedVersion = V1Dot0
@@ -57,7 +57,8 @@ func (d *Driver) determineVersion() error {
 			d.SelectedVersion = V1Dot0
 		} else {
 			return fmt.Errorf(
-				"%w: user requested netconf version 1.0, but server does not support this capability",
+				"%w: user requested netconf version 1.0,"+
+					" but server does not support this capability",
 				util.ErrNetconfError,
 			)
 		}
@@ -66,7 +67,8 @@ func (d *Driver) determineVersion() error {
 			d.SelectedVersion = V1Dot1
 		} else {
 			return fmt.Errorf(
-				"%w: user requested netconf version 1.1, but server does not support this capability",
+				"%w: user requested netconf version 1.1,"+
+					" but server does not support this capability",
 				util.ErrNetconfError)
 		}
 	}

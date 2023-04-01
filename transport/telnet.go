@@ -18,6 +18,8 @@ const (
 	wont = byte(252)
 	will = byte(251)
 	sga  = byte(3)
+
+	controlCharSocketTimeoutDivisor = 4
 )
 
 // NewTelnetTransport returns an instance of Telnet transport.
@@ -37,7 +39,7 @@ type Telnet struct {
 }
 
 func (t *Telnet) handleControlCharResponse(ctrlBuf []byte, c byte) ([]byte, error) {
-	if len(ctrlBuf) == 0 { //nolint:nestif
+	if len(ctrlBuf) == 0 { //nolint:nestif,gocritic
 		if c != iac {
 			t.initialBuf = append(t.initialBuf, c)
 		} else {
@@ -51,7 +53,7 @@ func (t *Telnet) handleControlCharResponse(ctrlBuf []byte, c byte) ([]byte, erro
 
 		var writeErr error
 
-		if cmd == do && c == sga {
+		if cmd == do && c == sga { //nolint: gocritic
 			_, writeErr = t.c.Write([]byte{iac, will, c})
 		} else if util.ByteIsAny(cmd, []byte{do, dont}) {
 			_, writeErr = t.c.Write([]byte{iac, wont, c})
@@ -70,7 +72,7 @@ func (t *Telnet) handleControlCharResponse(ctrlBuf []byte, c byte) ([]byte, erro
 }
 
 func (t *Telnet) handleControlChars(a *Args) error {
-	d := a.TimeoutSocket / 4
+	d := a.TimeoutSocket / controlCharSocketTimeoutDivisor
 
 	var handleErr error
 
@@ -83,7 +85,7 @@ func (t *Telnet) handleControlChars(a *Args) error {
 		}
 
 		// speed up timeout after initial Read
-		d = a.TimeoutSocket / 10
+		d = a.TimeoutSocket / controlCharSocketTimeoutDivisor * 2 //nolint:gomnd
 
 		charBuf := make([]byte, 1)
 

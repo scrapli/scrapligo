@@ -32,9 +32,6 @@
                                 </If-list>
                             </if-items>
                         </Dom-list>
-                        <Dom-list>
-                            <name>default</name>
-                        </Dom-list>
                     </dom-items>
                     <evpn_timeout>600</evpn_timeout>
                     <ipAdjRouteDistance>250</ipAdjRouteDistance>

@@ -194,7 +194,7 @@ func getTestSendCommandsFunctionalCommand(t *testing.T, testName, platformName s
 
 func testSendCommandsFunctional(
 	testName, platformName, transportName string,
-	testCase *sendCommandsFunctionalTestcase,
+	_ *sendCommandsFunctionalTestcase,
 ) func(t *testing.T) {
 	return func(t *testing.T) {
 		t.Logf("%s: starting", testName)

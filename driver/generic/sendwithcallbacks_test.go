@@ -39,7 +39,8 @@ func testSendWithCallbacks(
 
 		if r.Failed != nil {
 			t.Fatalf(
-				"%s: response object indicates failure, this shouldn't happenf or send with callbacks",
+				"%s: response object indicates failure,"+
+					" this shouldn't happenf or send with callbacks",
 				testName,
 			)
 		}

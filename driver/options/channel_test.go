@@ -38,7 +38,8 @@ func testWithPromptSearchDepth(testName string, testCase *optionsIntTestCase) fu
 
 		if !cmp.Equal(oo.PromptSearchDepth, testCase.i) {
 			t.Fatalf(
-				"%s: actual and expected prompt search depths do not match\nactual: %d\nexpected:%d",
+				"%s: actual and expected prompt search depths do not match\nactual:"+
+					" %d\nexpected:%d",
 				testName,
 				oo.PromptSearchDepth,
 				testCase.i,

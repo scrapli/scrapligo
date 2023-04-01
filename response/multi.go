@@ -55,8 +55,8 @@ func (mr *MultiResponse) AppendResponse(r *Response) {
 func (mr *MultiResponse) JoinedResult() string {
 	resultsSlice := make([]string, len(mr.Responses))
 
-	for _, resp := range mr.Responses {
-		resultsSlice = append(resultsSlice, resp.Result)
+	for idx, resp := range mr.Responses {
+		resultsSlice[idx] = resp.Result
 	}
 
 	return strings.Join(resultsSlice, "\n")

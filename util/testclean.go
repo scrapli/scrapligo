@@ -31,7 +31,7 @@ func GetCleanFunc(platform string) func(r string) string {
 }
 
 func replaceDoubleNewlines(s string) string {
-	return strings.Replace(s, "\n\n", "\n", -1)
+	return strings.ReplaceAll(s, "\n\n", "\n")
 }
 
 func cleanResponseNoop(r string) string { return r }

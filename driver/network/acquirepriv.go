@@ -110,7 +110,8 @@ func (d *Driver) escalate(target string) error {
 	if !p.EscalateAuth || d.AuthSecondary == "" {
 		if d.AuthSecondary == "" {
 			d.Logger.Info(
-				"no auth secondary set, but escalate target may require auth, trying with no password",
+				"no auth secondary set, but escalate target may require auth," +
+					" trying with no password",
 			)
 		}
 

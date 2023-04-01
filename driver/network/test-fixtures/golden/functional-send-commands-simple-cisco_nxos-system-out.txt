@@ -1,8 +1,6 @@
-
-
 !Command: show running-config
-!Running configuration last done at: Sat Jul  2 18:32:27 2022
-!Time: Sat Jul  2 18:37:39 2022
+!Running configuration last done at: Wed Mar 29 23:33:52 2023
+!Time: Wed Mar 29 23:54:59 2023
 
 version 9.2(4) Bios:version
 hostname vr-n9kv
@@ -21,7 +19,7 @@ feature netconf
 feature grpc
 
 no password strength-check
-username admin password 5 $5$OCIHOM$KYnQ6u7CdgTtDJ1OVIMRFfG4B0LiZP4TCu6NCr8SMU2  role network-admin
+username admin password 5 $5$BBJIEE$bFqq56nf8hAqkutYevGKnptXNMQunMrwKrfbDD8buQ9  role network-admin
 username boxen password 5 $5$ipZx5veq$a7WoQ5.Cnki64vgXPPjcUvQwgKsur3OKpOtGGILPlF/  role network-admin
 username boxen passphrase  lifetime 99999 warntime 14 gracetime 3
 ip domain-lookup

@@ -91,7 +91,8 @@ func testSystemTransportOpenArgs(
 
 		if !cmp.Equal(oo.ExtraArgs, testCase.ss) {
 			t.Fatalf(
-				"%s: actual and expected transport extra args do not match\nactual: %v\nexpected:%v",
+				"%s: actual and expected transport extra args do not match\nactual:"+
+					" %v\nexpected:%v",
 				testName,
 				oo.ExtraArgs,
 				testCase.ss,
