@@ -235,6 +235,12 @@ func TestSendCommandFunctionalGiant(t *testing.T) {
 		t.Skip("skip: functional tests skipped without the '-functional' flag being passed")
 	}
 
+	if !util.PlatformOK(platforms, platformName) {
+		t.Logf("%s: skipping platform '%s'", testName, platformName)
+
+		t.Skip()
+	}
+
 	t.Logf("%s: starting", testName)
 
 	for _, transportName := range []string{transport.SystemTransport, transport.StandardTransport} {
