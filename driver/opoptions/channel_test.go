@@ -246,3 +246,66 @@ func TestWithCompletePatterns(t *testing.T) {
 		t.Run(testName, f)
 	}
 }
+
+func testWithInterimPromptPatterns(testName string, testCase *struct {
+	description string
+	p           []*regexp.Regexp
+	o           interface{}
+	isignored   bool
+},
+) func(t *testing.T) {
+	return func(t *testing.T) {
+		t.Logf("%s: starting", testName)
+
+		err := opoptions.WithInterimPromptPattern(testCase.p)(testCase.o)
+		if err != nil {
+			if errors.Is(err, util.ErrIgnoredOption) && !testCase.isignored {
+				t.Fatalf(
+					"%s: option should be ignored, but returned different error",
+					testName,
+				)
+			}
+
+			return
+		}
+
+		oo, _ := testCase.o.(*channel.OperationOptions)
+
+		if !cmp.Equal(oo.InterimPromptPatterns[0].String(), testCase.p[0].String()) {
+			t.Fatalf(
+				"%s: actual and expected interim patterns do not match\nactual: %v\nexpected:%v",
+				testName,
+				oo.InterimPromptPatterns[0].String(),
+				testCase.p[0].String(),
+			)
+		}
+	}
+}
+
+func TestWithInterimPromptPatterns(t *testing.T) {
+	cases := map[string]*struct {
+		description string
+		p           []*regexp.Regexp
+		o           interface{}
+		isignored   bool
+	}{
+		"set-interim-patterns": {
+			description: "simple set option test",
+			p:           []*regexp.Regexp{regexp.MustCompile(`pattern!`)},
+			o:           &channel.OperationOptions{},
+			isignored:   false,
+		},
+		"ignored": {
+			description: "skipped due to ignored type",
+			p:           nil,
+			o:           &network.Driver{},
+			isignored:   true,
+		},
+	}
+
+	for testName, testCase := range cases {
+		f := testWithInterimPromptPatterns(testName, testCase)
+
+		t.Run(testName, f)
+	}
+}
