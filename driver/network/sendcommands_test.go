@@ -3,7 +3,10 @@ package network_test
 import (
 	"bytes"
 	"fmt"
+	"regexp"
 	"testing"
+
+	"github.com/scrapli/scrapligo/driver/opoptions"
 
 	"github.com/scrapli/scrapligo/util"
 
@@ -14,11 +17,12 @@ import (
 )
 
 type sendCommandsTestCase struct {
-	description string
-	commands    []string
-	payloadFile string
-	stripPrompt bool
-	eager       bool
+	description    string
+	commands       []string
+	payloadFile    string
+	stripPrompt    bool
+	eager          bool
+	interimPrompts []*regexp.Regexp
 }
 
 func testSendCommands(testName string, testCase *sendCommandsTestCase) func(t *testing.T) {
@@ -27,7 +31,13 @@ func testSendCommands(testName string, testCase *sendCommandsTestCase) func(t *t
 
 		d, fileTransportObj := prepareDriver(t, testName, testCase.payloadFile)
 
-		r, err := d.SendCommands(testCase.commands)
+		var opts []util.Option
+
+		if len(testCase.interimPrompts) > 0 {
+			opts = append(opts, opoptions.WithInterimPromptPattern(testCase.interimPrompts))
+		}
+
+		r, err := d.SendCommands(testCase.commands, opts...)
 		if err != nil {
 			t.Fatalf(
 				"%s: encountered error running generic Driver SendCommands, error: %s",
@@ -79,6 +89,18 @@ func TestSendCommands(t *testing.T) {
 			payloadFile: "send-commands-simple.txt",
 			stripPrompt: false,
 			eager:       false,
+		},
+		"send-commands-interim-prompt": {
+			description: "simple send commands test with interim prompt patterns",
+			commands: []string{
+				"some command that starts interim prompt thing",
+				"subcommand1",
+				"subcommand2",
+			},
+			payloadFile:    "send-commands-interim-prompt.txt",
+			stripPrompt:    false,
+			eager:          false,
+			interimPrompts: []*regexp.Regexp{regexp.MustCompile(`(?m)^\.{3}`)},
 		},
 	}
 
