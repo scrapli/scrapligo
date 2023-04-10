@@ -1,0 +1,10 @@
+
+
+some command that starts interim prompt thing
+
+
+subcommand1
+
+
+subcommand2
+

@@ -2,6 +2,7 @@ package channel
 
 import (
 	"fmt"
+	"regexp"
 	"time"
 
 	"github.com/scrapli/scrapligo/util"
@@ -45,9 +46,19 @@ func (c *Channel) SendInputB(input []byte, opts ...util.Option) ([]byte, error) 
 		if !op.Eager {
 			var nb []byte
 
-			nb, err = c.ReadUntilPrompt()
-			if err != nil {
-				cr <- &result{b: b, err: err}
+			var readErr error
+
+			if len(op.InterimPromptPatterns) == 0 {
+				nb, readErr = c.ReadUntilPrompt()
+			} else {
+				prompts := []*regexp.Regexp{c.PromptPattern}
+				prompts = append(prompts, op.InterimPromptPatterns...)
+
+				nb, readErr = c.ReadUntilAnyPrompt(prompts)
+			}
+
+			if readErr != nil {
+				cr <- &result{b: b, err: readErr}
 			}
 
 			b = append(b, nb...)

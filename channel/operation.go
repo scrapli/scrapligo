@@ -18,10 +18,11 @@ const (
 // strip the device prompt out, send eagerly (without reading until the input), and the timeout for
 // the given operation.
 type OperationOptions struct {
-	StripPrompt      bool
-	Eager            bool
-	Timeout          time.Duration
-	CompletePatterns []*regexp.Regexp
+	StripPrompt           bool
+	Eager                 bool
+	Timeout               time.Duration
+	CompletePatterns      []*regexp.Regexp
+	InterimPromptPatterns []*regexp.Regexp
 }
 
 // NewOperation returns a new OperationOptions object with the defaults set and any provided options

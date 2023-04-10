@@ -74,3 +74,43 @@ func WithCompletePatterns(p []*regexp.Regexp) util.Option {
 		return util.ErrIgnoredOption
 	}
 }
+
+// WithInterimPromptPattern is a slice of regex patterns that are valid prompts during a send X
+// operation (either command or config as this is a channel level option). This can be used when
+// devices change their prompt to indicate a multiline input.
+// For example, when editing `trace-options` on nokia srl devices with scrapli(go) the prompt
+// changes to ellipses to indicate you are editing the list still, this looks like this:
+//
+//	```
+//	A:srl# enter candidate private
+//	Candidate 'private-admin' is not empty
+//	--{ * candidate private private-admin }--[  ]--
+//	A:srl#
+//	--{ * candidate private private-admin }--[  ]--
+//	A:srl# system {
+//	--{ * candidate private private-admin }--[ system ]--
+//	A:srl# gnmi-server {
+//	--{ * candidate private private-admin }--[ system gnmi-server ]--
+//	A:srl# admin-state enable
+//	--{ * candidate private private-admin }--[ system gnmi-server ]--
+//	A:srl# trace-options [
+//	...
+//	````
+//
+// Without this option (or modifying the base comms prompt pattern/driver prompt patterns),
+// scrapligo does not accept "..." as a prompt and will time out as it cant "find the prompt". This
+// option allows you to cope with output like the above without modifying the driver/patterns
+// themselves.
+func WithInterimPromptPattern(p []*regexp.Regexp) util.Option {
+	return func(o interface{}) error {
+		c, ok := o.(*channel.OperationOptions)
+
+		if ok {
+			c.InterimPromptPatterns = p
+
+			return nil
+		}
+
+		return util.ErrIgnoredOption
+	}
+}

@@ -1,0 +1,5 @@
+C3560CX#some command that starts interim prompt thing
+... subcommand1
+... subcommand2
+
+C3560CX#
