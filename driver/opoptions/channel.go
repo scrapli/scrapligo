@@ -78,8 +78,8 @@ func WithCompletePatterns(p []*regexp.Regexp) util.Option {
 // WithInterimPromptPattern is a slice of regex patterns that are valid prompts during a send X
 // operation (either command or config as this is a channel level option). This can be used when
 // devices change their prompt to indicate a multiline input.
-// For example, when editing `trace-options` on nokia srl devices with scrapli(go) the prompt changes
-// to ellipses to indicate you are editing the list still, this looks like this:
+// For example, when editing `trace-options` on nokia srl devices with scrapli(go) the prompt
+// changes to ellipses to indicate you are editing the list still, this looks like this:
 //
 //	```
 //	A:srl# enter candidate private
