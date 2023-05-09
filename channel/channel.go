@@ -65,7 +65,7 @@ func NewChannel(
 		PromptPattern:     getPromptPattern(),
 		ReturnChar:        []byte(DefaultReturnChar),
 
-		done: make(chan bool),
+		done: make(chan struct{}),
 
 		Q:    util.NewQueue(),
 		Errs: make(chan error),
@@ -105,7 +105,7 @@ type Channel struct {
 	PromptPattern     *regexp.Regexp
 	ReturnChar        []byte
 
-	done chan bool
+	done chan struct{}
 
 	Q    *util.Queue
 	Errs chan error
@@ -172,9 +172,8 @@ func (c *Channel) Close() error {
 	ch := make(chan struct{})
 
 	go func() {
-		c.done <- true
-
-		ch <- struct{}{}
+		c.done <- struct{}{}
+		close(ch)
 	}()
 
 	select {
