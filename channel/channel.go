@@ -173,6 +173,7 @@ func (c *Channel) Close() error {
 
 	go func() {
 		c.done <- struct{}{}
+
 		close(ch)
 	}()
 
