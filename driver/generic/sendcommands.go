@@ -19,6 +19,10 @@ func (d *Driver) SendCommands(
 
 	m := response.NewMultiResponse(d.Transport.GetHost())
 
+	if len(commands) == 0 {
+		return m, err
+	}
+
 	for _, input := range commands[:len(commands)-1] {
 		var r *response.Response
 
