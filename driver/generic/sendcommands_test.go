@@ -162,3 +162,16 @@ func TestSendCommandsFromFile(t *testing.T) {
 		t.Run(testName, f)
 	}
 }
+
+func TestSendCommandsNoOp(t *testing.T) {
+	testName := "send-commands-no-op"
+
+	t.Logf("%s: starting", testName)
+
+	d, _ := prepareDriver(t, testName, "send-commands-simple.txt")
+
+	_, err := d.SendCommands(nil)
+	if err == nil {
+		t.Fatalf("no-op send commands did not return ErrNoOp")
+	}
+}

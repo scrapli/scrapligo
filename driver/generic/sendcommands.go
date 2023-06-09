@@ -1,6 +1,8 @@
 package generic
 
 import (
+	"fmt"
+
 	"github.com/scrapli/scrapligo/response"
 	"github.com/scrapli/scrapligo/util"
 )
@@ -11,6 +13,10 @@ func (d *Driver) SendCommands(
 	opts ...util.Option,
 ) (*response.MultiResponse, error) {
 	d.Logger.Infof("SendCommands requested, sending '%s'", commands)
+
+	if len(commands) == 0 {
+		return nil, fmt.Errorf("%w: no commands provided", util.ErrNoOp)
+	}
 
 	op, err := NewOperation(opts...)
 	if err != nil {
