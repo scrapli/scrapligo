@@ -25,7 +25,6 @@ linters:
     - asciicheck
     - bodyclose
     - decorder
-    - depguard
     - dogsled
     - dupl
     - dupword

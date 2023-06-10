@@ -27,4 +27,7 @@ var (
 	ErrNetconfError = errors.New("errNetconfError")
 	// ErrOperationError is returned for any "operation" issues -- mostly meaning ops timeouts.
 	ErrOperationError = errors.New("errOperationError")
+	// ErrNoOp is an error returned when a "no op" event happens -- that is a SendCommands or
+	// SendConfigs method is called with an empty command/config slice provided.
+	ErrNoOp = errors.New("errNoOp")
 )
