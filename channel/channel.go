@@ -122,11 +122,12 @@ func (c *Channel) Open() (rerr error) {
 
 		return err
 	}
+
 	defer func() {
 		if rerr != nil {
-			// Don't leave the trasnport open if we are
+			// Don't leave the transport open if we are
 			// going to return an error.
-			c.Close()
+			_ = c.Close()
 		}
 	}()
 
