@@ -126,7 +126,7 @@ func (c *Channel) Open() (rerr error) {
 		if rerr != nil {
 			// Don't leave the trasnport open if we are
 			// going to return an error.
-			c.t.Close(false)
+			c.Close()
 		}
 	}()
 
