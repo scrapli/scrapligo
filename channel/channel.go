@@ -115,7 +115,7 @@ type Channel struct {
 
 // Open opens the underlying Transport and begins the `read` goroutine, this also kicks off any
 // in channel authentication (if necessary).
-func (c *Channel) Open() (rerr error) {
+func (c *Channel) Open() (reterr error) {
 	err := c.t.Open()
 	if err != nil {
 		c.l.Criticalf("error opening channel, error: %s", err)
@@ -124,9 +124,10 @@ func (c *Channel) Open() (rerr error) {
 	}
 
 	defer func() {
-		if rerr != nil {
-			// Don't leave the transport open if we are
-			// going to return an error.
+		if reterr != nil {
+			// don't leave the transport open if we are going to return an error -- especially
+			// important for system transport which may leave ptys hanging open if not closed
+			// nicely, see #135.
 			_ = c.Close()
 		}
 	}()
