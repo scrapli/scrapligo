@@ -21,6 +21,7 @@ func (d *Driver) ServerHasCapability(s string) bool {
 // sent in the initial Hello message.
 func (d *Driver) ServerCapabilities() []string {
 	caps := make([]string, 0, len(d.serverCapabilities))
+
 	return append(caps, d.serverCapabilities...)
 }
 
