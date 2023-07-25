@@ -7,6 +7,10 @@ import (
 	"github.com/scrapli/scrapligo/util"
 )
 
+const (
+	numSessionIDMatches = 2
+)
+
 // ServerHasCapability returns true if the server supports capability s, otherwise false.
 func (d *Driver) ServerHasCapability(s string) bool {
 	for _, serverCapability := range d.serverCapabilities {
@@ -26,8 +30,8 @@ func (d *Driver) ServerCapabilities() []string {
 	return append(caps, d.serverCapabilities...)
 }
 
+// SessionID returns the session ID sent by the server in the initial Hello message.
 func (d *Driver) SessionID() uint64 {
-
 	return d.sessionID
 }
 
@@ -55,14 +59,16 @@ func (d *Driver) processServerCapabilities() error {
 
 	// extract session id if it exists in the hello message
 	sessionIDMatch := ncPatterns.sessionID.FindSubmatch(b)
-	if len(sessionIDMatch) != 2 {
+	if len(sessionIDMatch) == numSessionIDMatches {
 		return nil
 	}
 
 	i, err := strconv.Atoi(string(sessionIDMatch[1]))
 	if err != nil {
-		return fmt.Errorf("invalid sessionID=%s: %v", string(sessionIDMatch[1]), err)
+		return fmt.Errorf("%w: invalid sessionID=%s: %v", util.ErrNetconfError,
+			string(sessionIDMatch[1]), err)
 	}
+
 	d.sessionID = uint64(i)
 
 	return nil
