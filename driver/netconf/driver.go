@@ -58,6 +58,8 @@ const (
 	xmlHeader = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
 
 	initialMessageID = 101
+
+	sessionID = `(?i)<session-id>(\d+)</session-id>`
 )
 
 type netconfPatterns struct {
@@ -69,6 +71,7 @@ type netconfPatterns struct {
 	subscriptionID     *regexp.Regexp
 	subscriptionResult *regexp.Regexp
 	emptyTags          *regexp.Regexp
+	sessionID          *regexp.Regexp
 }
 
 var (
@@ -87,6 +90,7 @@ func getNetconfPatterns() *netconfPatterns {
 			subscriptionID:     regexp.MustCompile(subscriptionIDPattern),
 			subscriptionResult: regexp.MustCompile(subscriptionResultPattern),
 			emptyTags:          regexp.MustCompile(emptyTagPattern),
+			sessionID:          regexp.MustCompile(sessionID),
 		}
 	})
 
@@ -186,6 +190,7 @@ type Driver struct {
 	ForceSelfClosingTags bool
 
 	serverCapabilities []string
+	sessionID          uint64
 	ServerEcho         *bool
 
 	messageID int
