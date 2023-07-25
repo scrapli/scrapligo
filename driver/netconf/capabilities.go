@@ -2,6 +2,7 @@ package netconf
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/scrapli/scrapligo/util"
 )
@@ -25,6 +26,11 @@ func (d *Driver) ServerCapabilities() []string {
 	return append(caps, d.serverCapabilities...)
 }
 
+func (d *Driver) SessionID() uint64 {
+
+	return d.sessionID
+}
+
 func (d *Driver) processServerCapabilities() error {
 	b, err := d.Channel.ReadUntilPrompt()
 	if err != nil {
@@ -46,6 +52,18 @@ func (d *Driver) processServerCapabilities() error {
 	for _, match := range serverCapabilitiesMatches {
 		d.serverCapabilities = append(d.serverCapabilities, string(match[1]))
 	}
+
+	// extract session id if it exists in the hello message
+	sessionIDMatch := ncPatterns.sessionID.FindSubmatch(b)
+	if len(sessionIDMatch) != 2 {
+		return nil
+	}
+
+	i, err := strconv.Atoi(string(sessionIDMatch[1]))
+	if err != nil {
+		return fmt.Errorf("invalid sessionID=%s: %v", string(sessionIDMatch[1]), err)
+	}
+	d.sessionID = uint64(i)
 
 	return nil
 }
