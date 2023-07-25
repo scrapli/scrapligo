@@ -17,6 +17,13 @@ func (d *Driver) ServerHasCapability(s string) bool {
 	return false
 }
 
+// ServerCapabilities returns the list of capabilities the server
+// sent in the initial Hello message.
+func (d *Driver) ServerCapabilities() []string {
+	caps := make([]string, 0, len(d.serverCapabilities))
+	return append(caps, d.serverCapabilities...)
+}
+
 func (d *Driver) processServerCapabilities() error {
 	b, err := d.Channel.ReadUntilPrompt()
 	if err != nil {
