@@ -41,7 +41,7 @@ func (d *Driver) processServerCapabilities() error {
 	// rather than deal w/ xml like scrapli python does, just regex the caps out
 	serverCapabilitiesMatches := ncPatterns.capability.FindAllSubmatch(b, -1)
 
-	d.serverCapabilities = make([]string, 1)
+	d.serverCapabilities = make([]string, 0, len(serverCapabilitiesMatches))
 	for _, match := range serverCapabilitiesMatches {
 		d.serverCapabilities = append(d.serverCapabilities, string(match[1]))
 	}
