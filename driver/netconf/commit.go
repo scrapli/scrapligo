@@ -2,17 +2,33 @@ package netconf
 
 import (
 	"encoding/xml"
+	"strconv"
 
 	"github.com/scrapli/scrapligo/response"
+	"github.com/scrapli/scrapligo/util"
 )
 
 type commit struct {
-	XMLName xml.Name `xml:"commit"`
+	XMLName          xml.Name       `xml:"commit"`
+	Confirmed        *targetElement `xml:"confirmed,omitempty"`
+	ConfirmedTimeout string         `xml:"confirm-timeout,omitempty"`
+	Persist          string         `xml:"persist,omitempty"`
+	PersistID        string         `xml:"persist-id,omitempty"`
 }
 
-func (d *Driver) buildCommitElem() *message {
+func (d *Driver) buildCommitElem(confirmed bool, timeout uint, persist, persistID string) *message {
 	commitElem := &commit{
-		XMLName: xml.Name{},
+		XMLName:   xml.Name{},
+		Persist:   persist,
+		PersistID: persistID,
+	}
+
+	if confirmed {
+		commitElem.Confirmed = &targetElement{}
+	}
+
+	if timeout > 0 {
+		commitElem.ConfirmedTimeout = strconv.Itoa(int(timeout))
 	}
 
 	netconfInput := d.buildPayload(commitElem)
@@ -21,15 +37,21 @@ func (d *Driver) buildCommitElem() *message {
 }
 
 // Commit executes a commit rpc against the NETCONF server.
-func (d *Driver) Commit() (*response.NetconfResponse, error) {
+func (d *Driver) Commit(opts ...util.Option) (*response.NetconfResponse, error) {
 	d.Logger.Info("Commit RPC requested")
 
-	op, err := NewOperation()
+	op, err := NewOperation(opts...)
 	if err != nil {
 		return nil, err
 	}
 
-	return d.sendRPC(d.buildCommitElem(), op)
+	m := d.buildCommitElem(
+		op.CommitConfirmed,
+		op.CommitConfirmTimeout,
+		op.CommitConfirmedPersist,
+		op.CommitConfirmedPersistID)
+
+	return d.sendRPC(m, op)
 }
 
 type discard struct {
