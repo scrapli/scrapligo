@@ -19,6 +19,11 @@ type OperationOptions struct {
 	FilterType  string
 	DefaultType string
 	Timeout     time.Duration
+
+	CommitConfirmed          bool
+	CommitConfirmTimeout     uint
+	CommitConfirmedPersist   string
+	CommitConfirmedPersistID string
 }
 
 // NewOperation returns a new OperationOptions object with the defaults set and any provided options
