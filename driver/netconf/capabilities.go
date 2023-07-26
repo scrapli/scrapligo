@@ -59,7 +59,7 @@ func (d *Driver) processServerCapabilities() error {
 
 	// extract session id if it exists in the hello message
 	sessionIDMatch := ncPatterns.sessionID.FindSubmatch(b)
-	if len(sessionIDMatch) == numSessionIDMatches {
+	if len(sessionIDMatch) != numSessionIDMatches {
 		return nil
 	}
 
