@@ -191,7 +191,6 @@ type Driver struct {
 
 	serverCapabilities []string
 	sessionID          uint64
-	ServerEcho         *bool
 
 	messageID int
 
