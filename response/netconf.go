@@ -41,7 +41,8 @@ func getNetconfPatterns() *netconfPatterns {
 
 // NewNetconfResponse prepares a new NetconfResponse object.
 func NewNetconfResponse(
-	input []byte,
+	input,
+	framedInput []byte,
 	host string,
 	port int,
 	version string,
@@ -50,6 +51,7 @@ func NewNetconfResponse(
 		Host:        host,
 		Port:        port,
 		Input:       input,
+		FramedInput: framedInput,
 		Result:      "",
 		StartTime:   time.Now(),
 		EndTime:     time.Time{},
@@ -69,6 +71,7 @@ type NetconfResponse struct {
 	Host               string
 	Port               int
 	Input              []byte
+	FramedInput        []byte
 	RawResult          []byte
 	Result             string
 	StartTime          time.Time
