@@ -47,21 +47,22 @@ func (d *Driver) sendRPC(
 		d.Logger.Debug("ForceSelfClosingTags is true, enforcing...")
 	}
 
-	b, err := m.serialize(d.SelectedVersion, d.ForceSelfClosingTags)
+	serialized, err := m.serialize(d.SelectedVersion, d.ForceSelfClosingTags)
 	if err != nil {
 		return nil, err
 	}
 
-	d.Logger.Debugf("sending finalized rpc payload:\n%s", string(b))
+	d.Logger.Debugf("sending finalized rpc payload:\n%s", string(serialized.framedXML))
 
 	r := response.NewNetconfResponse(
-		b,
+		serialized.rawXML,
+		serialized.framedXML,
 		d.Transport.GetHost(),
 		d.Transport.GetPort(),
 		d.SelectedVersion,
 	)
 
-	err = d.Channel.WriteAndReturn(b, false)
+	err = d.Channel.WriteAndReturn(serialized.framedXML, false)
 	if err != nil {
 		return nil, err
 	}

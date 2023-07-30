@@ -20,7 +20,7 @@ func testNetconfRecord(testName string, testCase *testNetconfRecordTestCase) fun
 	return func(t *testing.T) {
 		t.Logf("%s: starting", testName)
 
-		r := response.NewNetconfResponse(nil, "localhost", 830, testCase.version)
+		r := response.NewNetconfResponse(nil, nil, "localhost", 830, testCase.version)
 
 		r.Record(readFile(t, testCase.payloadFile))
 
