@@ -3,17 +3,21 @@ package util
 import (
 	"bytes"
 	"regexp"
+	"sync"
 )
 
 const ansi = "[\u001B\u009B][[\\]()#;?]*(?:(?:(?:[a-zA-Z\\d]*(?:;[a-zA-Z\\d]*)*)?" +
 	"\u0007)|(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PRZcf-ntqry=><~]))"
 
-var ansiPattern *regexp.Regexp //nolint: gochecknoglobals
+var (
+	ansiPattern     *regexp.Regexp //nolint: gochecknoglobals
+	ansiPatternOnce sync.Once      //nolint: gochecknoglobals
+)
 
 func getAnsiPattern() *regexp.Regexp {
-	if ansiPattern == nil {
+	ansiPatternOnce.Do(func() {
 		ansiPattern = regexp.MustCompile(ansi)
-	}
+	})
 
 	return ansiPattern
 }
