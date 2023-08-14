@@ -39,6 +39,14 @@ func TestForceSelfClosingTags(t *testing.T) {
 			got:  []byte(`<running>  </running>`),
 			want: []byte(`<running/>`),
 		},
+		"dont_replace_already_self_closed_tags": {
+			got: []byte(
+				`<target><candidate xmlns="urn:nokia.com:sros:ns:yang:sr:ietf-netconf-augments"/></target>`, //nolint: lll
+			),
+			want: []byte(
+				`<target><candidate xmlns="urn:nokia.com:sros:ns:yang:sr:ietf-netconf-augments"/></target>`, //nolint: lll
+			),
+		},
 	}
 
 	for name, tt := range tests {

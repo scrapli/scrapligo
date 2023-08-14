@@ -26,19 +26,6 @@ func (d *Driver) RPC(opts ...util.Option) (*response.NetconfResponse, error) {
 	return d.sendRPC(d.buildRPCElem(op.Filter), op)
 }
 
-// ForceSelfClosingTags accepts a netconf looking xml byte slice and forces any "empty" tags (tags
-// without attributes) to use self-closing tags. For example:
-// `<running> </running>`
-// Would be converted to:
-// `<running/>`.
-func ForceSelfClosingTags(b []byte) []byte {
-	ncPatterns := getNetconfPatterns()
-
-	r := ncPatterns.emptyTags.ReplaceAll(b, []byte("<$1$2/>"))
-
-	return r
-}
-
 func (d *Driver) sendRPC(
 	m *message,
 	op *OperationOptions,
