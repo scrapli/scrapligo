@@ -33,9 +33,6 @@ func (c *Channel) read() {
 		// afraid to remove it!
 		b = bytes.ReplaceAll(b, []byte("\r"), []byte(""))
 
-		// trim out all the space we padded in the buffer to read into
-		b = bytes.ReplaceAll(b, []byte("\x00"), []byte(""))
-
 		if bytes.Contains(b, []byte("\x1b")) {
 			b = util.StripANSI(b)
 		}
@@ -117,14 +114,10 @@ func (c *Channel) ReadUntilPrompt() ([]byte, error) {
 	var rb []byte
 
 	for {
-		select {
-		case err := <-c.Errs:
+		nb, err := c.Read()
+		if err != nil {
 			return nil, err
-		default:
-			time.Sleep(c.ReadDelay)
 		}
-
-		nb := c.Q.Dequeue()
 
 		if nb == nil {
 			continue
@@ -137,6 +130,8 @@ func (c *Channel) ReadUntilPrompt() ([]byte, error) {
 
 			return rb, nil
 		}
+
+		time.Sleep(c.ReadDelay)
 	}
 }
 
@@ -146,14 +141,10 @@ func (c *Channel) ReadUntilAnyPrompt(prompts []*regexp.Regexp) ([]byte, error) {
 	var rb []byte
 
 	for {
-		select {
-		case err := <-c.Errs:
+		nb, err := c.Read()
+		if err != nil {
 			return nil, err
-		default:
-			time.Sleep(c.ReadDelay)
 		}
-
-		nb := c.Q.Dequeue()
 
 		if nb == nil {
 			continue
@@ -161,13 +152,17 @@ func (c *Channel) ReadUntilAnyPrompt(prompts []*regexp.Regexp) ([]byte, error) {
 
 		rb = append(rb, nb...)
 
+		prb := c.processReadBuf(rb)
+
 		for _, p := range prompts {
-			if p.Match(rb) {
+			if p.Match(prb) {
 				c.l.Debugf("channel read %#v", string(rb))
 
 				return rb, nil
 			}
 		}
+
+		time.Sleep(c.ReadDelay)
 	}
 }
 
@@ -177,14 +172,10 @@ func (c *Channel) ReadUntilExplicit(b []byte) ([]byte, error) {
 	var rb []byte
 
 	for {
-		select {
-		case err := <-c.Errs:
+		nb, err := c.Read()
+		if err != nil {
 			return nil, err
-		default:
-			time.Sleep(c.ReadDelay)
 		}
-
-		nb := c.Q.Dequeue()
 
 		if nb == nil {
 			continue
@@ -192,10 +183,12 @@ func (c *Channel) ReadUntilExplicit(b []byte) ([]byte, error) {
 
 		rb = append(rb, nb...)
 
-		if bytes.Contains(rb, b) {
+		if bytes.Contains(c.processReadBuf(rb), b) {
 			c.l.Debugf("channel read %#v", string(rb))
 
 			return rb, nil
 		}
+
+		time.Sleep(c.ReadDelay)
 	}
 }

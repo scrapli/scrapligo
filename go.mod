@@ -7,6 +7,5 @@ require (
 	github.com/google/go-cmp v0.5.9
 	github.com/sirikothe/gotextfsm v1.0.1-0.20200816110946-6aa2cfd355e4
 	golang.org/x/crypto v0.6.0
-	golang.org/x/term v0.8.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1
 )
