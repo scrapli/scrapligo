@@ -60,8 +60,6 @@ func (c *Channel) authenticateSSH(p, pp []byte) *result {
 		}
 
 		if c.PasswordPattern.Match(b) { //nolint:nestif
-			b = []byte{}
-
 			pCount++
 
 			if pCount > passwordSeenMax {
@@ -80,9 +78,10 @@ func (c *Channel) authenticateSSH(p, pp []byte) *result {
 			if err != nil {
 				return &result{nil, err}
 			}
-		} else if c.PassphrasePattern.Match(b) {
-			b = []byte{}
 
+			// reset the buffer so we don't re-read things and so we can find the prompt (hopefully)
+			b = []byte{}
+		} else if c.PassphrasePattern.Match(b) {
 			ppCount++
 
 			if ppCount > passphraseSeenMax {
@@ -105,6 +104,8 @@ func (c *Channel) authenticateSSH(p, pp []byte) *result {
 			if err != nil {
 				return &result{nil, err}
 			}
+
+			b = []byte{}
 		}
 	}
 }

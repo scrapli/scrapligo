@@ -26,7 +26,10 @@ func (c *Channel) GetPrompt() ([]byte, error) {
 
 		b, err = c.ReadUntilPrompt()
 
-		cr <- &result{b: b, err: err}
+		// we already know the pattern is in the buf, we just want ot re to yoink it out without
+		// any newlines or extra stuff we read (which shouldn't happen outside the initial
+		// connection but...)
+		cr <- &result{b: c.PromptPattern.Find(b), err: err}
 	}()
 
 	timer := time.NewTimer(c.TimeoutOps)
