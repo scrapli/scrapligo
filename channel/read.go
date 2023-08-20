@@ -120,6 +120,8 @@ func (c *Channel) ReadUntilPrompt() ([]byte, error) {
 		}
 
 		if nb == nil {
+			time.Sleep(c.ReadDelay)
+
 			continue
 		}
 
@@ -130,8 +132,6 @@ func (c *Channel) ReadUntilPrompt() ([]byte, error) {
 
 			return rb, nil
 		}
-
-		time.Sleep(c.ReadDelay)
 	}
 }
 
@@ -147,6 +147,8 @@ func (c *Channel) ReadUntilAnyPrompt(prompts []*regexp.Regexp) ([]byte, error) {
 		}
 
 		if nb == nil {
+			time.Sleep(c.ReadDelay)
+
 			continue
 		}
 
@@ -161,8 +163,6 @@ func (c *Channel) ReadUntilAnyPrompt(prompts []*regexp.Regexp) ([]byte, error) {
 				return rb, nil
 			}
 		}
-
-		time.Sleep(c.ReadDelay)
 	}
 }
 
@@ -178,6 +178,8 @@ func (c *Channel) ReadUntilExplicit(b []byte) ([]byte, error) {
 		}
 
 		if nb == nil {
+			time.Sleep(c.ReadDelay)
+
 			continue
 		}
 
@@ -188,7 +190,5 @@ func (c *Channel) ReadUntilExplicit(b []byte) ([]byte, error) {
 
 			return rb, nil
 		}
-
-		time.Sleep(c.ReadDelay)
 	}
 }
