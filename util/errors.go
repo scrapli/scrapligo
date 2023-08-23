@@ -6,6 +6,10 @@ var (
 	// ErrIgnoredOption is the error returned when attempting to apply an option to a struct that
 	// is not of the expected type. This error should not be exposed to end users.
 	ErrIgnoredOption = errors.New("errIgnoredOption")
+	// ErrConnectionError is the error returned for non auth related connection failures typically
+	// encountered during *in channel ssh authentication* -- things like host key verification
+	// failures and other openssh errors.
+	ErrConnectionError = errors.New("errConnectionError")
 	// ErrBadOption is returned when a bad value is passed to an option function.
 	ErrBadOption = errors.New("errBadOption")
 	// ErrTimeoutError is returned for any scrapligo timeout issues, meaning socket, transport or

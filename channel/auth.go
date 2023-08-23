@@ -1,6 +1,7 @@
 package channel
 
 import (
+	"bytes"
 	"fmt"
 	"regexp"
 	"sync"
@@ -21,9 +22,17 @@ type authPatterns struct {
 	passphrase *regexp.Regexp
 }
 
+type sshErrorMessagePatterns struct {
+	offeredOptions *regexp.Regexp
+	badConfig      *regexp.Regexp
+}
+
 var (
 	authPatternsInstance     *authPatterns //nolint:gochecknoglobals
 	authPatternsInstanceOnce sync.Once     //nolint:gochecknoglobals
+
+	sshErrorMessagePatternsInstance *sshErrorMessagePatterns //nolint:gochecknoglobals
+	sshErrorMessagePatternsOnce     sync.Once                //nolint:gochecknoglobals
 )
 
 func getAuthPatterns() *authPatterns {
@@ -38,6 +47,17 @@ func getAuthPatterns() *authPatterns {
 	return authPatternsInstance
 }
 
+func getSSHErrorMessagePatterns() *sshErrorMessagePatterns {
+	sshErrorMessagePatternsOnce.Do(func() {
+		sshErrorMessagePatternsInstance = &sshErrorMessagePatterns{
+			offeredOptions: regexp.MustCompile(`(?im)their offer: ([a-z0-9\-,]*)`),
+			badConfig:      regexp.MustCompile(`(?im)bad configuration option: ([a-z0-9+=,]*)`),
+		}
+	})
+
+	return sshErrorMessagePatternsInstance
+}
+
 func (c *Channel) authenticateSSH(p, pp []byte) *result {
 	pCount := 0
 
@@ -46,14 +66,17 @@ func (c *Channel) authenticateSSH(p, pp []byte) *result {
 	var b []byte
 
 	for {
-		nb, err := c.ReadUntilAnyPrompt(
-			[]*regexp.Regexp{c.PromptPattern, c.PasswordPattern, c.PassphrasePattern},
-		)
+		nb, err := c.Read()
 		if err != nil {
 			return &result{nil, err}
 		}
 
 		b = append(b, nb...)
+
+		err = c.sshMessageHandler(b)
+		if err != nil {
+			return &result{nil, err}
+		}
 
 		if c.PromptPattern.Match(b) {
 			return &result{b, nil}
@@ -225,4 +248,61 @@ func (c *Channel) AuthenticateTelnet(u, p []byte) ([]byte, error) {
 			util.ErrTimeoutError,
 		)
 	}
+}
+
+func (c *Channel) sshMessageHandler(b []byte) error { //nolint:gocyclo
+	var errorMessage string
+
+	normalizedB := bytes.ToLower(b)
+
+	switch {
+	case bytes.Contains(normalizedB, []byte("host key verification failed")):
+		errorMessage = "host key verification failed"
+	case bytes.Contains(normalizedB, []byte("operation timed out")) ||
+		bytes.Contains(normalizedB, []byte("connection timed out")):
+		errorMessage = "timed out connecting to host"
+	case bytes.Contains(normalizedB, []byte("no route to host")):
+		errorMessage = "no route to host"
+	case bytes.Contains(normalizedB, []byte("no matching")):
+		switch {
+		case bytes.Contains(normalizedB, []byte("no matching host key")):
+			errorMessage = "no matching host key found for host"
+		case bytes.Contains(normalizedB, []byte("no matching key exchange")):
+			errorMessage = "no matching key exchange found for host"
+		case bytes.Contains(normalizedB, []byte("no matching cipher")):
+			errorMessage = "no matching cipher found for host"
+		}
+
+		patterns := getSSHErrorMessagePatterns()
+
+		theirOffer := patterns.offeredOptions.FindSubmatch(b)
+		if len(theirOffer) > 0 {
+			errorMessage += fmt.Sprintf(", their offer: %s", theirOffer[0])
+		}
+	case bytes.Contains(normalizedB, []byte("bad configuration")):
+		errorMessage = "bad ssh configuration option(s) for host"
+
+		patterns := getSSHErrorMessagePatterns()
+
+		badOption := patterns.offeredOptions.FindSubmatch(b)
+		if len(badOption) > 0 {
+			errorMessage += fmt.Sprintf(", bad configuration option: %s", badOption[0])
+		}
+	case bytes.Contains(normalizedB, []byte("warning: unprotected private key file")):
+		errorMessage = "permissions for private key are too open"
+	case bytes.Contains(normalizedB, []byte("could not resolve hostname")):
+		errorMessage = "could not resolve hostname"
+	case bytes.Contains(normalizedB, []byte("permission denied")):
+		errorMessage = "permission denied"
+	}
+
+	if errorMessage != "" {
+		return fmt.Errorf(
+			"%w: encountered error output during in channel ssh authentication, error: '%s'",
+			util.ErrConnectionError,
+			errorMessage,
+		)
+	}
+
+	return nil
 }

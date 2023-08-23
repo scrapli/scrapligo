@@ -24,9 +24,18 @@ func (c *Channel) read() {
 				// the underlying transport was closed so just return
 				return
 			}
+
 			// we got a transport error, put it into the error channel for processing during
-			// the next read activity
+			// the next read activity, log it, sleep and then try again...
+			c.l.Criticalf(
+				"encountered error reading from transport during channel read loop. error: %s", err,
+			)
+
 			c.Errs <- err
+
+			time.Sleep(c.ReadDelay)
+
+			continue
 		}
 
 		// not 100% this is required, but has existed in scrapli/scrapligo for a long time and am
