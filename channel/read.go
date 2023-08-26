@@ -38,6 +38,13 @@ func (c *Channel) read() {
 			continue
 		}
 
+		if len(b) == 0 {
+			// nothing to process... no reason to enqueue empty bytes, sleep and then continue...
+			time.Sleep(c.ReadDelay)
+
+			continue
+		}
+
 		// not 100% this is required, but has existed in scrapli/scrapligo for a long time and am
 		// afraid to remove it!
 		b = bytes.ReplaceAll(b, []byte("\r"), []byte(""))
