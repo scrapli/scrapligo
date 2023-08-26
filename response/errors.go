@@ -15,9 +15,10 @@ type OperationError struct {
 // Error returns an error string for the OperationError object.
 func (e *OperationError) Error() string {
 	return fmt.Sprintf(
-		"operation error from input '%s'. indicated error '%s'",
+		"operation error from input '%s'. matched error sub-string '%s'. full output: '%s'",
 		e.Input,
 		e.ErrorString,
+		e.Output,
 	)
 }
 
@@ -30,9 +31,10 @@ type MultiOperationError struct {
 func (e *MultiOperationError) Error() string {
 	if len(e.Operations) == 1 {
 		return fmt.Sprintf(
-			"operation error from input '%s'. indicated error '%s'",
+			"operation error from input '%s'. matched error sub-string '%s'. full output: '%s'",
 			e.Operations[0].Input,
 			e.Operations[0].ErrorString,
+			e.Operations[0].Output,
 		)
 	}
 

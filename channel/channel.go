@@ -17,7 +17,7 @@ const (
 	// DefaultTimeoutOpsSeconds is the default time value for operations -- 60 seconds.
 	DefaultTimeoutOpsSeconds = 60
 	// DefaultReadDelayMicroSeconds is the default value for the delay between reads of the
-	// transport -- 100 microseconds. Going very low is likely to lead to very high cpu and not
+	// transport -- 250 microseconds. Going very low is likely to lead to very high cpu and not
 	// yield any recognizable gains, so be careful changing this!
 	DefaultReadDelayMicroSeconds = 250
 	// DefaultReturnChar is the character used to send an "enter" key to the device, "\n".
@@ -25,8 +25,9 @@ const (
 	// DefaultPromptSearchDepth -- is the default depth to search for the prompt in the received
 	// bytes.
 	DefaultPromptSearchDepth = 1_000
-	redacted                 = "redacted"
-	readDelayDivisor         = 1_000
+
+	redacted         = "redacted"
+	readDelayDivisor = 1_000
 )
 
 var (
@@ -136,39 +137,41 @@ func (c *Channel) Open() (reterr error) {
 
 	go c.read()
 
-	if !c.AuthBypass {
-		var b []byte
-
-		authData := c.t.InChannelAuthData()
-
-		switch authData.Type {
-		case transport.InChannelAuthSSH:
-			c.l.Debug("transport requests in channel ssh auth, starting...")
-
-			b, err = c.AuthenticateSSH(
-				[]byte(authData.Password),
-				[]byte(authData.PrivateKeyPassPhrase),
-			)
-			if err != nil {
-				return err
-			}
-		case transport.InChannelAuthTelnet:
-			c.l.Debug("transport requests in channel telnet auth, starting...")
-
-			b, err = c.AuthenticateTelnet([]byte(authData.User), []byte(authData.Password))
-			if err != nil {
-				return err
-			}
-		}
-
-		if len(b) > 0 {
-			// requeue any buffer data we get during in channel authentication back onto the
-			// read buffer. mostly this should only be relevant for netconf where we need to
-			// read the server capabilities.
-			c.Q.Requeue(b)
-		}
-	} else {
+	if c.AuthBypass {
 		c.l.Debug("auth bypass is enabled, skipping in channel auth check")
+
+		return nil
+	}
+
+	var b []byte
+
+	authData := c.t.InChannelAuthData()
+
+	switch authData.Type {
+	case transport.InChannelAuthSSH:
+		c.l.Debug("transport requests in channel ssh auth, starting...")
+
+		b, err = c.AuthenticateSSH(
+			[]byte(authData.Password),
+			[]byte(authData.PrivateKeyPassPhrase),
+		)
+		if err != nil {
+			return err
+		}
+	case transport.InChannelAuthTelnet:
+		c.l.Debug("transport requests in channel telnet auth, starting...")
+
+		b, err = c.AuthenticateTelnet([]byte(authData.User), []byte(authData.Password))
+		if err != nil {
+			return err
+		}
+	}
+
+	if len(b) > 0 {
+		// requeue any buffer data we get during in channel authentication back onto the
+		// read buffer. mostly this should only be relevant for netconf where we need to
+		// read the server capabilities.
+		c.Q.Requeue(b)
 	}
 
 	return nil

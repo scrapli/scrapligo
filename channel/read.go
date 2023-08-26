@@ -24,17 +24,30 @@ func (c *Channel) read() {
 				// the underlying transport was closed so just return
 				return
 			}
+
 			// we got a transport error, put it into the error channel for processing during
-			// the next read activity
+			// the next read activity, log it, sleep and then try again...
+			c.l.Criticalf(
+				"encountered error reading from transport during channel read loop. error: %s", err,
+			)
+
 			c.Errs <- err
+
+			time.Sleep(c.ReadDelay)
+
+			continue
+		}
+
+		if len(b) == 0 {
+			// nothing to process... no reason to enqueue empty bytes, sleep and then continue...
+			time.Sleep(c.ReadDelay)
+
+			continue
 		}
 
 		// not 100% this is required, but has existed in scrapli/scrapligo for a long time and am
 		// afraid to remove it!
 		b = bytes.ReplaceAll(b, []byte("\r"), []byte(""))
-
-		// trim out all the space we padded in the buffer to read into
-		b = bytes.ReplaceAll(b, []byte("\x00"), []byte(""))
 
 		if bytes.Contains(b, []byte("\x1b")) {
 			b = util.StripANSI(b)
@@ -117,16 +130,14 @@ func (c *Channel) ReadUntilPrompt() ([]byte, error) {
 	var rb []byte
 
 	for {
-		select {
-		case err := <-c.Errs:
+		nb, err := c.Read()
+		if err != nil {
 			return nil, err
-		default:
-			time.Sleep(c.ReadDelay)
 		}
 
-		nb := c.Q.Dequeue()
-
 		if nb == nil {
+			time.Sleep(c.ReadDelay)
+
 			continue
 		}
 
@@ -146,23 +157,23 @@ func (c *Channel) ReadUntilAnyPrompt(prompts []*regexp.Regexp) ([]byte, error) {
 	var rb []byte
 
 	for {
-		select {
-		case err := <-c.Errs:
+		nb, err := c.Read()
+		if err != nil {
 			return nil, err
-		default:
-			time.Sleep(c.ReadDelay)
 		}
 
-		nb := c.Q.Dequeue()
-
 		if nb == nil {
+			time.Sleep(c.ReadDelay)
+
 			continue
 		}
 
 		rb = append(rb, nb...)
 
+		prb := c.processReadBuf(rb)
+
 		for _, p := range prompts {
-			if p.Match(rb) {
+			if p.Match(prb) {
 				c.l.Debugf("channel read %#v", string(rb))
 
 				return rb, nil
@@ -177,22 +188,20 @@ func (c *Channel) ReadUntilExplicit(b []byte) ([]byte, error) {
 	var rb []byte
 
 	for {
-		select {
-		case err := <-c.Errs:
+		nb, err := c.Read()
+		if err != nil {
 			return nil, err
-		default:
-			time.Sleep(c.ReadDelay)
 		}
 
-		nb := c.Q.Dequeue()
-
 		if nb == nil {
+			time.Sleep(c.ReadDelay)
+
 			continue
 		}
 
 		rb = append(rb, nb...)
 
-		if bytes.Contains(rb, b) {
+		if bytes.Contains(c.processReadBuf(rb), b) {
 			c.l.Debugf("channel read %#v", string(rb))
 
 			return rb, nil

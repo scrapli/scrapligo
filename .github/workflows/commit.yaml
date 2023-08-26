@@ -9,7 +9,7 @@ jobs:
   unit-test:
     runs-on: ${{ matrix.os }}
     strategy:
-      max-parallel: 8
+      max-parallel: 10
       matrix:
         os:
           - ubuntu-latest
@@ -19,11 +19,12 @@ jobs:
           - "1.17"
           - "1.18"
           - "1.19"
+          - "1.20"
     steps:
       - name: checkout
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0
+          fetch-depth: 1
       - name: set up go ${{ matrix.go-version }}
         uses: actions/setup-go@v4
         with:
@@ -31,7 +32,7 @@ jobs:
       - name: lint
         uses: golangci/golangci-lint-action@v3
         with:
-          version: v1.52
+          version: v1.54
           args: --timeout 5m
       - name: install gotestsum
         run: go install gotest.tools/gotestsum@latest
@@ -45,7 +46,7 @@ jobs:
         os:
           - ubuntu-latest
         go-version:
-          - "1.19"
+          - "1.20"
         runtime:
           - "docker"
     needs:
@@ -54,7 +55,7 @@ jobs:
       - name: checkout
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0
+          fetch-depth: 1
       - name: set up go ${{ matrix.go-version }}
         uses: actions/setup-go@v4
         with:

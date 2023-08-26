@@ -236,9 +236,12 @@ func (t *Standard) IsAlive() bool {
 func (t *Standard) Read(n int) ([]byte, error) {
 	b := make([]byte, n)
 
-	_, err := t.reader.Read(b)
+	n, err := t.reader.Read(b)
+	if err != nil {
+		return nil, err
+	}
 
-	return b, err
+	return b[0:n], nil
 }
 
 // Write writes bytes b to the transport.
