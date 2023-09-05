@@ -7,6 +7,8 @@ import (
 	"regexp"
 	"time"
 
+	"github.com/lithammer/fuzzysearch/fuzzy"
+
 	"github.com/scrapli/scrapligo/util"
 )
 
@@ -106,6 +108,37 @@ func (c *Channel) ReadUntilInput(b []byte) ([]byte, error) {
 	}
 
 	return c.ReadUntilExplicit(b)
+}
+
+// ReadUntilFuzzy reads until a fuzzy match of the input is found.
+func (c *Channel) ReadUntilFuzzy(b []byte) ([]byte, error) {
+	if len(b) == 0 {
+		return nil, nil
+	}
+
+	var rb []byte
+
+	for {
+		nb, err := c.Read()
+		if err != nil {
+			return nil, err
+		}
+
+		if nb == nil {
+			time.Sleep(c.ReadDelay)
+
+			continue
+		}
+
+		rb = append(rb, nb...)
+
+		rankedMatch := fuzzy.RankMatch(string(b), string(rb))
+		if rankedMatch == 0 || rankedMatch >= 50 {
+			c.l.Debugf("channel read %#v", string(rb))
+
+			return rb, nil
+		}
+	}
 }
 
 func (c *Channel) processReadBuf(rb []byte) []byte {

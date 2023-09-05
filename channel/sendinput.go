@@ -17,6 +17,12 @@ func (c *Channel) SendInputB(input []byte, opts ...util.Option) ([]byte, error) 
 		return nil, err
 	}
 
+	readUntilF := c.ReadUntilInput
+
+	if op.FuzzyMatchInput {
+		readUntilF = c.ReadUntilFuzzy
+	}
+
 	cr := make(chan *result)
 
 	go func() {
@@ -29,7 +35,7 @@ func (c *Channel) SendInputB(input []byte, opts ...util.Option) ([]byte, error) 
 			return
 		}
 
-		_, err = c.ReadUntilInput(input)
+		_, err = readUntilF(input)
 		if err != nil {
 			cr <- &result{b: b, err: err}
 

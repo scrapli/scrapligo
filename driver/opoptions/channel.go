@@ -41,6 +41,38 @@ func WithEager() util.Option {
 	}
 }
 
+// WithFuzzyMatchInput makes the channel use fuzzy matching when reading until the input -- this can
+// be useful for inputs that devices split across multiple lines, for example, when entering a b64
+// key in nokia srlinux things look something like this:
+// ```
+//
+//	--{ * candidate private private-admin }--[  ]--
+//	A:srl# set / system tls server-profile carl key "-----BEGIN RSA PRIVATE KEY-----
+//	...SOMEVALUES
+//	...SOMEMOREVALUES
+//	...-----END RSA PRIVATE KEY-----"
+//	--{ * candidate private private-admin }--[  ]--
+//	A:srl
+//
+// ```
+//
+// The above output would cause "normal" scrapli operations to fail, but with fuzzy matching we can
+// determine that all of our input is actually there, its just split across newlines and has some
+// ellipses in front of each line.
+func WithFuzzyMatchInput() util.Option {
+	return func(o interface{}) error {
+		c, ok := o.(*channel.OperationOptions)
+
+		if ok {
+			c.FuzzyMatchInput = true
+
+			return nil
+		}
+
+		return util.ErrIgnoredOption
+	}
+}
+
 // WithTimeoutOps modifies the timeout "ops" value, or the timeout for a given operation. This only
 // modifies the timeout for the current operation and does not update the actual Channel TimeoutOps
 // value permanently.
