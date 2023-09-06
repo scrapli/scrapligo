@@ -24,9 +24,8 @@ func testStripANSI(testName string, in, expected []byte) func(t *testing.T) {
 
 func TestStripANSI(t *testing.T) {
 	cases := map[string]struct {
-		description string
-		in          []byte
-		expected    []byte
+		in       []byte
+		expected []byte
 	}{
 		"strip-ansi-simple": {
 			in:       []byte("[admin@CoolDevice.Sea1: \x1b[1m/\x1b[0;0m]$"),
@@ -56,10 +55,9 @@ func testByteIsAny(testName string, b byte, l []byte, expected bool) func(t *tes
 
 func TestByteIsAny(t *testing.T) {
 	cases := map[string]struct {
-		description string
-		b           byte
-		l           []byte
-		expected    bool
+		b        byte
+		l        []byte
+		expected bool
 	}{
 		"byte-is-any-simple": {
 			b:        byte(1),
@@ -96,10 +94,9 @@ func testByteContainsAny(testName string, b []byte, l [][]byte, expected bool) f
 
 func TestByteContainsAny(t *testing.T) {
 	cases := map[string]struct {
-		description string
-		b           []byte
-		l           [][]byte
-		expected    bool
+		b        []byte
+		l        [][]byte
+		expected bool
 	}{
 		"byte-contains-any-simple": {
 			b:        []byte("one"),
@@ -115,6 +112,69 @@ func TestByteContainsAny(t *testing.T) {
 
 	for testName, testCase := range cases {
 		f := testByteContainsAny(testName, testCase.b, testCase.l, testCase.expected)
+
+		t.Run(testName, f)
+	}
+}
+
+func testBytesRoughlyContains(
+	testName string,
+	input, output []byte,
+	expected bool,
+) func(t *testing.T) {
+	return func(t *testing.T) {
+		t.Logf(
+			"%s: starting", testName)
+
+		if !cmp.Equal(util.BytesRoughlyContains(input, output), expected) {
+			t.Fatalf(
+				"%s: actual and expected outputs do not match",
+				testName,
+			)
+		}
+	}
+}
+
+func TestBytesRoughlyContains(t *testing.T) {
+	cases := map[string]struct {
+		input    []byte
+		output   []byte
+		expected bool
+	}{
+		"exactly-equal": {
+			[]byte("potato"),
+			[]byte("potato"),
+			true,
+		},
+		"output-has-prefix": {
+			[]byte("potato"),
+			[]byte("...potato"),
+			true,
+		},
+		"output-has-suffix": {
+			[]byte("potato"),
+			[]byte("potato..."),
+			true,
+		},
+		"output-has-prefix-and-suffix": {
+			[]byte("potato"),
+			[]byte("...potato..."),
+			true,
+		},
+		"output-has-newlines": {
+			[]byte("potato"),
+			[]byte("po\nta\nto"),
+			true,
+		},
+		"output-is-reversed": {
+			[]byte("potato"),
+			[]byte("otatop"),
+			false,
+		},
+	}
+
+	for testName, testCase := range cases {
+		f := testBytesRoughlyContains(testName, testCase.input, testCase.output, testCase.expected)
 
 		t.Run(testName, f)
 	}

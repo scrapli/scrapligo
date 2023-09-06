@@ -79,7 +79,8 @@ func ByteContainsAny(b []byte, l [][]byte) bool {
 // happen!
 //
 // Note: @lithammer's fuzzy search `Match` function here:
-// https://github.com/lithammer/fuzzysearch/blob/master/fuzzy/fuzzy.go#L60-L83
+// https://github.com/lithammer/fuzzysearch/blob/ \
+// b1f37a8c2080703d9fbd3e8989b2855c149a09e4/fuzzy/fuzzy.go#L60-L83.
 func BytesRoughlyContains(input, output []byte) bool {
 	switch diffLen := len(output) - len(input); {
 	case diffLen < 0:
@@ -92,10 +93,15 @@ func BytesRoughlyContains(input, output []byte) bool {
 		}
 	}
 
+	if bytes.Contains(output, input) {
+		// now we can just check if our exact input is in the output in the simple way
+		return true
+	}
+
 	for _, inputChar := range input {
 		var shouldContinue bool
 
-		shouldContinue, output = innerBytesRoughlyContains(inputChar, output)
+		shouldContinue, output = bytesRoughlyContainsIterOutputForInputChar(inputChar, output)
 
 		if shouldContinue {
 			continue
@@ -107,7 +113,7 @@ func BytesRoughlyContains(input, output []byte) bool {
 	return true
 }
 
-func innerBytesRoughlyContains(
+func bytesRoughlyContainsIterOutputForInputChar(
 	inputChar byte,
 	output []byte,
 ) (shouldContinue bool, newOutput []byte) {
