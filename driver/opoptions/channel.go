@@ -42,7 +42,7 @@ func WithEager() util.Option {
 }
 
 // WithFuzzyMatchInput makes the channel use fuzzy matching when reading until the input -- this can
-// be useful for inputs that devices split across multiple lines, for example, when entering a b64
+// be useful for inputs that devices split across multiple lines, for example, when entering a cert
 // key in nokia srlinux things look something like this:
 // ```
 //
