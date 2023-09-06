@@ -78,6 +78,8 @@ func (c *Channel) Read() ([]byte, error) {
 
 	b := c.Q.Dequeue()
 
+	c.l.Debugf("channel read %#v", string(b))
+
 	return b, nil
 }
 
@@ -94,6 +96,8 @@ func (c *Channel) ReadAll() ([]byte, error) {
 	}
 
 	b := c.Q.DequeueAll()
+
+	c.l.Debugf("channel read %#v", string(b))
 
 	return b, nil
 }
@@ -131,8 +135,6 @@ func (c *Channel) ReadUntilFuzzy(b []byte) ([]byte, error) {
 		rb = append(rb, nb...)
 
 		if util.BytesRoughlyContains(b, rb) {
-			c.l.Debugf("channel read %#v", string(rb))
-
 			return rb, nil
 		}
 	}
@@ -174,8 +176,6 @@ func (c *Channel) ReadUntilPrompt() ([]byte, error) {
 		rb = append(rb, nb...)
 
 		if c.PromptPattern.Match(c.processReadBuf(rb)) {
-			c.l.Debugf("channel read %#v", string(rb))
-
 			return rb, nil
 		}
 	}
@@ -204,8 +204,6 @@ func (c *Channel) ReadUntilAnyPrompt(prompts []*regexp.Regexp) ([]byte, error) {
 
 		for _, p := range prompts {
 			if p.Match(prb) {
-				c.l.Debugf("channel read %#v", string(rb))
-
 				return rb, nil
 			}
 		}
@@ -232,8 +230,6 @@ func (c *Channel) ReadUntilExplicit(b []byte) ([]byte, error) {
 		rb = append(rb, nb...)
 
 		if bytes.Contains(c.processReadBuf(rb), b) {
-			c.l.Debugf("channel read %#v", string(rb))
-
 			return rb, nil
 		}
 	}
