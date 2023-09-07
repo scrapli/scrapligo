@@ -134,7 +134,7 @@ func (c *Channel) ReadUntilFuzzy(b []byte) ([]byte, error) {
 
 		rb = append(rb, nb...)
 
-		if util.BytesRoughlyContains(b, rb) {
+		if util.BytesRoughlyContains(b, c.processReadBuf(rb)) {
 			return rb, nil
 		}
 	}
