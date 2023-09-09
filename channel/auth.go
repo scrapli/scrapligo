@@ -82,7 +82,7 @@ func (c *Channel) authenticateSSH(p, pp []byte) *result {
 			return &result{b, nil}
 		}
 
-		if c.PasswordPattern.Match(b) { //nolint:nestif
+		if c.PasswordPattern.Match(b) {
 			pCount++
 
 			if pCount > passwordSeenMax {
@@ -104,7 +104,11 @@ func (c *Channel) authenticateSSH(p, pp []byte) *result {
 
 			// reset the buffer so we don't re-read things and so we can find the prompt (hopefully)
 			b = []byte{}
-		} else if c.PassphrasePattern.Match(b) {
+
+			continue
+		}
+
+		if c.PassphrasePattern.Match(b) {
 			ppCount++
 
 			if ppCount > passphraseSeenMax {
@@ -177,7 +181,7 @@ func (c *Channel) authenticateTelnet(u, p []byte) *result {
 			return &result{b, nil}
 		}
 
-		if c.UsernamePattern.Match(b) { //nolint:nestif
+		if c.UsernamePattern.Match(b) {
 			b = []byte{}
 
 			uCount++
@@ -200,7 +204,11 @@ func (c *Channel) authenticateTelnet(u, p []byte) *result {
 			if err != nil {
 				return &result{nil, err}
 			}
-		} else if c.PasswordPattern.Match(b) {
+
+			continue
+		}
+
+		if c.PasswordPattern.Match(b) {
 			b = []byte{}
 
 			pCount++
