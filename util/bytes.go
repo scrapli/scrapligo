@@ -82,17 +82,6 @@ func ByteContainsAny(b []byte, l [][]byte) bool {
 // https://github.com/lithammer/fuzzysearch/blob/ \
 // b1f37a8c2080703d9fbd3e8989b2855c149a09e4/fuzzy/fuzzy.go#L60-L83.
 func BytesRoughlyContains(input, output []byte) bool {
-	switch diffLen := len(output) - len(input); {
-	case diffLen < 0:
-		// output is not long enough to hold all our inputs, so definitely not roughly contains!
-		return false
-	case diffLen == 0:
-		// diff is same length, can directly test equality
-		if bytes.Equal(input, output) {
-			return true
-		}
-	}
-
 	if bytes.Contains(output, input) {
 		// now we can just check if our exact input is in the output in the simple way
 		return true
