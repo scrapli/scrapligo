@@ -21,7 +21,7 @@ default:
       escalate-prompt: '(?im)^[pP]assword:\s?$'
     configuration:
       name: 'configuration'
-      pattern: '(?im)^[\w.\-@()/: ]{1,63}\(config[\w.\-@/:]{0,32}\)#\s?$'
+      pattern: '(?im)^[\w.\-@()/: ]{1,63}\(config[\w.\-@/:]{0,63}\)#\s?$'
       previous-priv: 'privilege-exec'
       deescalate: 'end'
       escalate: 'configure terminal'
