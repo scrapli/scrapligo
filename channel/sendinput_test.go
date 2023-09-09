@@ -89,6 +89,13 @@ func TestSendInput(t *testing.T) {
 			noStripPrompt: false,
 			eager:         false,
 		},
+		"send-input-requiring-fuzzy-match": {
+			description:   "simple send input but requiring fuzzy match to work",
+			input:         "show run int vlan1",
+			payloadFile:   "send-input-require-fuzzy.txt",
+			noStripPrompt: false,
+			eager:         false,
+		},
 	}
 
 	for testName, testCase := range cases {

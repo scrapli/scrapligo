@@ -17,10 +17,10 @@ func (c *Channel) SendInputB(input []byte, opts ...util.Option) ([]byte, error) 
 		return nil, err
 	}
 
-	readUntilF := c.ReadUntilInput
+	readUntilF := c.ReadUntilFuzzy
 
-	if op.FuzzyMatchInput {
-		readUntilF = c.ReadUntilFuzzy
+	if op.ExactMatchInput {
+		readUntilF = c.ReadUntilExplicit
 	}
 
 	cr := make(chan *result)

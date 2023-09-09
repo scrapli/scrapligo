@@ -11,7 +11,7 @@ import (
 const (
 	defaultStripPrompt = true
 	defaultEager       = false
-	defaultFuzzy       = false
+	defaultExact       = false
 	defaultTimeout     = -1
 )
 
@@ -21,7 +21,7 @@ const (
 type OperationOptions struct {
 	StripPrompt           bool
 	Eager                 bool
-	FuzzyMatchInput       bool
+	ExactMatchInput       bool
 	Timeout               time.Duration
 	CompletePatterns      []*regexp.Regexp
 	InterimPromptPatterns []*regexp.Regexp
@@ -33,7 +33,7 @@ func NewOperation(options ...util.Option) (*OperationOptions, error) {
 	o := &OperationOptions{
 		StripPrompt:      defaultStripPrompt,
 		Eager:            defaultEager,
-		FuzzyMatchInput:  defaultFuzzy,
+		ExactMatchInput:  defaultExact,
 		Timeout:          defaultTimeout,
 		CompletePatterns: make([]*regexp.Regexp, 0),
 	}

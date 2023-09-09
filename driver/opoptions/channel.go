@@ -41,9 +41,15 @@ func WithEager() util.Option {
 	}
 }
 
-// WithFuzzyMatchInput makes the channel use fuzzy matching when reading until the input -- this can
-// be useful for inputs that devices split across multiple lines, for example, when entering a cert
-// key in nokia srlinux things look something like this:
+// WithExactMatchInput makes the channel use the historical default `ReadUntilExplicit` when
+// reading until a given input (during a SendX operation). This forces scrapli to look for *exactly*
+// the input you have given. This is more explicit (obviously), and probably also *slightly* faster
+// because we just simply do a direct `Bytes.Contains` rather than the "fuzzy" matching option when
+// this option is false.
+//
+// With fuzzy matching when reading until the input we don't care if the input comes with extra
+// "stuff" in the middle of it -- or if the device splits the input across multiple lines. For
+// example, when entering a cert key in nokia srlinux things look something like this:
 // ```
 //
 //	--{ * candidate private private-admin }--[  ]--
@@ -56,15 +62,15 @@ func WithEager() util.Option {
 //
 // ```
 //
-// The above output would cause "normal" scrapli operations to fail, but with fuzzy matching we can
-// determine that all of our input is actually there, its just split across newlines and has some
-// ellipses in front of each line.
-func WithFuzzyMatchInput() util.Option {
+// The above output would cause the ExactMatchInput style (and historically scrapli by default) to
+// fail as we never read the *exact* input. But, remember that the "exact" match is maybe a tick
+// more efficient and certainly is more exacting. This option enables the historical/legacy default.
+func WithExactMatchInput() util.Option {
 	return func(o interface{}) error {
 		c, ok := o.(*channel.OperationOptions)
 
 		if ok {
-			c.FuzzyMatchInput = true
+			c.ExactMatchInput = true
 
 			return nil
 		}
