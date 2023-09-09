@@ -78,6 +78,10 @@ func (c *Channel) Read() ([]byte, error) {
 
 	b := c.Q.Dequeue()
 
+	if b == nil {
+		return nil, nil
+	}
+
 	c.l.Debugf("channel read %#v", string(b))
 
 	return b, nil
@@ -97,19 +101,13 @@ func (c *Channel) ReadAll() ([]byte, error) {
 
 	b := c.Q.DequeueAll()
 
-	c.l.Debugf("channel read %#v", string(b))
-
-	return b, nil
-}
-
-// ReadUntilInput reads bytes out of the channel Q object until the "input" bytes b are "seen" in
-// the channel output. Once b is seen, all read bytes are returned.
-func (c *Channel) ReadUntilInput(b []byte) ([]byte, error) {
-	if len(b) == 0 {
+	if b == nil {
 		return nil, nil
 	}
 
-	return c.ReadUntilExplicit(b)
+	c.l.Debugf("channel read %#v", string(b))
+
+	return b, nil
 }
 
 // ReadUntilFuzzy reads until a fuzzy match of the input is found.

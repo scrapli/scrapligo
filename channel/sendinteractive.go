@@ -55,7 +55,7 @@ func (c *Channel) SendInteractive( //nolint: gocognit,gocyclo
 			if e.ChannelResponse != "" && !e.HideInput {
 				var nb []byte
 
-				nb, err = c.ReadUntilInput([]byte(e.ChannelInput))
+				nb, err = c.ReadUntilExplicit([]byte(e.ChannelInput))
 				if err != nil {
 					cr <- &result{b: nil, err: err}
 
