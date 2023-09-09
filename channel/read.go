@@ -150,7 +150,15 @@ func (c *Channel) ReadUntilFuzzy(b []byte) ([]byte, error) {
 
 		rb = append(rb, nb...)
 
-		if util.BytesRoughlyContains(b, processReadBuf(rb, inputSearchDepthMultiplier*(len(b)))) {
+		searchDepth := c.PromptSearchDepth
+
+		possibleSearchDepth := inputSearchDepthMultiplier * len(b)
+
+		if possibleSearchDepth > searchDepth {
+			searchDepth = possibleSearchDepth
+		}
+
+		if util.BytesRoughlyContains(b, processReadBuf(rb, searchDepth)) {
 			return rb, nil
 		}
 	}
