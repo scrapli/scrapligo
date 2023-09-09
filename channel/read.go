@@ -10,6 +10,24 @@ import (
 	"github.com/scrapli/scrapligo/util"
 )
 
+const inputSearchDepthMultiplier = 2
+
+func processReadBuf(rb []byte, searchDepth int) []byte {
+	if len(rb) <= searchDepth {
+		return rb
+	}
+
+	prb := rb[len(rb)-searchDepth:]
+
+	partitionIdx := bytes.Index(prb, []byte("\n"))
+
+	if partitionIdx > 0 {
+		prb = prb[partitionIdx:]
+	}
+
+	return prb
+}
+
 func (c *Channel) read() {
 	for {
 		select {
@@ -132,26 +150,10 @@ func (c *Channel) ReadUntilFuzzy(b []byte) ([]byte, error) {
 
 		rb = append(rb, nb...)
 
-		if util.BytesRoughlyContains(b, c.processReadBuf(rb)) {
+		if util.BytesRoughlyContains(b, processReadBuf(rb, inputSearchDepthMultiplier*(len(b)))) {
 			return rb, nil
 		}
 	}
-}
-
-func (c *Channel) processReadBuf(rb []byte) []byte {
-	if len(rb) <= c.PromptSearchDepth {
-		return rb
-	}
-
-	prb := rb[len(rb)-c.PromptSearchDepth:]
-
-	partitionIdx := bytes.Index(prb, []byte("\n"))
-
-	if partitionIdx > 0 {
-		prb = prb[partitionIdx:]
-	}
-
-	return prb
 }
 
 // ReadUntilPrompt reads bytes out of the channel Q object until the channel PromptPattern regex
@@ -173,7 +175,7 @@ func (c *Channel) ReadUntilPrompt() ([]byte, error) {
 
 		rb = append(rb, nb...)
 
-		if c.PromptPattern.Match(c.processReadBuf(rb)) {
+		if c.PromptPattern.Match(processReadBuf(rb, c.PromptSearchDepth)) {
 			return rb, nil
 		}
 	}
@@ -198,7 +200,7 @@ func (c *Channel) ReadUntilAnyPrompt(prompts []*regexp.Regexp) ([]byte, error) {
 
 		rb = append(rb, nb...)
 
-		prb := c.processReadBuf(rb)
+		prb := processReadBuf(rb, c.PromptSearchDepth)
 
 		for _, p := range prompts {
 			if p.Match(prb) {
@@ -227,7 +229,7 @@ func (c *Channel) ReadUntilExplicit(b []byte) ([]byte, error) {
 
 		rb = append(rb, nb...)
 
-		if bytes.Contains(c.processReadBuf(rb), b) {
+		if bytes.Contains(processReadBuf(rb, c.PromptSearchDepth), b) {
 			return rb, nil
 		}
 	}

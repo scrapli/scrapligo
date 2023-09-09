@@ -1,4 +1,4 @@
-C3560CX#show run \x1bint \x1bvlan1
+C3560CX#show run xxintblah vlan1
 Building configuration...
 
 Current configuration : 38 bytes

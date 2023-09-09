@@ -135,7 +135,40 @@ func testBytesRoughlyContains(
 	}
 }
 
+//nolint:lll
 func TestBytesRoughlyContains(t *testing.T) {
+	bannerInput := `set system banner motd-banner "................................................................
+:                  Welcome to Nokia SR Linux!                  :
+:              Open Network OS for the NetOps era.             :
+:                                                              :
+:    This is a freely distributed official container image.    :
+:                      Use it - Share it                       :
+:                                                              :
+: Get started: https://learn.srlinux.dev                       :
+: Container:   https://go.srlinux.dev/container-image          :
+: Docs:        https://doc.srlinux.dev/22-11                   :
+: Rel. notes:  https://doc.srlinux.dev/rn22-11-2               :
+: YANG:        https://yang.srlinux.dev/v22.11.2               :
+: Discord:     https://go.srlinux.dev/discord                  :
+: Contact:     https://go.srlinux.dev/contact-sales            :
+................................................................"`
+
+	bannerOutput := `set system banner motd-banner "................................................................
+...:                  Welcome to Nokia SR Linux!                  :
+...:              Open Network OS for the NetOps era.             :
+...:                                                              :
+...:    This is a freely distributed official container image.    :
+...:                      Use it - Share it                       :
+...:                                                              :
+...: Get started: https://learn.srlinux.dev                       :
+...: Container:   https://go.srlinux.dev/container-image          :
+...: Docs:        https://doc.srlinux.dev/22-11                   :
+...: Rel. notes:  https://doc.srlinux.dev/rn22-11-2               :
+...: YANG:        https://yang.srlinux.dev/v22.11.2               :
+...: Discord:     https://go.srlinux.dev/discord                  :
+...: Contact:     https://go.srlinux.dev/contact-sales            :
+..................................................................."`
+
 	cases := map[string]struct {
 		input    []byte
 		output   []byte
@@ -170,6 +203,11 @@ func TestBytesRoughlyContains(t *testing.T) {
 			[]byte("potato"),
 			[]byte("otatop"),
 			false,
+		},
+		"nokia_srl_banner": {
+			[]byte(bannerInput),
+			[]byte(bannerOutput),
+			true,
 		},
 	}
 
