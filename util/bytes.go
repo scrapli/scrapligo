@@ -83,8 +83,13 @@ func ByteContainsAny(b []byte, l [][]byte) bool {
 // b1f37a8c2080703d9fbd3e8989b2855c149a09e4/fuzzy/fuzzy.go#L60-L83.
 func BytesRoughlyContains(input, output []byte) bool {
 	if bytes.Contains(output, input) {
-		// now we can just check if our exact input is in the output in the simple way
+		// contains check is faster and simpler, if we contain the exact input then we are done
 		return true
+	}
+
+	if len(output) < len(input) {
+		// no point in doing a relatively costly check if there isn't enough chars to check against
+		return false
 	}
 
 	for _, inputChar := range input {
