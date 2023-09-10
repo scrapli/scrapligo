@@ -12,6 +12,18 @@ import (
 
 const inputSearchDepthMultiplier = 2
 
+func getProcessReadBufSearchDepth(promptSearchDepth, inputLen int) int {
+	finalSearchDepth := promptSearchDepth
+
+	possibleSearchDepth := inputSearchDepthMultiplier * inputLen
+
+	if possibleSearchDepth > finalSearchDepth {
+		finalSearchDepth = possibleSearchDepth
+	}
+
+	return finalSearchDepth
+}
+
 func processReadBuf(rb []byte, searchDepth int) []byte {
 	if len(rb) <= searchDepth {
 		return rb
@@ -150,15 +162,38 @@ func (c *Channel) ReadUntilFuzzy(b []byte) ([]byte, error) {
 
 		rb = append(rb, nb...)
 
-		searchDepth := c.PromptSearchDepth
+		if util.BytesRoughlyContains(
+			b,
+			processReadBuf(rb, getProcessReadBufSearchDepth(c.PromptSearchDepth, len(b))),
+		) {
+			return rb, nil
+		}
+	}
+}
 
-		possibleSearchDepth := inputSearchDepthMultiplier * len(b)
+// ReadUntilExplicit reads bytes out of the channel Q object until the bytes b are seen in the
+// output. Once the bytes are seen all read bytes are returned.
+func (c *Channel) ReadUntilExplicit(b []byte) ([]byte, error) {
+	var rb []byte
 
-		if possibleSearchDepth > searchDepth {
-			searchDepth = possibleSearchDepth
+	for {
+		nb, err := c.Read()
+		if err != nil {
+			return nil, err
 		}
 
-		if util.BytesRoughlyContains(b, processReadBuf(rb, searchDepth)) {
+		if nb == nil {
+			time.Sleep(c.ReadDelay)
+
+			continue
+		}
+
+		rb = append(rb, nb...)
+
+		if bytes.Contains(
+			processReadBuf(rb, getProcessReadBufSearchDepth(c.PromptSearchDepth, len(b))),
+			b,
+		) {
 			return rb, nil
 		}
 	}
@@ -214,31 +249,6 @@ func (c *Channel) ReadUntilAnyPrompt(prompts []*regexp.Regexp) ([]byte, error) {
 			if p.Match(prb) {
 				return rb, nil
 			}
-		}
-	}
-}
-
-// ReadUntilExplicit reads bytes out of the channel Q object until the bytes b are seen in the
-// output. Once the bytes are seen all read bytes are returned.
-func (c *Channel) ReadUntilExplicit(b []byte) ([]byte, error) {
-	var rb []byte
-
-	for {
-		nb, err := c.Read()
-		if err != nil {
-			return nil, err
-		}
-
-		if nb == nil {
-			time.Sleep(c.ReadDelay)
-
-			continue
-		}
-
-		rb = append(rb, nb...)
-
-		if bytes.Contains(processReadBuf(rb, c.PromptSearchDepth), b) {
-			return rb, nil
 		}
 	}
 }
