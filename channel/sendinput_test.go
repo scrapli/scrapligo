@@ -73,6 +73,7 @@ func testSendInput(testName string, testCase *sendInputTestcase) func(t *testing
 	}
 }
 
+//nolint:lll
 func TestSendInput(t *testing.T) {
 	cases := map[string]*sendInputTestcase{
 		"send-input-simple": {
@@ -86,6 +87,40 @@ func TestSendInput(t *testing.T) {
 			description:   "simple send input test",
 			input:         "show run int vlan1",
 			payloadFile:   "send-input-simple.txt",
+			noStripPrompt: false,
+			eager:         false,
+		},
+		"send-input-requiring-fuzzy-match": {
+			description:   "simple send input but requiring fuzzy match to work",
+			input:         "show run int vlan1",
+			payloadFile:   "send-input-require-fuzzy.txt",
+			noStripPrompt: false,
+			eager:         false,
+		},
+		"send-input-input-size-greater-than-search-depth": {
+			description: "send input where the input is larger than the comms search depth",
+			input: `set / system banner login-banner "................................................................
+:                  Welcome to Nokia SR Linux!                  :
+:              Open Network OS for the NetOps era.             :
+:                                                              :
+:    This is a freely distributed official container image.    :
+:                      Use it - Share it                       :
+:                                                              :
+:                                                              :
+:                      MOAR INPUT LINES!                       :
+:                                                              :
+:                                                              :
+:                                                              :
+: Get started: https://learn.srlinux.dev                       :
+: Container:   https://go.srlinux.dev/container-image          :
+: Docs:        https://doc.srlinux.dev/22-11                   :
+: Rel. notes:  https://doc.srlinux.dev/rn22-11-1               :
+: YANG:        https://yang.srlinux.dev/v22.11.1               :
+: Discord:     https://go.srlinux.dev/discord                  :
+: Contact:     https://go.srlinux.dev/contact-sales            :
+................................................................
+"`,
+			payloadFile:   "send-input-giant.txt",
 			noStripPrompt: false,
 			eager:         false,
 		},

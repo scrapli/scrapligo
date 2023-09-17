@@ -154,9 +154,9 @@ func (t *Telnet) Read(n int) ([]byte, error) {
 
 	b := make([]byte, n)
 
-	_, err := t.c.Read(b)
+	n, err := t.c.Read(b)
 
-	return b, err
+	return b[0:n], err
 }
 
 // Write writes bytes b to the transport.

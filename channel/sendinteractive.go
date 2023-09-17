@@ -32,6 +32,12 @@ func (c *Channel) SendInteractive( //nolint: gocognit,gocyclo
 		return nil, err
 	}
 
+	readUntilF := c.ReadUntilFuzzy
+
+	if op.ExactMatchInput {
+		readUntilF = c.ReadUntilExplicit
+	}
+
 	cr := make(chan *result)
 
 	var b []byte
@@ -55,7 +61,7 @@ func (c *Channel) SendInteractive( //nolint: gocognit,gocyclo
 			if e.ChannelResponse != "" && !e.HideInput {
 				var nb []byte
 
-				nb, err = c.ReadUntilInput([]byte(e.ChannelInput))
+				nb, err = readUntilF([]byte(e.ChannelInput))
 				if err != nil {
 					cr <- &result{b: nil, err: err}
 

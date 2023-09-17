@@ -41,6 +41,44 @@ func WithEager() util.Option {
 	}
 }
 
+// WithExactMatchInput makes the channel use the historical default `ReadUntilExplicit` when
+// reading until a given input (during a SendX operation). This forces scrapli to look for *exactly*
+// the input you have given. This is more explicit (obviously), and probably also *slightly* faster
+// because we just simply do a direct `Bytes.Contains` rather than the "fuzzy" matching option when
+// this option is false.
+//
+// With fuzzy matching when reading until the input we don't care if the input comes with extra
+// "stuff" in the middle of it -- or if the device splits the input across multiple lines. For
+// example, when entering a cert key in nokia srlinux things look something like this:
+// ```
+//
+//	--{ * candidate private private-admin }--[  ]--
+//	A:srl# set / system tls server-profile carl key "-----BEGIN RSA PRIVATE KEY-----
+//	...SOMEVALUES
+//	...SOMEMOREVALUES
+//	...-----END RSA PRIVATE KEY-----"
+//	--{ * candidate private private-admin }--[  ]--
+//	A:srl
+//
+// ```
+//
+// The above output would cause the ExactMatchInput style (and historically scrapli by default) to
+// fail as we never read the *exact* input. But, remember that the "exact" match is maybe a tick
+// more efficient and certainly is more exacting. This option enables the historical/legacy default.
+func WithExactMatchInput() util.Option {
+	return func(o interface{}) error {
+		c, ok := o.(*channel.OperationOptions)
+
+		if ok {
+			c.ExactMatchInput = true
+
+			return nil
+		}
+
+		return util.ErrIgnoredOption
+	}
+}
+
 // WithTimeoutOps modifies the timeout "ops" value, or the timeout for a given operation. This only
 // modifies the timeout for the current operation and does not update the actual Channel TimeoutOps
 // value permanently.
