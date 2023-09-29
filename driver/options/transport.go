@@ -1,6 +1,8 @@
 package options
 
 import (
+	"time"
+
 	"github.com/scrapli/scrapligo/transport"
 	"github.com/scrapli/scrapligo/util"
 )
@@ -62,6 +64,21 @@ func WithTermWidth(i int) util.Option {
 		}
 
 		a.TermWidth = i
+
+		return nil
+	}
+}
+
+// WithStandardTransportDialTimeout allows for modifying TimeoutSocket when using standard transport,
+// this modifies the timeout for initial connections
+func WithStandardTransportDialTimeout(t time.Duration) util.Option {
+	return func(o interface{}) error {
+		a, ok := o.(*transport.Args)
+		if !ok {
+			return util.ErrIgnoredOption
+		}
+
+		a.TimeoutSocket = t
 
 		return nil
 	}

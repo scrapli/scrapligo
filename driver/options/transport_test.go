@@ -3,6 +3,7 @@ package options_test
 import (
 	"errors"
 	"testing"
+	"time"
 
 	"github.com/scrapli/scrapligo/driver/generic"
 	"github.com/scrapli/scrapligo/driver/options"
@@ -223,6 +224,58 @@ func TestWithTermWidth(t *testing.T) {
 
 	for testName, testCase := range cases {
 		f := testWithTermWidth(testName, testCase)
+
+		t.Run(testName, f)
+	}
+}
+
+func testStandardTransportDialTimeout(testName string, testCase *optionsDurationTestCase) func(t *testing.T) {
+	return func(t *testing.T) {
+		t.Logf("%s: starting", testName)
+
+		err := options.WithStandardTransportDialTimeout(testCase.d)(testCase.o)
+		if err != nil {
+			if errors.Is(err, util.ErrIgnoredOption) && !testCase.isignored {
+				t.Fatalf(
+					"%s: option should be ignored, but returned different error",
+					testName,
+				)
+			}
+
+			return
+		}
+
+		oo, _ := testCase.o.(*transport.Args)
+
+		if !cmp.Equal(oo.TimeoutSocket, testCase.d) {
+			t.Fatalf(
+				"%s: actual and expected dial timeout do not match\nactual: %s\nexpected:%s",
+				testName,
+				oo.TimeoutSocket,
+				testCase.d,
+			)
+		}
+	}
+}
+
+func TestStandardTransportDialTimeout(t *testing.T) {
+	cases := map[string]*optionsDurationTestCase{
+		"set-timeout": {
+			description: "simple set option test",
+			d:           123 * time.Second,
+			o:           &transport.Args{},
+			isignored:   false,
+		},
+		"ignored": {
+			description: "skipped due to ignored type",
+			d:           123 * time.Second,
+			o:           &generic.Driver{},
+			isignored:   true,
+		},
+	}
+
+	for testName, testCase := range cases {
+		f := testStandardTransportDialTimeout(testName, testCase)
 
 		t.Run(testName, f)
 	}
