@@ -229,11 +229,11 @@ func TestWithTermWidth(t *testing.T) {
 	}
 }
 
-func testStandardTransportDialTimeout(testName string, testCase *optionsDurationTestCase) func(t *testing.T) {
+func testTransportTimeoutSocket(testName string, testCase *optionsDurationTestCase) func(t *testing.T) {
 	return func(t *testing.T) {
 		t.Logf("%s: starting", testName)
 
-		err := options.WithStandardTransportDialTimeout(testCase.d)(testCase.o)
+		err := options.WithTimeoutSocket(testCase.d)(testCase.o)
 		if err != nil {
 			if errors.Is(err, util.ErrIgnoredOption) && !testCase.isignored {
 				t.Fatalf(
@@ -258,7 +258,7 @@ func testStandardTransportDialTimeout(testName string, testCase *optionsDuration
 	}
 }
 
-func TestStandardTransportDialTimeout(t *testing.T) {
+func TestTransportTimeoutSocket(t *testing.T) {
 	cases := map[string]*optionsDurationTestCase{
 		"set-timeout": {
 			description: "simple set option test",
@@ -275,7 +275,7 @@ func TestStandardTransportDialTimeout(t *testing.T) {
 	}
 
 	for testName, testCase := range cases {
-		f := testStandardTransportDialTimeout(testName, testCase)
+		f := testTransportTimeoutSocket(testName, testCase)
 
 		t.Run(testName, f)
 	}

@@ -69,9 +69,14 @@ func WithTermWidth(i int) util.Option {
 	}
 }
 
-// WithStandardTransportDialTimeout allows for modifying TimeoutSocket when using standard transport,
-// this modifies the timeout for initial connections
-func WithStandardTransportDialTimeout(t time.Duration) util.Option {
+// WithTimeoutSocket allows for modifying the TimeoutSocket parameter for the underlying transport.
+// When using "system" (default) transport, this value governs the `ConnectTimeout` and
+// `ServerAliveInterval` ssh options.
+// When using the "standard" (crypto/ssh) transport, this modifies the timeout for initial
+// connections.
+// For the "telnet" transport, this value modifies the timeout for initial control character
+// processing.
+func WithTimeoutSocket(t time.Duration) util.Option {
 	return func(o interface{}) error {
 		a, ok := o.(*transport.Args)
 		if !ok {
