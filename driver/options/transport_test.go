@@ -229,7 +229,10 @@ func TestWithTermWidth(t *testing.T) {
 	}
 }
 
-func testTransportTimeoutSocket(testName string, testCase *optionsDurationTestCase) func(t *testing.T) {
+func testTransportTimeoutSocket(
+	testName string,
+	testCase *optionsDurationTestCase,
+) func(t *testing.T) {
 	return func(t *testing.T) {
 		t.Logf("%s: starting", testName)
 
