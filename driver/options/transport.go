@@ -1,6 +1,8 @@
 package options
 
 import (
+	"time"
+
 	"github.com/scrapli/scrapligo/transport"
 	"github.com/scrapli/scrapligo/util"
 )
@@ -62,6 +64,26 @@ func WithTermWidth(i int) util.Option {
 		}
 
 		a.TermWidth = i
+
+		return nil
+	}
+}
+
+// WithTimeoutSocket allows for modifying the TimeoutSocket parameter for the underlying transport.
+// When using "system" (default) transport, this value governs the `ConnectTimeout` and
+// `ServerAliveInterval` ssh options.
+// When using the "standard" (crypto/ssh) transport, this modifies the timeout for initial
+// connections.
+// For the "telnet" transport, this value modifies the timeout for initial control character
+// processing.
+func WithTimeoutSocket(t time.Duration) util.Option {
+	return func(o interface{}) error {
+		a, ok := o.(*transport.Args)
+		if !ok {
+			return util.ErrIgnoredOption
+		}
+
+		a.TimeoutSocket = t
 
 		return nil
 	}
