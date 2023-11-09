@@ -27,6 +27,16 @@ default:
       escalate: 'configure exclusive'
       escalate-auth: false
       escalate-prompt:
+    run:
+      name: 'run'
+      # match [xr-vm_node0_RP0_CPU0:~]$ (Cisco NC55XX)
+      # match [node0_RP0_CPU0:~]$ (Cisco 8000)
+      pattern: '(?im)^\[[^]]+\]\$\s*$'
+      previous-priv: 'exec'
+      deescalate: 'logout'
+      escalate: 'run'
+      escalate-auth: false
+      escalate-prompt:
   default-desired-privilege-level: 'exec'
   failed-when-contains:
     - '% Ambiguous command'
