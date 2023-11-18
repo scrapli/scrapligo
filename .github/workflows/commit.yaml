@@ -66,9 +66,9 @@ jobs:
       # pull the srl image before installing clab so that clab has no need to pull it when starting
       # -- make sure this is the same image version that is in the clab ci topo!
       - name: pull srlinux image
-        run: docker pull ghcr.io/nokia/srlinux:21.11.3
+        run: docker pull ghcr.io/nokia/srlinux:23.10.1
       - name: install clab
-        run: bash -c "$(curl -sL https://get.containerlab.dev)" -- -v 0.36.1
+        run: bash -c "$(curl -sL https://get.containerlab.dev)" -- -v 0.48.*
       - name: start clab ci topo
         run: make deploy-clab-ci
       - name: tests
