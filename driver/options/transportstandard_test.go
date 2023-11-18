@@ -35,8 +35,8 @@ func testStandardTransportExtraCiphers(
 
 		if !cmp.Equal(oo.ExtraCiphers, testCase.ss) {
 			t.Fatalf(
-				"%s: actual and expected transport extra ciphers do not match\nactual:"+
-					" %v\nexpected:%v",
+				"%s: actual and expected transport extra ciphers do not match\nactual: "+
+					"%v\nexpected:%v",
 				testName,
 				oo.ExtraCiphers,
 				testCase.ss,
@@ -91,8 +91,8 @@ func testStandardTransportExtraKexs(
 
 		if !cmp.Equal(oo.ExtraKexs, testCase.ss) {
 			t.Fatalf(
-				"%s: actual and expected transport extra kexs do not match\nactual:"+
-					" %v\nexpected:%v",
+				"%s: actual and expected transport extra kexs do not match\nactual: "+
+					"%v\nexpected:%v",
 				testName,
 				oo.ExtraKexs,
 				testCase.ss,
