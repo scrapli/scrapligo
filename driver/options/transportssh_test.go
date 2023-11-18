@@ -168,7 +168,7 @@ func testWithSSHConfigFile(testName string, testCase *optionsStringTestCase) fun
 		if !cmp.Equal(oo.ConfigFile, testCase.s) {
 			t.Fatalf(
 				"%s: actual and expected resolved ssh config files do not match\nactual:"+
-					" %v\nexpected:%v",
+					" %v\nexpected:%v", //nolint:goconst
 				testName,
 				oo.ConfigFile,
 				testCase.s,
