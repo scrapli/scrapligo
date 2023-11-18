@@ -167,8 +167,8 @@ func testWithSSHConfigFile(testName string, testCase *optionsStringTestCase) fun
 
 		if !cmp.Equal(oo.ConfigFile, testCase.s) {
 			t.Fatalf(
-				"%s: actual and expected resolved ssh config files do not match\nactual:"+
-					" %v\nexpected:%v",
+				"%s: actual and expected resolved ssh config files do not match\nactual: "+
+					"%v\nexpected:%v",
 				testName,
 				oo.ConfigFile,
 				testCase.s,
@@ -238,8 +238,8 @@ func testWithSSHKnownHostsFile(
 
 		if !cmp.Equal(oo.KnownHostsFile, testCase.s) {
 			t.Fatalf(
-				"%s: actual and expected resolved known hosts files do not match\nactual:"+
-					" %v\nexpected:%v",
+				"%s: actual and expected resolved known hosts files do not match\nactual: "+
+					"%v\nexpected:%v",
 				testName,
 				oo.KnownHostsFile,
 				testCase.s,

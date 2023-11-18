@@ -18,33 +18,33 @@ topology:
   nodes:
     vr-csr:
       kind: vr-csr
-      mgmt_ipv4: 172.20.20.11
-      mgmt_ipv6: 2001:172:20:20::11
+      mgmt-ipv4: 172.20.20.11
+      mgmt-ipv6: 2001:172:20:20::11
     vr-xrv9k:
       kind: vr-xrv9k
-      mgmt_ipv4: 172.20.20.12
-      mgmt_ipv6: 2001:172:20:20::12
+      mgmt-ipv4: 172.20.20.12
+      mgmt-ipv6: 2001:172:20:20::12
       binds:
         - configs/xrv9k-startup.cfg:/startup.cfg
       env:
         STARTUP_CONFIG: /startup.cfg
     vr-n9kv:
       kind: vr-n9kv
-      mgmt_ipv4: 172.20.20.13
-      mgmt_ipv6: 2001:172:20:20::13
+      mgmt-ipv4: 172.20.20.13
+      mgmt-ipv6: 2001:172:20:20::13
     ceos:
       kind: ceos
-      mgmt_ipv4: 172.20.20.14
-      mgmt_ipv6: 2001:172:20:20::14
+      mgmt-ipv4: 172.20.20.14
+      mgmt-ipv6: 2001:172:20:20::14
       startup-config: configs/ceos-startup.cfg
     vr-vqfx:
       kind: vr-vqfx
-      mgmt_ipv4: 172.20.20.15
-      mgmt_ipv6: 2001:172:20:20::15
+      mgmt-ipv4: 172.20.20.15
+      mgmt-ipv6: 2001:172:20:20::15
     srl:
       kind: srl
-      mgmt_ipv4: 172.20.20.16
-      mgmt_ipv6: 2001:172:20:20::16
+      mgmt-ipv4: 172.20.20.16
+      mgmt-ipv6: 2001:172:20:20::16
       startup-config: configs/srl-startup.json
   links:
     # forces "front panel port" for ceos, without this there is no ip routing
