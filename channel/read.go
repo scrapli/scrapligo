@@ -50,11 +50,6 @@ func (c *Channel) read() {
 
 		b, err := c.t.Read()
 		if err != nil {
-			if errors.Is(err, io.EOF) {
-				// the underlying transport was closed so just return
-				return
-			}
-
 			// we got a transport error, put it into the error channel for processing during
 			// the next read activity, log it, sleep and then try again...
 			c.l.Criticalf(
@@ -62,7 +57,10 @@ func (c *Channel) read() {
 			)
 
 			c.Errs <- err
-
+			if errors.Is(err, io.EOF) {
+				// the underlying transport was closed so just return
+				return
+			}
 			time.Sleep(c.ReadDelay)
 
 			continue
