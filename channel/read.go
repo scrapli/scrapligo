@@ -57,10 +57,12 @@ func (c *Channel) read() {
 			)
 
 			c.Errs <- err
+
 			if errors.Is(err, io.EOF) {
 				// the underlying transport was closed so just return
 				return
 			}
+
 			time.Sleep(c.ReadDelay)
 
 			continue
