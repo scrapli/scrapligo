@@ -41,7 +41,7 @@ func main() {
 	// "configuration" privilege level, if your platform does *not* have a "configuration" priv
 	// level things will fail! if there is an alternative to configuration (such as "exclusive"),
 	// you can explicitly execute configs in that privilege level with the
-	// `options.WithPrivilegeLevel` option.
+	// `opoptions.WithPrivilegeLevel` option.
 	r, err := d.SendConfigs([]string{"interface loopback999", "description tacocat"})
 	if err != nil {
 		fmt.Printf("failed to open driver; error: %+v\n", err)
