@@ -14,8 +14,8 @@ default:
       escalate-prompt:
     configuration:
       name: "configuration"
-      # https://regex101.com/r/Az7cnw/1
-      pattern: '(?im)^--{(\s\[[\w\s]+\]){0,5}[\+\*\!\s]{1,}candidate\sprivate\s[\-\w\s]+}--\[.+?\]--\s*\n[abcd]:\S+#\s*$'
+      # https://regex101.com/r/JsaUZy/1
+      pattern: '(?im)^--{(\s\[[\w\s]+\]){0,5}[\+\*\!\s]{1,}candidate[\-\w\s]+}--\[.+?\]--\s*\n[abcd]:\S+#\s*$'
       previous-priv: "exec"
       deescalate: "discard now"
       escalate: "enter candidate private"
