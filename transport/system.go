@@ -156,7 +156,6 @@ func (t *System) openNetconf(a *Args) error {
 	var err error
 
 	t.fd, err = pty.Start(c)
-
 	if err != nil {
 		a.l.Criticalf("encountered error spawning pty, error: %s", err)
 

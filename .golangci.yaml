@@ -94,6 +94,9 @@ issues:
   max-same-issues: 0
   # https://github.com/golangci/golangci-lint/issues/2439#issuecomment-1002912465
   exclude-use-default: false
+  exclude-dirs:
+    - private
+    - .private
   exclude-rules:
     - path: _test\.go
       linters:
@@ -115,11 +118,9 @@ issues:
 
 run:
   go: '1.21'
-  skip-dirs:
-    - private
 
 output:
   uniq-by-line: false
 
 service:
-  golangci-lint-version: 1.54.x
+  golangci-lint-version: 1.57.x

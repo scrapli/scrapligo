@@ -33,7 +33,6 @@ func (d *Driver) SendCommands(
 			op,
 			opts...,
 		)
-
 		if err != nil {
 			return nil, err
 		}

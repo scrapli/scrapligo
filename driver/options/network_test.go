@@ -45,13 +45,13 @@ func TestWithNetworkOnOpen(t *testing.T) {
 	cases := map[string]*optionsNetworkDriverOnXTestCase{
 		"set-on-open": {
 			description: "simple set option test",
-			f:           func(d *network.Driver) error { return nil },
+			f:           func(*network.Driver) error { return nil },
 			o:           &network.Driver{},
 			isignored:   false,
 		},
 		"ignored": {
 			description: "skipped due to ignored type",
-			f:           func(d *network.Driver) error { return nil },
+			f:           func(*network.Driver) error { return nil },
 			o:           &generic.Driver{},
 			isignored:   true,
 		},
@@ -98,13 +98,13 @@ func TestWithNetworkOnClose(t *testing.T) {
 	cases := map[string]*optionsNetworkDriverOnXTestCase{
 		"set-on-close": {
 			description: "simple set option test",
-			f:           func(d *network.Driver) error { return nil },
+			f:           func(*network.Driver) error { return nil },
 			o:           &network.Driver{},
 			isignored:   false,
 		},
 		"ignored": {
 			description: "skipped due to ignored type",
-			f:           func(d *network.Driver) error { return nil },
+			f:           func(*network.Driver) error { return nil },
 			o:           &generic.Driver{},
 			isignored:   true,
 		},

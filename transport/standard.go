@@ -130,7 +130,7 @@ func (t *Standard) openBase(a *Args) error {
 	if a.Password != "" {
 		authMethods = append(authMethods, ssh.Password(a.Password),
 			ssh.KeyboardInteractive(
-				func(user, instruction string, questions []string, echos []bool) ([]string, error) {
+				func(_, _ string, questions []string, _ []bool) ([]string, error) {
 					answers := make([]string, len(questions))
 					for i := range answers {
 						answers[i] = a.Password

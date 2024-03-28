@@ -72,7 +72,7 @@ func TestSendWithCallbacks(t *testing.T) {
 			initialInput: "",
 			callbacks: []*generic.Callback{
 				{
-					Callback: func(d *generic.Driver, s string) error {
+					Callback: func(d *generic.Driver, _ string) error {
 						_, err := d.Channel.SendInput("configure terminal")
 
 						return err
@@ -82,7 +82,7 @@ func TestSendWithCallbacks(t *testing.T) {
 					ResetOutput: true,
 				},
 				{
-					Callback: func(d *generic.Driver, s string) error {
+					Callback: func(d *generic.Driver, _ string) error {
 						return d.Channel.WriteAndReturn([]byte("show version"), false)
 					},
 					ContainsRe: regexp.MustCompile(`(?im)^c3560cx\(config\)#`),

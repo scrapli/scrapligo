@@ -52,7 +52,7 @@ func (r *Response) Record(b []byte) {
 
 	s := util.StringContainsAnySubStrs(r.Result, r.FailedWhenContains)
 
-	if len(s) > 0 {
+	if s != "" {
 		r.Failed = &OperationError{
 			Input:       r.Input,
 			Output:      r.Result,

@@ -61,6 +61,7 @@ func (d *Driver) read() {
 				b = []byte(ss[1])
 			} else if d.Channel.PromptPattern.Match(b) {
 				var messageID int
+
 				var subID int
 
 				messageID = getID(patterns.messageID.FindSubmatch(b))
