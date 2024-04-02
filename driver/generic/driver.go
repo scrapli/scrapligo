@@ -100,6 +100,10 @@ func (d *Driver) Open() error {
 		if err != nil {
 			d.Logger.Criticalf("error executing generic driver OnOpen, error: %s", err)
 
+			// don't leave the channel (and more importantly, the transport) open if we are going to
+			// return an error
+			_ = d.Channel.Close()
+
 			return err
 		}
 	}
