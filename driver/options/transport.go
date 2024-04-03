@@ -7,6 +7,22 @@ import (
 	"github.com/scrapli/scrapligo/util"
 )
 
+// WithCustomTransport sets a custom, user provided, transport instead of one of the "core"
+// transports. This custom transport must satisfy the transport.Transport interface.
+func WithCustomTransport(i transport.Implementation) util.Option {
+	return func(o interface{}) error {
+		a, ok := o.(*transport.Args)
+
+		if !ok {
+			return util.ErrIgnoredOption
+		}
+
+		a.UserImplementation = i
+
+		return nil
+	}
+}
+
 // WithTransportReadSize sets the number of bytes each transport read operation should try to read.
 // The default value is 65535.
 func WithTransportReadSize(i int) util.Option {

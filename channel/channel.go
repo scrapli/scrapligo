@@ -165,6 +165,7 @@ func (c *Channel) Open() (reterr error) {
 		if err != nil {
 			return err
 		}
+	case transport.InChannelAuthUnsupported:
 	}
 
 	if len(b) > 0 {
