@@ -36,6 +36,7 @@ type System struct {
 	OpenBin   string
 	OpenArgs  []string
 	fd        *os.File
+	c         *exec.Cmd
 }
 
 func (t *System) buildOpenArgs(a *Args) {
@@ -122,12 +123,12 @@ func (t *System) open(a *Args) error {
 
 	a.l.Debugf("opening system transport with bin '%s' and args '%s'", t.OpenBin, t.OpenArgs)
 
-	c := exec.Command(t.OpenBin, t.OpenArgs...) //nolint:gosec
+	t.c = exec.Command(t.OpenBin, t.OpenArgs...) //nolint:gosec
 
 	var err error
 
 	t.fd, err = pty.StartWithSize(
-		c,
+		t.c,
 		&pty.Winsize{
 			Rows: uint16(a.TermHeight),
 			Cols: uint16(a.TermWidth),
@@ -202,6 +203,13 @@ func (t *System) Close() error {
 	err := t.fd.Close()
 
 	t.fd = nil
+
+	if t.c != nil && t.c.Process != nil && t.c.ProcessState != nil && !t.c.ProcessState.Exited() {
+		err = t.c.Process.Kill()
+		if err != nil {
+			return err
+		}
+	}
 
 	return err
 }
