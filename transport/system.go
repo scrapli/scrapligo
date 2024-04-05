@@ -152,11 +152,11 @@ func (t *System) openNetconf(a *Args) error {
 
 	a.l.Debugf("opening system transport with bin '%s' and args '%s'", t.OpenBin, t.OpenArgs)
 
-	c := exec.Command(t.OpenBin, t.OpenArgs...) //nolint:gosec
+	t.c = exec.Command(t.OpenBin, t.OpenArgs...) //nolint:gosec
 
 	var err error
 
-	t.fd, err = pty.Start(c)
+	t.fd, err = pty.Start(t.c)
 	if err != nil {
 		a.l.Criticalf("encountered error spawning pty, error: %s", err)
 
@@ -204,7 +204,8 @@ func (t *System) Close() error {
 
 	t.fd = nil
 
-	if t.c != nil && t.c.Process != nil && t.c.ProcessState != nil && !t.c.ProcessState.Exited() {
+	// t.c.ProcessState is always nil in our case
+	if t.c != nil && t.c.Process != nil {
 		err = t.c.Process.Kill()
 		if err != nil {
 			return err
@@ -222,7 +223,10 @@ func (t *System) IsAlive() bool {
 // Read reads n bytes from the transport.
 func (t *System) Read(n int) ([]byte, error) {
 	b := make([]byte, n)
-
+	// we tried to make this call non blocking by calling syscall.SetNonBlock and SetReadDeadline
+	// but it doesn't seem possible with pty implementation
+	// see https://github.com/creack/pty/pull/167
+	// and https://github.com/creack/pty/issues/174
 	n, err := t.fd.Read(b)
 	if err != nil {
 		return nil, err
