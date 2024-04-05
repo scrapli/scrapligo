@@ -206,10 +206,12 @@ func (t *System) Close() error {
 
 	// t.c.ProcessState is always nil in our case
 	if t.c != nil && t.c.Process != nil {
-		if err := t.c.Process.Kill(); err != nil {
+		err = t.c.Process.Kill()
+		if err != nil {
 			return err
 		}
 	}
+
 	return err
 }
 
@@ -221,8 +223,7 @@ func (t *System) IsAlive() bool {
 // Read reads n bytes from the transport.
 func (t *System) Read(n int) ([]byte, error) {
 	b := make([]byte, n)
-	// we tried to make this call non blocking
-	// by calling syscall.SetNonBlock and SetReadDeadline
+	// we tried to make this call non blocking by calling syscall.SetNonBlock and SetReadDeadline
 	// but it doesn't seem possible with pty implementation
 	// see https://github.com/creack/pty/pull/167
 	// and https://github.com/creack/pty/issues/174
