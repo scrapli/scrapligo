@@ -36,6 +36,9 @@ jobs:
         with:
           version: v1.57
           args: --timeout 5m
+          # caching issues, see: https://github.com/golangci/golangci-lint-action/issues/244#issuecomment-1052190775
+          skip-pkg-cache: true
+          skip-build-cache: true
       - name: install gotestsum
         run: go install gotest.tools/gotestsum@v1.10.1
       - name: tests
