@@ -50,6 +50,22 @@ func (c *Channel) read() {
 
 		b, err := c.t.Read()
 		if err != nil {
+			select {
+			case <-c.done:
+				// this prevents us from ever writing to, what would in this case be, a closed
+				// errs channel. also if we are "done" we probably only got an error about transport
+				// dying so we can safely ignore that
+				return
+			default:
+			}
+
+			if errors.Is(err, io.EOF) {
+				// the underlying transport was closed so just return, we *probably* will have
+				// already bailed out by reading from the (maybe/probably) closed done channel, but
+				// if we hit EOF we know we are done anyway
+				return
+			}
+
 			// we got a transport error, put it into the error channel for processing during
 			// the next read activity, log it, sleep and then try again...
 			c.l.Criticalf(
@@ -57,11 +73,6 @@ func (c *Channel) read() {
 			)
 
 			c.Errs <- err
-
-			if errors.Is(err, io.EOF) {
-				// the underlying transport was closed so just return
-				return
-			}
 
 			time.Sleep(c.ReadDelay)
 

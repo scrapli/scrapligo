@@ -181,6 +181,8 @@ func (c *Channel) Open() (reterr error) {
 func (c *Channel) Close() error {
 	c.l.Info("channel closing...")
 
+	close(c.Errs)
+
 	ch := make(chan struct{})
 
 	go func() {

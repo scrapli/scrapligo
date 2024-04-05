@@ -206,7 +206,7 @@ type Driver struct {
 
 // Open opens the underlying generic.Driver, and by extension the channel.Channel and Transport
 // objects. This should be called prior to executing any RPC methods of the Driver.
-func (d *Driver) Open() error {
+func (d *Driver) Open() (reterr error) {
 	d.Logger.Debugf(
 		"opening connection to host '%s' on port '%d'",
 		d.Transport.Args.Host,
@@ -217,6 +217,14 @@ func (d *Driver) Open() error {
 	if err != nil {
 		return err
 	}
+
+	defer func() {
+		if reterr != nil {
+			// don't leave the channel (and more importantly, the transport) open if we are going to
+			// return an error
+			_ = d.Channel.Close()
+		}
+	}()
 
 	err = d.processServerCapabilities()
 	if err != nil {
