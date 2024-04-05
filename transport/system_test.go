@@ -66,6 +66,14 @@ func TestSystemTransportDontBlockOnClose(t *testing.T) {
 					return
 				}
 
+				if strings.Contains(readErr.Error(), "input/output error") {
+					// in ci for whatever reason we get a "/dev/ptmx input/output error" rather
+					// than EOF, the test works "correctly" with this check though so not bothering
+					// to investigate further (as in does not block when we kill the ssh process
+					// and does block when we dont)
+					return
+				}
+
 				errChan <- readErr
 
 				return

@@ -57,8 +57,6 @@ jobs:
 
       - name: tests
         run: make test-race
-        env:
-          TERM: xterm
 
   functional-test:
     runs-on: ${{ matrix.os }}
