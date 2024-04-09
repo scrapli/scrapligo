@@ -8,6 +8,7 @@ import (
 
 	"github.com/scrapli/scrapligo/driver/options"
 	"github.com/scrapli/scrapligo/logging"
+	"github.com/scrapli/scrapligo/testutil"
 	"github.com/scrapli/scrapligo/transport"
 )
 
@@ -15,7 +16,7 @@ func TestSystemTransportDontBlockOnClose(t *testing.T) {
 	handlerDone := make(chan struct{})
 	handlerErrChan := make(chan error)
 
-	go spawnDumbSever(
+	go testutil.SpawnDumbSever(
 		t,
 		handlerDone,
 		handlerErrChan,
