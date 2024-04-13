@@ -1,6 +1,7 @@
 package channel
 
 import (
+	"context"
 	"fmt"
 	"regexp"
 	"time"
@@ -39,6 +40,10 @@ func (c *Channel) SendInteractive( //nolint: gocognit,gocyclo
 	}
 
 	cr := make(chan *result)
+
+	ctx, cancel := context.WithCancel(context.Background())
+
+	defer cancel()
 
 	var b []byte
 
@@ -80,7 +85,7 @@ func (c *Channel) SendInteractive( //nolint: gocognit,gocyclo
 
 			var pb []byte
 
-			pb, err = c.ReadUntilAnyPrompt(prompts)
+			pb, err = c.ReadUntilAnyPrompt(ctx, prompts)
 			if err != nil {
 				cr <- &result{b: nil, err: err}
 

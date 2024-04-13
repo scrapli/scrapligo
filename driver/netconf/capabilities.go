@@ -1,8 +1,10 @@
 package netconf
 
 import (
+	"context"
 	"fmt"
 	"strconv"
+	"time"
 
 	"github.com/scrapli/scrapligo/util"
 )
@@ -35,8 +37,48 @@ func (d *Driver) SessionID() uint64 {
 	return d.sessionID
 }
 
+type result struct {
+	b   []byte
+	err error
+}
+
+func (d *Driver) getServerCapabilities() ([]byte, error) {
+	cr := make(chan *result)
+
+	ctx, cancel := context.WithCancel(context.Background())
+
+	defer cancel()
+
+	go func() {
+		b, err := d.Channel.ReadUntilPrompt(ctx)
+		if err != nil {
+			cr <- &result{b: b, err: err}
+		}
+
+		cr <- &result{
+			b:   b,
+			err: nil,
+		}
+	}()
+
+	timer := time.NewTimer(d.Channel.GetTimeout(d.Channel.TimeoutOps))
+
+	select {
+	case r := <-cr:
+		if r.err != nil {
+			return nil, r.err
+		}
+
+		return r.b, nil
+	case <-timer.C:
+		d.Logger.Critical("channel timeout reading capabilities")
+
+		return nil, fmt.Errorf("%w: channel timeout reading capabilities", util.ErrTimeoutError)
+	}
+}
+
 func (d *Driver) processServerCapabilities() error {
-	b, err := d.Channel.ReadUntilPrompt()
+	b, err := d.getServerCapabilities()
 	if err != nil {
 		return err
 	}

@@ -2,6 +2,7 @@ package channel
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"io"
 	"regexp"
@@ -212,10 +213,16 @@ func (c *Channel) ReadUntilExplicit(b []byte) ([]byte, error) {
 
 // ReadUntilPrompt reads bytes out of the channel Q object until the channel PromptPattern regex
 // pattern is seen in the output. Once that pattern is seen, all read bytes are returned.
-func (c *Channel) ReadUntilPrompt() ([]byte, error) {
+func (c *Channel) ReadUntilPrompt(ctx context.Context) ([]byte, error) {
 	var rb []byte
 
 	for {
+		select {
+		case <-ctx.Done():
+			return nil, nil
+		default:
+		}
+
 		nb, err := c.Read()
 		if err != nil {
 			return nil, err
@@ -237,10 +244,19 @@ func (c *Channel) ReadUntilPrompt() ([]byte, error) {
 
 // ReadUntilAnyPrompt reads bytes out of the channel Q object until any of the prompts in the
 // "prompts" argument are seen in the output. Once any pattern is seen, all read bytes are returned.
-func (c *Channel) ReadUntilAnyPrompt(prompts []*regexp.Regexp) ([]byte, error) {
+func (c *Channel) ReadUntilAnyPrompt(
+	ctx context.Context,
+	prompts []*regexp.Regexp,
+) ([]byte, error) {
 	var rb []byte
 
 	for {
+		select {
+		case <-ctx.Done():
+			return nil, nil
+		default:
+		}
+
 		nb, err := c.Read()
 		if err != nil {
 			return nil, err

@@ -1,6 +1,7 @@
 package channel
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -14,6 +15,10 @@ func (c *Channel) GetPrompt() ([]byte, error) {
 
 	cr := make(chan *result)
 
+	ctx, cancel := context.WithCancel(context.Background())
+
+	defer cancel()
+
 	go func() {
 		err := c.WriteReturn()
 		if err != nil {
@@ -24,7 +29,7 @@ func (c *Channel) GetPrompt() ([]byte, error) {
 
 		var b []byte
 
-		b, err = c.ReadUntilPrompt()
+		b, err = c.ReadUntilPrompt(ctx)
 
 		// we already know the pattern is in the buf, we just want ot re to yoink it out without
 		// any newlines or extra stuff we read (which shouldn't happen outside the initial

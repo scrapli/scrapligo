@@ -2,6 +2,7 @@ package channel
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"regexp"
 	"sync"
@@ -58,7 +59,7 @@ func getSSHErrorMessagePatterns() *sshErrorMessagePatterns {
 	return sshErrorMessagePatternsInstance
 }
 
-func (c *Channel) authenticateSSH(p, pp []byte) *result {
+func (c *Channel) authenticateSSH(ctx context.Context, p, pp []byte) *result {
 	pCount := 0
 
 	ppCount := 0
@@ -66,6 +67,12 @@ func (c *Channel) authenticateSSH(p, pp []byte) *result {
 	var b []byte
 
 	for {
+		select {
+		case <-ctx.Done():
+			return nil
+		default:
+		}
+
 		nb, err := c.Read()
 		if err != nil {
 			return &result{nil, err}
@@ -141,8 +148,12 @@ func (c *Channel) authenticateSSH(p, pp []byte) *result {
 func (c *Channel) AuthenticateSSH(p, pp []byte) ([]byte, error) {
 	cr := make(chan *result)
 
+	ctx, cancel := context.WithCancel(context.Background())
+
+	defer cancel()
+
 	go func() {
-		cr <- c.authenticateSSH(p, pp)
+		cr <- c.authenticateSSH(ctx, p, pp)
 	}()
 
 	t := time.NewTimer(c.TimeoutOps)
@@ -160,7 +171,7 @@ func (c *Channel) AuthenticateSSH(p, pp []byte) ([]byte, error) {
 	}
 }
 
-func (c *Channel) authenticateTelnet(u, p []byte) *result {
+func (c *Channel) authenticateTelnet(ctx context.Context, u, p []byte) *result {
 	uCount := 0
 
 	pCount := 0
@@ -169,7 +180,7 @@ func (c *Channel) authenticateTelnet(u, p []byte) *result {
 
 	for {
 		nb, err := c.ReadUntilAnyPrompt(
-			[]*regexp.Regexp{c.PromptPattern, c.UsernamePattern, c.PasswordPattern},
+			ctx, []*regexp.Regexp{c.PromptPattern, c.UsernamePattern, c.PasswordPattern},
 		)
 		if err != nil {
 			return &result{nil, err}
@@ -239,8 +250,12 @@ func (c *Channel) authenticateTelnet(u, p []byte) *result {
 func (c *Channel) AuthenticateTelnet(u, p []byte) ([]byte, error) {
 	cr := make(chan *result)
 
+	ctx, cancel := context.WithCancel(context.Background())
+
+	defer cancel()
+
 	go func() {
-		cr <- c.authenticateTelnet(u, p)
+		cr <- c.authenticateTelnet(ctx, u, p)
 	}()
 
 	t := time.NewTimer(c.TimeoutOps)
