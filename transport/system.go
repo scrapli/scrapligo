@@ -242,10 +242,12 @@ func (t *System) Write(b []byte) error {
 	return err
 }
 
-func (t *System) inChannelAuthType() string {
+// GetInChannelAuthType returns the in channel auth flavor for the system transport.
+func (t *System) GetInChannelAuthType() InChannelAuthType {
 	return InChannelAuthSSH
 }
 
-func (t *System) getSSHArgs() *SSHArgs {
+// GetSSHArgs returns the ssh args for the system transport.
+func (t *System) GetSSHArgs() *SSHArgs {
 	return t.SSHArgs
 }

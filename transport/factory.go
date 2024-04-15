@@ -26,7 +26,7 @@ func NewTransport(
 	host, transportType string,
 	options ...util.Option,
 ) (*Transport, error) {
-	var i transportImpl
+	var i Implementation
 
 	var err error
 
@@ -37,36 +37,40 @@ func NewTransport(
 		return nil, err
 	}
 
-	switch transportType {
-	case SystemTransport, StandardTransport:
-		var sshArgs *SSHArgs
-
-		sshArgs, err = NewSSHArgs(options...)
-		if err != nil {
-			return nil, err
-		}
-
+	if args.UserImplementation != nil {
+		i = args.UserImplementation
+	} else {
 		switch transportType {
-		case SystemTransport:
-			i, err = NewSystemTransport(sshArgs)
-		case StandardTransport:
-			i, err = NewStandardTransport(sshArgs)
-		}
-	case TelnetTransport:
-		var telnetArgs *TelnetArgs
+		case SystemTransport, StandardTransport:
+			var sshArgs *SSHArgs
 
-		telnetArgs, err = NewTelnetArgs(options...)
+			sshArgs, err = NewSSHArgs(options...)
+			if err != nil {
+				return nil, err
+			}
+
+			switch transportType {
+			case SystemTransport:
+				i, err = NewSystemTransport(sshArgs)
+			case StandardTransport:
+				i, err = NewStandardTransport(sshArgs)
+			}
+		case TelnetTransport:
+			var telnetArgs *TelnetArgs
+
+			telnetArgs, err = NewTelnetArgs(options...)
+			if err != nil {
+				return nil, err
+			}
+
+			i, err = NewTelnetTransport(telnetArgs)
+		case FileTransport:
+			i, err = NewFileTransport()
+		}
+
 		if err != nil {
 			return nil, err
 		}
-
-		i, err = NewTelnetTransport(telnetArgs)
-	case FileTransport:
-		i, err = NewFileTransport()
-	}
-
-	if err != nil {
-		return nil, err
 	}
 
 	for _, option := range options {

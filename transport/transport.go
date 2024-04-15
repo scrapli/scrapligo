@@ -9,17 +9,22 @@ import (
 	"github.com/scrapli/scrapligo/util"
 )
 
+// InChannelAuthType is an enum-ish string that represents valid in channel auth flavors.
+type InChannelAuthType string
+
+const (
+	// InChannelAuthUnsupported indicates that the transport does *not* support in channel auth.
+	InChannelAuthUnsupported InChannelAuthType = "unsupported"
+	// InChannelAuthSSH indicates that the transport supports in channel ssh auth.
+	InChannelAuthSSH InChannelAuthType = "ssh"
+	// InChannelAuthTelnet indicates that the transport supports in channel telnet auth.
+	InChannelAuthTelnet InChannelAuthType = "telnet"
+)
+
 const (
 	// DefaultTransport is the default transport constant for scrapligo, this defaults to the
 	// "system" transport.
 	DefaultTransport = "system"
-
-	// InChannelAuthUnsupported indicates that the transport does *not* support in channel auth.
-	InChannelAuthUnsupported = "in-channel-auth-unsupported"
-	// InChannelAuthSSH indicates that the transport supports in channel ssh auth.
-	InChannelAuthSSH = "in-channel-auth-ssh"
-	// InChannelAuthTelnet indicates that the transport supports in channel telnet auth.
-	InChannelAuthTelnet = "in-channel-auth-telnet"
 
 	defaultPort                 = 22
 	defaultTimeoutSocketSeconds = 30
@@ -33,7 +38,7 @@ const (
 // InChannelAuthData is a struct containing all necessary information for the Channel to handle
 // "in-channel" auth if necessary.
 type InChannelAuthData struct {
-	Type                 string
+	Type                 InChannelAuthType
 	User                 string
 	Password             string
 	PrivateKeyPassPhrase string
@@ -67,15 +72,16 @@ func NewArgs(l *logging.Instance, host string, options ...util.Option) (*Args, e
 
 // Args is a struct representing common transport arguments.
 type Args struct {
-	l             *logging.Instance
-	Host          string
-	Port          int
-	User          string
-	Password      string
-	TimeoutSocket time.Duration
-	ReadSize      int
-	TermHeight    int
-	TermWidth     int
+	l                  *logging.Instance
+	UserImplementation Implementation
+	Host               string
+	Port               int
+	User               string
+	Password           string
+	TimeoutSocket      time.Duration
+	ReadSize           int
+	TermHeight         int
+	TermWidth          int
 }
 
 // NewSSHArgs returns an instance of SSH arguments with provided options set. Just like NewArgs,
@@ -127,7 +133,10 @@ func NewTelnetArgs(options ...util.Option) (*TelnetArgs, error) {
 // TelnetArgs is a struct representing common transport Telnet specific arguments.
 type TelnetArgs struct{}
 
-type transportImpl interface {
+// Implementation defines a valid base scrapligo transport -- for SSH-specific transports users
+// should satisfy SSHImplementation -- and for transports that require authentication "in channel"
+// users should satisfy InChannelAuthImplementation (this could be in addition to the SSH one!).
+type Implementation interface {
 	Open(a *Args) error
 	Close() error
 	IsAlive() bool
@@ -135,21 +144,26 @@ type transportImpl interface {
 	Write(b []byte) error
 }
 
-// transportImplSSH is an interface that SSH transports *may* implement, this is currently only
+// SSHImplementation is an interface that SSH transports *may* implement, this is currently only
 // required if the SSH transport also requires (or just supports) "in-channel" ssh authentication.
-type transportImplSSH interface {
-	getSSHArgs() *SSHArgs
+type SSHImplementation interface {
+	Implementation
+	GetSSHArgs() *SSHArgs
 }
 
-type transportImplInChannelAuth interface {
-	inChannelAuthType() string
+// InChannelAuthImplementation is an interface that when satisfied tells us that the transport
+// wants to do "in channel" authentication -- meaning actually look for user/password prompt and
+// send those values in the connection rather than in the protocol/out of band.
+type InChannelAuthImplementation interface {
+	Implementation
+	GetInChannelAuthType() InChannelAuthType
 }
 
 // Transport is a struct which wraps a transportImpl object and provides a unified interface to any
 // type of transport selected by the user.
 type Transport struct {
 	Args        *Args
-	Impl        transportImpl
+	Impl        Implementation
 	implLock    *sync.Mutex
 	timeoutLock *sync.Mutex
 }
@@ -211,7 +225,7 @@ func (t *Transport) GetPort() int {
 // InChannelAuthData returns an instance of InChannelAuthData indicating if in-channel auth is
 // supported, and if so, the necessary fields to accomplish that.
 func (t *Transport) InChannelAuthData() *InChannelAuthData {
-	ti, ok := t.Impl.(transportImplInChannelAuth)
+	ti, ok := t.Impl.(InChannelAuthImplementation)
 	if !ok {
 		return &InChannelAuthData{
 			Type: InChannelAuthUnsupported,
@@ -219,7 +233,7 @@ func (t *Transport) InChannelAuthData() *InChannelAuthData {
 	}
 
 	d := &InChannelAuthData{
-		Type:                 ti.inChannelAuthType(),
+		Type:                 ti.GetInChannelAuthType(),
 		User:                 t.Args.User,
 		Password:             t.Args.Password,
 		PrivateKeyPassPhrase: "",
@@ -229,7 +243,7 @@ func (t *Transport) InChannelAuthData() *InChannelAuthData {
 		return d
 	}
 
-	sshTransport, ok := ti.(transportImplSSH)
+	sshTransport, ok := ti.(SSHImplementation)
 	if !ok {
 		panic(
 			"in channel auth requested on a non telnet transport," +
@@ -237,7 +251,7 @@ func (t *Transport) InChannelAuthData() *InChannelAuthData {
 		)
 	}
 
-	d.PrivateKeyPassPhrase = sshTransport.getSSHArgs().PrivateKeyPassPhrase
+	d.PrivateKeyPassPhrase = sshTransport.GetSSHArgs().PrivateKeyPassPhrase
 
 	return d
 }

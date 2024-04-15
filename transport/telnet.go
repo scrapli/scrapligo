@@ -166,6 +166,7 @@ func (t *Telnet) Write(b []byte) error {
 	return err
 }
 
-func (t *Telnet) inChannelAuthType() string {
+// GetInChannelAuthType returns the in channel auth flavor for the telnet transport.
+func (t *Telnet) GetInChannelAuthType() InChannelAuthType {
 	return InChannelAuthTelnet
 }
