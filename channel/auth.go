@@ -153,6 +153,8 @@ func (c *Channel) AuthenticateSSH(p, pp []byte) ([]byte, error) {
 	defer cancel()
 
 	go func() {
+		defer close(cr)
+
 		cr <- c.authenticateSSH(ctx, p, pp)
 	}()
 

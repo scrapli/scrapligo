@@ -1,6 +1,7 @@
 package netconf
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -63,10 +64,21 @@ func (d *Driver) sendRPC(
 
 	done := make(chan []byte)
 
+	ctx, cancel := context.WithCancel(context.Background())
+
+	defer cancel()
+
 	go func() {
+		defer close(done)
+
 		var data []byte
 
 		for {
+			if ctx.Err() != nil {
+				// timer expired, we're already done, nobody will be listening for our send anyway
+				return
+			}
+
 			data = d.getMessage(m.MessageID)
 			if data != nil {
 				break

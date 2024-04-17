@@ -20,6 +20,8 @@ func (c *Channel) GetPrompt() ([]byte, error) {
 	defer cancel()
 
 	go func() {
+		defer close(cr)
+
 		err := c.WriteReturn()
 		if err != nil {
 			cr <- &result{b: nil, err: err}

@@ -42,6 +42,10 @@ func processReadBuf(rb []byte, searchDepth int) []byte {
 }
 
 func (c *Channel) read() {
+	defer func() {
+		c.readLoopExited = true
+	}()
+
 	for {
 		select {
 		case <-c.done:

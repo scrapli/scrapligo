@@ -19,10 +19,87 @@ type SendInteractiveEvent struct {
 	HideInput       bool
 }
 
+func (c *Channel) sendInteractive(
+	ctx context.Context,
+	cr chan *result,
+	events []*SendInteractiveEvent,
+	op *OperationOptions,
+	readUntilF func(b []byte) ([]byte, error),
+) {
+	defer close(cr)
+
+	var b []byte
+
+	for i, e := range events {
+		prompts := op.CompletePatterns
+		if e.ChannelResponse != "" {
+			prompts = append(prompts, regexp.MustCompile(e.ChannelResponse))
+		} else {
+			prompts = append(prompts, c.PromptPattern)
+		}
+
+		err := c.Write([]byte(e.ChannelInput), e.HideInput)
+		if err != nil {
+			cr <- &result{b: nil, err: err}
+
+			return
+		}
+
+		if e.ChannelResponse != "" && !e.HideInput {
+			var nb []byte
+
+			nb, err = readUntilF([]byte(e.ChannelInput))
+			if err != nil {
+				cr <- &result{b: nil, err: err}
+
+				return
+			}
+
+			b = append(b, nb...)
+		}
+
+		err = c.WriteReturn()
+		if err != nil {
+			cr <- &result{b: nil, err: err}
+
+			return
+		}
+
+		var pb []byte
+
+		pb, err = c.ReadUntilAnyPrompt(ctx, prompts)
+		if err != nil {
+			cr <- &result{b: nil, err: err}
+
+			return
+		}
+
+		b = append(b, pb...)
+
+		if i < len(events)-1 && len(op.CompletePatterns) > 0 {
+			var done bool
+
+			for _, p := range op.CompletePatterns {
+				if p.Match(pb) {
+					done = true
+
+					break
+				}
+			}
+
+			if done {
+				break
+			}
+		}
+	}
+
+	cr <- &result{b: c.processOut(b, false), err: nil}
+}
+
 // SendInteractive sends a slice of SendInteractiveEvent to the device. This is typically used to
 // handle any well understood "interactive" prompts on a device -- things like "clear logging" which
 // prompts the user to confirm, or handling privilege escalation where there is a password prompt.
-func (c *Channel) SendInteractive( //nolint: gocognit,gocyclo
+func (c *Channel) SendInteractive(
 	events []*SendInteractiveEvent,
 	opts ...util.Option,
 ) ([]byte, error) {
@@ -45,74 +122,7 @@ func (c *Channel) SendInteractive( //nolint: gocognit,gocyclo
 
 	defer cancel()
 
-	var b []byte
-
-	go func() {
-		for i, e := range events {
-			prompts := op.CompletePatterns
-			if e.ChannelResponse != "" {
-				prompts = append(prompts, regexp.MustCompile(e.ChannelResponse))
-			} else {
-				prompts = append(prompts, c.PromptPattern)
-			}
-
-			err = c.Write([]byte(e.ChannelInput), e.HideInput)
-			if err != nil {
-				cr <- &result{b: nil, err: err}
-
-				return
-			}
-
-			if e.ChannelResponse != "" && !e.HideInput {
-				var nb []byte
-
-				nb, err = readUntilF([]byte(e.ChannelInput))
-				if err != nil {
-					cr <- &result{b: nil, err: err}
-
-					return
-				}
-
-				b = append(b, nb...)
-			}
-
-			err = c.WriteReturn()
-			if err != nil {
-				cr <- &result{b: nil, err: err}
-
-				return
-			}
-
-			var pb []byte
-
-			pb, err = c.ReadUntilAnyPrompt(ctx, prompts)
-			if err != nil {
-				cr <- &result{b: nil, err: err}
-
-				return
-			}
-
-			b = append(b, pb...)
-
-			if i < len(events)-1 && len(op.CompletePatterns) > 0 {
-				var done bool
-
-				for _, p := range op.CompletePatterns {
-					if p.Match(pb) {
-						done = true
-
-						break
-					}
-				}
-
-				if done {
-					break
-				}
-			}
-		}
-
-		cr <- &result{b: c.processOut(b, false), err: nil}
-	}()
+	go c.sendInteractive(ctx, cr, events, op, readUntilF)
 
 	timer := time.NewTimer(c.GetTimeout(op.Timeout))
 

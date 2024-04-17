@@ -50,9 +50,16 @@ func (d *Driver) getServerCapabilities() ([]byte, error) {
 	defer cancel()
 
 	go func() {
+		defer close(cr)
+
 		b, err := d.Channel.ReadUntilPrompt(ctx)
 		if err != nil {
 			cr <- &result{b: b, err: err}
+		}
+
+		if ctx.Err() != nil {
+			// timer expired, we're already done, nobody will be listening for our send anyway
+			return
 		}
 
 		cr <- &result{
