@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hello xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+<capabilities>
+<capability>urn:ietf:params:netconf:base:1.0</capability>
+<capability>urn:ietf:params:netconf:base:1.1</capability>
+<capability>urn:ietf:params:netconf:capability:writable-running:1.0</capability>
+<capability>urn:ietf:params:netconf:capability:xpath:1.0</capability>
+<capability>urn:ietf:params:netconf:capability:validate:1.0</capability>
+<capability>urn:ietf:params:netconf:capability:validate:1.1</capability>
+<capability>urn:ietf:params:netconf:capability:rollback-on-error:1.0</capability>
+<capability>urn:ietf:params:netconf:capability:notification:1.0</capability>
+<capability>urn:ietf:params:netconf:capability:interleave:1.0</capability>
+<capability>urn:ietf:params:netconf:capability:with-defaults:1.0?basic-mode=explicit&amp;also-supported=report-all-tagged</capability>
+<capability>urn:ietf:params:netconf:capability:yang-library:1.0?revision=2016-06-21&amp;module-set-id=9ba76f016f7eb0d15cc6fb677efc3fee</capability>
+<capability>urn:ietf:params:xml:ns:netconf:base:1.0?module=ietf-netconf&amp;revision=2011-06-01</capability>
+<capability>urn:ietf:params:xml:ns:yang:ietf-netconf-with-defaults?module=ietf-netconf-with-defaults&amp;revision=2011-06-01</capability>
+<capability>
+        urn:ietf:params:netconf:capability:notification:1.1
+      </capability>
+</capabilities>
+<session-id>25</session-id></hello>]]>]]>

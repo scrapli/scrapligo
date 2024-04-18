@@ -108,8 +108,9 @@ type Channel struct {
 
 	done chan struct{}
 
-	Q    *util.Queue
-	Errs chan error
+	Q              *util.Queue
+	Errs           chan error
+	readLoopExited bool
 
 	ChannelLog io.Writer
 }
@@ -186,11 +187,15 @@ func (c *Channel) Close() error {
 
 	ch := make(chan struct{})
 
-	go func() {
-		c.done <- struct{}{}
+	if !c.readLoopExited {
+		go func() {
+			defer close(ch)
 
+			c.done <- struct{}{}
+		}()
+	} else {
 		close(ch)
-	}()
+	}
 
 	select {
 	case <-ch:

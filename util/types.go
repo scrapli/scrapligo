@@ -8,4 +8,5 @@ type Option func(interface{}) error
 type PayloadTestCase struct {
 	Description string
 	PayloadFile string
+	ExpectErr   bool
 }

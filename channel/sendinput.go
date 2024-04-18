@@ -1,6 +1,7 @@
 package channel
 
 import (
+	"context"
 	"fmt"
 	"regexp"
 	"time"
@@ -24,6 +25,12 @@ func (c *Channel) SendInputB(input []byte, opts ...util.Option) ([]byte, error) 
 	}
 
 	cr := make(chan *result)
+
+	ctx, cancel := context.WithCancel(context.Background())
+
+	// we'll call cancel no matter what, either the read goroutines finished nicely in which case it
+	// doesnt matter, or we hit the timer and the cancel will stop the reading
+	defer cancel()
 
 	go func() {
 		var b []byte
@@ -55,12 +62,12 @@ func (c *Channel) SendInputB(input []byte, opts ...util.Option) ([]byte, error) 
 			var readErr error
 
 			if len(op.InterimPromptPatterns) == 0 {
-				nb, readErr = c.ReadUntilPrompt()
+				nb, readErr = c.ReadUntilPrompt(ctx)
 			} else {
 				prompts := []*regexp.Regexp{c.PromptPattern}
 				prompts = append(prompts, op.InterimPromptPatterns...)
 
-				nb, readErr = c.ReadUntilAnyPrompt(prompts)
+				nb, readErr = c.ReadUntilAnyPrompt(ctx, prompts)
 			}
 
 			if readErr != nil {
