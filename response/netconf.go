@@ -2,6 +2,7 @@ package response
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"regexp"
 	"strconv"
@@ -16,11 +17,19 @@ const (
 	v1Dot1      = "1.1"
 	v1Dot0Delim = "]]>]]>"
 	xmlHeader   = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+	// from https://datatracker.ietf.org/doc/html/rfc6242#section-4.2
+	v1Dot1MaxChunkSize = 4294967295
 )
 
+var errNetconf1Dot1Error = errors.New("unable to parse netconf 1.1 response")
+
+func errNetconf1Dot1ParseError(msg string) error {
+	return fmt.Errorf("%w: %s", errNetconf1Dot1Error, msg)
+}
+
 type netconfPatterns struct {
-	v1dot1Chunk *regexp.Regexp
-	rpcErrors   *regexp.Regexp
+	rpcErrors             *regexp.Regexp
+	v1Dot1MaxChunkSizeLen int
 }
 
 var (
@@ -31,8 +40,8 @@ var (
 func getNetconfPatterns() *netconfPatterns {
 	netconfPatternsInstanceOnce.Do(func() {
 		netconfPatternsInstance = &netconfPatterns{
-			v1dot1Chunk: regexp.MustCompile(`(?ms)(\d+)\n(.*?)^#`), //nolint:gocritic
-			rpcErrors:   regexp.MustCompile(`(?s)<rpc-errors?>(.*)</rpc-errors?>`),
+			rpcErrors:             regexp.MustCompile(`(?s)<rpc-errors?>(.*)</rpc-errors?>`),
+			v1Dot1MaxChunkSizeLen: len(strconv.Itoa(v1Dot1MaxChunkSize)),
 		}
 	})
 
@@ -120,42 +129,78 @@ func (r *NetconfResponse) record1dot0() {
 	r.Result = string(bytes.TrimSpace(b))
 }
 
-func (r *NetconfResponse) validateChunk(i int, b []byte) {
-	// does this need more ... "massaging" like scrapli?
-	// chunk regex matches the newline before the chunk size or end of message delimiter, so we
-	// subtract one for that newline char
-	if len(b)-1 != i {
-		errMsg := fmt.Sprintf("return element lengh invalid, expted: %d, got %d for element: %s\n",
-			i,
-			len(b)-1,
-			b)
-
+func (r *NetconfResponse) record1dot1() {
+	joined, err := r.record1dot1Chunks(r.RawResult)
+	if err != nil {
 		r.Failed = &OperationError{
 			Input:       string(r.Input),
 			Output:      r.Result,
-			ErrorString: errMsg,
+			ErrorString: err.Error(),
 		}
-	}
-}
-
-func (r *NetconfResponse) record1dot1() {
-	patterns := getNetconfPatterns()
-
-	chunkSections := patterns.v1dot1Chunk.FindAllSubmatch(r.RawResult, -1)
-
-	var joined []byte
-
-	for _, chunkSection := range chunkSections {
-		chunk := chunkSection[2]
-
-		size, _ := strconv.Atoi(string(chunkSection[1]))
-
-		r.validateChunk(size, chunk)
-
-		joined = append(joined, chunk[:len(chunk)-1]...)
 	}
 
 	joined = bytes.TrimPrefix(joined, []byte(xmlHeader))
 
 	r.Result = string(bytes.TrimSpace(joined))
+}
+
+func (r *NetconfResponse) record1dot1Chunks(d []byte) ([]byte, error) {
+	pattern := getNetconfPatterns()
+
+	cursor := 0
+
+	joined := []byte{}
+
+	for cursor < len(d) {
+		// allow for some amount of newlines
+		if d[cursor] == byte('\n') {
+			cursor++
+
+			continue
+		}
+
+		if d[cursor] != byte('#') {
+			return nil, errNetconf1Dot1ParseError(fmt.Sprintf(
+				"unable to parse netconf response: chunk marker missing, got '%s'",
+				string(d[cursor])),
+			)
+		}
+
+		cursor++
+
+		// found prompt
+		if d[cursor] == byte('#') {
+			return joined, nil
+		}
+
+		// look for end of chunk size
+		// allow to match end with \n char
+		chunkSizeLen := 0
+		for ; chunkSizeLen < pattern.v1Dot1MaxChunkSizeLen+1; chunkSizeLen++ {
+			if cursor+chunkSizeLen >= len(d) {
+				return nil, errNetconf1Dot1ParseError("chunk size not found before end of data")
+			}
+
+			if d[cursor+chunkSizeLen] == byte('\n') {
+				break
+			}
+		}
+
+		chunkSizeStr := string(d[cursor : cursor+chunkSizeLen])
+		cursor += chunkSizeLen + 1
+
+		chunkSize, err := strconv.Atoi(chunkSizeStr)
+		if err != nil {
+			return nil, errNetconf1Dot1ParseError(
+				fmt.Sprintf("unable to parse chunk size '%s': %s", chunkSizeStr, err),
+			)
+		}
+
+		joined = append(joined, d[cursor:cursor+chunkSize]...)
+		// last new line of block is not counted
+		// since it's considered a delimiter for next chunk
+		cursor += chunkSize + 1
+	}
+
+	return joined, nil
 }
