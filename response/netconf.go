@@ -17,8 +17,11 @@ const (
 	v1Dot1      = "1.1"
 	v1Dot0Delim = "]]>]]>"
 	xmlHeader   = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-	// from https://datatracker.ietf.org/doc/html/rfc6242#section-4.2
-	v1Dot1MaxChunkSize = 4294967295
+
+	// https://datatracker.ietf.org/doc/html/rfc6242#section-4.2 max chunk size is 4294967295 so
+	// for us that is a max of 10 chars that the chunk size could be when we are parsing it out of
+	// raw bytes.
+	maxChunkSizeCharLen = 10
 )
 
 var errNetconf1Dot1Error = errors.New("unable to parse netconf 1.1 response")
@@ -28,8 +31,7 @@ func errNetconf1Dot1ParseError(msg string) error {
 }
 
 type netconfPatterns struct {
-	rpcErrors             *regexp.Regexp
-	v1Dot1MaxChunkSizeLen int
+	rpcErrors *regexp.Regexp
 }
 
 var (
@@ -40,8 +42,7 @@ var (
 func getNetconfPatterns() *netconfPatterns {
 	netconfPatternsInstanceOnce.Do(func() {
 		netconfPatternsInstance = &netconfPatterns{
-			rpcErrors:             regexp.MustCompile(`(?s)<rpc-errors?>(.*)</rpc-errors?>`),
-			v1Dot1MaxChunkSizeLen: len(strconv.Itoa(v1Dot1MaxChunkSize)),
+			rpcErrors: regexp.MustCompile(`(?s)<rpc-errors?>(.*)</rpc-errors?>`),
 		}
 	})
 
@@ -130,7 +131,7 @@ func (r *NetconfResponse) record1dot0() {
 }
 
 func (r *NetconfResponse) record1dot1() {
-	joined, err := r.record1dot1Chunks(r.RawResult)
+	err := r.record1dot1Chunks()
 	if err != nil {
 		r.Failed = &OperationError{
 			Input:       string(r.Input),
@@ -138,69 +139,82 @@ func (r *NetconfResponse) record1dot1() {
 			ErrorString: err.Error(),
 		}
 	}
-
-	joined = bytes.TrimPrefix(joined, []byte(xmlHeader))
-
-	r.Result = string(bytes.TrimSpace(joined))
 }
 
-func (r *NetconfResponse) record1dot1Chunks(d []byte) ([]byte, error) {
-	pattern := getNetconfPatterns()
+func (r *NetconfResponse) record1dot1Chunks() error {
+	d := bytes.TrimSpace(r.RawResult)
 
-	cursor := 0
+	if len(d) == 0 || d[0] != byte('#') {
+		return errNetconf1Dot1ParseError(
+			"unable to parse netconf response: no chunk marker at start of data",
+		)
+	}
 
-	joined := []byte{}
+	var joined []byte
+
+	var cursor int
 
 	for cursor < len(d) {
-		// allow for some amount of newlines
 		if d[cursor] == byte('\n') {
+			// we don't need this at the start of this loop, but this lets us easily handle newlines
+			// between chunks
 			cursor++
 
 			continue
 		}
 
 		if d[cursor] != byte('#') {
-			return nil, errNetconf1Dot1ParseError(fmt.Sprintf(
+			return errNetconf1Dot1ParseError(fmt.Sprintf(
 				"unable to parse netconf response: chunk marker missing, got '%s'",
-				string(d[cursor])),
-			)
+				string(d[cursor])))
 		}
 
 		cursor++
 
-		// found prompt
 		if d[cursor] == byte('#') {
-			return joined, nil
+			break
 		}
 
-		// look for end of chunk size
-		// allow to match end with \n char
-		chunkSizeLen := 0
-		for ; chunkSizeLen < pattern.v1Dot1MaxChunkSizeLen+1; chunkSizeLen++ {
-			if cursor+chunkSizeLen >= len(d) {
-				return nil, errNetconf1Dot1ParseError("chunk size not found before end of data")
-			}
+		var chunkSizeStr string
 
+		for chunkSizeLen := 0; chunkSizeLen <= maxChunkSizeCharLen; chunkSizeLen++ {
 			if d[cursor+chunkSizeLen] == byte('\n') {
+				chunkSizeStr = string(d[cursor : cursor+chunkSizeLen])
+
+				cursor += chunkSizeLen + 1
+
 				break
 			}
 		}
 
-		chunkSizeStr := string(d[cursor : cursor+chunkSizeLen])
-		cursor += chunkSizeLen + 1
+		if chunkSizeStr == "" {
+			return errNetconf1Dot1ParseError(
+				"unable to parse netconf response: failed parsing chunk size",
+			)
+		}
 
 		chunkSize, err := strconv.Atoi(chunkSizeStr)
 		if err != nil {
-			return nil, errNetconf1Dot1ParseError(
-				fmt.Sprintf("unable to parse chunk size '%s': %s", chunkSizeStr, err),
+			return errNetconf1Dot1ParseError(
+				fmt.Sprintf(
+					"unable to parse netconf response: unable to parse chunk size '%s': %s",
+					chunkSizeStr,
+					err,
+				),
 			)
 		}
 
 		joined = append(joined, d[cursor:cursor+chunkSize]...)
-		// last new line of block is not counted
-		// since it's considered a delimiter for next chunk
-		cursor += chunkSize + 1
+
+		// obviously no reason to iterate over the chunk we just yoinked out, so increment the
+		// cursor accordingly -- we can ignore newlines after the chunk since we handle that at
+		// the top of this loop
+		cursor += chunkSize
 	}
 
-	return joined, nil
+	joined = bytes.TrimPrefix(joined, []byte(xmlHeader))
+
+	r.Result = string(bytes.TrimSpace(joined))
+
+	return nil
 }
