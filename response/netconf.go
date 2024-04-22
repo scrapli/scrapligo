@@ -2,6 +2,7 @@ package response
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"regexp"
 	"strconv"
@@ -16,11 +17,21 @@ const (
 	v1Dot1      = "1.1"
 	v1Dot0Delim = "]]>]]>"
 	xmlHeader   = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+
+	// https://datatracker.ietf.org/doc/html/rfc6242#section-4.2 max chunk size is 4294967295 so
+	// for us that is a max of 10 chars that the chunk size could be when we are parsing it out of
+	// raw bytes.
+	maxChunkSizeCharLen = 10
 )
 
+var errNetconf1Dot1Error = errors.New("unable to parse netconf 1.1 response")
+
+func errNetconf1Dot1ParseError(msg string) error {
+	return fmt.Errorf("%w: %s", errNetconf1Dot1Error, msg)
+}
+
 type netconfPatterns struct {
-	v1dot1Chunk *regexp.Regexp
-	rpcErrors   *regexp.Regexp
+	rpcErrors *regexp.Regexp
 }
 
 var (
@@ -31,8 +42,7 @@ var (
 func getNetconfPatterns() *netconfPatterns {
 	netconfPatternsInstanceOnce.Do(func() {
 		netconfPatternsInstance = &netconfPatterns{
-			v1dot1Chunk: regexp.MustCompile(`(?ms)(\d+)\n(.*?)^#`), //nolint:gocritic
-			rpcErrors:   regexp.MustCompile(`(?s)<rpc-errors?>(.*)</rpc-errors?>`),
+			rpcErrors: regexp.MustCompile(`(?s)<rpc-errors?>(.*)</rpc-errors?>`),
 		}
 	})
 
@@ -120,42 +130,91 @@ func (r *NetconfResponse) record1dot0() {
 	r.Result = string(bytes.TrimSpace(b))
 }
 
-func (r *NetconfResponse) validateChunk(i int, b []byte) {
-	// does this need more ... "massaging" like scrapli?
-	// chunk regex matches the newline before the chunk size or end of message delimiter, so we
-	// subtract one for that newline char
-	if len(b)-1 != i {
-		errMsg := fmt.Sprintf("return element lengh invalid, expted: %d, got %d for element: %s\n",
-			i,
-			len(b)-1,
-			b)
-
+func (r *NetconfResponse) record1dot1() {
+	err := r.record1dot1Chunks()
+	if err != nil {
 		r.Failed = &OperationError{
 			Input:       string(r.Input),
 			Output:      r.Result,
-			ErrorString: errMsg,
+			ErrorString: err.Error(),
 		}
 	}
 }
 
-func (r *NetconfResponse) record1dot1() {
-	patterns := getNetconfPatterns()
+func (r *NetconfResponse) record1dot1Chunks() error {
+	d := bytes.TrimSpace(r.RawResult)
 
-	chunkSections := patterns.v1dot1Chunk.FindAllSubmatch(r.RawResult, -1)
+	if len(d) == 0 || d[0] != byte('#') {
+		return errNetconf1Dot1ParseError(
+			"unable to parse netconf response: no chunk marker at start of data",
+		)
+	}
 
 	var joined []byte
 
-	for _, chunkSection := range chunkSections {
-		chunk := chunkSection[2]
+	var cursor int
 
-		size, _ := strconv.Atoi(string(chunkSection[1]))
+	for cursor < len(d) {
+		if d[cursor] == byte('\n') {
+			// we don't need this at the start of this loop, but this lets us easily handle newlines
+			// between chunks
+			cursor++
 
-		r.validateChunk(size, chunk)
+			continue
+		}
 
-		joined = append(joined, chunk[:len(chunk)-1]...)
+		if d[cursor] != byte('#') {
+			return errNetconf1Dot1ParseError(fmt.Sprintf(
+				"unable to parse netconf response: chunk marker missing, got '%s'",
+				string(d[cursor])))
+		}
+
+		cursor++
+
+		if d[cursor] == byte('#') {
+			break
+		}
+
+		var chunkSizeStr string
+
+		for chunkSizeLen := 0; chunkSizeLen <= maxChunkSizeCharLen; chunkSizeLen++ {
+			if d[cursor+chunkSizeLen] == byte('\n') {
+				chunkSizeStr = string(d[cursor : cursor+chunkSizeLen])
+
+				cursor += chunkSizeLen + 1
+
+				break
+			}
+		}
+
+		if chunkSizeStr == "" {
+			return errNetconf1Dot1ParseError(
+				"unable to parse netconf response: failed parsing chunk size",
+			)
+		}
+
+		chunkSize, err := strconv.Atoi(chunkSizeStr)
+		if err != nil {
+			return errNetconf1Dot1ParseError(
+				fmt.Sprintf(
+					"unable to parse netconf response: unable to parse chunk size '%s': %s",
+					chunkSizeStr,
+					err,
+				),
+			)
+		}
+
+		joined = append(joined, d[cursor:cursor+chunkSize]...)
+
+		// obviously no reason to iterate over the chunk we just yoinked out, so increment the
+		// cursor accordingly -- we can ignore newlines after the chunk since we handle that at
+		// the top of this loop
+		cursor += chunkSize
 	}
 
 	joined = bytes.TrimPrefix(joined, []byte(xmlHeader))
 
 	r.Result = string(bytes.TrimSpace(joined))
+
+	return nil
 }

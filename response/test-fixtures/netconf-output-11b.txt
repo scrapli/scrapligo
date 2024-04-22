@@ -1,0 +1,14 @@
+#279
+  <banners xmlns="http://cisco.com/ns/yang/Cisco-IOS-XR-infra-infra-cfg">
+   <banner>
+    <banner-name>motd</banner-name>
+    <banner-text>8
+######################
+A very cool banner with a bunch of #### in it :)
+######################
+
+8</banner-text>
+   </banner>
+  </banners>
+
+##

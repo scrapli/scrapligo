@@ -63,6 +63,11 @@ func TestNetconfRecord(t *testing.T) {
 			version:     "1.1",
 			payloadFile: "netconf-output-11.txt",
 		},
+		"record-response-11b": {
+			description: "a tricky banner to parse test to test recording netconf 1.1 response",
+			version:     "1.1",
+			payloadFile: "netconf-output-11b.txt",
+		},
 	}
 
 	for testName, testCase := range cases {
