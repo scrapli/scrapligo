@@ -40,7 +40,7 @@ jobs:
           go-version: ${{ matrix.go-version }}
 
       - name: lint
-        uses: golangci/golangci-lint-action@v4
+        uses: golangci/golangci-lint-action@v5
         with:
           version: v1.57
           args: --timeout 5m
