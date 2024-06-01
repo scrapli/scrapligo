@@ -47,7 +47,7 @@ func (t *Telnet) handleControlCharResponse(ctrlBuf []byte, c byte) ([]byte, erro
 		}
 	} else if len(ctrlBuf) == 1 && util.ByteIsAny(c, []byte{do, dont, will, wont}) {
 		ctrlBuf = append(ctrlBuf, c)
-	} else if len(ctrlBuf) == 2 { //nolint:gomnd
+	} else if len(ctrlBuf) == 2 { //nolint:mnd
 		cmd := ctrlBuf[1:2][0]
 		ctrlBuf = make([]byte, 0)
 
@@ -85,7 +85,7 @@ func (t *Telnet) handleControlChars(a *Args) error {
 		}
 
 		// speed up timeout after initial Read
-		d = a.TimeoutSocket / controlCharSocketTimeoutDivisor * 2 //nolint:gomnd
+		d = a.TimeoutSocket / controlCharSocketTimeoutDivisor * 2 //nolint:mnd
 
 		charBuf := make([]byte, 1)
 

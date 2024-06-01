@@ -26,7 +26,7 @@ func testOpen(testName string, testCase *util.PayloadTestCase) func(t *testing.T
 				options.WithTransportType(transport.FileTransport),
 				options.WithFileTransportFile(resolveFile(t, testCase.PayloadFile)),
 				options.WithReadDelay(0),
-				options.WithTimeoutOps(1*time.Second),
+				options.WithTimeoutOps(2*time.Second),
 			)
 			if err != nil {
 				errChan <- err

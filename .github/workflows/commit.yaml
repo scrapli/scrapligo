@@ -40,9 +40,9 @@ jobs:
           go-version: ${{ matrix.go-version }}
 
       - name: lint
-        uses: golangci/golangci-lint-action@v5
+        uses: golangci/golangci-lint-action@v6
         with:
-          version: v1.57
+          version: v1.59
           args: --timeout 5m
           # caching issues, see: https://github.com/golangci/golangci-lint-action/issues/244#issuecomment-1052190775
           skip-pkg-cache: true

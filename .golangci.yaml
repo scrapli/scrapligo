@@ -31,6 +31,7 @@ linters:
     - dupl
     - dupword
     - durationcheck
+    - err113
     - errcheck
     - errchkjson
     - errname
@@ -48,11 +49,9 @@ linters:
     - gocyclo
     - godot
     - godox
-    - goerr113
     - gofmt
     - gofumpt
     - goimports
-    - gomnd
     - goprintffuncname
     - gosec
     - gosimple
@@ -64,6 +63,7 @@ linters:
     - maintidx
     - makezero
     - misspell
+    - mnd
     - nakedret
     - nestif
     - nilerr
@@ -117,10 +117,10 @@ issues:
       text: "package-comments"
 
 run:
-  go: '1.21'
+  go: '1.22'
 
 output:
   uniq-by-line: false
 
 service:
-  golangci-lint-version: 1.57.x
+  golangci-lint-version: 1.59.x

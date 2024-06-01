@@ -84,7 +84,7 @@ func (d *Driver) sendRPC(
 				break
 			}
 
-			time.Sleep(5 * time.Microsecond) //nolint: gomnd
+			time.Sleep(5 * time.Microsecond) //nolint: mnd
 		}
 
 		done <- data
