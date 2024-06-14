@@ -122,6 +122,10 @@ func (c *Channel) Read() ([]byte, error) {
 	default:
 	}
 
+	if c.readLoopExited {
+		return nil, util.ErrConnectionError
+	}
+
 	b := c.Q.Dequeue()
 
 	if b == nil {
