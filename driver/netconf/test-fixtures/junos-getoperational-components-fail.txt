@@ -1,0 +1,50 @@
+<nc:hello xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0">
+   <nc:capabilities>
+    <nc:capability>urn:ietf:params:netconf:base:1.0</nc:capability>
+    <nc:capability>urn:ietf:params:netconf:capability:candidate:1.0</nc:capability>
+    <nc:capability>urn:ietf:params:netconf:capability:confirmed-commit:1.0</nc:capability>
+    <nc:capability>urn:ietf:params:netconf:capability:validate:1.0</nc:capability>
+    <nc:capability>urn:ietf:params:netconf:capability:url:1.0?scheme=http,ftp,file</nc:capability>
+    <nc:capability>urn:ietf:params:xml:ns:netconf:base:1.0?module=ietf-netconf&amp;revision=2011-06-01</nc:capability>
+    <nc:capability>urn:ietf:params:xml:ns:netconf:capability:candidate:1.0</nc:capability>
+    <nc:capability>urn:ietf:params:xml:ns:netconf:capability:confirmed-commit:1.0</nc:capability>
+    <nc:capability>urn:ietf:params:xml:ns:netconf:capability:validate:1.0</nc:capability>
+    <nc:capability>urn:ietf:params:xml:ns:netconf:capability:url:1.0?scheme=http,ftp,file</nc:capability>
+    <nc:capability>urn:ietf:params:xml:ns:yang:ietf-inet-types?module=ietf-inet-types&amp;revision=2013-07-15</nc:capability>
+    <nc:capability>urn:ietf:params:xml:ns:yang:ietf-yang-metadata?module=ietf-yang-metadata&amp;revision=2016-08-05</nc:capability>
+    <nc:capability>urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring</nc:capability>
+    <nc:capability>http://xml.juniper.net/netconf/junos/1.0</nc:capability>
+    <nc:capability>http://xml.juniper.net/dmi/system/1.0</nc:capability>
+    <nc:capability>http://yang.juniper.net/junos/jcmd?module=junos-configuration-metadata&amp;revision=2021-09-01</nc:capability>
+  </nc:capabilities>
+  <nc:session-id>5026</nc:session-id>
+</nc:hello>
+]]>]]>
+<?xml version="1.0" encoding="utf-8"?>
+<hello xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+     <capabilities>
+         <capability>urn:ietf:params:netconf:base:1.0</capability>
+     </capabilities>
+</hello>]]>]]>
+<?xml version="1.0" encoding="UTF-8"?><rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="101"><get><filter type="subtree"><components xmlns="http://openconfig.net/yang/platform"><component><state><type xmlns:idx="http://openconfig.net/yang/platform-types">idx:CHASSIS</type></state></component></components></filter></get></rpc>]]>]]>
+<nc:rpc-reply xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" xmlns:junos="http://xml.juniper.net/junos/23.2R2.21-EVO/junos"  message-id="101">
+<nc:rpc-error>
+<nc:error-type>protocol</nc:error-type>
+<nc:error-tag>operation-failed</nc:error-tag>
+<nc:error-severity>error</nc:error-severity>
+<nc:error-message>syntax error</nc:error-message>
+<nc:error-info>
+<nc:bad-element>components</nc:bad-element>
+</nc:error-info>
+</nc:rpc-error>
+<nc:rpc-error>
+<nc:error-type>protocol</nc:error-type>
+<nc:error-tag>operation-failed</nc:error-tag>
+<nc:error-severity>error</nc:error-severity>
+<nc:error-message>syntax error, expecting &lt;/filter&gt;</nc:error-message>
+<nc:error-info>
+<nc:bad-element>components</nc:bad-element>
+</nc:error-info>
+</nc:rpc-error>
+</nc:rpc-reply>
+]]>]]>

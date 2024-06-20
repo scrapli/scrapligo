@@ -71,6 +71,9 @@ func NewNetconfResponse(
 			[]byte("<rpc-errors>"),
 			[]byte("</rpc-error>"),
 			[]byte("</rpc-errors>"),
+			// for juniper, with set system services netconf rfc-compliant
+			[]byte("<nc:rpc-error>"),
+			[]byte("</nc:rpc-error>"),
 		},
 		NetconfVersion: version,
 	}

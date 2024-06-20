@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<hello xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+     <capabilities>
+         <capability>urn:ietf:params:netconf:base:1.0</capability>
+     </capabilities>
+</hello>]]>]]>
+
+
+<?xml version="1.0" encoding="UTF-8"?><rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="101"><get><filter type="subtree"><components xmlns="http://openconfig.net/yang/platform">
+			<component>
+			<state>
+			<type xmlns:idx="http://openconfig.net/yang/platform-types">idx:CHASSIS</type>
+			</state>
+			</component>
+			</components></filter></get></rpc>]]>]]>
+
