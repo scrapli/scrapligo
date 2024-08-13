@@ -120,6 +120,7 @@ func (r *NetconfResponse) Record(b []byte) {
 
 		for _, rpcerr := range patterns.rpcSingleErrors.FindAll(r.RawResult, -1) {
 			errStr := string(rpcerr)
+
 			switch {
 			case strings.Contains(errStr, "<error-severity>error</error-severity>"):
 				r.ErrorMessages = append(r.ErrorMessages, errStr)
