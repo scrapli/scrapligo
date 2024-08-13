@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"regexp"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -31,7 +32,8 @@ func errNetconf1Dot1ParseError(msg string) error {
 }
 
 type netconfPatterns struct {
-	rpcErrors *regexp.Regexp
+	rpcErrors       *regexp.Regexp
+	rpcSingleErrors *regexp.Regexp
 }
 
 var (
@@ -42,7 +44,8 @@ var (
 func getNetconfPatterns() *netconfPatterns {
 	netconfPatternsInstanceOnce.Do(func() {
 		netconfPatternsInstance = &netconfPatterns{
-			rpcErrors: regexp.MustCompile(`(?s)<rpc-errors?>(.*)</rpc-errors?>`),
+			rpcErrors:       regexp.MustCompile(`(?s)<rpc-errors?>(.*)</rpc-errors?>`),
+			rpcSingleErrors: regexp.MustCompile(`(?sU)<rpc-errors?>.*</rpc-errors?>`),
 		}
 	})
 
@@ -81,21 +84,22 @@ func NewNetconfResponse(
 
 // NetconfResponse is a struct returned from all netconf driver operations.
 type NetconfResponse struct {
-	Host               string
-	Port               int
-	Input              []byte
-	FramedInput        []byte
-	RawResult          []byte
-	Result             string
-	StartTime          time.Time
-	EndTime            time.Time
-	ElapsedTime        float64
-	FailedWhenContains [][]byte
-	Failed             error
-	StripNamespaces    bool
-	NetconfVersion     string
-	ErrorMessages      [][]string
-	SubscriptionID     int
+	Host                 string
+	Port                 int
+	Input                []byte
+	FramedInput          []byte
+	RawResult            []byte
+	Result               string
+	StartTime            time.Time
+	EndTime              time.Time
+	ElapsedTime          float64
+	FailedWhenContains   [][]byte
+	Failed               error
+	StripNamespaces      bool
+	NetconfVersion       string
+	ErrorMessages        []string
+	WarningErrorMessages []string
+	SubscriptionID       int
 }
 
 // Record records the output of a NETCONF operation.
@@ -112,6 +116,17 @@ func (r *NetconfResponse) Record(b []byte) {
 			Input:       string(r.Input),
 			Output:      r.Result,
 			ErrorString: string(patterns.rpcErrors.Find(r.RawResult)),
+		}
+
+		for _, rpcerr := range patterns.rpcSingleErrors.FindAll(r.RawResult, -1) {
+			errStr := string(rpcerr)
+
+			switch {
+			case strings.Contains(errStr, "<error-severity>error</error-severity>"):
+				r.ErrorMessages = append(r.ErrorMessages, errStr)
+			case strings.Contains(errStr, "<error-severity>warning</error-severity>"):
+				r.WarningErrorMessages = append(r.WarningErrorMessages, errStr)
+			}
 		}
 	}
 

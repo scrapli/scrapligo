@@ -58,6 +58,11 @@ func TestNetconfRecord(t *testing.T) {
 			version:     "1.0",
 			payloadFile: "netconf-output-10.txt",
 		},
+		"record-response-10-errors": {
+			description: "simple test to test recording netconf 1.0 response with errors",
+			version:     "1.0",
+			payloadFile: "netconf-output-10-errors.txt",
+		},
 		"record-response-11": {
 			description: "simple test to test recording netconf 1.1 response",
 			version:     "1.1",
