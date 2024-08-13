@@ -51,6 +51,34 @@ func testNetconfRecord(testName string, testCase *testNetconfRecordTestCase) fun
 	}
 }
 
+func TestNetconfRecordErrorWarningMsgs(t *testing.T) {
+	r := response.NewNetconfResponse(nil, nil, "localhost", 830, "1.1")
+
+	r.Record([]byte(`<rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+       <rpc-error>
+         <error-type>ERROR1</error-type>
+         <error-severity>error</error-severity>
+       </rpc-error>
+	   <rpc-error>
+         <error-type>ERROR2</error-type>
+		 <error-severity>error</error-severity>
+       </rpc-error>
+	   <rpc-error>
+         <error-type>WARNING1</error-type>
+		 <error-severity>warning</error-severity>
+       </rpc-error>
+     </rpc-reply>
+	 `))
+
+	if len(r.WarningErrorMessages) != 1 {
+		t.Errorf("expected 1 warning message, got %d", len(r.WarningErrorMessages))
+	}
+
+	if len(r.ErrorMessages) != 2 {
+		t.Errorf("expected 2 error message, got %d", len(r.ErrorMessages))
+	}
+}
+
 func TestNetconfRecord(t *testing.T) {
 	cases := map[string]*testNetconfRecordTestCase{
 		"record-response-10": {
