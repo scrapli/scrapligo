@@ -26,6 +26,7 @@ linters:
   enable:
     - asciicheck
     - bodyclose
+    - copyloopvar
     - decorder
     - dogsled
     - dupl
@@ -36,7 +37,6 @@ linters:
     - errchkjson
     - errname
     - exhaustive
-    - exportloopref
     - forbidigo
     - forcetypeassert
     - funlen

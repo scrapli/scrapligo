@@ -28,7 +28,7 @@ func (d *Driver) buildCommitElem(confirmed bool, timeout uint, persist, persistI
 	}
 
 	if timeout > 0 {
-		commitElem.ConfirmedTimeout = strconv.Itoa(int(timeout))
+		commitElem.ConfirmedTimeout = strconv.Itoa(int(timeout)) //nolint:gosec
 	}
 
 	netconfInput := d.buildPayload(commitElem)

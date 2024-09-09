@@ -130,8 +130,9 @@ func (t *System) open(a *Args) error {
 	t.fd, err = pty.StartWithSize(
 		t.c,
 		&pty.Winsize{
-			Rows: uint16(a.TermHeight),
-			Cols: uint16(a.TermWidth),
+			// ignoring linters we know these will fit in uint16
+			Rows: uint16(a.TermHeight), //nolint:gosec
+			Cols: uint16(a.TermWidth),  //nolint:gosec
 		},
 	)
 	if err != nil {
