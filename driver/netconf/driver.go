@@ -188,6 +188,7 @@ type Driver struct {
 	SelectedVersion  string
 
 	ForceSelfClosingTags bool
+	ExcludeHeader        bool
 
 	serverCapabilities []string
 	sessionID          uint64
