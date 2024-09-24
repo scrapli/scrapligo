@@ -118,7 +118,7 @@ func (d *Driver) processServerCapabilities() error {
 			string(sessionIDMatch[1]), err)
 	}
 
-	d.sessionID = uint64(i)
+	d.sessionID = uint64(i) //nolint:gosec
 
 	return nil
 }
