@@ -18,7 +18,11 @@ type serializedInput struct {
 	framedXML []byte
 }
 
-func (m *message) serialize(v string, forceSelfClosingTags bool) (*serializedInput, error) {
+func (m *message) serialize(
+	v string,
+	forceSelfClosingTags,
+	excludeHeader bool,
+) (*serializedInput, error) {
 	serialized := &serializedInput{}
 
 	msg, err := xml.Marshal(m)
@@ -26,7 +30,9 @@ func (m *message) serialize(v string, forceSelfClosingTags bool) (*serializedInp
 		return nil, err
 	}
 
-	msg = append([]byte(xmlHeader), msg...)
+	if !excludeHeader {
+		msg = append([]byte(xmlHeader), msg...)
+	}
 
 	if forceSelfClosingTags {
 		msg = ForceSelfClosingTags(msg)

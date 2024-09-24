@@ -45,3 +45,19 @@ func WithNetconfForceSelfClosingTags() util.Option {
 		return nil
 	}
 }
+
+// WithNetconfExcludeHeader excludes the XML header from the NETCONF message.
+// This is useful for devices that do not support the XML header.
+func WithNetconfExcludeHeader() util.Option {
+	return func(o interface{}) error {
+		d, ok := o.(*netconf.Driver)
+
+		if !ok {
+			return util.ErrIgnoredOption
+		}
+
+		d.ExcludeHeader = true
+
+		return nil
+	}
+}

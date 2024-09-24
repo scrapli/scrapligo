@@ -35,7 +35,7 @@ func (d *Driver) sendRPC(
 		d.Logger.Debug("ForceSelfClosingTags is true, enforcing...")
 	}
 
-	serialized, err := m.serialize(d.SelectedVersion, d.ForceSelfClosingTags)
+	serialized, err := m.serialize(d.SelectedVersion, d.ForceSelfClosingTags, d.ExcludeHeader)
 	if err != nil {
 		return nil, err
 	}
