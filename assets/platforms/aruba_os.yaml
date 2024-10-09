@@ -39,17 +39,17 @@ default:
       escalate-prompt:
   default-desired-privilege-level: 'privilege-exec'
   failed-when-contains:
+    - '% Unrecognized command'
     - '% Ambiguous command'
-    - '% Incomplete command'
-    - '% Invalid input detected'
-    - '% Unknown command'
+    - '% Wrong parameter'
+    - "% Incomplete command"
+    - "% Too many parameters"
+    - "% Invalid input"
   textfsm-platform: 'aruba_os' # ignored in go because no ntc-templates
   network-on-open:
     - operation: 'acquire-priv' # targets default desired priv by default
     - operation: 'driver.send-command'
-      command: 'terminal width 512'
-    - operation: 'driver.send-command'
-      command: 'terminal length 0'
+      command: 'no paging'
   network-on-close:
     - operation: 'acquire-priv'
     - operation: 'channel.write'
