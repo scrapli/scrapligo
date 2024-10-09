@@ -28,13 +28,23 @@ const (
 	JuniperJunos = "juniper_junos"
 	// NokiaSrl is a constant representing the platform string/name for Nokia SRL/SRLinux devices.
 	NokiaSrl = "nokia_srl"
+	// ArubaOs is a constant representing the platform string/name for Aruba OS devices.
+	ArubaOs = "aruba_os"
+	// H3C is a constant representing the platform string/name for H3Cdevices.
+	H3C = "h3c"
+	// HuaweiVrp is a constant representing the platform string/name for Huawei VRP devices.
+	HuaweiVrp = "huawei_vrp"
+	// Ruijie is a constant representing the platform string/name for Ruijie devices.
+	Ruijie = "ruijie"
+	// Fortinet is a constant representing the platform string/name for Fortinet devices.
+	Fortinet = "fortinet"
 )
 
 // GetPlatformNames is used to get the "core" (as in embedded in assets and used in testing)
 // platform names.
 func GetPlatformNames() []string {
 	return []string{
-		AristaEos, CiscoIosxe, CiscoIosxr, CiscoNxos, JuniperJunos, NokiaSrl,
+		AristaEos, CiscoIosxe, CiscoIosxr, CiscoNxos, JuniperJunos, NokiaSrl, ArubaOs, H3C, HuaweiVrp, Ruijie, Fortinet,
 	}
 }
 
