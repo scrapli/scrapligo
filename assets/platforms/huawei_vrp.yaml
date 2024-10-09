@@ -25,6 +25,7 @@ default:
     - 'Error: Wrong parameter'
       # missing whitespace is intentional below
     - 'Error:Ambiguous command'
+    - 'Error:Too many parameters'
     - 'Error:Incomplete command'
   textfsm-platform: 'huawei_vrp' # ignored in go because no ntc-templates
   network-on-open:
