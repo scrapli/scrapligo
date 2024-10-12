@@ -218,10 +218,20 @@ func (d *Driver) SendWithCallbacks(
 	input string,
 	callbacks []*Callback,
 	timeout time.Duration,
+	opts ...util.Option,
 ) (*response.Response, error) {
 	d.Logger.Info("SendWithCallbacks requested")
 
-	r := response.NewResponse(input, d.Transport.GetHost(), d.Transport.GetPort(), nil)
+	driverOpts, err := NewOperation(opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(driverOpts.FailedWhenContains) == 0 {
+		driverOpts.FailedWhenContains = d.FailedWhenContains
+	}
+
+	r := response.NewResponse(input, d.Transport.GetHost(), d.Transport.GetPort(), driverOpts.FailedWhenContains)
 
 	if input != "" {
 		err := d.Channel.WriteAndReturn([]byte(input), false)
