@@ -1,5 +1,5 @@
 ---
-platform-type: 'h3c'
+platform-type: 'hp_comware'
 default:
   driver-type: 'network'
   privilege-levels:
@@ -26,7 +26,7 @@ default:
     - '% Wrong parameter'
     - "% Incomplete command"
     - "% Too many parameters"
-  textfsm-platform: 'h3c' # ignored in go because no ntc-templates
+  textfsm-platform: 'hp_comware' # ignored in go because no ntc-templates
   network-on-open:
     - operation: 'acquire-priv' # targets default desired priv by default
     - operation: 'driver.send-command'

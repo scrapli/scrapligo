@@ -1,11 +1,11 @@
 ---
-platform-type: 'aruba_os'
+platform-type: 'ruijie_rgos'
 default:
   driver-type: 'network'
   privilege-levels:
     exec:
       name: 'exec'
-      pattern: '(?im)^[\w.\-@/: ()*]{1,63}>$'
+      pattern: '(?im)^[\w.\-@/:]{1,63}>$'
       previous-priv:
       deescalate:
       escalate:
@@ -13,7 +13,7 @@ default:
       escalate-prompt:
     privilege-exec:
       name: 'privilege-exec'
-      pattern: '(?im)^[\w.\-@/: ()*]{1,63}#$'
+      pattern: '(?im)^[\w.\-@/:]{1,63}#$'
       previous-priv: 'exec'
       deescalate: 'disable'
       escalate: 'enable'
@@ -21,7 +21,7 @@ default:
       escalate-prompt: '(?im)^(?:enable\s){0,1}password:\s?$'
     configuration:
       name: 'configuration'
-      pattern: '(?im)^[\w.\-@/: ()*]{1,63}\([\+\w.\-@/:+]{0,32}\)#$'
+      pattern: '(?im)^[\w.\-@/:]{1,63}\([\+\w.\-@/:+]{0,32}\)#$'
       not-contains:
         - 'tcl)'
       previous-priv: 'privilege-exec'
@@ -39,17 +39,15 @@ default:
       escalate-prompt:
   default-desired-privilege-level: 'privilege-exec'
   failed-when-contains:
-    - '% Unrecognized command'
     - '% Ambiguous command'
-    - '% Wrong parameter'
-    - "% Incomplete command"
-    - "% Too many parameters"
-    - "% Invalid input"
-  textfsm-platform: 'aruba_os' # ignored in go because no ntc-templates
+    - '% Incomplete command'
+    - '% Invalid input detected'
+    - '% Unknown command'
+  textfsm-platform: '' # ignored in go because no ntc-templates
   network-on-open:
     - operation: 'acquire-priv' # targets default desired priv by default
     - operation: 'driver.send-command'
-      command: 'no paging'
+      command: 'terminal length 0'
   network-on-close:
     - operation: 'acquire-priv'
     - operation: 'channel.write'

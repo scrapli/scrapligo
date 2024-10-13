@@ -1,5 +1,5 @@
 ---
-platform-type: 'fortinet'
+platform-type: 'fortinet_fortios'
 default:
   driver-type: 'network'
   privilege-levels:
