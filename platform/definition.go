@@ -18,23 +18,65 @@ import (
 const (
 	// AristaEos is a constant representing the platform string/name for Arista EOS devices.
 	AristaEos = "arista_eos"
+	// ArubaWlc is a constant representing the platform string/name for Aruba Wireless controller
+	// AOS devices.
+	ArubaWlc = "aruba_wlc"
 	// CiscoIosxe is a constant representing the platform string/name for Cisco IOSXE devices.
 	CiscoIosxe = "cisco_iosxe"
 	// CiscoIosxr is a constant representing the platform string/name for Cisco IOSXR devices.
 	CiscoIosxr = "cisco_iosxr"
 	// CiscoNxos is a constant representing the platform string/name for Cisco NXOS devices.
 	CiscoNxos = "cisco_nxos"
+	// CumulusLinux is a constant representing the platform string/name for Cumulus devices.
+	CumulusLinux = "cumulus_linux"
+	// CumulusVtysh is a constant representing the platform string/name for Cumulus vtysh devices.
+	CumulusVtysh = "cumulus_vtysh"
+	// HpComware is a constant representing the platform string/name for H3C devices.
+	HpComware = "hp_comware"
+	// HuaweiVrp is a constant representing the platform string/name for Huawei VRP devices.
+	HuaweiVrp = "huawei_vrp"
+	// IpinfusionOcnos is a constant representing the platform string/name for Ipinfusion OCNos
+	// devices.
+	IpinfusionOcnos = "ipinfusion_ocnos"
 	// JuniperJunos is a constant representing the platform string/name for Juniper JunOS devices.
 	JuniperJunos = "juniper_junos"
 	// NokiaSrl is a constant representing the platform string/name for Nokia SRL/SRLinux devices.
 	NokiaSrl = "nokia_srl"
+	// NokiaSros is a constant representing the platform string/name for Nokia SROS devices.
+	NokiaSros = "nokia_sros"
+	// NokiaSrosClassic is a constant representing the platform string/name for Nokia SROS devices
+	// in classic mode.
+	NokiaSrosClassic = "nokia_sros_classic"
+	// PaloAltoPanos is a constant representing the platform string/name for Palo Alto PanOS
+	// devices.
+	PaloAltoPanos = "paloalto_panos"
+	// RuijieRgos is a constant representing the platform string/name for Ruijie network devices.
+	RuijieRgos = "ruijie_rgos"
+	// VyattaVyos is a constant representing the platform string/name for Vyos devices.
+	VyattaVyos = "vyatta_vyos"
 )
 
 // GetPlatformNames is used to get the "core" (as in embedded in assets and used in testing)
 // platform names.
 func GetPlatformNames() []string {
 	return []string{
-		AristaEos, CiscoIosxe, CiscoIosxr, CiscoNxos, JuniperJunos, NokiaSrl,
+		AristaEos,
+		ArubaWlc,
+		CiscoIosxe,
+		CiscoIosxr,
+		CiscoNxos,
+		CumulusLinux,
+		CumulusVtysh,
+		HpComware,
+		HuaweiVrp,
+		IpinfusionOcnos,
+		JuniperJunos,
+		NokiaSrl,
+		NokiaSros,
+		NokiaSrosClassic,
+		PaloAltoPanos,
+		RuijieRgos,
+		VyattaVyos,
 	}
 }
 

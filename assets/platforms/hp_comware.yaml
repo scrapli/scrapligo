@@ -1,5 +1,5 @@
 ---
-platform-type: 'huawei_vrp'
+platform-type: 'hp_comware'
 default:
   driver-type: 'network'
   privilege-levels:
@@ -21,17 +21,16 @@ default:
       escalate-prompt:
   default-desired-privilege-level: 'user-view'
   failed-when-contains:
-    - 'Error: Unrecognized command'
-    - 'Error: Wrong parameter'
-      # missing whitespace is intentional below
-    - 'Error:Ambiguous command'
-    - 'Error:Too many parameters'
-    - 'Error:Incomplete command'
-  textfsm-platform: 'huawei_vrp' # ignored in go because no ntc-templates
+    - '% Unrecognized command'
+    - '% Ambiguous command'
+    - '% Wrong parameter'
+    - "% Incomplete command"
+    - "% Too many parameters"
+  textfsm-platform: 'hp_comware' # ignored in go because no ntc-templates
   network-on-open:
     - operation: 'acquire-priv' # targets default desired priv by default
     - operation: 'driver.send-command'
-      command: 'screen-length 0 temporary'
+      command: 'screen-length disable'
   network-on-close:
     - operation: 'acquire-priv'
     - operation: 'channel.write'
