@@ -13,7 +13,7 @@ default:
       escalate-prompt:
     system-view:
       name: 'system-view'
-      pattern: '(?im)^[[\w.\-@/:~]{1,63}]$'
+      pattern: '(?im)^[[\w.\-@/:~*]{1,63}]$'
       previous-priv: 'user-view'
       deescalate: 'quit'
       escalate: 'system-view'
