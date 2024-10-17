@@ -11,9 +11,9 @@ default:
       escalate:
       escalate-auth: false
       escalate-prompt:
-    system-view:
-      name: 'system-view'
-      pattern: '(?im)^[[\w.\-@/:]{1,63}]$'
+    configuration:
+      name: 'configuration'
+      pattern: '(?im)^[[\w.\-@/:~*]{1,63}]$'
       previous-priv: 'user-view'
       deescalate: 'quit'
       escalate: 'system-view'
