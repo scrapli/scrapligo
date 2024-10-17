@@ -231,7 +231,12 @@ func (d *Driver) SendWithCallbacks(
 		driverOpts.FailedWhenContains = d.FailedWhenContains
 	}
 
-	r := response.NewResponse(input, d.Transport.GetHost(), d.Transport.GetPort(), driverOpts.FailedWhenContains)
+	r := response.NewResponse(
+		input,
+		d.Transport.GetHost(),
+		d.Transport.GetPort(),
+		driverOpts.FailedWhenContains,
+	)
 
 	if input != "" {
 		err := d.Channel.WriteAndReturn([]byte(input), false)
