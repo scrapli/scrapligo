@@ -2,6 +2,6 @@ C3560CX#configure terminal
 Enter configuration commands, one per line.  End with CNTL/Z.
 C3560CX(config)#show version
                   ^
-NOTHING TO SEE HERE -- dont want the test to have a failed result, so just making this show no failed when contains thing :)
+% Invalid input detected at '^' marker.
 
 C3560CX(config)#

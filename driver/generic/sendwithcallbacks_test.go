@@ -17,6 +17,7 @@ type sendWithCallbacksTestCase struct {
 	payloadFile  string
 	initialInput string
 	callbacks    []*generic.Callback
+	failed       bool
 }
 
 func testSendWithCallbacks(
@@ -37,10 +38,9 @@ func testSendWithCallbacks(
 			)
 		}
 
-		if r.Failed != nil {
+		if r.Failed != nil && !testCase.failed {
 			t.Fatalf(
-				"%s: response object indicates failure,"+
-					" this shouldn't happenf or send with callbacks",
+				"%s: response object indicates failure, this shouldn't happen",
 				testName,
 			)
 		}
@@ -90,6 +90,32 @@ func TestSendWithCallbacks(t *testing.T) {
 					Complete:   true,
 				},
 			},
+		},
+		"send-with-callbacks-failed-when-contains": {
+			description:  "simple send with callbacks test w/ failed when contains output",
+			payloadFile:  "send-with-callbacks-failed-when-contains.txt",
+			initialInput: "",
+			callbacks: []*generic.Callback{
+				{
+					Callback: func(d *generic.Driver, _ string) error {
+						_, err := d.Channel.SendInput("configure terminal")
+
+						return err
+					},
+					Contains:    "C3560CX#",
+					Name:        "callback-one",
+					ResetOutput: true,
+				},
+				{
+					Callback: func(d *generic.Driver, _ string) error {
+						return d.Channel.WriteAndReturn([]byte("show version"), false)
+					},
+					ContainsRe: regexp.MustCompile(`(?im)^c3560cx\(config\)#`),
+					Name:       "callback-two",
+					Complete:   true,
+				},
+			},
+			failed: true,
 		},
 	}
 
