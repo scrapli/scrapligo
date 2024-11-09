@@ -2,9 +2,9 @@ package netconf
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strconv"
-	"time"
 
 	"github.com/scrapli/scrapligo/util"
 )
@@ -45,7 +45,10 @@ type result struct {
 func (d *Driver) getServerCapabilities() ([]byte, error) {
 	cr := make(chan *result)
 
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel := context.WithTimeout(
+		context.Background(),
+		d.Channel.GetTimeout(d.Channel.TimeoutOps),
+	)
 
 	defer cancel()
 
@@ -68,20 +71,21 @@ func (d *Driver) getServerCapabilities() ([]byte, error) {
 		}
 	}()
 
-	timer := time.NewTimer(d.Channel.GetTimeout(d.Channel.TimeoutOps))
+	r := <-cr
+	if r.err != nil {
+		if errors.Is(r.err, context.DeadlineExceeded) {
+			d.Logger.Critical("channel timeout reading capabilities")
 
-	select {
-	case r := <-cr:
-		if r.err != nil {
-			return nil, r.err
+			return nil, fmt.Errorf(
+				"%w: channel timeout reading capabilities",
+				util.ErrTimeoutError,
+			)
 		}
 
-		return r.b, nil
-	case <-timer.C:
-		d.Logger.Critical("channel timeout reading capabilities")
-
-		return nil, fmt.Errorf("%w: channel timeout reading capabilities", util.ErrTimeoutError)
+		return nil, r.err
 	}
+
+	return r.b, nil
 }
 
 func (d *Driver) processServerCapabilities() error {

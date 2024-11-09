@@ -2,6 +2,8 @@ package channel
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"regexp"
 
 	"github.com/scrapli/scrapligo/util"
@@ -85,6 +87,15 @@ func (c *Channel) SendInputB(input []byte, opts ...util.Option) ([]byte, error) 
 
 	r := <-cr
 	if r.err != nil {
+		if errors.Is(r.err, context.DeadlineExceeded) {
+			c.l.Critical("channel timeout sending input to device")
+
+			return nil, fmt.Errorf(
+				"%w: channel timeout sending input to device",
+				util.ErrTimeoutError,
+			)
+		}
+
 		return nil, r.err
 	}
 

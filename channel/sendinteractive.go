@@ -2,9 +2,9 @@ package channel
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"regexp"
-	"time"
 
 	"github.com/scrapli/scrapligo/util"
 )
@@ -118,27 +118,25 @@ func (c *Channel) SendInteractive(
 
 	cr := make(chan *result)
 
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel := context.WithTimeout(context.Background(), c.GetTimeout(op.Timeout))
 
 	defer cancel()
 
 	go c.sendInteractive(ctx, cr, events, op, readUntilF)
 
-	timer := time.NewTimer(c.GetTimeout(op.Timeout))
+	r := <-cr
+	if r.err != nil {
+		if errors.Is(r.err, context.DeadlineExceeded) {
+			c.l.Critical("channel timeout sending input to device")
 
-	select {
-	case r := <-cr:
-		if r.err != nil {
-			return nil, r.err
+			return nil, fmt.Errorf(
+				"%w: channel timeout sending input to device",
+				util.ErrTimeoutError,
+			)
 		}
 
-		return r.b, nil
-	case <-timer.C:
-		c.l.Critical("channel timeout sending interactive input to device")
-
-		return nil, fmt.Errorf(
-			"%w: channel timeout sending interactive input to device",
-			util.ErrTimeoutError,
-		)
+		return nil, r.err
 	}
+
+	return r.b, nil
 }
