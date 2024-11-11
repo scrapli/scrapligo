@@ -2,9 +2,9 @@ package channel
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"regexp"
-	"time"
 
 	"github.com/scrapli/scrapligo/util"
 )
@@ -26,7 +26,7 @@ func (c *Channel) SendInputB(input []byte, opts ...util.Option) ([]byte, error) 
 
 	cr := make(chan *result)
 
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel := context.WithTimeout(context.Background(), c.GetTimeout(op.Timeout))
 
 	// we'll call cancel no matter what, either the read goroutines finished nicely in which case it
 	// doesnt matter, or we hit the timer and the cancel will stop the reading
@@ -72,6 +72,8 @@ func (c *Channel) SendInputB(input []byte, opts ...util.Option) ([]byte, error) 
 
 			if readErr != nil {
 				cr <- &result{b: b, err: readErr}
+
+				return
 			}
 
 			b = append(b, nb...)
@@ -83,20 +85,21 @@ func (c *Channel) SendInputB(input []byte, opts ...util.Option) ([]byte, error) 
 		}
 	}()
 
-	timer := time.NewTimer(c.GetTimeout(op.Timeout))
+	r := <-cr
+	if r.err != nil {
+		if errors.Is(r.err, context.DeadlineExceeded) {
+			c.l.Critical("channel timeout sending input to device")
 
-	select {
-	case r := <-cr:
-		if r.err != nil {
-			return nil, r.err
+			return nil, fmt.Errorf(
+				"%w: channel timeout sending input to device",
+				util.ErrTimeoutError,
+			)
 		}
 
-		return r.b, nil
-	case <-timer.C:
-		c.l.Critical("channel timeout sending input to device")
-
-		return nil, fmt.Errorf("%w: channel timeout sending input to device", util.ErrTimeoutError)
+		return nil, r.err
 	}
+
+	return r.b, nil
 }
 
 // SendInput sends the input string to the target device. Any bytes output is returned.

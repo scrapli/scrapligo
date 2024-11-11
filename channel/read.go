@@ -227,7 +227,7 @@ func (c *Channel) ReadUntilPrompt(ctx context.Context) ([]byte, error) {
 	for {
 		select {
 		case <-ctx.Done():
-			return nil, nil
+			return nil, ctx.Err()
 		default:
 		}
 
@@ -261,7 +261,7 @@ func (c *Channel) ReadUntilAnyPrompt(
 	for {
 		select {
 		case <-ctx.Done():
-			return nil, nil
+			return nil, ctx.Err()
 		default:
 		}
 
