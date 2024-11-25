@@ -78,6 +78,13 @@ func (c *Channel) authenticateSSH(ctx context.Context, p, pp []byte) *result {
 			return &result{nil, err}
 		}
 
+		if nb == nil {
+			// nothing read, sleep a bit then try again
+			time.Sleep(c.ReadDelay)
+
+			continue
+		}
+
 		b = append(b, nb...)
 
 		err = c.sshMessageHandler(b)
@@ -186,6 +193,13 @@ func (c *Channel) authenticateTelnet(ctx context.Context, u, p []byte) *result {
 		)
 		if err != nil {
 			return &result{nil, err}
+		}
+
+		if nb == nil {
+			// nothing read, sleep a bit then try again
+			time.Sleep(c.ReadDelay)
+
+			continue
 		}
 
 		b = append(b, nb...)
