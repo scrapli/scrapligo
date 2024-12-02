@@ -172,6 +172,7 @@ func (d *Driver) handleCallbacks(
 
 	go func() {
 		defer close(c)
+
 		for {
 			select {
 			case <-ctx.Done():
@@ -182,6 +183,7 @@ func (d *Driver) handleCallbacks(
 					c <- &callbackResult{
 						err: err,
 					}
+
 					return
 				}
 
@@ -197,6 +199,7 @@ func (d *Driver) handleCallbacks(
 							fb:        fb,
 							err:       nil,
 						}
+
 						return
 					}
 				}
@@ -209,6 +212,7 @@ func (d *Driver) handleCallbacks(
 		if r.err != nil {
 			return nil, r.err
 		}
+
 		return d.executeCallback(r.i, r.callbacks, r.b, r.fb, timeout)
 	case <-ctx.Done():
 		return nil, fmt.Errorf("%w: timeout handling callbacks", util.ErrTimeoutError)
