@@ -2,6 +2,7 @@ package generic
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"regexp"
 	"time"
@@ -164,41 +165,47 @@ func (d *Driver) handleCallbacks(
 	b, fb []byte,
 	timeout time.Duration,
 ) ([]byte, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+
 	c := make(chan *callbackResult)
 
 	go func() {
 		defer close(c)
 
 		for {
-			rb, err := d.Channel.Read()
-			if err != nil {
-				c <- &callbackResult{
-					err: err,
-				}
-
+			select {
+			case <-ctx.Done():
 				return
-			}
-
-			b = append(b, rb...)
-			fb = append(fb, rb...)
-
-			for i, cb := range callbacks {
-				if cb.check(b) {
+			default:
+				rb, err := d.Channel.Read()
+				if err != nil {
 					c <- &callbackResult{
-						i:         i,
-						callbacks: callbacks,
-						b:         b,
-						fb:        fb,
-						err:       nil,
+						err: err,
 					}
 
 					return
 				}
+
+				b = append(b, rb...)
+				fb = append(fb, rb...)
+
+				for i, cb := range callbacks {
+					if cb.check(b) {
+						c <- &callbackResult{
+							i:         i,
+							callbacks: callbacks,
+							b:         b,
+							fb:        fb,
+							err:       nil,
+						}
+
+						return
+					}
+				}
 			}
 		}
 	}()
-
-	timer := time.NewTimer(timeout)
 
 	select {
 	case r := <-c:
@@ -207,7 +214,7 @@ func (d *Driver) handleCallbacks(
 		}
 
 		return d.executeCallback(r.i, r.callbacks, r.b, r.fb, timeout)
-	case <-timer.C:
+	case <-ctx.Done():
 		return nil, fmt.Errorf("%w: timeout handling callbacks", util.ErrTimeoutError)
 	}
 }
