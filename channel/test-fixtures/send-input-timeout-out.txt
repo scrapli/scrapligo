@@ -1,0 +1,3 @@
+RP/0/RP0/CPU0:iosxr75#terminal width 512
+RP/0/RP0/CPU0:iosxr75#terminal length 0
+RP/0/RP0/CPU0:iosxr75#show running-co

@@ -76,6 +76,7 @@ func prepareChannel(
 	t *testing.T,
 	testName,
 	payloadFile string,
+	chanOpts ...util.Option,
 ) (*channel.Channel, *transport.File) {
 	l, _ := logging.NewInstance()
 
@@ -90,7 +91,7 @@ func prepareChannel(
 		t.Errorf("%s: encountered error creating File Transport, error: %s", testName, err)
 	}
 
-	c, err := channel.NewChannel(l, transportObj)
+	c, err := channel.NewChannel(l, transportObj, chanOpts...)
 	if err != nil {
 		t.Errorf("%s: encountered error creating Channel, error: %s", testName, err)
 	}

@@ -4,8 +4,10 @@ import (
 	"bytes"
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/scrapli/scrapligo/driver/opoptions"
+	"github.com/scrapli/scrapligo/driver/options"
 
 	"github.com/scrapli/scrapligo/util"
 
@@ -130,5 +132,32 @@ func TestSendInput(t *testing.T) {
 		f := testSendInput(testName, testCase)
 
 		t.Run(testName, f)
+	}
+}
+
+func TestScrapligoSendCommandErrorTimeout(t *testing.T) {
+	input := readFile(t, "send-input-timeout-in.txt")
+
+	c, _ := prepareChannel(
+		t,
+		t.Name(),
+		"send-input-timeout-out.txt",
+		options.WithTimeoutOps(1*time.Millisecond),
+	)
+	_, err := c.SendInput(string(input))
+
+	if err == nil {
+		t.Fatalf("%s: expecting an error but got none", t.Name())
+	}
+
+	expectedErr := "errTimeoutError: channel timeout sending input to device"
+
+	if err.Error() != expectedErr {
+		t.Fatalf(
+			"%s: actual and expected errors do not match\nactual: %s\nexpected:%s",
+			t.Name(),
+			err.Error(),
+			expectedErr,
+		)
 	}
 }
