@@ -42,7 +42,7 @@ func (c *Channel) SendInputB(input []byte, opts ...util.Option) ([]byte, error) 
 			return
 		}
 
-		_, err = readUntilF(input)
+		_, err = readUntilF(ctx, input)
 		if err != nil {
 			cr <- &result{b: b, err: err}
 
@@ -85,30 +85,21 @@ func (c *Channel) SendInputB(input []byte, opts ...util.Option) ([]byte, error) 
 		}
 	}()
 
-	select {
-	case r := <-cr:
-		if r.err != nil {
-			if errors.Is(r.err, context.DeadlineExceeded) {
-				c.l.Critical("channel timeout sending input to device")
+	r := <-cr
+	if r.err != nil {
+		if errors.Is(r.err, context.DeadlineExceeded) {
+			c.l.Critical("channel timeout sending input to device")
 
-				return nil, fmt.Errorf(
-					"%w: channel timeout sending input to device",
-					util.ErrTimeoutError,
-				)
-			}
-
-			return nil, r.err
+			return nil, fmt.Errorf(
+				"%w: channel timeout sending input to device",
+				util.ErrTimeoutError,
+			)
 		}
 
-		return r.b, nil
-	case <-ctx.Done():
-		c.l.Critical("channel timeout sending input to device")
-
-		return nil, fmt.Errorf(
-			"%w: channel timeout sending input to device",
-			util.ErrTimeoutError,
-		)
+		return nil, r.err
 	}
+
+	return r.b, nil
 }
 
 // SendInput sends the input string to the target device. Any bytes output is returned.
