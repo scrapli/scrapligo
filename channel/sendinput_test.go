@@ -135,7 +135,7 @@ func TestSendInput(t *testing.T) {
 	}
 }
 
-func TestScrapligoSendCommandErrorTimeout(t *testing.T) {
+func TestSendCommandTimeout(t *testing.T) {
 	input := readFile(t, "send-input-timeout-in.txt")
 
 	c, _ := prepareChannel(
