@@ -161,7 +161,7 @@ func (c *Channel) ReadAll() ([]byte, error) {
 }
 
 // ReadUntilFuzzy reads until a fuzzy match of the input is found.
-func (c *Channel) ReadUntilFuzzy(b []byte) ([]byte, error) {
+func (c *Channel) ReadUntilFuzzy(ctx context.Context, b []byte) ([]byte, error) {
 	if len(b) == 0 {
 		return nil, nil
 	}
@@ -169,6 +169,12 @@ func (c *Channel) ReadUntilFuzzy(b []byte) ([]byte, error) {
 	var rb []byte
 
 	for {
+		select {
+		case <-ctx.Done():
+			return nil, ctx.Err()
+		default:
+		}
+
 		nb, err := c.Read()
 		if err != nil {
 			return nil, err
@@ -193,10 +199,16 @@ func (c *Channel) ReadUntilFuzzy(b []byte) ([]byte, error) {
 
 // ReadUntilExplicit reads bytes out of the channel Q object until the bytes b are seen in the
 // output. Once the bytes are seen all read bytes are returned.
-func (c *Channel) ReadUntilExplicit(b []byte) ([]byte, error) {
+func (c *Channel) ReadUntilExplicit(ctx context.Context, b []byte) ([]byte, error) {
 	var rb []byte
 
 	for {
+		select {
+		case <-ctx.Done():
+			return nil, ctx.Err()
+		default:
+		}
+
 		nb, err := c.Read()
 		if err != nil {
 			return nil, err

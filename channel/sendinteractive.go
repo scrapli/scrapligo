@@ -24,7 +24,7 @@ func (c *Channel) sendInteractive(
 	cr chan *result,
 	events []*SendInteractiveEvent,
 	op *OperationOptions,
-	readUntilF func(b []byte) ([]byte, error),
+	readUntilF func(ctx context.Context, b []byte) ([]byte, error),
 ) {
 	defer close(cr)
 
@@ -48,7 +48,7 @@ func (c *Channel) sendInteractive(
 		if e.ChannelResponse != "" && !e.HideInput {
 			var nb []byte
 
-			nb, err = readUntilF([]byte(e.ChannelInput))
+			nb, err = readUntilF(ctx, []byte(e.ChannelInput))
 			if err != nil {
 				cr <- &result{b: nil, err: err}
 

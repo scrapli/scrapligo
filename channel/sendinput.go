@@ -42,7 +42,7 @@ func (c *Channel) SendInputB(input []byte, opts ...util.Option) ([]byte, error) 
 			return
 		}
 
-		_, err = readUntilF(input)
+		_, err = readUntilF(ctx, input)
 		if err != nil {
 			cr <- &result{b: b, err: err}
 
