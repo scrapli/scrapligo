@@ -1,0 +1,102 @@
+---
+name: test
+
+on:
+  workflow_call: {}
+  workflow_dispatch:
+    inputs:
+      debug_unit:
+        description: "start tmate before unit tests"
+        type: boolean
+        required: false
+        default: false
+      debug_e2e:
+        description: "start tmate before e2e tests"
+        type: boolean
+        required: false
+        default: false
+
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: load env vars for workflow run
+        run: |
+          source .github/vars.env
+          echo "GO_VERSION=$GO_VERSION" >> "$GITHUB_ENV"
+          echo "GCI_VERSION=$GCI_VERSION" >> "$GITHUB_ENV"
+          echo "GOFUMPT_VERSION=$GOFUMPT_VERSION" >> "$GITHUB_ENV"
+          echo "GOLANGCI_LINT_VERSION=$GOLANGCI_LINT_VERSION" >> "$GITHUB_ENV"
+          echo "GOLINES_VERSION=$GOLINES_VERSION" >> "$GITHUB_ENV"
+          echo "GOTESTSUM_VERSION=$GOTESTSUM_VERSION" >> "$GITHUB_ENV"
+
+      - name: set up go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: install go test tools
+        run: |
+          go install gotest.tools/gotestsum@${{ env.GOTESTSUM_VERSION }}
+
+      - name: setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.debug_unit }}
+
+      - name: unit tests
+        run: make test-race
+
+  e2e:
+    runs-on: ubuntu-latest
+    needs:
+      - unit
+    # run e2e on main or prs pointing to main
+    if: (github.ref_name == 'main' || github.base_ref == 'main') || (github.event_name == 'workflow_dispatch' && inputs.debug_e2e)
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: load env vars for workflow run
+        run: |
+          source .github/vars.env
+          echo "GO_VERSION=$GO_VERSION" >> "$GITHUB_ENV"
+          echo "GCI_VERSION=$GCI_VERSION" >> "$GITHUB_ENV"
+          echo "GOFUMPT_VERSION=$GOFUMPT_VERSION" >> "$GITHUB_ENV"
+          echo "GOLANGCI_LINT_VERSION=$GOLANGCI_LINT_VERSION" >> "$GITHUB_ENV"
+          echo "GOLINES_VERSION=$GOLINES_VERSION" >> "$GITHUB_ENV"
+          echo "GOTESTSUM_VERSION=$GOTESTSUM_VERSION" >> "$GITHUB_ENV"
+          echo "CONTAINERLAB_VERSION=$CONTAINERLAB_VERSION" >> "$GITHUB_ENV"
+
+      - name: set up go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: install go test tools
+        run: |
+          go install gotest.tools/gotestsum@${{ env.GOTESTSUM_VERSION }}
+
+      # pull the srl image before installing clab so that clab has no need to pull it when starting
+      # -- make sure this is the same image version that is in the clab ci topo!
+      - name: pull srlinux image
+        run: docker pull ghcr.io/nokia/srlinux:${{ env.SRLINUX_VERSION }}
+
+      - name: install clab
+        run: bash -c "$(curl -sL https://get.containerlab.dev)" -- -v ${{ env.CONTAINERLAB_VERSION }}
+
+      - name: start clab ci topo
+        run: make deploy-clab-ci
+
+      - name: setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.debug_e2e }}
+
+      - name: e2e tests
+        run: make test-e2e-ci

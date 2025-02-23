@@ -3,10 +3,12 @@
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
-lint: ## Run linters
+fmt: ## Run formatters
 	gofumpt -w .
-	goimports -w .
+	gci write .
 	golines -w .
+
+lint: ## Run linters
 	golangci-lint run
 
 test: ## Run unit tests
@@ -15,11 +17,11 @@ test: ## Run unit tests
 test-race: ## Run unit tests with race flag
 	gotestsum --format testname --hide-summary=skipped -- -coverprofile=cover.out ./... -race
 
-test-functional: ## Run functional tests against "full" test topology
-	gotestsum --format testname --hide-summary=skipped -- ./... -functional
+test-e2e: ## Run e2e tests against "full" test topology
+	gotestsum --format testname --hide-summary=skipped -- ./e2e/...
 
-test-ci: ## Run functional tests against "ci" test topology with race flag
-	gotestsum --format testname --hide-summary=skipped -- ./... -functional -platforms nokia_srl -race
+test-e2e-ci: ## Run e2e tests against "ci" test topology with race flag
+	gotestsum --format testname --hide-summary=skipped -- ./e2e/... -platforms nokia_srl -race
 
 cov:  ## Produce html coverage report
 	go tool cover -html=cover.out

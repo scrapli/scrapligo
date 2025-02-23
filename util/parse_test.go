@@ -1,12 +1,12 @@
 package util_test
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"testing"
 
-	"github.com/google/go-cmp/cmp"
-	"github.com/scrapli/scrapligo/util"
+	scrapligoutil "github.com/scrapli/scrapligo/util"
 )
 
 func testTextFsmParse(testName string) func(t *testing.T) {
@@ -15,7 +15,10 @@ func testTextFsmParse(testName string) func(t *testing.T) {
 
 		s := string(readFile(t, fmt.Sprintf("%s.txt", testName)))
 
-		actualOut, err := util.TextFsmParse(s, "test-fixtures/cisco_ios_show_version.textfsm")
+		actualOut, err := scrapligoutil.TextFsmParse(
+			s,
+			"test-fixtures/cisco_ios_show_version.textfsm",
+		)
 		if err != nil {
 			t.Fatalf("%s: encountered error parsing with textfsm, error: %s", testName, err)
 		}
@@ -35,7 +38,7 @@ func testTextFsmParse(testName string) func(t *testing.T) {
 
 		expectedOut := readFile(t, fmt.Sprintf("golden/%s-out.txt", testName))
 
-		if !cmp.Equal(actualOutJSON, expectedOut) {
+		if !bytes.Equal(actualOutJSON, expectedOut) {
 			t.Fatalf(
 				"%s: actual and expected outputs do not match\nactual: %s\nexpected:%s",
 				testName,

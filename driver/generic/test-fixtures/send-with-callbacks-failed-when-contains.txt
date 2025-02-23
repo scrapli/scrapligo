@@ -1,7 +1,0 @@
-C3560CX#configure terminal
-Enter configuration commands, one per line.  End with CNTL/Z.
-C3560CX(config)#show version
-                  ^
-% Invalid input detected at '^' marker.
-
-C3560CX(config)#

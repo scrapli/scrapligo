@@ -34,3 +34,6 @@ cover.out
 
 # clab build dir
 .clab/clab-scrapligo
+
+# dont check in shared libraries, we'll build them in ci
+assets/lib/*

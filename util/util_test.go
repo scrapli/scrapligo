@@ -7,30 +7,13 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/scrapli/scrapligo/util"
+	scrapligoconstants "github.com/scrapli/scrapligo/constants"
 )
 
-var (
-	update = flag.Bool( //nolint
-		"update",
-		false,
-		"update the golden files",
-	)
-	functional = flag.Bool( //nolint
-		"functional",
-		false,
-		"execute functional tests",
-	)
-	platforms = flag.String( //nolint
-		"platforms",
-		util.All,
-		"comma sep list of platform(s) to target",
-	)
-	transports = flag.String( //nolint
-		"transports",
-		util.All,
-		"comma sep list of transport(s) to target",
-	)
+var update = flag.Bool( //nolint: gochecknoglobals
+	"update",
+	false,
+	"update the golden files",
 )
 
 func readFile(t *testing.T, f string) []byte {
@@ -45,7 +28,11 @@ func readFile(t *testing.T, f string) []byte {
 func writeGolden(t *testing.T, testName string, actualOut []byte) {
 	goldenOut := filepath.Join("test-fixtures", "golden", testName+"-out.txt")
 
-	err := os.WriteFile(goldenOut, actualOut, 0o644) //nolint:gosec
+	err := os.WriteFile(
+		goldenOut,
+		actualOut,
+		scrapligoconstants.PermissionsOwnerReadWriteEveryoneRead,
+	)
 	if err != nil {
 		t.Fatal(err)
 	}
