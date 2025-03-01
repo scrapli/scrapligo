@@ -7,6 +7,13 @@ import (
 	"github.com/ebitengine/purego"
 	scrapligoerrors "github.com/scrapli/scrapligo/errors"
 	scrapligoffi "github.com/scrapli/scrapligo/ffi"
+	scrapligoutil "github.com/scrapli/scrapligo/util"
+)
+
+const (
+	defaultReadDelayMinNs         uint64 = 1_000
+	defaultReadDelayMaxNs         uint64 = 1_000_000
+	defaultReadDelayBackoffFactor uint8  = 2
 )
 
 // NewDriver returns a new instance of Driver setup with the given options.
@@ -23,7 +30,7 @@ func NewDriver(
 	d := &Driver{
 		ffiMap: ffiMap,
 
-		platformDefinitionFile: platformDefinitionFile,
+		platformDefinitionFilePath: platformDefinitionFile,
 
 		host: host,
 
@@ -59,7 +66,7 @@ type Driver struct {
 	ptr    uintptr
 	ffiMap *scrapligoffi.Mapping
 
-	platformDefinitionFile string
+	platformDefinitionFilePath string
 
 	host string
 
@@ -87,21 +94,23 @@ func (d *Driver) Open(ctx context.Context) (*Result, error) {
 		loggerCallback = purego.NewCallback(d.options.loggerCallback)
 	}
 
-	d.ptr = d.ffiMap.Driver.AllocFromYaml(
-		d.platformDefinitionFile,
-		d.options.platformVariant,
+	d.ptr = d.ffiMap.Driver.Alloc(
+		d.platformDefinitionFilePath,
+		"", // definition string
+		d.options.definitionVariant,
 		loggerCallback,
 		d.host,
-		string(d.options.transportKind),
 		*d.options.port,
-		d.options.username,
-		d.options.password,
-		// timeouts governed by contexts in go!
-		0,
+		string(d.options.transportKind),
 	)
 
 	if d.ptr == 0 {
 		return nil, scrapligoerrors.NewFfiError("failed to allocate driver", nil)
+	}
+
+	err := d.options.apply(d.ptr, d.ffiMap)
+	if err != nil {
+		return nil, scrapligoerrors.NewFfiError("failed to applying driver options", err)
 	}
 
 	cancel := false
@@ -122,8 +131,6 @@ func (d *Driver) Open(ctx context.Context) (*Result, error) {
 		return nil, err
 	}
 
-	// TODO we can run native language callbacks here if we want?
-
 	return result, nil
 }
 
@@ -137,10 +144,40 @@ func (d *Driver) Close() {
 	d.ffiMap.Driver.Free(d.ptr)
 }
 
-func (d *Driver) getResult(ctx context.Context, cancel *bool, operationID uint32) (*Result, error) {
+func getPollDelay(curVal uint64, maxVal *uint64, backoffFactor *uint8) time.Duration {
+	bf := defaultReadDelayBackoffFactor
+	if backoffFactor != nil {
+		bf = *backoffFactor
+	}
+
+	mv := defaultReadDelayMaxNs
+	if maxVal != nil {
+		mv = *maxVal
+	}
+
+	newVal := curVal
+	newVal *= uint64(bf)
+
+	if newVal > mv {
+		return time.Duration(scrapligoutil.SafeUint64ToInt64(mv))
+	}
+
+	return time.Duration(scrapligoutil.SafeUint64ToInt64(newVal))
+}
+
+func (d *Driver) getResult(
+	ctx context.Context,
+	cancel *bool,
+	operationID uint32,
+) (*Result, error) {
 	var done bool
 
 	var resultRawSize, resultSize, resultFailedIndicatorSize, errSize uint64
+
+	curPollDelay := defaultReadDelayMinNs
+	if d.options.session.readDelayMinNs != nil {
+		curPollDelay = *d.options.session.readDelayMinNs
+	}
 
 	for {
 		select {
@@ -151,9 +188,15 @@ func (d *Driver) getResult(ctx context.Context, cancel *bool, operationID uint32
 		default:
 		}
 
-		// TODO obviously figuring out how tight to loop this will be impactful af on things i think
-		// i think it probably makes sense to make it exactly the same as the read delay?
-		time.Sleep(time.Millisecond)
+		// we obviously cant have too tight a loop here or cpu will go nuts and we'll block things,
+		// so we'll sleep the same as the zig read delay will be
+		time.Sleep(
+			getPollDelay(
+				curPollDelay,
+				d.options.session.readDelayMaxNs,
+				d.options.session.readDelayBackoffFactor,
+			),
+		)
 
 		rc := d.ffiMap.Driver.PollOperation(
 			d.ptr,

@@ -235,12 +235,19 @@ func GetMapping() (*Mapping, error) {
 		mappingInst = &Mapping{
 			Driver:        DriverMapping{},
 			DriverNetconf: DriverNetconfMapping{},
+			Options: OptionMapping{
+				Session:       SessionOptions{},
+				Auth:          AuthOptions{},
+				TransportBin:  TransportBinOptions{},
+				TransportSSH2: TransportSSH2Options{},
+			},
 		}
 
 		purego.RegisterLibFunc(&mappingInst.AssertNoLeaks, libScrapliFfi, "assertNoLeaks")
 
 		registerDriver(mappingInst, libScrapliFfi)
 		registerNetconf(mappingInst, libScrapliFfi)
+		registerOptions(mappingInst, libScrapliFfi)
 
 		scrapligologging.Logger(
 			scrapligologging.Debug,

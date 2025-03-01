@@ -6,36 +6,21 @@ type Mapping struct {
 	AssertNoLeaks func() bool
 	Driver        DriverMapping
 	DriverNetconf DriverNetconfMapping
+	Options       OptionMapping
 }
 
 // DriverMapping holds libscrapli mappings specifically for telnet/ssh drivers.
 type DriverMapping struct {
-	// AllocFromYaml allocates a driver object in zig from the given platform definition yaml file,
-	// using the given params.
-	AllocFromYaml func(
-		platformDefinitionFile string,
-		platformVariant string,
+	// Alloc allocates a driver object in zig -- it expects *all* the possible options.
+	Alloc func(
+		// general bits
+		definitionFilePath string,
+		definitionString string,
+		definitionVariant string,
 		loggerCallback uintptr,
 		host string,
-		transportKind string,
 		port uint16,
-		username string,
-		password string,
-		sessionTimeoutNs uint64,
-	) (driverPtr uintptr)
-	// AllocFromYamlString ist he same as AllocFromYaml but accepts a loaded YAML string rather than
-	// a path to a string. This is useful because a platform definition may be in memory in a go
-	// asset.
-	AllocFromYamlString func(
-		platformDefinitionString string,
-		platformVariant string,
-		loggerCallback uintptr,
-		host string,
 		transportKind string,
-		port uint16,
-		username string,
-		password string,
-		sessionTimeoutNs uint64,
 	) (driverPtr uintptr)
 	// Free releases the memory of the driver object at driverPtr -- this should be called *after*
 	// Close where possible.
@@ -166,5 +151,175 @@ type DriverNetconfMapping struct {
 		driverPtr uintptr,
 		operationID *uint32,
 		cancel *bool,
+	) int
+}
+
+// OptionMapping holds libscrapli mappings for the applying driver options.
+type OptionMapping struct {
+	Session       SessionOptions
+	Auth          AuthOptions
+	TransportBin  TransportBinOptions
+	TransportSSH2 TransportSSH2Options
+}
+
+// SessionOptions holds options setters for session related things.
+type SessionOptions struct {
+	// SetReadSize sets the session read size for the driver at driverPtr.
+	SetReadSize func(
+		driverPtr uintptr,
+		value uint64,
+	) int
+
+	// SetReadDelayMinNs sets the session minimum read delay in nanoseconds for the driver
+	// at driverPtr.
+	SetReadDelayMinNs func(
+		driverPtr uintptr,
+		value uint64,
+	) int
+
+	// SetReadDelayMaxNs sets the session minimum read delay in nanoseconds for the driver
+	// at driverPtr.
+	SetReadDelayMaxNs func(
+		driverPtr uintptr,
+		value uint64,
+	) int
+
+	// SetReadDelayBackoffFactor sets the backoff factor for the read delay for the driver
+	// at driverPtr.
+	SetReadDelayBackoffFactor func(
+		driverPtr uintptr,
+		value uint8,
+	) int
+
+	// SetReturnChar sets the return char string for the driver at driverPtr.
+	SetReturnChar func(
+		driverPtr uintptr,
+		value string,
+	) int
+
+	// SetOperationTimeoutNs sets the session operation timeout in nanoseconds for the driver
+	// at driverPtr.
+	SetOperationTimeoutNs func(
+		driverPtr uintptr,
+		value uint64,
+	) int
+
+	// SetOperationMaxSearchDepth sets the maximum search depth to look backward for prompt
+	// matching for the driver at driverPtr.
+	SetOperationMaxSearchDepth func(
+		driverPtr uintptr,
+		value uint64,
+	) int
+}
+
+// AuthOptions holds options setters related to authentication.
+type AuthOptions struct {
+	// SetUsername sets the username for the driver at driverPtr.
+	SetUsername func(
+		driverPtr uintptr,
+		value string,
+	) int
+
+	// SetPassword sets the username for the driver at driverPtr.
+	SetPassword func(
+		driverPtr uintptr,
+		value string,
+	) int
+
+	// SetPrivateKeyPath sets the private key path for the driver at driverPtr.
+	SetPrivateKeyPath func(
+		driverPtr uintptr,
+		value string,
+	) int
+
+	// SetPrivateKeyPassphrase sets the private key passphrase for the driver at driverPtr.
+	SetPrivateKeyPassphrase func(
+		driverPtr uintptr,
+		value string,
+	) int
+
+	// SetInSessionAuthBypass sets the in session auth bypass flag for the driver at driverPtr.
+	SetInSessionAuthBypass func(
+		driverPtr uintptr,
+	) int
+
+	// SetUsernamePattern sets the username pcre2 regex pattern for the driver at driverPtr.
+	SetUsernamePattern func(
+		driverPtr uintptr,
+		value string,
+	) int
+
+	// SetPasswordPattern sets the password pcre2 regex pattern for the driver at driverPtr.
+	SetPasswordPattern func(
+		driverPtr uintptr,
+		value string,
+	) int
+
+	// SetPassphrasePattern sets the passphrase pcre2 regex pattern for the driver at driverPtr.
+	SetPassphrasePattern func(
+		driverPtr uintptr,
+		value string,
+	) int
+}
+
+// TransportBinOptions holds options setters for the bin transport.
+type TransportBinOptions struct {
+	// SetBin sets the path to the binary to use when opening the transport for the driver at
+	// driverPtr.
+	SetBin func(
+		driverPtr uintptr,
+		value string,
+	) int
+
+	// SetExtraOpenArgs sets the extra args to pass when opening the transport for the driver at
+	// driverPtr.
+	SetExtraOpenArgs func(
+		driverPtr uintptr,
+		value string,
+	) int
+
+	// SetOverrideOpenArgs sets the extra args to pass when opening the transport for the driver at
+	// driverPtr.
+	SetOverrideOpenArgs func(
+		driverPtr uintptr,
+		value string,
+	) int
+
+	// SetSSHConfigPath sets the ssh config file path for the transport for the driver at driverPtr.
+	SetSSHConfigPath func(
+		driverPtr uintptr,
+		value string,
+	) int
+
+	// SetKnownHostsPath sets the ssh config file path for the transport for the driver at
+	// driverPtr.
+	SetKnownHostsPath func(
+		driverPtr uintptr,
+		value string,
+	) int
+
+	// SetEnableStrictKey sets the flag to enable strict key checking for the driver at driverPtr.
+	SetEnableStrictKey func(
+		driverPtr uintptr,
+	) int
+
+	// SetTermHeight sets the pty term height for the driver at driverPtr.
+	SetTermHeight func(
+		driverPtr uintptr,
+		value uint16,
+	) int
+
+	// SetTermWidth sets the pty term width for the driver at driverPtr.
+	SetTermWidth func(
+		driverPtr uintptr,
+		value uint16,
+	) int
+}
+
+// TransportSSH2Options holds options setters for the ssh2 transport.
+type TransportSSH2Options struct {
+	// SetLibSSH2Trace enables libssh2 trace for the driver at driverPtr.
+	SetLibSSH2Trace func(
+		driverPtr uintptr,
 	) int
 }

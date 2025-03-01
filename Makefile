@@ -8,7 +8,7 @@ fmt: ## Run formatters
 	gci write .
 	golines -w .
 
-lint: ## Run linters
+lint: fmt ## Run linters
 	golangci-lint run
 
 test: ## Run unit tests
