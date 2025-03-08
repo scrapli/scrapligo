@@ -14,7 +14,6 @@ type DriverMapping struct {
 	// Alloc allocates a driver object in zig -- it expects *all* the possible options.
 	Alloc func(
 		// general bits
-		definitionFilePath string,
 		definitionString string,
 		definitionVariant string,
 		loggerCallback uintptr,
@@ -85,6 +84,10 @@ type DriverMapping struct {
 		operationID *uint32,
 		cancel *bool,
 		input string,
+		requestedMode string,
+		inputHandling string,
+		retainInput bool,
+		retainTrailingPrompt bool,
 	) int
 	// SendPromptedInput submits a SendPromptedInput operation to the underlying driver with the
 	// given input, prompt, response, and configured options. The driver populates the operationID
@@ -98,6 +101,9 @@ type DriverMapping struct {
 		response string,
 		hiddenResponse bool,
 		abortInput string,
+		requestedMode string,
+		inputHandling string,
+		retainTrailingPrompt bool,
 	) int
 }
 
@@ -235,6 +241,14 @@ type AuthOptions struct {
 	// SetPrivateKeyPassphrase sets the private key passphrase for the driver at driverPtr.
 	SetPrivateKeyPassphrase func(
 		driverPtr uintptr,
+		value string,
+	) int
+
+	// SetDriverOptionAuthLookupKeyValue sets a k/v pair in the lookup map for the driver at
+	// driverPtr.
+	SetDriverOptionAuthLookupKeyValue func(
+		driverPtr uintptr,
+		key string,
 		value string,
 	) int
 

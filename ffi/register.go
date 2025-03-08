@@ -101,6 +101,11 @@ func registerOptions(m *Mapping, libScrapliFfi uintptr) {
 		"setDriverOptionAuthPrivateKeyPassphrase",
 	)
 	purego.RegisterLibFunc(
+		&m.Options.Auth.SetDriverOptionAuthLookupKeyValue,
+		libScrapliFfi,
+		"setDriverOptionAuthLookupKeyValue",
+	)
+	purego.RegisterLibFunc(
 		&m.Options.Auth.SetInSessionAuthBypass,
 		libScrapliFfi,
 		"setDriverOptionAuthInSessionAuthBypass",

@@ -32,6 +32,7 @@ func NewResult(
 	endTime uint64,
 	resultRaw []byte,
 	result string,
+	resultFailedWhenIndicator []byte,
 ) *Result {
 	return &Result{
 		Host:               host,
@@ -42,6 +43,8 @@ func NewResult(
 		StartTime:          startTime,
 		EndTime:            endTime,
 		ElapsedTimeSeconds: elapsedTime(startTime, endTime),
+		Failed:             len(resultFailedWhenIndicator) > 0,
+		FailedIndicator:    string(resultFailedWhenIndicator),
 	}
 }
 
@@ -66,6 +69,8 @@ type Result struct {
 	StartTime          uint64
 	EndTime            uint64
 	ElapsedTimeSeconds float64
+	Failed             bool
+	FailedIndicator    string
 }
 
 // TextFsmParse parses recorded output w/ a provided textfsm template.

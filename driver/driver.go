@@ -2,9 +2,12 @@ package driver
 
 import (
 	"context"
+	"fmt"
+	"os"
 	"time"
 
 	"github.com/ebitengine/purego"
+	scrapligoassets "github.com/scrapli/scrapligo/assets"
 	scrapligoerrors "github.com/scrapli/scrapligo/errors"
 	scrapligoffi "github.com/scrapli/scrapligo/ffi"
 	scrapligoutil "github.com/scrapli/scrapligo/util"
@@ -16,9 +19,11 @@ const (
 	defaultReadDelayBackoffFactor uint8  = 2
 )
 
-// NewDriver returns a new instance of Driver setup with the given options.
+// NewDriver returns a new instance of Driver setup with the given options. The definitionFileOrName
+// should be the name of one of the platforms that has a definition embedded in this package's
+// assets, or a file path to a valid yaml definition.
 func NewDriver(
-	platformDefinitionFile,
+	definitionFileOrName,
 	host string,
 	opts ...Option,
 ) (*Driver, error) {
@@ -28,14 +33,44 @@ func NewDriver(
 	}
 
 	d := &Driver{
-		ffiMap: ffiMap,
-
-		platformDefinitionFilePath: platformDefinitionFile,
-
-		host: host,
-
+		ffiMap:  ffiMap,
+		host:    host,
 		options: newOptions(),
 	}
+
+	var definitionBytes []byte
+
+	assetPlatformNames := scrapligoassets.GetPlatformNames()
+
+	for _, platformName := range assetPlatformNames {
+		if platformName == definitionFileOrName {
+			definitionBytes, err = scrapligoassets.Assets.ReadFile(
+				fmt.Sprintf("definitions/%s.yaml", platformName),
+			)
+			if err != nil {
+				return nil, scrapligoerrors.NewUtilError(
+					fmt.Sprintf(
+						"failed loading definition asset for platform %q",
+						definitionFileOrName,
+					),
+					err,
+				)
+			}
+		}
+	}
+
+	if len(definitionBytes) == 0 {
+		// didn't load from assets, so we'll try to load the file
+		definitionBytes, err = os.ReadFile(definitionFileOrName) //nolint: gosec
+		if err != nil {
+			return nil, scrapligoerrors.NewUtilError(
+				fmt.Sprintf("failed loading definition file at path %q", definitionFileOrName),
+				err,
+			)
+		}
+	}
+
+	d.options.definitionString = string(definitionBytes)
 
 	for _, opt := range opts {
 		err = opt(d)
@@ -63,13 +98,9 @@ func NewDriver(
 // Driver is an object representing a connection to a device of some sort -- this object wraps the
 // underlying zig driver (created via libscrapli).
 type Driver struct {
-	ptr    uintptr
-	ffiMap *scrapligoffi.Mapping
-
-	platformDefinitionFilePath string
-
-	host string
-
+	ptr     uintptr
+	ffiMap  *scrapligoffi.Mapping
+	host    string
 	options options
 }
 
@@ -95,8 +126,7 @@ func (d *Driver) Open(ctx context.Context) (*Result, error) {
 	}
 
 	d.ptr = d.ffiMap.Driver.Alloc(
-		d.platformDefinitionFilePath,
-		"", // definition string
+		d.options.definitionString,
 		d.options.definitionVariant,
 		loggerCallback,
 		d.host,
@@ -254,6 +284,7 @@ func (d *Driver) getResult(
 		resultEndTime,
 		resultRaw,
 		string(result),
+		resultFailedWhenIndicator,
 	), nil
 }
 
@@ -290,12 +321,27 @@ func (d *Driver) GetPrompt(ctx context.Context) (*Result, error) {
 // "SendConfig(s)" operations, but these no longer exist. Instead, we have SendInput or SendInputs
 // which accept their respective options -- the options can (among other things) control the "mode"
 // (historically "privilege level") at which to send the input(s).
-func (d *Driver) SendInput(ctx context.Context, input string) (*Result, error) {
+func (d *Driver) SendInput(
+	ctx context.Context,
+	input string,
+	options ...OperationOption,
+) (*Result, error) {
 	cancel := false
 
 	var operationID uint32
 
-	status := d.ffiMap.Driver.SendInput(d.ptr, &operationID, &cancel, input)
+	loadedOptions := newOperationOptions(options...)
+
+	status := d.ffiMap.Driver.SendInput(
+		d.ptr,
+		&operationID,
+		&cancel,
+		input,
+		loadedOptions.requestedMode,
+		string(loadedOptions.inputHandling),
+		loadedOptions.retainInput,
+		loadedOptions.retainTrailingPrompt,
+	)
 	if status != 0 {
 		return nil, scrapligoerrors.NewFfiError("failed to submit sendInput operation", nil)
 	}
@@ -304,15 +350,30 @@ func (d *Driver) SendInput(ctx context.Context, input string) (*Result, error) {
 }
 
 // SendInputs send multiple "inputs" to the device.
-func (d *Driver) SendInputs(ctx context.Context, inputs ...string) (*MultiResult, error) {
+func (d *Driver) SendInputs(
+	ctx context.Context,
+	inputs []string,
+	options ...OperationOption,
+) (*MultiResult, error) {
 	cancel := false
+
+	loadedOptions := newOperationOptions(options...)
 
 	results := NewMultiResult(d.host, *d.options.port)
 
 	for _, input := range inputs {
 		var operationID uint32
 
-		status := d.ffiMap.Driver.SendInput(d.ptr, &operationID, &cancel, input)
+		status := d.ffiMap.Driver.SendInput(
+			d.ptr,
+			&operationID,
+			&cancel,
+			input,
+			loadedOptions.requestedMode,
+			string(loadedOptions.inputHandling),
+			loadedOptions.retainInput,
+			loadedOptions.retainTrailingPrompt,
+		)
 		if status != 0 {
 			return nil, scrapligoerrors.NewFfiError("failed to submit sendInput operation", nil)
 		}
@@ -323,6 +384,13 @@ func (d *Driver) SendInputs(ctx context.Context, inputs ...string) (*MultiResult
 		}
 
 		results.AppendResult(r)
+
+		if r.Failed && loadedOptions.stopOnIndicatedFailure {
+			// note that this returns nil for an error since there was nothing unrecoverable
+			// (probably) that happened, just we saw some stuff in the output saying that we
+			// had a bad input or something
+			return results, nil
+		}
 	}
 
 	return results, nil
@@ -335,8 +403,11 @@ func (d *Driver) SendPromptedInput(
 	input,
 	prompt,
 	response string,
+	options ...OperationOption,
 ) (*Result, error) {
 	cancel := false
+
+	loadedOptions := newOperationOptions(options...)
 
 	var operationID uint32
 
@@ -347,8 +418,11 @@ func (d *Driver) SendPromptedInput(
 		input,
 		prompt,
 		response,
-		false,
-		"",
+		loadedOptions.hiddenInput,
+		loadedOptions.abortInput,
+		loadedOptions.requestedMode,
+		string(loadedOptions.inputHandling),
+		loadedOptions.retainTrailingPrompt,
 	)
 	if status != 0 {
 		return nil, scrapligoerrors.NewFfiError("failed to submit sendPromptedInput operation", nil)

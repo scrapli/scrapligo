@@ -18,6 +18,15 @@ func WithPassword(password string) Option {
 	}
 }
 
+// WithLookupKeyValue adds an entry to the lookup map for the driver instance.
+func WithLookupKeyValue(key, value string) Option {
+	return func(d *Driver) error {
+		d.options.auth.lookupMap[key] = value
+
+		return nil
+	}
+}
+
 // WithAuthBypass bypasses/disables the "in session" authentication process where applicable (which
 // means in the bin/telnet transports basically).
 func WithAuthBypass() Option {

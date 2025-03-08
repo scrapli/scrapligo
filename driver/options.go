@@ -36,10 +36,16 @@ func newOptions() options {
 		loggerCallback:    nil,
 		transportKind:     TransportKindBin,
 		port:              nil,
+		auth: authOptions{
+			lookupMap: make(map[string]string),
+		},
 	}
 }
 
 type options struct {
+	// the loaded string is set in NewDriver, not via an option as the name/file of the definition
+	// is a required argument.
+	definitionString  string
 	definitionVariant string
 
 	loggerCallback func(level uint8, message *string)
@@ -169,6 +175,8 @@ type authOptions struct {
 	privateKeyPath       string
 	privateKeyPassphrase string
 
+	lookupMap map[string]string
+
 	inSessionAuthBypass bool
 
 	usernamePattern   string
@@ -203,6 +211,16 @@ func (o *authOptions) apply(driverPtr uintptr, m *scrapligoffi.Mapping) error { 
 		if rc != 0 {
 			return scrapligoerrors.NewOptionsError(
 				"failed setting private key passphrase option",
+				nil,
+			)
+		}
+	}
+
+	for k, v := range o.lookupMap {
+		rc := m.Options.Auth.SetDriverOptionAuthLookupKeyValue(driverPtr, k, v)
+		if rc != 0 {
+			return scrapligoerrors.NewOptionsError(
+				"failed setting lookup map option",
 				nil,
 			)
 		}
