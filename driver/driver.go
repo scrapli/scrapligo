@@ -3,6 +3,7 @@ package driver
 import (
 	"context"
 	"fmt"
+	"math/rand"
 	"os"
 	"time"
 
@@ -107,6 +108,21 @@ func NewDriver[T PlatformNameOrString](
 		d.options.port = &p
 	}
 
+	d.minPollDelay = defaultReadDelayMaxNs * 2
+	if d.options.session.readDelayMinNs != nil {
+		d.minPollDelay = *d.options.session.readDelayMinNs * 2
+	}
+
+	d.maxPollDelay = defaultReadDelayMaxNs * 2
+	if d.options.session.readDelayMaxNs != nil {
+		d.maxPollDelay = *d.options.session.readDelayMaxNs * 2
+	}
+
+	d.backoffFactor = defaultReadDelayBackoffFactor
+	if d.options.session.readDelayBackoffFactor != nil {
+		d.backoffFactor = *d.options.session.readDelayBackoffFactor
+	}
+
 	return d, nil
 }
 
@@ -117,6 +133,10 @@ type Driver struct {
 	ffiMap  *scrapligoffi.Mapping
 	host    string
 	options options
+
+	minPollDelay  uint64
+	maxPollDelay  uint64
+	backoffFactor uint8
 }
 
 // GetPtr returns the pointer to the zig driver, don't use this unless you know what you are doing,
@@ -194,25 +214,15 @@ func (d *Driver) Close() {
 	d.ffiMap.Driver.Free(d.ptr)
 }
 
-func getPollDelay(curVal uint64, maxVal *uint64, backoffFactor *uint8) time.Duration {
-	bf := defaultReadDelayBackoffFactor
-	if backoffFactor != nil {
-		bf = *backoffFactor
-	}
-
-	mv := defaultReadDelayMaxNs
-	if maxVal != nil {
-		mv = *maxVal
-	}
-
+func getPollDelay(curVal, minVal, maxVal uint64, backoffFactor uint8) int64 {
 	newVal := curVal
-	newVal *= uint64(bf)
+	newVal *= uint64(backoffFactor)
 
-	if newVal > mv {
-		return time.Duration(scrapligoutil.SafeUint64ToInt64(mv))
+	if newVal > maxVal {
+		newVal = maxVal
 	}
 
-	return time.Duration(scrapligoutil.SafeUint64ToInt64(newVal))
+	return scrapligoutil.SafeUint64ToInt64(newVal + uint64(rand.Int63n(int64(minVal))))
 }
 
 func (d *Driver) getResult(
@@ -224,9 +234,9 @@ func (d *Driver) getResult(
 
 	var resultRawSize, resultSize, resultFailedIndicatorSize, errSize uint64
 
-	curPollDelay := defaultReadDelayMinNs
+	curPollDelay := defaultReadDelayMinNs * 2
 	if d.options.session.readDelayMinNs != nil {
-		curPollDelay = *d.options.session.readDelayMinNs
+		curPollDelay = *d.options.session.readDelayMinNs * 2
 	}
 
 	for {
@@ -240,13 +250,14 @@ func (d *Driver) getResult(
 
 		// we obviously cant have too tight a loop here or cpu will go nuts and we'll block things,
 		// so we'll sleep the same as the zig read delay will be
-		time.Sleep(
-			getPollDelay(
-				curPollDelay,
-				d.options.session.readDelayMaxNs,
-				d.options.session.readDelayBackoffFactor,
-			),
-		)
+		curPollDelay = uint64(getPollDelay(
+			curPollDelay,
+			d.minPollDelay,
+			d.maxPollDelay,
+			d.backoffFactor,
+		))
+
+		time.Sleep(time.Duration(curPollDelay))
 
 		rc := d.ffiMap.Driver.PollOperation(
 			d.ptr,
