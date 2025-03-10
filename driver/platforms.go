@@ -3,6 +3,12 @@ package driver
 // PlatformName is an enum(ish) representing the name of a Platform.
 type PlatformName string
 
+// String (stringer) method for PlatformName for formatting and/or just to NokiaSrl.String() when
+// passing to.
+func (p PlatformName) String() string {
+	return string(p)
+}
+
 const (
 	AristaEos        PlatformName = "arista_eos"
 	ArubaWlc         PlatformName = "aruba_wlc"
@@ -27,24 +33,24 @@ const (
 // platform names. If your platform isn't listed here, or you need to have a tweaked platform
 // definition you can always pass a definition filename instead of a platform name on Driver
 // creation.
-func GetPlatformNames() []PlatformName {
-	return []PlatformName{
-		AristaEos,
-		ArubaWlc,
-		CiscoIosxe,
-		CiscoIosxr,
-		CiscoNxos,
-		CumulusLinux,
-		CumulusVtysh,
-		HpComware,
-		HuaweiVrp,
-		IpInfusionOcnos,
-		JuniperJunos,
-		NokiaSrl,
-		NokiaSros,
-		NokiaSrosClassic,
-		PaloAltoPanos,
-		RuijieRgos,
-		VyattaVyos,
+func GetPlatformNames() []string {
+	return []string{
+		string(AristaEos),
+		string(ArubaWlc),
+		string(CiscoIosxe),
+		string(CiscoIosxr),
+		string(CiscoNxos),
+		string(CumulusLinux),
+		string(CumulusVtysh),
+		string(HpComware),
+		string(HuaweiVrp),
+		string(IpInfusionOcnos),
+		string(JuniperJunos),
+		string(NokiaSrl),
+		string(NokiaSros),
+		string(NokiaSrosClassic),
+		string(PaloAltoPanos),
+		string(RuijieRgos),
+		string(VyattaVyos),
 	}
 }

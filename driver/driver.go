@@ -19,11 +19,17 @@ const (
 	defaultReadDelayBackoffFactor uint8  = 2
 )
 
+// PlatformNameOrString is a string-like interface so you can pass a PlatformName or "normal" string
+// to the driver constructor.
+type PlatformNameOrString interface {
+	~string
+}
+
 // NewDriver returns a new instance of Driver setup with the given options. The definitionFileOrName
 // should be the name of one of the platforms that has a definition embedded in this package's
 // assets, or a file path to a valid yaml definition.
-func NewDriver(
-	definitionFileOrName,
+func NewDriver[T PlatformNameOrString](
+	definitionFileOrName T,
 	host string,
 	opts ...Option,
 ) (*Driver, error) {
@@ -40,10 +46,19 @@ func NewDriver(
 
 	var definitionBytes []byte
 
+	var definitionFileOrNameString string
+
+	switch v := any(definitionFileOrName).(type) {
+	case PlatformName:
+		definitionFileOrNameString = v.String()
+	case string:
+		definitionFileOrNameString = v
+	}
+
 	assetPlatformNames := GetPlatformNames()
 
 	for _, platformName := range assetPlatformNames {
-		if string(platformName) == definitionFileOrName {
+		if platformName == definitionFileOrNameString {
 			definitionBytes, err = scrapligoassets.Assets.ReadFile(
 				fmt.Sprintf("definitions/%s.yaml", platformName),
 			)
@@ -61,7 +76,7 @@ func NewDriver(
 
 	if len(definitionBytes) == 0 {
 		// didn't load from assets, so we'll try to load the file
-		definitionBytes, err = os.ReadFile(definitionFileOrName) //nolint: gosec
+		definitionBytes, err = os.ReadFile(definitionFileOrNameString) //nolint: gosec
 		if err != nil {
 			return nil, scrapligoerrors.NewUtilError(
 				fmt.Sprintf("failed loading definition file at path %q", definitionFileOrName),
