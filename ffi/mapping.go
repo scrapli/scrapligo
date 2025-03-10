@@ -15,7 +15,6 @@ type DriverMapping struct {
 	Alloc func(
 		// general bits
 		definitionString string,
-		definitionVariant string,
 		loggerCallback uintptr,
 		host string,
 		port uint16,

@@ -127,7 +127,6 @@ func (d *Driver) Open(ctx context.Context) (*Result, error) {
 
 	d.ptr = d.ffiMap.Driver.Alloc(
 		d.options.definitionString,
-		d.options.definitionVariant,
 		loggerCallback,
 		d.host,
 		*d.options.port,

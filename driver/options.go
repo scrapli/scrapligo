@@ -14,13 +14,13 @@ type TransportKind string
 const (
 	// TransportKindBin represents the "bin" transport -- the default transport that is a wrapper
 	// around /bin/ssh.
-	TransportKindBin TransportKind = "Bin"
+	TransportKindBin TransportKind = "bin"
 	// TransportKindSSH2 represents the "ssh2" transport -- the transport using libssh2.
-	TransportKindSSH2 TransportKind = "SSH2"
+	TransportKindSSH2 TransportKind = "ssh2"
 	// TransportKindTelnet represents the "telnet" transport.
-	TransportKindTelnet TransportKind = "Telnet"
-	// TransportKindFile represents the "file" transport that is used for integration testing.
-	TransportKindFile TransportKind = "File"
+	TransportKindTelnet TransportKind = "telnet"
+	// TransportKindTest represents the "Test" transport that is used for integration testing.
+	TransportKindTest TransportKind = "test"
 )
 
 const (
@@ -82,7 +82,7 @@ func (o *options) apply(driverPtr uintptr, m *scrapligoffi.Mapping) error {
 			return err
 		}
 	case TransportKindTelnet:
-	case TransportKindFile:
+	case TransportKindTest:
 	}
 
 	return nil
