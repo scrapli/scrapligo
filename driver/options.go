@@ -20,7 +20,7 @@ const (
 	// TransportKindTelnet represents the "telnet" transport.
 	TransportKindTelnet TransportKind = "telnet"
 	// TransportKindTest represents the "Test" transport that is used for integration testing.
-	TransportKindTest TransportKind = "test"
+	TransportKindTest TransportKind = "test_"
 )
 
 const (
@@ -83,6 +83,10 @@ func (o *options) apply(driverPtr uintptr, m *scrapligoffi.Mapping) error {
 		}
 	case TransportKindTelnet:
 	case TransportKindTest:
+		err = o.transport.test.apply(driverPtr, m)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -97,6 +101,9 @@ type sessionOptions struct {
 
 	operationTimeoutNs      *uint64
 	operationMaxSearchDepth *uint64
+
+	// do not use outside of tests, will leak/is unsafe!
+	recorderPath string
 }
 
 func (o *sessionOptions) apply( //nolint: gocyclo
@@ -162,6 +169,13 @@ func (o *sessionOptions) apply( //nolint: gocyclo
 				"failed setting operation search depth option",
 				nil,
 			)
+		}
+	}
+
+	if o.recorderPath != "" {
+		rc := m.Options.Session.SetRecorderPath(driverPtr, o.recorderPath)
+		if rc != 0 {
+			return scrapligoerrors.NewOptionsError("failed setting recorder path option", nil)
 		}
 	}
 
@@ -263,6 +277,7 @@ func (o *authOptions) apply(driverPtr uintptr, m *scrapligoffi.Mapping) error { 
 type transportOptions struct {
 	bin  transportBinOptions
 	ssh2 transportSSH2Options
+	test transportTestOptions
 }
 
 type transportBinOptions struct {
@@ -369,6 +384,21 @@ func (o *transportSSH2Options) apply(driverPtr uintptr, m *scrapligoffi.Mapping)
 		rc := m.Options.TransportSSH2.SetLibSSH2Trace(driverPtr)
 		if rc != 0 {
 			return scrapligoerrors.NewOptionsError("failed setting libssh2 trace option", nil)
+		}
+	}
+
+	return nil
+}
+
+type transportTestOptions struct {
+	f string
+}
+
+func (o *transportTestOptions) apply(driverPtr uintptr, m *scrapligoffi.Mapping) error {
+	if o.f != "" {
+		rc := m.Options.TransportTest.SetF(driverPtr, o.f)
+		if rc != 0 {
+			return scrapligoerrors.NewOptionsError("failed setting test transport f option", nil)
 		}
 	}
 

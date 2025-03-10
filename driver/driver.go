@@ -40,10 +40,10 @@ func NewDriver(
 
 	var definitionBytes []byte
 
-	assetPlatformNames := scrapligoassets.GetPlatformNames()
+	assetPlatformNames := GetPlatformNames()
 
 	for _, platformName := range assetPlatformNames {
-		if platformName == definitionFileOrName {
+		if string(platformName) == definitionFileOrName {
 			definitionBytes, err = scrapligoassets.Assets.ReadFile(
 				fmt.Sprintf("definitions/%s.yaml", platformName),
 			)
@@ -102,6 +102,12 @@ type Driver struct {
 	ffiMap  *scrapligoffi.Mapping
 	host    string
 	options options
+}
+
+// GetPtr returns the pointer to the zig driver, don't use this unless you know what you are doing,
+// this is just exposed so you *can* get to it if you want to.
+func (d *Driver) GetPtr() (uintptr, *scrapligoffi.Mapping) {
+	return d.ptr, d.ffiMap
 }
 
 // Open opens the driver object. This method spawns the underlying zig driver which the Driver then

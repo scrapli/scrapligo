@@ -165,6 +165,7 @@ type OptionMapping struct {
 	Auth          AuthOptions
 	TransportBin  TransportBinOptions
 	TransportSSH2 TransportSSH2Options
+	TransportTest TransportTestOptions
 }
 
 // SessionOptions holds options setters for session related things.
@@ -214,6 +215,12 @@ type SessionOptions struct {
 	SetOperationMaxSearchDepth func(
 		driverPtr uintptr,
 		value uint64,
+	) int
+
+	// SetRecorderPath sets the recorder path for the driver at driverPtr.
+	SetRecorderPath func(
+		driverPtr uintptr,
+		value string,
 	) int
 }
 
@@ -334,5 +341,14 @@ type TransportSSH2Options struct {
 	// SetLibSSH2Trace enables libssh2 trace for the driver at driverPtr.
 	SetLibSSH2Trace func(
 		driverPtr uintptr,
+	) int
+}
+
+// TransportTestOptions holds options setters for the test transport.
+type TransportTestOptions struct {
+	// SetF sets the "f" (source file) option for the driver at driverPtr.
+	SetF func(
+		driverPtr uintptr,
+		value string,
 	) int
 }

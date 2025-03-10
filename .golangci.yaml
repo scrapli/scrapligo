@@ -108,6 +108,16 @@ issues:
     - linters:
         - revive
       text: "package-comments"
+
+    # ignore some naming things for platforms
+    - path: driver/platforms.go
+      linters:
+        - revive
+      text: "exported"
+    - path: driver/platforms.go
+      linters:
+        - revive
+      text: "var-naming"
   uniq-by-line: false
 
 run:

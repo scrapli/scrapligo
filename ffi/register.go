@@ -78,6 +78,11 @@ func registerOptions(m *Mapping, libScrapliFfi uintptr) {
 		libScrapliFfi,
 		"setDriverOptionSessionOperationMaxSearchDepth",
 	)
+	purego.RegisterLibFunc(
+		&m.Options.Session.SetRecorderPath,
+		libScrapliFfi,
+		"setDriverOptionSessionRecorderPath",
+	)
 
 	// auth
 	purego.RegisterLibFunc(
@@ -173,5 +178,12 @@ func registerOptions(m *Mapping, libScrapliFfi uintptr) {
 		&m.Options.TransportSSH2.SetLibSSH2Trace,
 		libScrapliFfi,
 		"setDriverOptionSSH2TransportSSH2Trace",
+	)
+
+	// transport test
+	purego.RegisterLibFunc(
+		&m.Options.TransportTest.SetF,
+		libScrapliFfi,
+		"setDriverOptionTestTransportF",
 	)
 }

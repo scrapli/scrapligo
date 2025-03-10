@@ -82,3 +82,13 @@ func WithOperationMaxSearchDepth(i uint64) Option {
 		return nil
 	}
 }
+
+// WithSessionRecorderPath sets the output path for a recorder/writer for the session. DO NOT USE
+// OTHER THAN FOR TESTING -- THIS IS UNSAFE AND WILL LEAK :).
+func WithSessionRecorderPath(s string) Option {
+	return func(d *Driver) error {
+		d.options.session.recorderPath = s
+
+		return nil
+	}
+}
