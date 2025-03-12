@@ -2,7 +2,6 @@ package driver
 
 import (
 	"context"
-
 	scrapligoerrors "github.com/scrapli/scrapligo/errors"
 )
 
@@ -26,7 +25,9 @@ func (d *Driver) SendPromptedInput(
 		&operationID,
 		&cancel,
 		input,
+		// TODO should prompt pattern just be a func arg?
 		prompt,
+		loadedOptions.promptPattern,
 		response,
 		loadedOptions.hiddenInput,
 		loadedOptions.abortInput,

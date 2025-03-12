@@ -9,16 +9,16 @@ type InputHandling string
 const (
 	// InputHandlingExact represents "exact" input handling -- meaning the driver will read the
 	// *exact* inputs from the connection before continuing/sending the return char.
-	InputHandlingExact InputHandling = "Exact"
+	InputHandlingExact InputHandling = "exact"
 	// InputHandlingFuzzy represents "fuzzy" input handling -- meaning the driver will read all
 	// input characters in the correct order from the connection before continuing/sending return --
 	// this means that inputs can still be read even if there are some chars that interrupt it such
 	// as backspaces or indicators of newlines etc.
-	InputHandlingFuzzy InputHandling = "Fuzzy"
+	InputHandlingFuzzy InputHandling = "fuzzy"
 	// InputHandlingIgnore represents "ignore" input handling -- meaning the driver will simply
 	// continue to sending return rather than attempting to read/consume the input. Generally,
 	// don't use this.
-	InputHandlingIgnore InputHandling = "Ignore"
+	InputHandlingIgnore InputHandling = "ignore"
 )
 
 func newOperationOptions(options ...OperationOption) *operationOptions {
@@ -39,6 +39,7 @@ type operationOptions struct {
 	retainInput            bool
 	retainTrailingPrompt   bool
 	stopOnIndicatedFailure bool
+	promptPattern          string
 	abortInput             string
 	hiddenInput            bool
 }
@@ -78,6 +79,14 @@ func WithRetainTrailingPrompt() OperationOption {
 func WithStopOnIndicatedFailure() OperationOption {
 	return func(o *operationOptions) {
 		o.stopOnIndicatedFailure = true
+	}
+}
+
+// WithPromptPattern sets a string pcre2 regex pattern to look for after sending an input -- this is
+// only applicable to SendPromptedInputs.
+func WithPromptPattern(s string) OperationOption {
+	return func(o *operationOptions) {
+		o.promptPattern = s
 	}
 }
 

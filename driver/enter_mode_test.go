@@ -112,6 +112,14 @@ func TestEnterMode(t *testing.T) {
 						testGoldenContent,
 					)
 				}
+
+				scrapligotesthelper.AssertEqual(t, 22, r.Port)
+				scrapligotesthelper.AssertEqual(t, testHost, r.Host)
+				scrapligotesthelper.AssertNotDefault(t, r.StartTime)
+				scrapligotesthelper.AssertNotDefault(t, r.EndTime)
+				scrapligotesthelper.AssertNotDefault(t, r.ElapsedTimeSeconds)
+				scrapligotesthelper.AssertNotDefault(t, r.Host)
+				scrapligotesthelper.AssertNotDefault(t, r.ResultRaw)
 			}
 		})
 	}

@@ -19,23 +19,18 @@ func TestSendPromptedInput(t *testing.T) {
 		description string
 		postOpenF   func(t *testing.T, d *scrapligodriver.Driver)
 		input       string
-		expect      string
+		prompt      string
 		response    string
+		options     []scrapligodriver.OperationOption
 	}{
 		"simple": {
 			description: "simple input that requires no pagination",
-			postOpenF: func(t *testing.T, d *scrapligodriver.Driver) {
-				ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
-				defer cancel()
-
-				_, err := d.EnterMode(ctx, "bash")
-				if err != nil {
-					t.Fatal(err)
-				}
+			input:       "read -p \"Will you prompt me plz? \" answer",
+			prompt:      "Will you prompt me plz?",
+			response:    "nou",
+			options: []scrapligodriver.OperationOption{
+				scrapligodriver.WithRequestedMode("bash"),
 			},
-			input:    "read -p \"Will you prompt me plz? \" answer",
-			expect:   "Will you prompt me plz?",
-			response: "nou",
 		},
 	}
 
@@ -69,7 +64,7 @@ func TestSendPromptedInput(t *testing.T) {
 				c.postOpenF(t, d)
 			}
 
-			r, err := d.SendInput(ctx, c.input)
+			r, err := d.SendPromptedInput(ctx, c.input, c.prompt, c.response, c.options...)
 			if err != nil {
 				t.Fatal(err)
 			}

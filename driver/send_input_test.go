@@ -19,14 +19,17 @@ func TestSendInput(t *testing.T) {
 		description string
 		postOpenF   func(t *testing.T, d *scrapligodriver.Driver)
 		input       string
+		options     []scrapligodriver.OperationOption
 	}{
 		"simple": {
 			description: "simple input that requires no pagination",
 			input:       "show version | i Kern",
+			options:     []scrapligodriver.OperationOption{},
 		},
 		"simple-requires-pagination": {
 			description: "simple input that requires pagination",
 			input:       "show running-config all",
+			options:     []scrapligodriver.OperationOption{},
 		},
 		"simple-non-default-mode": {
 			description: "simple input executed in non-default mode",
@@ -39,7 +42,15 @@ func TestSendInput(t *testing.T) {
 					t.Fatal(err)
 				}
 			},
-			input: "do show version | i Kern",
+			input:   "do show version | i Kern",
+			options: []scrapligodriver.OperationOption{},
+		},
+		"simple-acquire-non-default-mode": {
+			description: "simple input executed in freshly acquired non-default mode",
+			input:       "do show version | i Kern",
+			options: []scrapligodriver.OperationOption{
+				scrapligodriver.WithRequestedMode("configuration"),
+			},
 		},
 	}
 

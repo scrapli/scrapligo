@@ -1,11 +1,15 @@
 package driver_test
 
 import (
-	scrapligodriver "github.com/scrapli/scrapligo/driver"
 	"os"
 	"testing"
 
+	scrapligodriver "github.com/scrapli/scrapligo/driver"
 	scrapligotesthelper "github.com/scrapli/scrapligo/testhelper"
+)
+
+const (
+	testHost = "localhost"
 )
 
 func TestMain(m *testing.M) {
@@ -38,7 +42,7 @@ func getDriver(t *testing.T, f string) *scrapligodriver.Driver {
 
 	d, err := scrapligodriver.NewDriver(
 		string(scrapligodriver.AristaEos),
-		"localhost",
+		testHost,
 		opts...,
 	)
 	if err != nil {
