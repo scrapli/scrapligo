@@ -38,14 +38,11 @@ func getDriver(t *testing.T, f string) *scrapligodriver.Driver {
 			scrapligooptions.WithTransportTest(),
 			scrapligooptions.WithTestTransportF(f),
 			scrapligooptions.WithReadSize(1),
-			scrapligooptions.WithReadDelayMin(0),
-			scrapligooptions.WithReadDelayMax(0),
-			scrapligooptions.WithReadDelayBackoffFactor(0),
 		)
 	}
 
 	d, err := scrapligodriver.NewDriver(
-		string(scrapligodriver.AristaEos),
+		scrapligodriver.AristaEos,
 		testHost,
 		opts...,
 	)

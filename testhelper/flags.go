@@ -11,6 +11,20 @@ var Record = flag.Bool("record", false, "record") //nolint: gochecknoglobals
 // Update is the flag indicating if golden files should be updated.
 var Update = flag.Bool("update", false, "update the golden files") //nolint: gochecknoglobals
 
+// Platforms is the comma sep list of platforms to run e2e tests against.
+var Platforms = flag.String( //nolint: gochecknoglobals
+	"platforms",
+	"all",
+	"comma sep list of platform(s) to target",
+)
+
+// Transports is the comma sep list of transports to run e2e tests against.
+var Transports = flag.String( //nolint: gochecknoglobals
+	"transports",
+	"all",
+	"comma sep list of transports(s) to target",
+)
+
 // Flags handles parsing test flags.
 func Flags() {
 	flag.Parse()

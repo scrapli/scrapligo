@@ -9,8 +9,14 @@ import (
 // GetConfigOption defines a functional option for a getconfig rpc.
 type GetConfigOption func(o *getConfigOption)
 
-func newGetConfigOptions(options ...GetConfigOption) getConfigOption {
-	return getConfigOption{}
+func newGetConfigOptions(options ...GetConfigOption) *getConfigOption {
+	o := &getConfigOption{}
+
+	for _, opt := range options {
+		opt(o)
+	}
+
+	return o
 }
 
 type getConfigOption struct{}

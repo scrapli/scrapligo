@@ -118,6 +118,13 @@ issues:
       linters:
         - revive
       text: "var-naming"
+
+    # ignore some stuff for test packages
+    - path: e2e/
+      linters:
+        - nestif
+        - gocognit
+
   uniq-by-line: false
 
 run:

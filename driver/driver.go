@@ -89,9 +89,6 @@ func NewDriver[T PlatformNameOrString](
 		options: scrapligointernal.NewOptions(),
 	}
 
-	// TODO make a branching decision here -- *if* definitioFileOrName == netconf, just return
-	// the driver... that would let us just have nteconf create a driver from NewDriver then it
-	// can take over
 	definitionBytes, err := getDefinitionBytes(definitionFileOrName)
 	if err != nil {
 		return nil, err
