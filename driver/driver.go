@@ -9,15 +9,12 @@ import (
 
 	"github.com/ebitengine/purego"
 	scrapligoassets "github.com/scrapli/scrapligo/assets"
+	scrapligoconstants "github.com/scrapli/scrapligo/constants"
 	scrapligoerrors "github.com/scrapli/scrapligo/errors"
 	scrapligoffi "github.com/scrapli/scrapligo/ffi"
+	scrapligointernal "github.com/scrapli/scrapligo/internal"
+	scrapligooptions "github.com/scrapli/scrapligo/options"
 	scrapligoutil "github.com/scrapli/scrapligo/util"
-)
-
-const (
-	defaultReadDelayMinNs         uint64 = 1_000
-	defaultReadDelayMaxNs         uint64 = 1_000_000
-	defaultReadDelayBackoffFactor uint8  = 2
 )
 
 // PlatformNameOrString is a string-like interface so you can pass a PlatformName or "normal" string
@@ -26,28 +23,12 @@ type PlatformNameOrString interface {
 	~string
 }
 
-// NewDriver returns a new instance of Driver setup with the given options. The definitionFileOrName
-// should be the name of one of the platforms that has a definition embedded in this package's
-// assets, or a file path to a valid yaml definition.
-func NewDriver[T PlatformNameOrString](
-	definitionFileOrName T,
-	host string,
-	opts ...Option,
-) (*Driver, error) {
-	ffiMap, err := scrapligoffi.GetMapping()
-	if err != nil {
-		return nil, err
-	}
-
-	d := &Driver{
-		ffiMap:  ffiMap,
-		host:    host,
-		options: newOptions(),
-	}
-
+func getDefinitionBytes[T PlatformNameOrString](definitionFileOrName T) ([]byte, error) {
 	var definitionBytes []byte
 
 	var definitionFileOrNameString string
+
+	var err error
 
 	switch v := any(definitionFileOrName).(type) {
 	case PlatformName:
@@ -86,41 +67,74 @@ func NewDriver[T PlatformNameOrString](
 		}
 	}
 
-	d.options.definitionString = string(definitionBytes)
+	return definitionBytes, nil
+}
+
+// NewDriver returns a new instance of Driver setup with the given options. The definitionFileOrName
+// should be the name of one of the platforms that has a definition embedded in this package's
+// assets, or a file path to a valid yaml definition.
+func NewDriver[T PlatformNameOrString](
+	definitionFileOrName T,
+	host string,
+	opts ...scrapligooptions.Option,
+) (*Driver, error) {
+	ffiMap, err := scrapligoffi.GetMapping()
+	if err != nil {
+		return nil, err
+	}
+
+	d := &Driver{
+		ffiMap:  ffiMap,
+		host:    host,
+		options: scrapligointernal.NewOptions(),
+	}
+
+	// TODO make a branching decision here -- *if* definitioFileOrName == netconf, just return
+	// the driver... that would let us just have nteconf create a driver from NewDriver then it
+	// can take over
+	definitionBytes, err := getDefinitionBytes(definitionFileOrName)
+	if err != nil {
+		return nil, err
+	}
+
+	d.options.DefinitionString = string(definitionBytes)
 
 	for _, opt := range opts {
-		err = opt(d)
+		err = opt(d.options)
 		if err != nil {
 			return nil, scrapligoerrors.NewOptionsError("failed applying option", err)
 		}
 	}
 
-	if d.options.port == nil {
+	if d.options.Port == nil {
 		var p uint16
 
-		switch d.options.transportKind { //nolint: exhaustive
-		case TransportKindTelnet:
-			p = DefaultTelnetPort
+		switch d.options.TransportKind { //nolint: exhaustive
+		case scrapligointernal.TransportKindTelnet:
+			p = scrapligoconstants.DefaultTelnetPort
 		default:
-			p = DefaultSSHPort
+			p = scrapligoconstants.DefaultSSHPort
 		}
 
-		d.options.port = &p
+		d.options.Port = &p
 	}
 
-	d.minPollDelay = defaultReadDelayMaxNs * 2
-	if d.options.session.readDelayMinNs != nil {
-		d.minPollDelay = *d.options.session.readDelayMinNs * 2
+	minNs := scrapligoconstants.DefaultReadDelayMinNs
+	maxNs := scrapligoconstants.DefaultReadDelayMaxNs
+
+	d.minPollDelay = minNs * scrapligoconstants.ReadDelayMultiplier
+	if d.options.Session.ReadDelayMinNs != nil {
+		d.minPollDelay = *d.options.Session.ReadDelayMinNs * scrapligoconstants.ReadDelayMultiplier
 	}
 
-	d.maxPollDelay = defaultReadDelayMaxNs * 2
-	if d.options.session.readDelayMaxNs != nil {
-		d.maxPollDelay = *d.options.session.readDelayMaxNs * 2
+	d.maxPollDelay = maxNs * scrapligoconstants.ReadDelayMultiplier
+	if d.options.Session.ReadDelayMaxNs != nil {
+		d.maxPollDelay = *d.options.Session.ReadDelayMaxNs * scrapligoconstants.ReadDelayMultiplier
 	}
 
-	d.backoffFactor = defaultReadDelayBackoffFactor
-	if d.options.session.readDelayBackoffFactor != nil {
-		d.backoffFactor = *d.options.session.readDelayBackoffFactor
+	d.backoffFactor = scrapligoconstants.DefaultReadDelayBackoffFactor
+	if d.options.Session.ReadDelayBackoffFactor != nil {
+		d.backoffFactor = *d.options.Session.ReadDelayBackoffFactor
 	}
 
 	return d, nil
@@ -132,7 +146,7 @@ type Driver struct {
 	ptr     uintptr
 	ffiMap  *scrapligoffi.Mapping
 	host    string
-	options options
+	options *scrapligointernal.Options
 
 	minPollDelay  uint64
 	maxPollDelay  uint64
@@ -162,23 +176,23 @@ func (d *Driver) Open(ctx context.Context) (*Result, error) {
 	}()
 
 	var loggerCallback uintptr
-	if d.options.loggerCallback != nil {
-		loggerCallback = purego.NewCallback(d.options.loggerCallback)
+	if d.options.LoggerCallback != nil {
+		loggerCallback = purego.NewCallback(d.options.LoggerCallback)
 	}
 
 	d.ptr = d.ffiMap.Driver.Alloc(
-		d.options.definitionString,
+		d.options.DefinitionString,
 		loggerCallback,
 		d.host,
-		*d.options.port,
-		string(d.options.transportKind),
+		*d.options.Port,
+		string(d.options.TransportKind),
 	)
 
 	if d.ptr == 0 {
 		return nil, scrapligoerrors.NewFfiError("failed to allocate driver", nil)
 	}
 
-	err := d.options.apply(d.ptr, d.ffiMap)
+	err := d.options.Apply(d.ptr, d.ffiMap)
 	if err != nil {
 		return nil, scrapligoerrors.NewFfiError("failed to applying driver options", err)
 	}
@@ -214,7 +228,7 @@ func (d *Driver) Close() {
 	d.ffiMap.Driver.Free(d.ptr)
 }
 
-func getPollDelay(curVal, minVal, maxVal uint64, backoffFactor uint8) int64 {
+func getPollDelay(curVal, minVal, maxVal uint64, backoffFactor uint8) uint64 {
 	newVal := curVal
 	newVal *= uint64(backoffFactor)
 
@@ -222,7 +236,9 @@ func getPollDelay(curVal, minVal, maxVal uint64, backoffFactor uint8) int64 {
 		newVal = maxVal
 	}
 
-	return scrapligoutil.SafeUint64ToInt64(newVal + uint64(rand.Int63n(int64(minVal))))
+	return newVal + scrapligoutil.SafeInt64ToUint64(
+		rand.Int63n(scrapligoutil.SafeUint64ToInt64(minVal)), //nolint:gosec
+	)
 }
 
 func (d *Driver) getResult(
@@ -234,9 +250,11 @@ func (d *Driver) getResult(
 
 	var resultRawSize, resultSize, resultFailedIndicatorSize, errSize uint64
 
-	curPollDelay := defaultReadDelayMinNs * 2
-	if d.options.session.readDelayMinNs != nil {
-		curPollDelay = *d.options.session.readDelayMinNs * 2
+	minNs := scrapligoconstants.DefaultReadDelayMinNs
+
+	curPollDelay := minNs * scrapligoconstants.ReadDelayMultiplier
+	if d.options.Session.ReadDelayMinNs != nil {
+		curPollDelay = *d.options.Session.ReadDelayMinNs * scrapligoconstants.ReadDelayMultiplier
 	}
 
 	for {
@@ -250,14 +268,14 @@ func (d *Driver) getResult(
 
 		// we obviously cant have too tight a loop here or cpu will go nuts and we'll block things,
 		// so we'll sleep the same as the zig read delay will be
-		curPollDelay = uint64(getPollDelay(
+		curPollDelay = getPollDelay(
 			curPollDelay,
 			d.minPollDelay,
 			d.maxPollDelay,
 			d.backoffFactor,
-		))
+		)
 
-		time.Sleep(time.Duration(curPollDelay))
+		time.Sleep(time.Duration(scrapligoutil.SafeUint64ToInt64(curPollDelay)))
 
 		rc := d.ffiMap.Driver.PollOperation(
 			d.ptr,
@@ -310,7 +328,7 @@ func (d *Driver) getResult(
 	return NewResult(
 		"",
 		d.host,
-		*d.options.port,
+		*d.options.Port,
 		resultStartTime,
 		resultEndTime,
 		resultRaw,

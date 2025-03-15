@@ -4,16 +4,22 @@ package ffi
 type Mapping struct {
 	// AssertNoLeaks returns "true" if no leaks were found, otherwise false.
 	AssertNoLeaks func() bool
-	Driver        DriverMapping
-	DriverNetconf DriverNetconfMapping
-	Options       OptionMapping
+
+	// StripASCIIAndAnsiControlCharsInPlace accepts a "haystack" and an index at which to start
+	// stripping out ascii/ansi control chars/sequences. It returns a new length at (from the start
+	// index provided) for the stripped string.
+	StripASCIIAndAnsiControlCharsInPlace func(haystack *string, startIdx int) int
+
+	// TODO need to expose read and write methods for the drivers
+	Driver  DriverMapping
+	Netconf NetconfMapping
+	Options OptionMapping
 }
 
 // DriverMapping holds libscrapli mappings specifically for telnet/ssh drivers.
 type DriverMapping struct {
 	// Alloc allocates a driver object in zig -- it expects *all* the possible options.
 	Alloc func(
-		// general bits
 		definitionString string,
 		loggerCallback uintptr,
 		host string,
@@ -107,17 +113,14 @@ type DriverMapping struct {
 	) int
 }
 
-// DriverNetconfMapping holds libscrapli mappings specifically for the netconf driver.
-type DriverNetconfMapping struct {
+// NetconfMapping holds libscrapli mappings specifically for the netconf driver.
+type NetconfMapping struct {
 	// Alloc allocates the driver. See DriverMapping.Alloc for details.
 	Alloc func(
 		loggerCallback uintptr,
 		host string,
-		transportKind string,
 		port uint16,
-		username string,
-		password string,
-		sessionTimeoutNs uint64,
+		transportKind string,
 	) (driverPtr uintptr)
 	// Free frees the driver. See DriverMapping.Free for details.
 	Free func(driverPtr uintptr)
@@ -137,8 +140,7 @@ type DriverNetconfMapping struct {
 		operationID uint32,
 		done *bool,
 		resultRawSize,
-		resultSize,
-		errSize *uint64,
+		resultSize *uint64,
 	) int
 	// FetchOperation polls the given operationID. See DriverMapping.FetchOperation for details.
 	FetchOperation func(
@@ -147,8 +149,7 @@ type DriverNetconfMapping struct {
 		resultStartTime *uint64,
 		resultEndTime *uint64,
 		resultRaw,
-		result,
-		err *[]byte,
+		result *[]byte,
 	) int
 
 	// GetConfig submits a GetConfig operation to the underlying driver. The driver populates the

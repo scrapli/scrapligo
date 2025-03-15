@@ -1,6 +1,7 @@
 package driver_test
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"path/filepath"
@@ -8,6 +9,7 @@ import (
 	"time"
 
 	scrapligodriver "github.com/scrapli/scrapligo/driver"
+	scrapligotesthelper "github.com/scrapli/scrapligo/testhelper"
 )
 
 func TestSendInputs(t *testing.T) {
@@ -19,9 +21,14 @@ func TestSendInputs(t *testing.T) {
 		inputs      []string
 		options     []scrapligodriver.OperationOption
 	}{
-		"simple": {
-			description: "simple input that requires no pagination",
+		"simple-single-input": {
+			description: "simple single input no pagination required",
 			inputs:      []string{"show version | i Kern"},
+			options:     []scrapligodriver.OperationOption{},
+		},
+		"simple-multi-input": {
+			description: "simple multi input no pagination required",
+			inputs:      []string{"show version | i Kern", "show version | i Kern"},
 			options:     []scrapligodriver.OperationOption{},
 		},
 	}
@@ -46,6 +53,7 @@ func TestSendInputs(t *testing.T) {
 			defer cancel()
 
 			d := getDriver(t, testFixturePath)
+			defer closeDriver(t, d, testFixturePath)
 
 			_, err = d.Open(ctx)
 			if err != nil {
@@ -56,7 +64,32 @@ func TestSendInputs(t *testing.T) {
 				c.postOpenF(t, d)
 			}
 
-			_ = testGoldenPath
+			r, err := d.SendInputs(ctx, c.inputs, c.options...)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			if *scrapligotesthelper.Update {
+				scrapligotesthelper.WriteFile(
+					t,
+					testGoldenPath,
+					[]byte(r.JoinedResult()),
+				)
+			} else {
+				testGoldenContent := scrapligotesthelper.ReadFile(t, testGoldenPath)
+
+				if !bytes.Equal([]byte(r.JoinedResult()), testGoldenContent) {
+					scrapligotesthelper.FailOutput(t, r.JoinedResult(), testGoldenContent)
+				}
+
+				scrapligotesthelper.AssertEqual(t, 22, r.Port)
+				scrapligotesthelper.AssertEqual(t, testHost, r.Host)
+				scrapligotesthelper.AssertNotDefault(t, r.StartTime)
+				scrapligotesthelper.AssertNotDefault(t, r.EndTime)
+				scrapligotesthelper.AssertNotDefault(t, r.ElapsedTimeSeconds)
+				scrapligotesthelper.AssertNotDefault(t, r.Host)
+				scrapligotesthelper.AssertNotDefault(t, r.Results)
+			}
 		})
 	}
 }

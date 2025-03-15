@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	scrapligoconstants "github.com/scrapli/scrapligo/constants"
+	scrapligoffi "github.com/scrapli/scrapligo/ffi"
 )
 
 // ReadFile reads the file or fatals.
@@ -17,11 +18,17 @@ func ReadFile(t *testing.T, f string) []byte {
 	return b
 }
 
-// WriteFile writes the conteent to the file or fatals.
+// WriteFile writes the content to the file or fatals. Also strips any ascii/ansi bits out the
+// content.
 func WriteFile(t *testing.T, f string, content []byte) {
-	err := os.WriteFile(
+	sContent, err := scrapligoffi.StripASCIIAndAnsiControlCharsInPlace(string(content))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = os.WriteFile(
 		f,
-		content,
+		[]byte(sContent),
 		scrapligoconstants.PermissionsOwnerReadWriteEveryoneRead,
 	)
 	if err != nil {

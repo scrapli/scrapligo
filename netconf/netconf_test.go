@@ -1,10 +1,10 @@
-package driver_test
+package netconf_test
 
 import (
 	"os"
 	"testing"
 
-	scrapligodriver "github.com/scrapli/scrapligo/driver"
+	scrapligonetconf "github.com/scrapli/scrapligo/netconf"
 	scrapligooptions "github.com/scrapli/scrapligo/options"
 	scrapligotesthelper "github.com/scrapli/scrapligo/testhelper"
 )
@@ -19,17 +19,16 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
-func getDriver(t *testing.T, f string) *scrapligodriver.Driver {
+func getNetconf(t *testing.T, f string) *scrapligonetconf.Netconf {
 	opts := []scrapligooptions.Option{
 		scrapligooptions.WithUsername("admin"),
 		scrapligooptions.WithPassword("admin"),
-		scrapligooptions.WithLookupKeyValue("enable", "libscrapli"),
+		scrapligooptions.WithPort(22830),
 	}
 
 	if *scrapligotesthelper.Record {
 		opts = append(
 			opts,
-			scrapligooptions.WithPort(22022),
 			scrapligooptions.WithSessionRecorderPath(f),
 		)
 	} else {
@@ -38,14 +37,12 @@ func getDriver(t *testing.T, f string) *scrapligodriver.Driver {
 			scrapligooptions.WithTransportTest(),
 			scrapligooptions.WithTestTransportF(f),
 			scrapligooptions.WithReadSize(1),
-			scrapligooptions.WithReadDelayMin(0),
-			scrapligooptions.WithReadDelayMax(0),
-			scrapligooptions.WithReadDelayBackoffFactor(0),
+			// see libscrapli notes in integration netconf tests
+			scrapligooptions.WithOperationMaxSearchDepth(32),
 		)
 	}
 
-	d, err := scrapligodriver.NewDriver(
-		string(scrapligodriver.AristaEos),
+	d, err := scrapligonetconf.NewNetconf(
 		testHost,
 		opts...,
 	)
@@ -56,15 +53,15 @@ func getDriver(t *testing.T, f string) *scrapligodriver.Driver {
 	return d
 }
 
-func closeDriver(t *testing.T, d *scrapligodriver.Driver, f string) {
+func closeNetconf(t *testing.T, n *scrapligonetconf.Netconf, f string) {
 	if *scrapligotesthelper.Record {
-		p, m := d.GetPtr()
-		m.Driver.Free(p)
+		p, m := n.GetPtr()
+		m.Netconf.Free(p)
 
 		return
 	}
 
-	d.Close()
+	n.Close()
 
 	if !*scrapligotesthelper.Record {
 		return

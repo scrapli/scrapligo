@@ -21,24 +21,24 @@ func registerDriver(m *Mapping, libScrapliFfi uintptr) {
 }
 
 func registerNetconf(m *Mapping, libScrapliFfi uintptr) {
-	purego.RegisterLibFunc(&m.DriverNetconf.Alloc, libScrapliFfi, "netconfAllocDriver")
-	purego.RegisterLibFunc(&m.DriverNetconf.Free, libScrapliFfi, "netconfFreeDriver")
+	purego.RegisterLibFunc(&m.Netconf.Alloc, libScrapliFfi, "netconfAllocDriver")
+	purego.RegisterLibFunc(&m.Netconf.Free, libScrapliFfi, "freeDriver")
 
-	purego.RegisterLibFunc(&m.DriverNetconf.Open, libScrapliFfi, "netconfOpenDriver")
-	purego.RegisterLibFunc(&m.DriverNetconf.Close, libScrapliFfi, "netconfCloseDriver")
+	purego.RegisterLibFunc(&m.Netconf.Open, libScrapliFfi, "openDriver")
+	purego.RegisterLibFunc(&m.Netconf.Close, libScrapliFfi, "closeDriver")
 
 	purego.RegisterLibFunc(
-		&m.DriverNetconf.PollOperation,
+		&m.Netconf.PollOperation,
 		libScrapliFfi,
 		"netconfPollOperation",
 	)
 	purego.RegisterLibFunc(
-		&m.DriverNetconf.FetchOperation,
+		&m.Netconf.FetchOperation,
 		libScrapliFfi,
 		"netconfFetchOperation",
 	)
 
-	purego.RegisterLibFunc(&m.DriverNetconf.GetConfig, libScrapliFfi, "netconfGetConfig")
+	purego.RegisterLibFunc(&m.Netconf.GetConfig, libScrapliFfi, "netconfGetConfig")
 }
 
 func registerOptions(m *Mapping, libScrapliFfi uintptr) {

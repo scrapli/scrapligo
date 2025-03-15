@@ -16,7 +16,7 @@ func (d *Driver) SendInputs(
 
 	loadedOptions := newOperationOptions(options...)
 
-	results := NewMultiResult(d.host, *d.options.port)
+	results := NewMultiResult(d.host, *d.options.Port)
 
 	for _, input := range inputs {
 		var operationID uint32

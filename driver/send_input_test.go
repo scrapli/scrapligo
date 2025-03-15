@@ -28,11 +28,14 @@ func TestSendInput(t *testing.T) {
 		},
 		"simple-requires-pagination": {
 			description: "simple input that requires pagination",
-			input:       "show running-config all",
-			options:     []scrapligodriver.OperationOption{},
+			// dont include stuff like secretes as there are "$" that we will mistake for being a
+			// prompt pattern because of test transport reading one byte at a time, so just show the
+			// transceiver stuff since thats enough to require pagination!
+			input:   "show running-config all | include snmp",
+			options: []scrapligodriver.OperationOption{},
 		},
-		"simple-non-default-mode": {
-			description: "simple input executed in non-default mode",
+		"simple-already-in-non-default-mode": {
+			description: "simple input executed in non-default mode we are already in",
 			postOpenF: func(t *testing.T, d *scrapligodriver.Driver) {
 				ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 				defer cancel()
@@ -42,8 +45,10 @@ func TestSendInput(t *testing.T) {
 					t.Fatal(err)
 				}
 			},
-			input:   "do show version | i Kern",
-			options: []scrapligodriver.OperationOption{},
+			input: "do show version | i Kern",
+			options: []scrapligodriver.OperationOption{
+				scrapligodriver.WithRequestedMode("configuration"),
+			},
 		},
 		"simple-acquire-non-default-mode": {
 			description: "simple input executed in freshly acquired non-default mode",
@@ -74,6 +79,7 @@ func TestSendInput(t *testing.T) {
 			defer cancel()
 
 			d := getDriver(t, testFixturePath)
+			defer closeDriver(t, d, testFixturePath)
 
 			_, err = d.Open(ctx)
 			if err != nil {
@@ -84,7 +90,7 @@ func TestSendInput(t *testing.T) {
 				c.postOpenF(t, d)
 			}
 
-			r, err := d.SendInput(ctx, c.input)
+			r, err := d.SendInput(ctx, c.input, c.options...)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -99,13 +105,16 @@ func TestSendInput(t *testing.T) {
 				testGoldenContent := scrapligotesthelper.ReadFile(t, testGoldenPath)
 
 				if !bytes.Equal([]byte(r.Result), testGoldenContent) {
-					t.Fatalf(
-						"%s: actual and expected inputs do not match\nactual: %s\nexpected:%s",
-						testName,
-						r.Result,
-						testGoldenContent,
-					)
+					scrapligotesthelper.FailOutput(t, r.Result, testGoldenContent)
 				}
+
+				scrapligotesthelper.AssertEqual(t, 22, r.Port)
+				scrapligotesthelper.AssertEqual(t, testHost, r.Host)
+				scrapligotesthelper.AssertNotDefault(t, r.StartTime)
+				scrapligotesthelper.AssertNotDefault(t, r.EndTime)
+				scrapligotesthelper.AssertNotDefault(t, r.ElapsedTimeSeconds)
+				scrapligotesthelper.AssertNotDefault(t, r.Host)
+				scrapligotesthelper.AssertNotDefault(t, r.ResultRaw)
 			}
 		})
 	}

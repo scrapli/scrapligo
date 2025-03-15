@@ -1,4 +1,4 @@
-package driver_test
+package netconf_test
 
 import (
 	"bytes"
@@ -8,29 +8,19 @@ import (
 	"testing"
 	"time"
 
-	scrapligodriver "github.com/scrapli/scrapligo/driver"
+	scrapligonetconf "github.com/scrapli/scrapligo/netconf"
 	scrapligotesthelper "github.com/scrapli/scrapligo/testhelper"
 )
 
-func TestSendPromptedInput(t *testing.T) {
-	parentName := "send-prompted-input"
+func TestGetConfig(t *testing.T) {
+	parentName := "get-config"
 
 	cases := map[string]struct {
 		description string
-		postOpenF   func(t *testing.T, d *scrapligodriver.Driver)
-		input       string
-		prompt      string
-		response    string
-		options     []scrapligodriver.OperationOption
+		options     []scrapligonetconf.GetConfigOption
 	}{
 		"simple": {
-			description: "simple input that requires no pagination",
-			input:       "read -p \"Will you prompt me plz? \" answer",
-			prompt:      "Will you prompt me plz?",
-			response:    "nou",
-			options: []scrapligodriver.OperationOption{
-				scrapligodriver.WithRequestedMode("bash"),
-			},
+			description: "simple - get the running config",
 		},
 	}
 
@@ -53,19 +43,15 @@ func TestSendPromptedInput(t *testing.T) {
 			ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 			defer cancel()
 
-			d := getDriver(t, testFixturePath)
-			defer closeDriver(t, d, testFixturePath)
+			n := getNetconf(t, testFixturePath)
+			defer closeNetconf(t, n, testFixturePath)
 
-			_, err = d.Open(ctx)
+			_, err = n.Open(ctx)
 			if err != nil {
 				t.Fatal(err)
 			}
 
-			if c.postOpenF != nil {
-				c.postOpenF(t, d)
-			}
-
-			r, err := d.SendPromptedInput(ctx, c.input, c.prompt, c.response, c.options...)
+			r, err := n.GetConfig(ctx, c.options...)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -83,7 +69,7 @@ func TestSendPromptedInput(t *testing.T) {
 					scrapligotesthelper.FailOutput(t, r.Result, testGoldenContent)
 				}
 
-				scrapligotesthelper.AssertEqual(t, 22, r.Port)
+				scrapligotesthelper.AssertEqual(t, 22830, r.Port)
 				scrapligotesthelper.AssertEqual(t, testHost, r.Host)
 				scrapligotesthelper.AssertNotDefault(t, r.StartTime)
 				scrapligotesthelper.AssertNotDefault(t, r.EndTime)

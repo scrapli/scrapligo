@@ -80,6 +80,7 @@ func TestEnterMode(t *testing.T) {
 			defer cancel()
 
 			d := getDriver(t, testFixturePath)
+			defer closeDriver(t, d, testFixturePath)
 
 			_, err = d.Open(ctx)
 			if err != nil {
@@ -105,12 +106,7 @@ func TestEnterMode(t *testing.T) {
 				testGoldenContent := scrapligotesthelper.ReadFile(t, testGoldenPath)
 
 				if !bytes.Equal([]byte(r.Result), testGoldenContent) {
-					t.Fatalf(
-						"%s: actual and expected inputs do not match\nactual: %s\nexpected:%s",
-						testName,
-						r.Result,
-						testGoldenContent,
-					)
+					scrapligotesthelper.FailOutput(t, r.Result, testGoldenContent)
 				}
 
 				scrapligotesthelper.AssertEqual(t, 22, r.Port)
