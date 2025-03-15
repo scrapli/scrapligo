@@ -1,4 +1,4 @@
-package driver_test
+package netconf_test
 
 import (
 	"os"
@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	scrapligodriver "github.com/scrapli/scrapligo/driver"
+	scrapligonetconf "github.com/scrapli/scrapligo/netconf"
 	scrapligooptions "github.com/scrapli/scrapligo/options"
 	scrapligotesthelper "github.com/scrapli/scrapligo/testhelper"
 )
@@ -21,7 +22,6 @@ func getTransports() []string {
 	return []string{
 		"bin",
 		"ssh2",
-		"telnet",
 	}
 }
 
@@ -66,15 +66,10 @@ func shouldSkip(platform, transport string) bool {
 		return true
 	}
 
-	if transport == "telnet" && platform != scrapligodriver.AristaEos.String() {
-		// now we just check against telnet, since we only run that against eos for now
-		return true
-	}
-
 	return false
 }
 
-func getDriver(t *testing.T, platform, transportName string) *scrapligodriver.Driver {
+func getNetconf(t *testing.T, platform, transportName string) *scrapligonetconf.Netconf {
 	var host string
 
 	opts := []scrapligooptions.Option{
@@ -92,11 +87,6 @@ func getDriver(t *testing.T, platform, transportName string) *scrapligodriver.Dr
 			opts,
 			scrapligooptions.WithTransportSSH2(),
 		)
-	case "telnet":
-		opts = append(
-			opts,
-			scrapligooptions.WithTransportTelnet(),
-		)
 	default:
 		t.Fatal("unsupported transport name")
 	}
@@ -113,7 +103,7 @@ func getDriver(t *testing.T, platform, transportName string) *scrapligodriver.Dr
 
 			opts = append(
 				opts,
-				scrapligooptions.WithPort(21022),
+				scrapligooptions.WithPort(21830),
 			)
 		} else {
 			host = "172.20.20.16"
@@ -122,30 +112,22 @@ func getDriver(t *testing.T, platform, transportName string) *scrapligodriver.Dr
 		opts = append(
 			opts,
 			scrapligooptions.WithPassword("admin"),
-			scrapligooptions.WithLookupKeyValue("enable", "libscrapli"),
+			scrapligooptions.WithPassword("admin"),
 		)
-
-		var port uint16
 
 		if runtime.GOOS == "darwin" {
 			host = "localhost"
-			port = 22022
+
+			opts = append(
+				opts,
+				scrapligooptions.WithPort(22830),
+			)
 		} else {
 			host = "172.20.20.17"
 		}
-
-		if transportName == "telnet" {
-			port++
-		}
-
-		opts = append(
-			opts,
-			scrapligooptions.WithPort(port),
-		)
 	}
 
-	d, err := scrapligodriver.NewDriver(
-		platform,
+	n, err := scrapligonetconf.NewNetconf(
 		host,
 		opts...,
 	)
@@ -153,11 +135,11 @@ func getDriver(t *testing.T, platform, transportName string) *scrapligodriver.Dr
 		t.Fatal(err)
 	}
 
-	return d
+	return n
 }
 
-func closeDriver(t *testing.T, d *scrapligodriver.Driver) {
+func closeDriver(t *testing.T, n *scrapligonetconf.Netconf) {
 	_ = t
 
-	d.Close()
+	n.Close()
 }

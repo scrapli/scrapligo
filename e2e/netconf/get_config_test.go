@@ -1,4 +1,4 @@
-package driver_test
+package netconf_test
 
 import (
 	"bytes"
@@ -9,45 +9,26 @@ import (
 	"time"
 
 	scrapligodriver "github.com/scrapli/scrapligo/driver"
+	scrapligonetconf "github.com/scrapli/scrapligo/netconf"
 	scrapligotesthelper "github.com/scrapli/scrapligo/testhelper"
 )
 
-func TestSendInput(t *testing.T) {
-	parentName := "send-input"
+func TestGetConfig(t *testing.T) {
+	parentName := "get-config"
 
 	cases := map[string]struct {
 		description string
 		platform    string
-		postOpenF   func(t *testing.T, d *scrapligodriver.Driver)
-		input       string
-		options     []scrapligodriver.OperationOption
+		options     []scrapligonetconf.GetConfigOption
 	}{
-		"simple-srl": {
-			description: "simple input that requires no pagination",
-			platform:    scrapligodriver.NokiaSrl.String(),
-			input:       "info interface mgmt0",
-			options:     []scrapligodriver.OperationOption{},
-		},
 		"simple-eos": {
-			description: "simple input that requires no pagination",
+			description: "simple - get the running config",
 			platform:    scrapligodriver.AristaEos.String(),
-			input:       "show version | i Kern",
-			options:     []scrapligodriver.OperationOption{},
 		},
-		"big-srl": {
-			description: "simple input with a big output",
+		"simple-srl2": {
+			description: "simple - get the running config",
 			platform:    scrapligodriver.NokiaSrl.String(),
-			input:       "info",
-			options:     []scrapligodriver.OperationOption{},
 		},
-		// output file is literally 39MB, so... no, just no. but can be fun for testing!
-		// if using need to set timeout > 140s or so (probably longer if in ci)
-		// "enormous-srl": {
-		// 	 description: "simple input with a big output",
-		// 	 platform:    scrapligodriver.NokiaSrl.String(),
-		// 	 input:       "info from state",
-		// 	 options:     []scrapligodriver.OperationOption{},
-		// },
 	}
 
 	for caseName, c := range cases {
@@ -69,19 +50,15 @@ func TestSendInput(t *testing.T) {
 				ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 				defer cancel()
 
-				d := getDriver(t, c.platform, transportName)
-				defer closeDriver(t, d)
+				n := getNetconf(t, c.platform, transportName)
+				defer closeDriver(t, n)
 
-				_, err = d.Open(ctx)
+				_, err = n.Open(ctx)
 				if err != nil {
 					t.Fatal(err)
 				}
 
-				if c.postOpenF != nil {
-					c.postOpenF(t, d)
-				}
-
-				r, err := d.SendInput(ctx, c.input, c.options...)
+				r, err := n.GetConfig(ctx, c.options...)
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -90,13 +67,15 @@ func TestSendInput(t *testing.T) {
 					scrapligotesthelper.WriteFile(
 						t,
 						testGoldenPath,
-						[]byte(r.Result),
+						scrapligotesthelper.CleanNetconfOutput(t, r.Result),
 					)
 				} else {
+					cleanedActual := scrapligotesthelper.CleanNetconfOutput(t, r.Result)
+
 					testGoldenContent := scrapligotesthelper.ReadFile(t, testGoldenPath)
 
-					if !bytes.Equal([]byte(r.Result), testGoldenContent) {
-						scrapligotesthelper.FailOutput(t, r.Result, testGoldenContent)
+					if !bytes.Equal(cleanedActual, testGoldenContent) {
+						scrapligotesthelper.FailOutput(t, string(cleanedActual), testGoldenContent)
 					}
 
 					scrapligotesthelper.AssertNotDefault(t, r.StartTime)
