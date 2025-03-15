@@ -25,45 +25,53 @@ func getTransports() []string {
 	}
 }
 
-func shouldSkip(platform, transport string) bool {
-	if scrapligotesthelper.Platforms != nil {
-		var skipPlatform bool
-
-		platforms := strings.Split(*scrapligotesthelper.Platforms, ",")
-
-		for _, platformName := range platforms {
-			if platformName == platform {
-				skipPlatform = true
-			}
-		}
-
-		if skipPlatform {
-			return false
-		}
-	}
-
-	if scrapligotesthelper.Transports != nil {
-		var skipTransport bool
-
-		transports := strings.Split(*scrapligotesthelper.Transports, ",")
-
-		for _, transportName := range transports {
-			if transportName == transport {
-				skipTransport = true
-			}
-		}
-
-		if skipTransport {
-			return false
-		}
-	}
-
-	if transport == "telnet" && platform == scrapligodriver.NokiaSrl.String() {
-		// no telnet on srl node
+func shouldSkipPlatform(platform string) bool {
+	if *scrapligotesthelper.Platforms == "all" {
 		return false
 	}
 
-	return true
+	platforms := strings.Split(*scrapligotesthelper.Platforms, ",")
+
+	for _, platformName := range platforms {
+		if platformName == platform {
+			return true
+		}
+	}
+
+	return false
+}
+
+func shouldSkipTransport(transport string) bool {
+	if *scrapligotesthelper.Transports == "all" {
+		return false
+	}
+
+	transports := strings.Split(*scrapligotesthelper.Transports, ",")
+
+	for _, transportName := range transports {
+		if transportName == transport {
+			return true
+		}
+	}
+
+	return false
+}
+
+func shouldSkip(platform, transport string) bool {
+	if shouldSkipPlatform(platform) {
+		return true
+	}
+
+	if shouldSkipTransport(platform) {
+		return true
+	}
+
+	if transport == "telnet" && platform != scrapligodriver.AristaEos.String() {
+		// now we just check against telnet, since we only run that against eos for now
+		return true
+	}
+
+	return false
 }
 
 func getDriver(t *testing.T, platform, transportName string) *scrapligodriver.Driver {
@@ -93,7 +101,7 @@ func getDriver(t *testing.T, platform, transportName string) *scrapligodriver.Dr
 		t.Fatal("unsupported transport name")
 	}
 
-	if platform == string(scrapligodriver.NokiaSrl) {
+	if platform == scrapligodriver.NokiaSrl.String() {
 		opts = append(
 			opts,
 			scrapligooptions.WithPassword("admin"),
@@ -128,8 +136,6 @@ func getDriver(t *testing.T, platform, transportName string) *scrapligodriver.Dr
 		}
 
 		if transportName == "telnet" {
-			// TODO i think that we have to add the annoying "send return when you dont see shit"
-			//  to zig in session auth for telnet stuff
 			port++
 		}
 

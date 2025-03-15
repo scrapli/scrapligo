@@ -18,7 +18,6 @@ func TestSendInput(t *testing.T) {
 	cases := map[string]struct {
 		description string
 		platform    string
-		transport   string
 		postOpenF   func(t *testing.T, d *scrapligodriver.Driver)
 		input       string
 		options     []scrapligodriver.OperationOption
@@ -39,7 +38,7 @@ func TestSendInput(t *testing.T) {
 
 	for caseName, c := range cases {
 		for _, transportName := range getTransports() {
-			if shouldSkip(c.platform, c.transport) {
+			if shouldSkip(c.platform, transportName) {
 				continue
 			}
 
