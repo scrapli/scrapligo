@@ -26,6 +26,8 @@ func NewOptions() *Options {
 		LoggerCallback: nil,
 		TransportKind:  TransportKindBin,
 		Port:           nil,
+		Driver:         DriverOptions{},
+		Netconf:        NetconfOptions{},
 		Auth: AuthOptions{
 			LookupMap: make(map[string]string),
 		},
@@ -34,11 +36,8 @@ func NewOptions() *Options {
 
 // Options holds options for all driver kinds ("normal" and netconf).
 type Options struct {
-	// TODO there should be a "driver' and "netconf" sub section for stuff like this that is
-	//  only applicable to driver or netocnf and not both
-	// the loaded string is set in NewDriver, not via an option as the name/file of the definition
-	// is a required argument.
-	DefinitionString string
+	Driver  DriverOptions
+	Netconf NetconfOptions
 
 	LoggerCallback func(level uint8, message *string)
 
@@ -50,6 +49,14 @@ type Options struct {
 	Auth      AuthOptions
 	Transport TransportOptions
 }
+
+// DriverOptions holds driver specific options.
+type DriverOptions struct {
+	DefinitionString string
+}
+
+// NetconfOptions holds netconf specific options.
+type NetconfOptions struct{}
 
 // Apply applies the Options to the given driver at driverPtr.
 func (o *Options) Apply(driverPtr uintptr, m *scrapligoffi.Mapping) error {

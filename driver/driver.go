@@ -94,7 +94,7 @@ func NewDriver[T PlatformNameOrString](
 		return nil, err
 	}
 
-	d.options.DefinitionString = string(definitionBytes)
+	d.options.Driver.DefinitionString = string(definitionBytes)
 
 	for _, opt := range opts {
 		err = opt(d.options)
@@ -178,7 +178,7 @@ func (d *Driver) Open(ctx context.Context) (*Result, error) {
 	}
 
 	d.ptr = d.ffiMap.Driver.Alloc(
-		d.options.DefinitionString,
+		d.options.Driver.DefinitionString,
 		loggerCallback,
 		d.host,
 		*d.options.Port,
