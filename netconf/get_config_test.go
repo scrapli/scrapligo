@@ -17,7 +17,7 @@ func TestGetConfig(t *testing.T) {
 
 	cases := map[string]struct {
 		description string
-		options     []scrapligonetconf.GetConfigOption
+		options     []scrapligonetconf.Option
 	}{
 		"simple": {
 			description: "simple - get the running config",

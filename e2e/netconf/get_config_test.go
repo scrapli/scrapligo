@@ -19,7 +19,7 @@ func TestGetConfig(t *testing.T) {
 	cases := map[string]struct {
 		description string
 		platform    string
-		options     []scrapligonetconf.GetConfigOption
+		options     []scrapligonetconf.Option
 	}{
 		"simple-eos": {
 			description: "simple - get the running config",

@@ -158,6 +158,22 @@ type NetconfMapping struct {
 		driverPtr uintptr,
 		operationID *uint32,
 		cancel *bool,
+		source string,
+		filter string,
+		filterType string,
+		filterNamespacePrefix string,
+		filterNamespace string,
+		defaultsType string,
+	) int
+
+	// EditConfig submits an EditConfig operation to the underlying driver. The driver populates the
+	// operationID into the uint32 pointer.
+	EditConfig func(
+		driverPtr uintptr,
+		operationID *uint32,
+		cancel *bool,
+		config string,
+		target string,
 	) int
 }
 

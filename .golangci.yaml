@@ -119,6 +119,12 @@ issues:
         - revive
       text: "var-naming"
 
+    # ignore requiring comment on all the consts in netconf/types.go
+    - path: netconf/types.go
+      linters:
+        - revive
+      text: "exported: exported const"
+
     # ignore some stuff for test packages
     - path: e2e/
       linters:
