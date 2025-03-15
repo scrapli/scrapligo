@@ -39,6 +39,14 @@ func registerNetconf(m *Mapping, libScrapliFfi uintptr) {
 	)
 
 	purego.RegisterLibFunc(&m.Netconf.GetConfig, libScrapliFfi, "netconfGetConfig")
+	purego.RegisterLibFunc(&m.Netconf.EditConfig, libScrapliFfi, "netconfEditConfig")
+	purego.RegisterLibFunc(&m.Netconf.CopyConfig, libScrapliFfi, "netconfCopyConfig")
+	purego.RegisterLibFunc(&m.Netconf.DeleteConfig, libScrapliFfi, "netconfDeleteConfig")
+	purego.RegisterLibFunc(&m.Netconf.Lock, libScrapliFfi, "netconfLock")
+	purego.RegisterLibFunc(&m.Netconf.Unlock, libScrapliFfi, "netconfUnlock")
+	purego.RegisterLibFunc(&m.Netconf.Get, libScrapliFfi, "netconfGet")
+	purego.RegisterLibFunc(&m.Netconf.CloseSession, libScrapliFfi, "netconfCloseSession")
+	purego.RegisterLibFunc(&m.Netconf.KillSession, libScrapliFfi, "netconfKillSession")
 }
 
 func registerOptions(m *Mapping, libScrapliFfi uintptr) {

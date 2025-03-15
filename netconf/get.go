@@ -6,9 +6,8 @@ import (
 	scrapligoerrors "github.com/scrapli/scrapligo/errors"
 )
 
-func newGetConfigOptions(options ...Option) *getConfigOptions {
-	o := &getConfigOptions{
-		source:       DatastoreTypeRunning,
+func newGetOptions(options ...Option) *getOptions {
+	o := &getOptions{
 		filterType:   FilterTypeSubtree,
 		defaultsType: DefaultsTypeUnset,
 	}
@@ -20,8 +19,7 @@ func newGetConfigOptions(options ...Option) *getConfigOptions {
 	return o
 }
 
-type getConfigOptions struct {
-	source                DatastoreType
+type getOptions struct {
 	filter                string
 	filterType            FilterType
 	filterNamespacePrefix string
@@ -29,14 +27,13 @@ type getConfigOptions struct {
 	defaultsType          DefaultsType
 }
 
-// GetConfig executes a netconf getconfig rpc. Supported options:
-//   - WithSourceType
+// Get executes a netconf get rpc. Supported options:
 //   - WithFilter
 //   - WithFilterType
 //   - WithFilterNamespacePrefix
 //   - WithFilterNamespace
 //   - WithDefaultsType
-func (n *Netconf) GetConfig(
+func (n *Netconf) Get(
 	ctx context.Context,
 	options ...Option,
 ) (*Result, error) {
@@ -44,13 +41,12 @@ func (n *Netconf) GetConfig(
 
 	var operationID uint32
 
-	loadedOptions := newGetConfigOptions(options...)
+	loadedOptions := newGetOptions(options...)
 
-	status := n.ffiMap.Netconf.GetConfig(
+	status := n.ffiMap.Netconf.Get(
 		n.ptr,
 		&operationID,
 		&cancel,
-		loadedOptions.source.String(),
 		loadedOptions.filter,
 		loadedOptions.filterType.String(),
 		loadedOptions.filterNamespacePrefix,
@@ -58,7 +54,7 @@ func (n *Netconf) GetConfig(
 		loadedOptions.defaultsType.String(),
 	)
 	if status != 0 {
-		return nil, scrapligoerrors.NewFfiError("failed to submit getConfig operation", nil)
+		return nil, scrapligoerrors.NewFfiError("failed to submit get operation", nil)
 	}
 
 	return n.getResult(ctx, &cancel, operationID)

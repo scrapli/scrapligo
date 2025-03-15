@@ -7,8 +7,10 @@ type Option func(o any)
 func WithSourceType(t DatastoreType) Option {
 	return func(o any) {
 		switch to := o.(type) {
-		case getConfigOption:
+		case getConfigOptions:
 			to.source = t
+		case copyConfigOptions:
+			to.target = t
 		}
 	}
 }
@@ -17,7 +19,13 @@ func WithSourceType(t DatastoreType) Option {
 func WithTargetType(t DatastoreType) Option {
 	return func(o any) {
 		switch to := o.(type) {
-		case editConfigOption:
+		case editConfigOptions:
+			to.target = t
+		case copyConfigOptions:
+			to.target = t
+		case deleteConfigOptions:
+			to.target = t
+		case lockUnlockOptions:
 			to.target = t
 		}
 	}
@@ -27,7 +35,9 @@ func WithTargetType(t DatastoreType) Option {
 func WithFilter(s string) Option {
 	return func(o any) {
 		switch to := o.(type) {
-		case getConfigOption:
+		case getConfigOptions:
+			to.filter = s
+		case getOptions:
 			to.filter = s
 		}
 	}
@@ -37,7 +47,9 @@ func WithFilter(s string) Option {
 func WithFilterType(t FilterType) Option {
 	return func(o any) {
 		switch to := o.(type) {
-		case getConfigOption:
+		case getConfigOptions:
+			to.filterType = t
+		case getOptions:
 			to.filterType = t
 		}
 	}
@@ -47,7 +59,9 @@ func WithFilterType(t FilterType) Option {
 func WithFilterNamespacePrefix(s string) Option {
 	return func(o any) {
 		switch to := o.(type) {
-		case getConfigOption:
+		case getConfigOptions:
+			to.filterNamespacePrefix = s
+		case getOptions:
 			to.filterNamespacePrefix = s
 		}
 	}
@@ -57,7 +71,9 @@ func WithFilterNamespacePrefix(s string) Option {
 func WithFilterNamespace(s string) Option {
 	return func(o any) {
 		switch to := o.(type) {
-		case getConfigOption:
+		case getConfigOptions:
+			to.filterNamespace = s
+		case getOptions:
 			to.filterNamespace = s
 		}
 	}
@@ -67,7 +83,9 @@ func WithFilterNamespace(s string) Option {
 func WithDefaultsType(t DefaultsType) Option {
 	return func(o any) {
 		switch to := o.(type) {
-		case getConfigOption:
+		case getConfigOptions:
+			to.defaultsType = t
+		case getOptions:
 			to.defaultsType = t
 		}
 	}

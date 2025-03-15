@@ -6,8 +6,8 @@ import (
 	scrapligoerrors "github.com/scrapli/scrapligo/errors"
 )
 
-func newEditConfigOptions(options ...Option) *editConfigOptions {
-	o := &editConfigOptions{
+func newDeleteConfigOptions(options ...Option) *deleteConfigOptions {
+	o := &deleteConfigOptions{
 		target: DatastoreTypeRunning,
 	}
 
@@ -18,32 +18,30 @@ func newEditConfigOptions(options ...Option) *editConfigOptions {
 	return o
 }
 
-type editConfigOptions struct {
+type deleteConfigOptions struct {
 	target DatastoreType
 }
 
-// EditConfig executes a netconf edit config rpc. Supported options:
+// DeleteConfig executes a netconf delete config rpc. Supported options:
 //   - WithTargetType
-func (n *Netconf) EditConfig(
+func (n *Netconf) DeleteConfig(
 	ctx context.Context,
-	config string,
 	options ...Option,
 ) (*Result, error) {
 	cancel := false
 
 	var operationID uint32
 
-	loadedOptions := newEditConfigOptions(options...)
+	loadedOptions := newDeleteConfigOptions(options...)
 
-	status := n.ffiMap.Netconf.EditConfig(
+	status := n.ffiMap.Netconf.DeleteConfig(
 		n.ptr,
 		&operationID,
 		&cancel,
-		config,
 		loadedOptions.target.String(),
 	)
 	if status != 0 {
-		return nil, scrapligoerrors.NewFfiError("failed to submit editConfig operation", nil)
+		return nil, scrapligoerrors.NewFfiError("failed to submit deleteConfig operation", nil)
 	}
 
 	return n.getResult(ctx, &cancel, operationID)

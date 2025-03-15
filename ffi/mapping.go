@@ -175,6 +175,73 @@ type NetconfMapping struct {
 		config string,
 		target string,
 	) int
+
+	// CopyConfig submits a CopyConfig operation to the underlying driver. The driver populates the
+	// operationID into the uint32 pointer.
+	CopyConfig func(
+		driverPtr uintptr,
+		operationID *uint32,
+		cancel *bool,
+		target string,
+		source string,
+	) int
+
+	// DeleteConfig submits a DeleteConfig operation to the underlying driver. The driver populates
+	// the operationID into the uint32 pointer.
+	DeleteConfig func(
+		driverPtr uintptr,
+		operationID *uint32,
+		cancel *bool,
+		target string,
+	) int
+
+	// Lock submits a Lock operation to the underlying driver. The driver populates the operationID
+	// into the uint32 pointer.
+	Lock func(
+		driverPtr uintptr,
+		operationID *uint32,
+		cancel *bool,
+		target string,
+	) int
+
+	// Unlock submits an Unlock operation to the underlying driver. The driver populates the
+	// operationID into the uint32 pointer.
+	Unlock func(
+		driverPtr uintptr,
+		operationID *uint32,
+		cancel *bool,
+		target string,
+	) int
+
+	// Get submits a Get operation to the underlying driver. The driver populates the operationID
+	// into the uint32 pointer.
+	Get func(
+		driverPtr uintptr,
+		operationID *uint32,
+		cancel *bool,
+		filter string,
+		filterType string,
+		filterNamespacePrefix string,
+		filterNamespace string,
+		defaultsType string,
+	) int
+
+	// CloseSession submits a CloseSession operation to the underlying driver. The driver populates
+	// the operationID into the uint32 pointer.
+	CloseSession func(
+		driverPtr uintptr,
+		operationID *uint32,
+		cancel *bool,
+	) int
+
+	// KillSession submits a KillSession operation to the underlying driver. The driver populates
+	// the operationID into the uint32 pointer.
+	KillSession func(
+		driverPtr uintptr,
+		operationID *uint32,
+		cancel *bool,
+		sessionID uint64,
+	) int
 }
 
 // OptionMapping holds libscrapli mappings for the applying driver options.
