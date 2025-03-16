@@ -7,7 +7,7 @@ import (
 )
 
 // KillSession executes a netconf kill session rpc.
-func (n *Netconf) KillSession(
+func (d *Driver) KillSession(
 	ctx context.Context,
 	sessionID uint64,
 ) (*Result, error) {
@@ -15,8 +15,8 @@ func (n *Netconf) KillSession(
 
 	var operationID uint32
 
-	status := n.ffiMap.Netconf.KillSession(
-		n.ptr,
+	status := d.ffiMap.Netconf.KillSession(
+		d.ptr,
 		&operationID,
 		&cancel,
 		sessionID,
@@ -25,5 +25,5 @@ func (n *Netconf) KillSession(
 		return nil, scrapligoerrors.NewFfiError("failed to submit killSession operation", nil)
 	}
 
-	return n.getResult(ctx, &cancel, operationID)
+	return d.getResult(ctx, &cancel, operationID)
 }

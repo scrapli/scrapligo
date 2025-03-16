@@ -14,17 +14,17 @@ import (
 	scrapligoutil "github.com/scrapli/scrapligo/util"
 )
 
-// NewNetconf returns a new instance of Netconf setup with the given options.
-func NewNetconf(
+// NewDriver returns a new instance of Driver setup with the given options.
+func NewDriver(
 	host string,
 	opts ...scrapligooptions.Option,
-) (*Netconf, error) {
+) (*Driver, error) {
 	ffiMap, err := scrapligoffi.GetMapping()
 	if err != nil {
 		return nil, err
 	}
 
-	n := &Netconf{
+	n := &Driver{
 		ffiMap:  ffiMap,
 		host:    host,
 		options: scrapligointernal.NewOptions(),
@@ -64,9 +64,9 @@ func NewNetconf(
 	return n, nil
 }
 
-// Netconf is an object representing a netconf connection to a device of some sort -- this object
+// Driver is an object representing a netconf connection to a device of some sort -- this object
 // wraps the underlying zig (netconf) driver (created via libscrapli).
-type Netconf struct {
+type Driver struct {
 	ptr     uintptr
 	ffiMap  *scrapligoffi.Mapping
 	host    string
@@ -79,14 +79,14 @@ type Netconf struct {
 
 // GetPtr returns the pointer to the zig driver, don't use this unless you know what you are doing,
 // this is just exposed so you *can* get to it if you want to.
-func (n *Netconf) GetPtr() (uintptr, *scrapligoffi.Mapping) {
-	return n.ptr, n.ffiMap
+func (d *Driver) GetPtr() (uintptr, *scrapligoffi.Mapping) {
+	return d.ptr, d.ffiMap
 }
 
 // Open opens the driver object. This method spawns the underlying zig driver which the Cli then
 // holds a pointer to. All Cli operations operate against this pointer (though this is
 // transparent to the user).
-func (n *Netconf) Open(ctx context.Context) (*Result, error) {
+func (d *Driver) Open(ctx context.Context) (*Result, error) {
 	// ensure we dealloc if something happens, otherwise users calls to defer close would not be
 	// super handy
 	cleanup := false
@@ -96,26 +96,26 @@ func (n *Netconf) Open(ctx context.Context) (*Result, error) {
 			return
 		}
 
-		n.ffiMap.Netconf.Free(n.ptr)
+		d.ffiMap.Netconf.Free(d.ptr)
 	}()
 
 	var loggerCallback uintptr
-	if n.options.LoggerCallback != nil {
-		loggerCallback = purego.NewCallback(n.options.LoggerCallback)
+	if d.options.LoggerCallback != nil {
+		loggerCallback = purego.NewCallback(d.options.LoggerCallback)
 	}
 
-	n.ptr = n.ffiMap.Netconf.Alloc(
+	d.ptr = d.ffiMap.Netconf.Alloc(
 		loggerCallback,
-		n.host,
-		*n.options.Port,
-		string(n.options.TransportKind),
+		d.host,
+		*d.options.Port,
+		string(d.options.TransportKind),
 	)
 
-	if n.ptr == 0 {
+	if d.ptr == 0 {
 		return nil, scrapligoerrors.NewFfiError("failed to allocate driver", nil)
 	}
 
-	err := n.options.Apply(n.ptr, n.ffiMap)
+	err := d.options.Apply(d.ptr, d.ffiMap)
 	if err != nil {
 		return nil, scrapligoerrors.NewFfiError("failed to applying driver options", err)
 	}
@@ -124,14 +124,14 @@ func (n *Netconf) Open(ctx context.Context) (*Result, error) {
 
 	var operationID uint32
 
-	status := n.ffiMap.Netconf.Open(n.ptr, &operationID, &cancel)
+	status := d.ffiMap.Netconf.Open(d.ptr, &operationID, &cancel)
 	if status != 0 {
 		cleanup = true
 
 		return nil, scrapligoerrors.NewFfiError("failed to submit open operation", nil)
 	}
 
-	result, err := n.getResult(ctx, &cancel, operationID)
+	result, err := d.getResult(ctx, &cancel, operationID)
 	if err != nil {
 		cleanup = true
 
@@ -142,13 +142,13 @@ func (n *Netconf) Open(ctx context.Context) (*Result, error) {
 }
 
 // Close closes the netconf object. This also deallocates the underlying (zig) netconf object.
-func (n *Netconf) Close() {
-	if n.ptr == 0 {
+func (d *Driver) Close() {
+	if d.ptr == 0 {
 		return
 	}
 
-	n.ffiMap.Netconf.Close(n.ptr)
-	n.ffiMap.Netconf.Free(n.ptr)
+	d.ffiMap.Netconf.Close(d.ptr)
+	d.ffiMap.Netconf.Free(d.ptr)
 }
 
 func getPollDelay(curVal, minVal, maxVal uint64, backoffFactor uint8) uint64 {
@@ -168,7 +168,7 @@ func getPollDelay(curVal, minVal, maxVal uint64, backoffFactor uint8) uint64 {
 	)
 }
 
-func (n *Netconf) getResult(
+func (d *Driver) getResult(
 	ctx context.Context,
 	cancel *bool,
 	operationID uint32,
@@ -180,8 +180,8 @@ func (n *Netconf) getResult(
 	minNs := scrapligoconstants.DefaultReadDelayMinNs
 
 	curPollDelay := minNs * scrapligoconstants.ReadDelayMultiplier
-	if n.options.Session.ReadDelayMinNs != nil {
-		curPollDelay = *n.options.Session.ReadDelayMinNs * scrapligoconstants.ReadDelayMultiplier
+	if d.options.Session.ReadDelayMinNs != nil {
+		curPollDelay = *d.options.Session.ReadDelayMinNs * scrapligoconstants.ReadDelayMultiplier
 	}
 
 	for {
@@ -197,15 +197,15 @@ func (n *Netconf) getResult(
 		// so we'll sleep the same as the zig read delay will be
 		curPollDelay = getPollDelay(
 			curPollDelay,
-			n.minPollDelay,
-			n.maxPollDelay,
-			n.backoffFactor,
+			d.minPollDelay,
+			d.maxPollDelay,
+			d.backoffFactor,
 		)
 
 		time.Sleep(time.Duration(scrapligoutil.SafeUint64ToInt64(curPollDelay)))
 
-		rc := n.ffiMap.Netconf.PollOperation(
-			n.ptr,
+		rc := d.ffiMap.Netconf.PollOperation(
+			d.ptr,
 			operationID,
 			&done,
 			&resultRawSize,
@@ -230,8 +230,8 @@ func (n *Netconf) getResult(
 
 	errString := make([]byte, errSize)
 
-	rc := n.ffiMap.Netconf.FetchOperation(
-		n.ptr,
+	rc := d.ffiMap.Netconf.FetchOperation(
+		d.ptr,
 		operationID,
 		&resultStartTime,
 		&resultEndTime,
@@ -248,8 +248,8 @@ func (n *Netconf) getResult(
 
 	return NewResult(
 		"",
-		n.host,
-		*n.options.Port,
+		d.host,
+		*d.options.Port,
 		resultStartTime,
 		resultEndTime,
 		resultRaw,

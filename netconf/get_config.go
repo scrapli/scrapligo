@@ -36,7 +36,7 @@ type getConfigOptions struct {
 //   - WithFilterNamespacePrefix
 //   - WithFilterNamespace
 //   - WithDefaultsType
-func (n *Netconf) GetConfig(
+func (d *Driver) GetConfig(
 	ctx context.Context,
 	options ...Option,
 ) (*Result, error) {
@@ -46,8 +46,8 @@ func (n *Netconf) GetConfig(
 
 	loadedOptions := newGetConfigOptions(options...)
 
-	status := n.ffiMap.Netconf.GetConfig(
-		n.ptr,
+	status := d.ffiMap.Netconf.GetConfig(
+		d.ptr,
 		&operationID,
 		&cancel,
 		loadedOptions.source.String(),
@@ -61,5 +61,5 @@ func (n *Netconf) GetConfig(
 		return nil, scrapligoerrors.NewFfiError("failed to submit getConfig operation", nil)
 	}
 
-	return n.getResult(ctx, &cancel, operationID)
+	return d.getResult(ctx, &cancel, operationID)
 }

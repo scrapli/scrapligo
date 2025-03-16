@@ -24,7 +24,7 @@ type editConfigOptions struct {
 
 // EditConfig executes a netconf edit config rpc. Supported options:
 //   - WithTargetType
-func (n *Netconf) EditConfig(
+func (d *Driver) EditConfig(
 	ctx context.Context,
 	config string,
 	options ...Option,
@@ -35,8 +35,8 @@ func (n *Netconf) EditConfig(
 
 	loadedOptions := newEditConfigOptions(options...)
 
-	status := n.ffiMap.Netconf.EditConfig(
-		n.ptr,
+	status := d.ffiMap.Netconf.EditConfig(
+		d.ptr,
 		&operationID,
 		&cancel,
 		config,
@@ -46,5 +46,5 @@ func (n *Netconf) EditConfig(
 		return nil, scrapligoerrors.NewFfiError("failed to submit editConfig operation", nil)
 	}
 
-	return n.getResult(ctx, &cancel, operationID)
+	return d.getResult(ctx, &cancel, operationID)
 }

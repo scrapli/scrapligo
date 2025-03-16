@@ -24,7 +24,7 @@ type lockUnlockOptions struct {
 
 // Lock executes a netconf lock rpc. Supported options:
 //   - WithTargetType
-func (n *Netconf) Lock(
+func (d *Driver) Lock(
 	ctx context.Context,
 	options ...Option,
 ) (*Result, error) {
@@ -34,8 +34,8 @@ func (n *Netconf) Lock(
 
 	loadedOptions := newLockUnlockOptions(options...)
 
-	status := n.ffiMap.Netconf.Lock(
-		n.ptr,
+	status := d.ffiMap.Netconf.Lock(
+		d.ptr,
 		&operationID,
 		&cancel,
 		loadedOptions.target.String(),
@@ -44,12 +44,12 @@ func (n *Netconf) Lock(
 		return nil, scrapligoerrors.NewFfiError("failed to submit lock operation", nil)
 	}
 
-	return n.getResult(ctx, &cancel, operationID)
+	return d.getResult(ctx, &cancel, operationID)
 }
 
 // Unlock executes a netconf unlock rpc. Supported options:
 //   - WithTargetType
-func (n *Netconf) Unlock(
+func (d *Driver) Unlock(
 	ctx context.Context,
 	options ...Option,
 ) (*Result, error) {
@@ -59,8 +59,8 @@ func (n *Netconf) Unlock(
 
 	loadedOptions := newLockUnlockOptions(options...)
 
-	status := n.ffiMap.Netconf.Unlock(
-		n.ptr,
+	status := d.ffiMap.Netconf.Unlock(
+		d.ptr,
 		&operationID,
 		&cancel,
 		loadedOptions.target.String(),
@@ -69,5 +69,5 @@ func (n *Netconf) Unlock(
 		return nil, scrapligoerrors.NewFfiError("failed to submit unlock operation", nil)
 	}
 
-	return n.getResult(ctx, &cancel, operationID)
+	return d.getResult(ctx, &cancel, operationID)
 }

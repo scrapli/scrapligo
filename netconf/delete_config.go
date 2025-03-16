@@ -24,7 +24,7 @@ type deleteConfigOptions struct {
 
 // DeleteConfig executes a netconf delete config rpc. Supported options:
 //   - WithTargetType
-func (n *Netconf) DeleteConfig(
+func (d *Driver) DeleteConfig(
 	ctx context.Context,
 	options ...Option,
 ) (*Result, error) {
@@ -34,8 +34,8 @@ func (n *Netconf) DeleteConfig(
 
 	loadedOptions := newDeleteConfigOptions(options...)
 
-	status := n.ffiMap.Netconf.DeleteConfig(
-		n.ptr,
+	status := d.ffiMap.Netconf.DeleteConfig(
+		d.ptr,
 		&operationID,
 		&cancel,
 		loadedOptions.target.String(),
@@ -44,5 +44,5 @@ func (n *Netconf) DeleteConfig(
 		return nil, scrapligoerrors.NewFfiError("failed to submit deleteConfig operation", nil)
 	}
 
-	return n.getResult(ctx, &cancel, operationID)
+	return d.getResult(ctx, &cancel, operationID)
 }

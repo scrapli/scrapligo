@@ -8,15 +8,15 @@ import (
 
 // CloseSession executes a netconf delete config rpc. Supported options:
 //   - WithTargetType
-func (n *Netconf) CloseSession(
+func (d *Driver) CloseSession(
 	ctx context.Context,
 ) (*Result, error) {
 	cancel := false
 
 	var operationID uint32
 
-	status := n.ffiMap.Netconf.CloseSession(
-		n.ptr,
+	status := d.ffiMap.Netconf.CloseSession(
+		d.ptr,
 		&operationID,
 		&cancel,
 	)
@@ -24,5 +24,5 @@ func (n *Netconf) CloseSession(
 		return nil, scrapligoerrors.NewFfiError("failed to submit closeSession operation", nil)
 	}
 
-	return n.getResult(ctx, &cancel, operationID)
+	return d.getResult(ctx, &cancel, operationID)
 }

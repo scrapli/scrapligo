@@ -19,7 +19,7 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
-func getNetconf(t *testing.T, f string) *scrapligonetconf.Netconf {
+func getNetconf(t *testing.T, f string) *scrapligonetconf.Driver {
 	opts := []scrapligooptions.Option{
 		scrapligooptions.WithUsername("admin"),
 		scrapligooptions.WithPassword("admin"),
@@ -42,7 +42,7 @@ func getNetconf(t *testing.T, f string) *scrapligonetconf.Netconf {
 		)
 	}
 
-	d, err := scrapligonetconf.NewNetconf(
+	d, err := scrapligonetconf.NewDriver(
 		testHost,
 		opts...,
 	)
@@ -53,7 +53,7 @@ func getNetconf(t *testing.T, f string) *scrapligonetconf.Netconf {
 	return d
 }
 
-func closeNetconf(t *testing.T, n *scrapligonetconf.Netconf, f string) {
+func closeNetconf(t *testing.T, n *scrapligonetconf.Driver, f string) {
 	if *scrapligotesthelper.Record {
 		p, m := n.GetPtr()
 		m.Netconf.Free(p)
