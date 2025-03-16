@@ -1,4 +1,4 @@
-package driver_test
+package cli_test
 
 import (
 	"bytes"
@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	scrapligodriver "github.com/scrapli/scrapligo/driver"
+	scrapligocli "github.com/scrapli/scrapligo/cli"
 	scrapligotesthelper "github.com/scrapli/scrapligo/testhelper"
 )
 
@@ -17,14 +17,14 @@ func TestSendInput(t *testing.T) {
 
 	cases := map[string]struct {
 		description string
-		postOpenF   func(t *testing.T, d *scrapligodriver.Driver)
+		postOpenF   func(t *testing.T, d *scrapligocli.Driver)
 		input       string
-		options     []scrapligodriver.OperationOption
+		options     []scrapligocli.OperationOption
 	}{
 		"simple": {
 			description: "simple input that requires no pagination",
 			input:       "show version | i Kern",
-			options:     []scrapligodriver.OperationOption{},
+			options:     []scrapligocli.OperationOption{},
 		},
 		"simple-requires-pagination": {
 			description: "simple input that requires pagination",
@@ -32,11 +32,11 @@ func TestSendInput(t *testing.T) {
 			// prompt pattern because of test transport reading one byte at a time, so just show the
 			// transceiver stuff since thats enough to require pagination!
 			input:   "show running-config all | include snmp",
-			options: []scrapligodriver.OperationOption{},
+			options: []scrapligocli.OperationOption{},
 		},
 		"simple-already-in-non-default-mode": {
 			description: "simple input executed in non-default mode we are already in",
-			postOpenF: func(t *testing.T, d *scrapligodriver.Driver) {
+			postOpenF: func(t *testing.T, d *scrapligocli.Driver) {
 				ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 				defer cancel()
 
@@ -46,15 +46,15 @@ func TestSendInput(t *testing.T) {
 				}
 			},
 			input: "do show version | i Kern",
-			options: []scrapligodriver.OperationOption{
-				scrapligodriver.WithRequestedMode("configuration"),
+			options: []scrapligocli.OperationOption{
+				scrapligocli.WithRequestedMode("configuration"),
 			},
 		},
 		"simple-acquire-non-default-mode": {
 			description: "simple input executed in freshly acquired non-default mode",
 			input:       "do show version | i Kern",
-			options: []scrapligodriver.OperationOption{
-				scrapligodriver.WithRequestedMode("configuration"),
+			options: []scrapligocli.OperationOption{
+				scrapligocli.WithRequestedMode("configuration"),
 			},
 		},
 	}

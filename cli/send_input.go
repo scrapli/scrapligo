@@ -1,4 +1,4 @@
-package driver
+package cli
 
 import (
 	"context"
@@ -21,7 +21,7 @@ func (d *Driver) SendInput(
 
 	loadedOptions := newOperationOptions(options...)
 
-	status := d.ffiMap.Driver.SendInput(
+	status := d.ffiMap.Cli.SendInput(
 		d.ptr,
 		&operationID,
 		&cancel,

@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	scrapligodriver "github.com/scrapli/scrapligo/driver"
+	scrapligocli "github.com/scrapli/scrapligo/cli"
 	scrapligonetconf "github.com/scrapli/scrapligo/netconf"
 	scrapligooptions "github.com/scrapli/scrapligo/options"
 	scrapligotesthelper "github.com/scrapli/scrapligo/testhelper"
@@ -91,7 +91,7 @@ func getNetconf(t *testing.T, platform, transportName string) *scrapligonetconf.
 		t.Fatal("unsupported transport name")
 	}
 
-	if platform == scrapligodriver.NokiaSrl.String() {
+	if platform == scrapligocli.NokiaSrl.String() {
 		opts = append(
 			opts,
 			scrapligooptions.WithPassword("admin"),

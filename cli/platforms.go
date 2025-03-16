@@ -1,4 +1,4 @@
-package driver
+package cli
 
 // PlatformName is an enum(ish) representing the name of a Platform.
 type PlatformName string

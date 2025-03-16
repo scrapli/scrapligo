@@ -1,4 +1,4 @@
-package driver
+package cli
 
 import (
 	"context"
@@ -13,7 +13,7 @@ func (d *Driver) EnterMode(ctx context.Context, requestedMode string) (*Result, 
 
 	var operationID uint32
 
-	status := d.ffiMap.Driver.EnterMode(d.ptr, &operationID, &cancel, requestedMode)
+	status := d.ffiMap.Cli.EnterMode(d.ptr, &operationID, &cancel, requestedMode)
 	if status != 0 {
 		return nil, scrapligoerrors.NewFfiError("failed to submit enterMode operation", nil)
 	}
@@ -27,7 +27,7 @@ func (d *Driver) GetPrompt(ctx context.Context) (*Result, error) {
 
 	var operationID uint32
 
-	status := d.ffiMap.Driver.GetPrompt(d.ptr, &operationID, &cancel)
+	status := d.ffiMap.Cli.GetPrompt(d.ptr, &operationID, &cancel)
 	if status != 0 {
 		return nil, scrapligoerrors.NewFfiError("failed to submit getPrompt operation", nil)
 	}

@@ -1,4 +1,4 @@
-package driver_test
+package cli_test
 
 import (
 	"bytes"
@@ -8,55 +8,29 @@ import (
 	"testing"
 	"time"
 
-	scrapligodriver "github.com/scrapli/scrapligo/driver"
+	scrapligocli "github.com/scrapli/scrapligo/cli"
 	scrapligotesthelper "github.com/scrapli/scrapligo/testhelper"
 )
 
-func TestEnterMode(t *testing.T) {
-	parentName := "enter-mode"
+func TestSendPromptedInput(t *testing.T) {
+	parentName := "send-prompted-input"
 
 	cases := map[string]struct {
-		description   string
-		postOpenF     func(t *testing.T, d *scrapligodriver.Driver)
-		requestedMode string
+		description string
+		postOpenF   func(t *testing.T, d *scrapligocli.Driver)
+		input       string
+		prompt      string
+		response    string
+		options     []scrapligocli.OperationOption
 	}{
-		"no-change": {
-			description:   "enter mode with no change required",
-			requestedMode: "privileged_exec",
-		},
-		"escalate": {
-			description:   "enter mode with single stage change 'escalating' the mode",
-			requestedMode: "configuration",
-		},
-		"deescalate": {
-			description:   "enter mode with single stage change 'deescalating' the mode'",
-			requestedMode: "exec",
-		},
-		"multi-stage-change-escalate": {
-			description: "enter mode with multi stage change 'escalating' the mode'",
-			postOpenF: func(t *testing.T, d *scrapligodriver.Driver) {
-				ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
-				defer cancel()
-
-				_, err := d.EnterMode(ctx, "exec")
-				if err != nil {
-					t.Fatal(err)
-				}
+		"simple": {
+			description: "simple input that requires no pagination",
+			input:       "read -p \"Will you prompt me plz? \" answer",
+			prompt:      "Will you prompt me plz?",
+			response:    "nou",
+			options: []scrapligocli.OperationOption{
+				scrapligocli.WithRequestedMode("bash"),
 			},
-			requestedMode: "configuration",
-		},
-		"multi-stage-change-deescalate": {
-			description: "enter mode with multi stage change 'deescalating' the mode'",
-			postOpenF: func(t *testing.T, d *scrapligodriver.Driver) {
-				ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
-				defer cancel()
-
-				_, err := d.EnterMode(ctx, "configuration")
-				if err != nil {
-					t.Fatal(err)
-				}
-			},
-			requestedMode: "exec",
 		},
 	}
 
@@ -91,7 +65,7 @@ func TestEnterMode(t *testing.T) {
 				c.postOpenF(t, d)
 			}
 
-			r, err := d.EnterMode(ctx, c.requestedMode)
+			r, err := d.SendPromptedInput(ctx, c.input, c.prompt, c.response, c.options...)
 			if err != nil {
 				t.Fatal(err)
 			}

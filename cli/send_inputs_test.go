@@ -1,4 +1,4 @@
-package driver_test
+package cli_test
 
 import (
 	"bytes"
@@ -8,29 +8,28 @@ import (
 	"testing"
 	"time"
 
-	scrapligodriver "github.com/scrapli/scrapligo/driver"
+	scrapligocli "github.com/scrapli/scrapligo/cli"
 	scrapligotesthelper "github.com/scrapli/scrapligo/testhelper"
 )
 
-func TestSendPromptedInput(t *testing.T) {
-	parentName := "send-prompted-input"
+func TestSendInputs(t *testing.T) {
+	parentName := "send-inputs"
 
 	cases := map[string]struct {
 		description string
-		postOpenF   func(t *testing.T, d *scrapligodriver.Driver)
-		input       string
-		prompt      string
-		response    string
-		options     []scrapligodriver.OperationOption
+		postOpenF   func(t *testing.T, d *scrapligocli.Driver)
+		inputs      []string
+		options     []scrapligocli.OperationOption
 	}{
-		"simple": {
-			description: "simple input that requires no pagination",
-			input:       "read -p \"Will you prompt me plz? \" answer",
-			prompt:      "Will you prompt me plz?",
-			response:    "nou",
-			options: []scrapligodriver.OperationOption{
-				scrapligodriver.WithRequestedMode("bash"),
-			},
+		"simple-single-input": {
+			description: "simple single input no pagination required",
+			inputs:      []string{"show version | i Kern"},
+			options:     []scrapligocli.OperationOption{},
+		},
+		"simple-multi-input": {
+			description: "simple multi input no pagination required",
+			inputs:      []string{"show version | i Kern", "show version | i Kern"},
+			options:     []scrapligocli.OperationOption{},
 		},
 	}
 
@@ -65,7 +64,7 @@ func TestSendPromptedInput(t *testing.T) {
 				c.postOpenF(t, d)
 			}
 
-			r, err := d.SendPromptedInput(ctx, c.input, c.prompt, c.response, c.options...)
+			r, err := d.SendInputs(ctx, c.inputs, c.options...)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -74,13 +73,13 @@ func TestSendPromptedInput(t *testing.T) {
 				scrapligotesthelper.WriteFile(
 					t,
 					testGoldenPath,
-					[]byte(r.Result),
+					[]byte(r.JoinedResult()),
 				)
 			} else {
 				testGoldenContent := scrapligotesthelper.ReadFile(t, testGoldenPath)
 
-				if !bytes.Equal([]byte(r.Result), testGoldenContent) {
-					scrapligotesthelper.FailOutput(t, r.Result, testGoldenContent)
+				if !bytes.Equal([]byte(r.JoinedResult()), testGoldenContent) {
+					scrapligotesthelper.FailOutput(t, r.JoinedResult(), testGoldenContent)
 				}
 
 				scrapligotesthelper.AssertEqual(t, 22, r.Port)
@@ -89,7 +88,7 @@ func TestSendPromptedInput(t *testing.T) {
 				scrapligotesthelper.AssertNotDefault(t, r.EndTime)
 				scrapligotesthelper.AssertNotDefault(t, r.ElapsedTimeSeconds)
 				scrapligotesthelper.AssertNotDefault(t, r.Host)
-				scrapligotesthelper.AssertNotDefault(t, r.ResultRaw)
+				scrapligotesthelper.AssertNotDefault(t, r.Results)
 			}
 		})
 	}

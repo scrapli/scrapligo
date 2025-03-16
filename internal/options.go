@@ -5,7 +5,7 @@ import (
 	scrapligoffi "github.com/scrapli/scrapligo/ffi"
 )
 
-// TransportKind is an enum(ish) representing the kind of transport a Driver should use.
+// TransportKind is an enum(ish) representing the kind of transport a Cli should use.
 type TransportKind string
 
 const (

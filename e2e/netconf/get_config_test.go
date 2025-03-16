@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	scrapligodriver "github.com/scrapli/scrapligo/driver"
+	scrapligocli "github.com/scrapli/scrapligo/cli"
 	scrapligonetconf "github.com/scrapli/scrapligo/netconf"
 	scrapligotesthelper "github.com/scrapli/scrapligo/testhelper"
 )
@@ -23,11 +23,11 @@ func TestGetConfig(t *testing.T) {
 	}{
 		"simple-eos": {
 			description: "simple - get the running config",
-			platform:    scrapligodriver.AristaEos.String(),
+			platform:    scrapligocli.AristaEos.String(),
 		},
 		"simple-srl2": {
 			description: "simple - get the running config",
-			platform:    scrapligodriver.NokiaSrl.String(),
+			platform:    scrapligocli.NokiaSrl.String(),
 		},
 	}
 

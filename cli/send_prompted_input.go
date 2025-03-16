@@ -1,4 +1,4 @@
-package driver
+package cli
 
 import (
 	"context"
@@ -21,7 +21,7 @@ func (d *Driver) SendPromptedInput(
 
 	var operationID uint32
 
-	status := d.ffiMap.Driver.SendPromptedInput(
+	status := d.ffiMap.Cli.SendPromptedInput(
 		d.ptr,
 		&operationID,
 		&cancel,

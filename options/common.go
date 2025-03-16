@@ -2,10 +2,10 @@ package options
 
 import scrapligointernal "github.com/scrapli/scrapligo/internal"
 
-// Option is a type used for functional options for the Driver object's options.
+// Option is a type used for functional options for the Cli object's options.
 type Option func(o *scrapligointernal.Options) error
 
-// WithLoggerCallback sets the logger callback for the Driver to use -- this is passed as pointer
+// WithLoggerCallback sets the logger callback for the Cli to use -- this is passed as pointer
 // to the zig bits.
 func WithLoggerCallback(
 	loggerCallback func(level uint8, message *string),

@@ -1,4 +1,4 @@
-package driver
+package cli
 
 import (
 	"context"
@@ -169,7 +169,7 @@ func (d *Driver) Open(ctx context.Context) (*Result, error) {
 			return
 		}
 
-		d.ffiMap.Driver.Free(d.ptr)
+		d.ffiMap.Cli.Free(d.ptr)
 	}()
 
 	var loggerCallback uintptr
@@ -177,7 +177,7 @@ func (d *Driver) Open(ctx context.Context) (*Result, error) {
 		loggerCallback = purego.NewCallback(d.options.LoggerCallback)
 	}
 
-	d.ptr = d.ffiMap.Driver.Alloc(
+	d.ptr = d.ffiMap.Cli.Alloc(
 		d.options.Driver.DefinitionString,
 		loggerCallback,
 		d.host,
@@ -198,7 +198,7 @@ func (d *Driver) Open(ctx context.Context) (*Result, error) {
 
 	var operationID uint32
 
-	status := d.ffiMap.Driver.Open(d.ptr, &operationID, &cancel)
+	status := d.ffiMap.Cli.Open(d.ptr, &operationID, &cancel)
 	if status != 0 {
 		cleanup = true
 
@@ -221,8 +221,8 @@ func (d *Driver) Close() {
 		return
 	}
 
-	d.ffiMap.Driver.Close(d.ptr)
-	d.ffiMap.Driver.Free(d.ptr)
+	d.ffiMap.Cli.Close(d.ptr)
+	d.ffiMap.Cli.Free(d.ptr)
 }
 
 func getPollDelay(curVal, minVal, maxVal uint64, backoffFactor uint8) uint64 {
@@ -274,7 +274,7 @@ func (d *Driver) getResult(
 
 		time.Sleep(time.Duration(scrapligoutil.SafeUint64ToInt64(curPollDelay)))
 
-		rc := d.ffiMap.Driver.PollOperation(
+		rc := d.ffiMap.Cli.PollOperation(
 			d.ptr,
 			operationID,
 			&done,
@@ -304,7 +304,7 @@ func (d *Driver) getResult(
 
 	errString := make([]byte, errSize)
 
-	rc := d.ffiMap.Driver.FetchOperation(
+	rc := d.ffiMap.Cli.FetchOperation(
 		d.ptr,
 		operationID,
 		&resultStartTime,

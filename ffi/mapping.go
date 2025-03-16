@@ -5,19 +5,14 @@ type Mapping struct {
 	// AssertNoLeaks returns "true" if no leaks were found, otherwise false.
 	AssertNoLeaks func() bool
 
-	// StripASCIIAndAnsiControlCharsInPlace accepts a "haystack" and an index at which to start
-	// stripping out ascii/ansi control chars/sequences. It returns a new length at (from the start
-	// index provided) for the stripped string.
-	StripASCIIAndAnsiControlCharsInPlace func(haystack *string, startIdx int) int
-
 	// TODO need to expose read and write methods for the drivers
-	Driver  DriverMapping
+	Cli     CliMapping
 	Netconf NetconfMapping
 	Options OptionMapping
 }
 
-// DriverMapping holds libscrapli mappings specifically for telnet/ssh drivers.
-type DriverMapping struct {
+// CliMapping holds libscrapli mappings specifically for telnet/ssh drivers.
+type CliMapping struct {
 	// Alloc allocates a driver object in zig -- it expects *all* the possible options.
 	Alloc func(
 		definitionString string,
@@ -30,7 +25,7 @@ type DriverMapping struct {
 	// Close where possible.
 	Free func(driverPtr uintptr)
 
-	// Open opens the telnet/ssh connection of the Driver at driverPtr.
+	// Open opens the telnet/ssh connection of the Cli at driverPtr.
 	Open func(
 		driverPtr uintptr,
 		operationID *uint32,
@@ -40,7 +35,7 @@ type DriverMapping struct {
 
 	// PollOperation checks to see if the given operationID is complete -- the state (done or not
 	// done) is set into the done bool pointer. If the state is done, the other pointers are also
-	// populated such that the Driver "knows" how much space to allocate for the result(raw) and
+	// populated such that the Cli "knows" how much space to allocate for the result(raw) and
 	// fail/error indicators. Note that while there is a "waitOperation" method in zig, we do *not*
 	// use that here as that would block the goroutine -- we simply poll repeatedly until the
 	// operation result is ready.
@@ -115,23 +110,23 @@ type DriverMapping struct {
 
 // NetconfMapping holds libscrapli mappings specifically for the netconf driver.
 type NetconfMapping struct {
-	// Alloc allocates the driver. See DriverMapping.Alloc for details.
+	// Alloc allocates the driver. See CliMapping.Alloc for details.
 	Alloc func(
 		loggerCallback uintptr,
 		host string,
 		port uint16,
 		transportKind string,
 	) (driverPtr uintptr)
-	// Free frees the driver. See DriverMapping.Free for details.
+	// Free frees the driver. See CliMapping.Free for details.
 	Free func(driverPtr uintptr)
 
-	// Open opens the driver. See DriverMapping.Open for details.
+	// Open opens the driver. See CliMapping.Open for details.
 	Open func(
 		driverPtr uintptr,
 		operationID *uint32,
 		cancel *bool,
 	) int
-	// Close closes the driver. See DriverMapping.Close for details.
+	// Close closes the driver. See CliMapping.Close for details.
 	Close func(driverPtr uintptr)
 
 	// PollOperation polls the given operationID. See DriverMapping.PollerOperation for details.
@@ -142,7 +137,7 @@ type NetconfMapping struct {
 		resultRawSize,
 		resultSize *uint64,
 	) int
-	// FetchOperation polls the given operationID. See DriverMapping.FetchOperation for details.
+	// FetchOperation polls the given operationID. See CliMapping.FetchOperation for details.
 	FetchOperation func(
 		driverPtr uintptr,
 		operationID uint32,

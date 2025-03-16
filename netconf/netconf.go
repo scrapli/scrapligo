@@ -83,8 +83,8 @@ func (n *Netconf) GetPtr() (uintptr, *scrapligoffi.Mapping) {
 	return n.ptr, n.ffiMap
 }
 
-// Open opens the driver object. This method spawns the underlying zig driver which the Driver then
-// holds a pointer to. All Driver operations operate against this pointer (though this is
+// Open opens the driver object. This method spawns the underlying zig driver which the Cli then
+// holds a pointer to. All Cli operations operate against this pointer (though this is
 // transparent to the user).
 func (n *Netconf) Open(ctx context.Context) (*Result, error) {
 	// ensure we dealloc if something happens, otherwise users calls to defer close would not be

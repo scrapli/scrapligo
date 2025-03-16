@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/carlmontanari/difflibgo/difflibgo"
-	scrapligodriver "github.com/scrapli/scrapligo/driver"
+	scrapligocli "github.com/scrapli/scrapligo/cli"
 )
 
 // AssertNotDefault asserts `v` is not a default value for that type.
@@ -24,7 +24,7 @@ func AssertNotDefault(t *testing.T, v any) {
 		if typedV == nil {
 			t.Fatal("expected non-default value")
 		}
-	case []*scrapligodriver.Result:
+	case []*scrapligocli.Result:
 		if len(typedV) == 0 {
 			t.Fatal("expected non-default value")
 		}

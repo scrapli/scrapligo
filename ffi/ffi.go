@@ -42,19 +42,6 @@ func AssertNoLeaks() error {
 	return scrapligoerrors.NewFfiError("found memory leaks", nil)
 }
 
-// StripASCIIAndAnsiControlCharsInPlace is a wrapper around the in place ascii/ansi stripping
-// function exported from the zig ffi layer. It does what it says it does.
-func StripASCIIAndAnsiControlCharsInPlace(haystack string) (string, error) {
-	m, err := GetMapping()
-	if err != nil {
-		return "", scrapligoerrors.NewFfiError("failed stripping ascii/ansi control chars", err)
-	}
-
-	newSize := m.StripASCIIAndAnsiControlCharsInPlace(&haystack, 0)
-
-	return haystack[:newSize], nil
-}
-
 func getZigStyleArch() string {
 	switch runtime.GOARCH {
 	case "amd64":
@@ -246,7 +233,7 @@ func GetMapping() (*Mapping, error) {
 		// of the initial loading meaningful? this may be even more relevant/interesting if the
 		// filesize and startup time matter (due to having to load from binary then write to disk)
 		mappingInst = &Mapping{
-			Driver:  DriverMapping{},
+			Cli:     CliMapping{},
 			Netconf: NetconfMapping{},
 			Options: OptionMapping{
 				Session:       SessionOptions{},
@@ -257,11 +244,6 @@ func GetMapping() (*Mapping, error) {
 		}
 
 		purego.RegisterLibFunc(&mappingInst.AssertNoLeaks, libScrapliFfi, "assertNoLeaks")
-		purego.RegisterLibFunc(
-			&mappingInst.StripASCIIAndAnsiControlCharsInPlace,
-			libScrapliFfi,
-			"stripAsciiAndAnsiControlCharsInPlace",
-		)
 
 		registerDriver(mappingInst, libScrapliFfi)
 		registerNetconf(mappingInst, libScrapliFfi)

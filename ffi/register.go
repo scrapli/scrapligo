@@ -5,23 +5,23 @@ import "github.com/ebitengine/purego"
 func registerDriver(m *Mapping, libScrapliFfi uintptr) {
 	// TODO is it possible to have my own register funcs that bypass reflection?
 	//  driver creation/destruction
-	purego.RegisterLibFunc(&m.Driver.Alloc, libScrapliFfi, "allocDriver")
-	purego.RegisterLibFunc(&m.Driver.Free, libScrapliFfi, "freeDriver")
+	purego.RegisterLibFunc(&m.Cli.Alloc, libScrapliFfi, "allocCliDriver")
+	purego.RegisterLibFunc(&m.Cli.Free, libScrapliFfi, "freeDriver")
 
-	purego.RegisterLibFunc(&m.Driver.Open, libScrapliFfi, "openDriver")
-	purego.RegisterLibFunc(&m.Driver.Close, libScrapliFfi, "closeDriver")
+	purego.RegisterLibFunc(&m.Cli.Open, libScrapliFfi, "openDriver")
+	purego.RegisterLibFunc(&m.Cli.Close, libScrapliFfi, "closeDriver")
 
-	purego.RegisterLibFunc(&m.Driver.PollOperation, libScrapliFfi, "pollOperation")
-	purego.RegisterLibFunc(&m.Driver.FetchOperation, libScrapliFfi, "fetchOperation")
+	purego.RegisterLibFunc(&m.Cli.PollOperation, libScrapliFfi, "pollOperation")
+	purego.RegisterLibFunc(&m.Cli.FetchOperation, libScrapliFfi, "fetchOperation")
 
-	purego.RegisterLibFunc(&m.Driver.EnterMode, libScrapliFfi, "enterMode")
-	purego.RegisterLibFunc(&m.Driver.GetPrompt, libScrapliFfi, "getPrompt")
-	purego.RegisterLibFunc(&m.Driver.SendInput, libScrapliFfi, "sendInput")
-	purego.RegisterLibFunc(&m.Driver.SendPromptedInput, libScrapliFfi, "sendPromptedInput")
+	purego.RegisterLibFunc(&m.Cli.EnterMode, libScrapliFfi, "enterMode")
+	purego.RegisterLibFunc(&m.Cli.GetPrompt, libScrapliFfi, "getPrompt")
+	purego.RegisterLibFunc(&m.Cli.SendInput, libScrapliFfi, "sendInput")
+	purego.RegisterLibFunc(&m.Cli.SendPromptedInput, libScrapliFfi, "sendPromptedInput")
 }
 
 func registerNetconf(m *Mapping, libScrapliFfi uintptr) {
-	purego.RegisterLibFunc(&m.Netconf.Alloc, libScrapliFfi, "netconfAllocDriver")
+	purego.RegisterLibFunc(&m.Netconf.Alloc, libScrapliFfi, "allocNetconfDriver")
 	purego.RegisterLibFunc(&m.Netconf.Free, libScrapliFfi, "freeDriver")
 
 	purego.RegisterLibFunc(&m.Netconf.Open, libScrapliFfi, "openDriver")

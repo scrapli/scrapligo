@@ -1,4 +1,4 @@
-package driver_test
+package cli_test
 
 import (
 	"os"
@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	scrapligodriver "github.com/scrapli/scrapligo/driver"
+	scrapligocli "github.com/scrapli/scrapligo/cli"
 	scrapligooptions "github.com/scrapli/scrapligo/options"
 	scrapligotesthelper "github.com/scrapli/scrapligo/testhelper"
 )
@@ -66,7 +66,7 @@ func shouldSkip(platform, transport string) bool {
 		return true
 	}
 
-	if transport == "telnet" && platform != scrapligodriver.AristaEos.String() {
+	if transport == "telnet" && platform != scrapligocli.AristaEos.String() {
 		// now we just check against telnet, since we only run that against eos for now
 		return true
 	}
@@ -74,7 +74,7 @@ func shouldSkip(platform, transport string) bool {
 	return false
 }
 
-func getDriver(t *testing.T, platform, transportName string) *scrapligodriver.Driver {
+func getDriver(t *testing.T, platform, transportName string) *scrapligocli.Driver {
 	var host string
 
 	opts := []scrapligooptions.Option{
@@ -101,7 +101,7 @@ func getDriver(t *testing.T, platform, transportName string) *scrapligodriver.Dr
 		t.Fatal("unsupported transport name")
 	}
 
-	if platform == scrapligodriver.NokiaSrl.String() {
+	if platform == scrapligocli.NokiaSrl.String() {
 		opts = append(
 			opts,
 			scrapligooptions.WithPassword("admin"),
@@ -144,7 +144,7 @@ func getDriver(t *testing.T, platform, transportName string) *scrapligodriver.Dr
 		)
 	}
 
-	d, err := scrapligodriver.NewDriver(
+	d, err := scrapligocli.NewDriver(
 		platform,
 		host,
 		opts...,
@@ -156,7 +156,7 @@ func getDriver(t *testing.T, platform, transportName string) *scrapligodriver.Dr
 	return d
 }
 
-func closeDriver(t *testing.T, d *scrapligodriver.Driver) {
+func closeDriver(t *testing.T, d *scrapligocli.Driver) {
 	_ = t
 
 	d.Close()

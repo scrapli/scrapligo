@@ -1,4 +1,4 @@
-package driver
+package cli
 
 // OperationOption is a type used for functional options for Driver operations.
 type OperationOption func(o *operationOptions)

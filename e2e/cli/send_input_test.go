@@ -1,4 +1,4 @@
-package driver_test
+package cli_test
 
 import (
 	"bytes"
@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	scrapligodriver "github.com/scrapli/scrapligo/driver"
+	scrapligocli "github.com/scrapli/scrapligo/cli"
 	scrapligotesthelper "github.com/scrapli/scrapligo/testhelper"
 )
 
@@ -18,27 +18,27 @@ func TestSendInput(t *testing.T) {
 	cases := map[string]struct {
 		description string
 		platform    string
-		postOpenF   func(t *testing.T, d *scrapligodriver.Driver)
+		postOpenF   func(t *testing.T, d *scrapligocli.Driver)
 		input       string
-		options     []scrapligodriver.OperationOption
+		options     []scrapligocli.OperationOption
 	}{
 		"simple-srl": {
 			description: "simple input that requires no pagination",
-			platform:    scrapligodriver.NokiaSrl.String(),
+			platform:    scrapligocli.NokiaSrl.String(),
 			input:       "info interface mgmt0",
-			options:     []scrapligodriver.OperationOption{},
+			options:     []scrapligocli.OperationOption{},
 		},
 		"simple-eos": {
 			description: "simple input that requires no pagination",
-			platform:    scrapligodriver.AristaEos.String(),
+			platform:    scrapligocli.AristaEos.String(),
 			input:       "show version | i Kern",
-			options:     []scrapligodriver.OperationOption{},
+			options:     []scrapligocli.OperationOption{},
 		},
 		"big-srl": {
 			description: "simple input with a big output",
-			platform:    scrapligodriver.NokiaSrl.String(),
+			platform:    scrapligocli.NokiaSrl.String(),
 			input:       "info",
-			options:     []scrapligodriver.OperationOption{},
+			options:     []scrapligocli.OperationOption{},
 		},
 		// output file is literally 39MB, so... no, just no. but can be fun for testing!
 		// if using need to set timeout > 140s or so (probably longer if in ci)

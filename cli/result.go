@@ -1,4 +1,4 @@
-package driver
+package cli
 
 import (
 	"math"

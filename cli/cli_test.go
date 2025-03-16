@@ -1,10 +1,10 @@
-package driver_test
+package cli_test
 
 import (
 	"os"
 	"testing"
 
-	scrapligodriver "github.com/scrapli/scrapligo/driver"
+	scrapligocli "github.com/scrapli/scrapligo/cli"
 	scrapligooptions "github.com/scrapli/scrapligo/options"
 	scrapligotesthelper "github.com/scrapli/scrapligo/testhelper"
 )
@@ -19,7 +19,7 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
-func getDriver(t *testing.T, f string) *scrapligodriver.Driver {
+func getDriver(t *testing.T, f string) *scrapligocli.Driver {
 	opts := []scrapligooptions.Option{
 		scrapligooptions.WithUsername("admin"),
 		scrapligooptions.WithPassword("admin"),
@@ -41,8 +41,8 @@ func getDriver(t *testing.T, f string) *scrapligodriver.Driver {
 		)
 	}
 
-	d, err := scrapligodriver.NewDriver(
-		scrapligodriver.AristaEos,
+	d, err := scrapligocli.NewDriver(
+		scrapligocli.AristaEos,
 		testHost,
 		opts...,
 	)
@@ -53,10 +53,10 @@ func getDriver(t *testing.T, f string) *scrapligodriver.Driver {
 	return d
 }
 
-func closeDriver(t *testing.T, d *scrapligodriver.Driver, f string) {
+func closeDriver(t *testing.T, d *scrapligocli.Driver, f string) {
 	if *scrapligotesthelper.Record {
 		p, m := d.GetPtr()
-		m.Driver.Free(p)
+		m.Cli.Free(p)
 
 		return
 	}

@@ -22,7 +22,7 @@ func NewResult(
 	}
 }
 
-// Result is a struct returned from all Driver operations.
+// Result is a struct returned from all Cli operations.
 type Result struct {
 	Host               string
 	Port               uint16

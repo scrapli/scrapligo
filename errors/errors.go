@@ -16,7 +16,7 @@ const (
 	// Ffi represents errors caused by the ffi integration layer, such as failure to submit or
 	// poll an operation.
 	Ffi ErrorKind = "ffi"
-	// Options represents errors applying Driver options.
+	// Options represents errors applying Cli options.
 	Options ErrorKind = "options"
 	// Auth represents errors encountered during authentication.
 	Auth ErrorKind = "auth"

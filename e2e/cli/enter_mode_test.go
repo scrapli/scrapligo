@@ -1,4 +1,4 @@
-package driver_test
+package cli_test
 
 import (
 	"bytes"
@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	scrapligodriver "github.com/scrapli/scrapligo/driver"
+	scrapligocli "github.com/scrapli/scrapligo/cli"
 	scrapligotesthelper "github.com/scrapli/scrapligo/testhelper"
 )
 
@@ -18,28 +18,28 @@ func TestEnterMode(t *testing.T) {
 	cases := map[string]struct {
 		description   string
 		platform      string
-		postOpenF     func(t *testing.T, d *scrapligodriver.Driver)
+		postOpenF     func(t *testing.T, d *scrapligocli.Driver)
 		requestedMode string
 	}{
 		"no-change-eos": {
 			description:   "enter mode with no change required",
-			platform:      scrapligodriver.AristaEos.String(),
+			platform:      scrapligocli.AristaEos.String(),
 			requestedMode: "privileged_exec",
 		},
 		"escalate-eos": {
 			description:   "enter mode with single stage change 'escalating' the mode",
-			platform:      scrapligodriver.AristaEos.String(),
+			platform:      scrapligocli.AristaEos.String(),
 			requestedMode: "configuration",
 		},
 		"deescalate-eos": {
 			description:   "enter mode with single stage change 'deescalating' the mode'",
-			platform:      scrapligodriver.AristaEos.String(),
+			platform:      scrapligocli.AristaEos.String(),
 			requestedMode: "exec",
 		},
 		"multi-stage-change-escalate-eos": {
 			description: "enter mode with multi stage change 'escalating' the mode'",
-			platform:    scrapligodriver.AristaEos.String(),
-			postOpenF: func(t *testing.T, d *scrapligodriver.Driver) {
+			platform:    scrapligocli.AristaEos.String(),
+			postOpenF: func(t *testing.T, d *scrapligocli.Driver) {
 				ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 				defer cancel()
 
@@ -52,8 +52,8 @@ func TestEnterMode(t *testing.T) {
 		},
 		"multi-stage-change-deescalate-eos": {
 			description: "enter mode with multi stage change 'deescalating' the mode'",
-			platform:    scrapligodriver.AristaEos.String(),
-			postOpenF: func(t *testing.T, d *scrapligodriver.Driver) {
+			platform:    scrapligocli.AristaEos.String(),
+			postOpenF: func(t *testing.T, d *scrapligocli.Driver) {
 				ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 				defer cancel()
 
