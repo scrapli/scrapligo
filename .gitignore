@@ -35,9 +35,6 @@ cover.out
 # clab build dir
 .clab/clab-scrapligo
 
-# dont check in shared libraries, we'll add these later and/or build them in ci?
-assets/lib/*
-
 # functional testing things (containerlab bin will go away once dind fix is merged and released)
 e2e/clab/clab-libscrapli
 e2e/clab/*.bak

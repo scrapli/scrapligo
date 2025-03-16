@@ -1,8 +1,8 @@
 package constants
 
-// Version is the version of scrapligo. Set with build flags, so leave at 0.0.0.
+// Version is the version of scrapligo. Set during release via ci.
 var Version = "0.0.0" //nolint: gochecknoglobals
 
-// LibScrapliVersion is the version of libscrapli scrapligo was built with. Set with build flags,
-// so leave at 0.0.0.
+// LibScrapliVersion is the version of libscrapli scrapligo was built with. Should be set during
+// release via ci to the version of libscrapli bundled in assets.
 var LibScrapliVersion = "0.0.1" //nolint: gochecknoglobals

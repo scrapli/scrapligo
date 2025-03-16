@@ -12,10 +12,10 @@ lint: fmt ## Run linters
 	golangci-lint run
 
 test: ## Run unit tests
-	gotestsum --format testname --hide-summary=skipped -- -coverprofile=cover.out ./...
+	gotestsum --format testname --hide-summary=skipped -- -coverprofile=cover.out `go list ./... | grep -v e2e`
 
 test-race: ## Run unit tests with race flag
-	gotestsum --format testname --hide-summary=skipped -- -coverprofile=cover.out ./... -race
+	gotestsum --format testname --hide-summary=skipped -- -coverprofile=cover.out -race `go list ./... | grep -v e2e`
 
 test-e2e: ## Run e2e tests against "full" test topology
 	gotestsum --format testname --hide-summary=skipped -- ./e2e/...
@@ -37,3 +37,4 @@ deploy-clab-ci: ## Deploy "ci" test topology
 
 destroy-clab-ci: ## Destroy "ci" test topology
 	cd .clab && sudo clab destroy -t topo-ci.yaml
+
