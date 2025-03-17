@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<rpc-reply message-id="101" xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">    <data>
+<rpc-reply message-id="101" xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+    <data>
         <acl xmlns="urn:nokia.com:srlinux:acl:acl">
             <acl-filter>
                 <name>cpm</name>
@@ -1541,7 +1542,8 @@ hLNNOPVX4mlAyJOmjGcH3x2XZEGSLVAKbIDbsvqgj0QkIWoXqJgPjwPhP8/TMKNG
 LEKz+Oa+8boGhcZcgfVslUZaHJGar2jv2C2wpSENThxXh5nDYWWyx6/qkzqzW6YH
 o+phN+pt
 -----END CERTIFICATE-----
-]]></certificate>                    <authenticate-client>false</authenticate-client>
+]]></certificate>
+                    <authenticate-client>false</authenticate-client>
                 </server-profile>
             </tls>
             <grpc-server xmlns="urn:nokia.com:srlinux:grpc:grpc">
@@ -1584,7 +1586,8 @@ o+phN+pt
 : Discord:     https://go.srlinux.dev/discord                  :
 : Contact:     https://go.srlinux.dev/contact-sales            :
 ................................................................
-]]></login-banner>            </banner>
+]]></login-banner>
+            </banner>
             <logging xmlns="urn:nokia.com:srlinux:log:logging">
                 <buffer>
                     <buffer-name>messages</buffer-name>
@@ -2932,7 +2935,8 @@ o+phN+pt
             <admin-state>disable</admin-state>
             <description>some looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong description</description>
         </network-instance>
-        <network-instance xmlns="urn:nokia.com:srlinux:net-inst:network-instance">            <name>ipvrf118</name>
+        <network-instance xmlns="urn:nokia.com:srlinux:net-inst:network-instance">
+            <name>ipvrf118</name>
             <type>ip-vrf</type>
             <admin-state>disable</admin-state>
             <description>some looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong description</description>
@@ -3643,7 +3647,8 @@ o+phN+pt
             <name>ipvrf1286</name>
             <type>ip-vrf</type>
             <admin-state>disable</admin-state>
-            <description>some looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong description</description>        </network-instance>
+            <description>some looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong description</description>
+        </network-instance>
         <network-instance xmlns="urn:nokia.com:srlinux:net-inst:network-instance">
             <name>ipvrf1287</name>
             <type>ip-vrf</type>
@@ -3804,7 +3809,8 @@ o+phN+pt
             <name>ipvrf131</name>
             <type>ip-vrf</type>
             <admin-state>disable</admin-state>
-            <description>some looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong description</description>        </network-instance>
+            <description>some looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong description</description>
+        </network-instance>
         <network-instance xmlns="urn:nokia.com:srlinux:net-inst:network-instance">
             <name>ipvrf1310</name>
             <type>ip-vrf</type>
@@ -4779,7 +4785,8 @@ o+phN+pt
         </network-instance>
         <network-instance xmlns="urn:nokia.com:srlinux:net-inst:network-instance">
             <name>ipvrf1457</name>
-            <type>ip-vrf</type>            <admin-state>disable</admin-state>
+            <type>ip-vrf</type>
+            <admin-state>disable</admin-state>
             <description>some looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong description</description>
         </network-instance>
         <network-instance xmlns="urn:nokia.com:srlinux:net-inst:network-instance">
@@ -5811,7 +5818,8 @@ o+phN+pt
         <network-instance xmlns="urn:nokia.com:srlinux:net-inst:network-instance">
             <name>ipvrf1611</name>
             <type>ip-vrf</type>
-            <admin-state>disable</admin-state>            <description>some looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong description</description>
+            <admin-state>disable</admin-state>
+            <description>some looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong description</description>
         </network-instance>
         <network-instance xmlns="urn:nokia.com:srlinux:net-inst:network-instance">
             <name>ipvrf1612</name>
@@ -6410,7 +6418,8 @@ o+phN+pt
         <network-instance xmlns="urn:nokia.com:srlinux:net-inst:network-instance">
             <name>ipvrf1701</name>
             <type>ip-vrf</type>
-            <admin-state>disable</admin-state>            <description>some looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong description</description>
+            <admin-state>disable</admin-state>
+            <description>some looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong description</description>
         </network-instance>
         <network-instance xmlns="urn:nokia.com:srlinux:net-inst:network-instance">
             <name>ipvrf1702</name>
@@ -10086,7 +10095,8 @@ o+phN+pt
         </network-instance>
         <network-instance xmlns="urn:nokia.com:srlinux:net-inst:network-instance">
             <name>ipvrf2253</name>
-            <type>ip-vrf</type>            <admin-state>disable</admin-state>
+            <type>ip-vrf</type>
+            <admin-state>disable</admin-state>
             <description>some looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong description</description>
         </network-instance>
         <network-instance xmlns="urn:nokia.com:srlinux:net-inst:network-instance">
@@ -13451,7 +13461,8 @@ o+phN+pt
         </network-instance>
         <network-instance xmlns="urn:nokia.com:srlinux:net-inst:network-instance">
             <name>ipvrf2759</name>
-            <type>ip-vrf</type>            <admin-state>disable</admin-state>
+            <type>ip-vrf</type>
+            <admin-state>disable</admin-state>
             <description>some looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong description</description>
         </network-instance>
         <network-instance xmlns="urn:nokia.com:srlinux:net-inst:network-instance">
@@ -14316,7 +14327,8 @@ o+phN+pt
             <name>ipvrf2889</name>
             <type>ip-vrf</type>
             <admin-state>disable</admin-state>
-            <description>some looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong description</description>        </network-instance>
+            <description>some looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong description</description>
+        </network-instance>
         <network-instance xmlns="urn:nokia.com:srlinux:net-inst:network-instance">
             <name>ipvrf289</name>
             <type>ip-vrf</type>
@@ -15508,7 +15520,8 @@ o+phN+pt
         <network-instance xmlns="urn:nokia.com:srlinux:net-inst:network-instance">
             <name>ipvrf3067</name>
             <type>ip-vrf</type>
-            <admin-state>disable</admin-state>            <description>some looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong description</description>
+            <admin-state>disable</admin-state>
+            <description>some looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong description</description>
         </network-instance>
         <network-instance xmlns="urn:nokia.com:srlinux:net-inst:network-instance">
             <name>ipvrf3068</name>
@@ -15770,7 +15783,8 @@ o+phN+pt
         </network-instance>
         <network-instance xmlns="urn:nokia.com:srlinux:net-inst:network-instance">
             <name>ipvrf3106</name>
-            <type>ip-vrf</type>            <admin-state>disable</admin-state>
+            <type>ip-vrf</type>
+            <admin-state>disable</admin-state>
             <description>some looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong description</description>
         </network-instance>
         <network-instance xmlns="urn:nokia.com:srlinux:net-inst:network-instance">
@@ -15923,7 +15937,8 @@ o+phN+pt
             <admin-state>disable</admin-state>
             <description>some looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong description</description>
         </network-instance>
-        <network-instance xmlns="urn:nokia.com:srlinux:net-inst:network-instance">            <name>ipvrf313</name>
+        <network-instance xmlns="urn:nokia.com:srlinux:net-inst:network-instance">
+            <name>ipvrf313</name>
             <type>ip-vrf</type>
             <admin-state>disable</admin-state>
             <description>some looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong description</description>
@@ -16776,7 +16791,8 @@ o+phN+pt
         </network-instance>
         <network-instance xmlns="urn:nokia.com:srlinux:net-inst:network-instance">
             <name>ipvrf3258</name>
-            <type>ip-vrf</type>            <admin-state>disable</admin-state>
+            <type>ip-vrf</type>
+            <admin-state>disable</admin-state>
             <description>some looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong description</description>
         </network-instance>
         <network-instance xmlns="urn:nokia.com:srlinux:net-inst:network-instance">
@@ -17641,7 +17657,8 @@ o+phN+pt
             <name>ipvrf3388</name>
             <type>ip-vrf</type>
             <admin-state>disable</admin-state>
-            <description>some looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong description</description>        </network-instance>
+            <description>some looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong description</description>
+        </network-instance>
         <network-instance xmlns="urn:nokia.com:srlinux:net-inst:network-instance">
             <name>ipvrf3389</name>
             <type>ip-vrf</type>
@@ -19250,7 +19267,8 @@ o+phN+pt
             <admin-state>disable</admin-state>
             <description>some looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong description</description>
         </network-instance>
-        <network-instance xmlns="urn:nokia.com:srlinux:net-inst:network-instance">            <name>ipvrf363</name>
+        <network-instance xmlns="urn:nokia.com:srlinux:net-inst:network-instance">
+            <name>ipvrf363</name>
             <type>ip-vrf</type>
             <admin-state>disable</admin-state>
             <description>some looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong description</description>
@@ -20713,7 +20731,8 @@ o+phN+pt
             <admin-state>disable</admin-state>
             <description>some looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong description</description>
         </network-instance>
-        <network-instance xmlns="urn:nokia.com:srlinux:net-inst:network-instance">            <name>ipvrf385</name>
+        <network-instance xmlns="urn:nokia.com:srlinux:net-inst:network-instance">
+            <name>ipvrf385</name>
             <type>ip-vrf</type>
             <admin-state>disable</admin-state>
             <description>some looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong description</description>
@@ -21843,7 +21862,8 @@ o+phN+pt
         <network-instance xmlns="urn:nokia.com:srlinux:net-inst:network-instance">
             <name>ipvrf4018</name>
             <type>ip-vrf</type>
-            <admin-state>disable</admin-state>            <description>some looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong description</description>
+            <admin-state>disable</admin-state>
+            <description>some looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong description</description>
         </network-instance>
         <network-instance xmlns="urn:nokia.com:srlinux:net-inst:network-instance">
             <name>ipvrf4019</name>
@@ -23045,7 +23065,8 @@ o+phN+pt
             <admin-state>disable</admin-state>
             <description>some looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong description</description>
         </network-instance>
-        <network-instance xmlns="urn:nokia.com:srlinux:net-inst:network-instance">            <name>ipvrf514</name>
+        <network-instance xmlns="urn:nokia.com:srlinux:net-inst:network-instance">
+            <name>ipvrf514</name>
             <type>ip-vrf</type>
             <admin-state>disable</admin-state>
             <description>some looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong description</description>
@@ -23262,7 +23283,8 @@ o+phN+pt
         </network-instance>
         <network-instance xmlns="urn:nokia.com:srlinux:net-inst:network-instance">
             <name>ipvrf547</name>
-            <type>ip-vrf</type>            <admin-state>disable</admin-state>
+            <type>ip-vrf</type>
+            <admin-state>disable</admin-state>
             <description>some looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong description</description>
         </network-instance>
         <network-instance xmlns="urn:nokia.com:srlinux:net-inst:network-instance">
@@ -23602,7 +23624,8 @@ o+phN+pt
             <description>some looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong description</description>
         </network-instance>
         <network-instance xmlns="urn:nokia.com:srlinux:net-inst:network-instance">
-            <name>ipvrf599</name>            <type>ip-vrf</type>
+            <name>ipvrf599</name>
+            <type>ip-vrf</type>
             <admin-state>disable</admin-state>
             <description>some looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong description</description>
         </network-instance>
@@ -26631,7 +26654,8 @@ o+phN+pt
             <description>some looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong description</description>
         </network-instance>
         <network-instance xmlns="urn:nokia.com:srlinux:net-inst:network-instance">
-            <name>macvrf1052</name>            <type>mac-vrf</type>
+            <name>macvrf1052</name>
+            <type>mac-vrf</type>
             <admin-state>disable</admin-state>
             <description>some looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong description</description>
         </network-instance>
@@ -30485,7 +30509,8 @@ o+phN+pt
             <name>macvrf1630</name>
             <type>mac-vrf</type>
             <admin-state>disable</admin-state>
-            <description>some looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong description</description>        </network-instance>
+            <description>some looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong description</description>
+        </network-instance>
         <network-instance xmlns="urn:nokia.com:srlinux:net-inst:network-instance">
             <name>macvrf1631</name>
             <type>mac-vrf</type>
@@ -31362,7 +31387,8 @@ o+phN+pt
             <admin-state>disable</admin-state>
             <description>some looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong description</description>
         </network-instance>
-        <network-instance xmlns="urn:nokia.com:srlinux:net-inst:network-instance">            <name>macvrf1763</name>
+        <network-instance xmlns="urn:nokia.com:srlinux:net-inst:network-instance">
+            <name>macvrf1763</name>
             <type>mac-vrf</type>
             <admin-state>disable</admin-state>
             <description>some looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong description</description>
@@ -31962,7 +31988,8 @@ o+phN+pt
             <description>some looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong description</description>
         </network-instance>
         <network-instance xmlns="urn:nokia.com:srlinux:net-inst:network-instance">
-            <name>macvrf1853</name>            <type>mac-vrf</type>
+            <name>macvrf1853</name>
+            <type>mac-vrf</type>
             <admin-state>disable</admin-state>
             <description>some looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong description</description>
         </network-instance>
@@ -37617,7 +37644,8 @@ o+phN+pt
             <type>mac-vrf</type>
             <admin-state>disable</admin-state>
             <description>some looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong description</description>
-        </network-instance>        <network-instance xmlns="urn:nokia.com:srlinux:net-inst:network-instance">
+        </network-instance>
+        <network-instance xmlns="urn:nokia.com:srlinux:net-inst:network-instance">
             <name>macvrf2701</name>
             <type>mac-vrf</type>
             <admin-state>disable</admin-state>
@@ -39418,7 +39446,8 @@ o+phN+pt
             <description>some looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong description</description>
         </network-instance>
         <network-instance xmlns="urn:nokia.com:srlinux:net-inst:network-instance">
-            <name>macvrf2972</name>            <type>mac-vrf</type>
+            <name>macvrf2972</name>
+            <type>mac-vrf</type>
             <admin-state>disable</admin-state>
             <description>some looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong description</description>
         </network-instance>
@@ -43322,7 +43351,8 @@ o+phN+pt
             <admin-state>disable</admin-state>
             <description>some looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong description</description>
         </network-instance>
-        <network-instance xmlns="urn:nokia.com:srlinux:net-inst:network-instance">            <name>macvrf3558</name>
+        <network-instance xmlns="urn:nokia.com:srlinux:net-inst:network-instance">
+            <name>macvrf3558</name>
             <type>mac-vrf</type>
             <admin-state>disable</admin-state>
             <description>some looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong description</description>
@@ -43937,7 +43967,8 @@ o+phN+pt
             <name>macvrf365</name>
             <type>mac-vrf</type>
             <admin-state>disable</admin-state>
-            <description>some looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong description</description>        </network-instance>
+            <description>some looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong description</description>
+        </network-instance>
         <network-instance xmlns="urn:nokia.com:srlinux:net-inst:network-instance">
             <name>macvrf3650</name>
             <type>mac-vrf</type>
@@ -44060,7 +44091,8 @@ o+phN+pt
         </network-instance>
         <network-instance xmlns="urn:nokia.com:srlinux:net-inst:network-instance">
             <name>macvrf3669</name>
-            <type>mac-vrf</type>            <admin-state>disable</admin-state>
+            <type>mac-vrf</type>
+            <admin-state>disable</admin-state>
             <description>some looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong description</description>
         </network-instance>
         <network-instance xmlns="urn:nokia.com:srlinux:net-inst:network-instance">
@@ -44813,7 +44845,8 @@ o+phN+pt
             <admin-state>disable</admin-state>
             <description>some looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong description</description>
         </network-instance>
-        <network-instance xmlns="urn:nokia.com:srlinux:net-inst:network-instance">            <name>macvrf3782</name>
+        <network-instance xmlns="urn:nokia.com:srlinux:net-inst:network-instance">
+            <name>macvrf3782</name>
             <type>mac-vrf</type>
             <admin-state>disable</admin-state>
             <description>some looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong description</description>
@@ -50047,7 +50080,8 @@ o+phN+pt
         <network-instance xmlns="urn:nokia.com:srlinux:net-inst:network-instance">
             <name>macvrf880</name>
             <type>mac-vrf</type>
-            <admin-state>disable</admin-state>            <description>some looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong description</description>
+            <admin-state>disable</admin-state>
+            <description>some looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong description</description>
         </network-instance>
         <network-instance xmlns="urn:nokia.com:srlinux:net-inst:network-instance">
             <name>macvrf881</name>

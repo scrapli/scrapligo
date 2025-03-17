@@ -34,11 +34,11 @@ func shouldSkipPlatform(platform string) bool {
 
 	for _, platformName := range platforms {
 		if platformName == platform {
-			return true
+			return false
 		}
 	}
 
-	return false
+	return true
 }
 
 func shouldSkipTransport(transport string) bool {
@@ -50,11 +50,11 @@ func shouldSkipTransport(transport string) bool {
 
 	for _, transportName := range transports {
 		if transportName == transport {
-			return true
+			return false
 		}
 	}
 
-	return false
+	return true
 }
 
 func shouldSkip(platform, transport string) bool {

@@ -25,7 +25,7 @@ func TestGetConfig(t *testing.T) {
 			description: "simple - get the running config",
 			platform:    scrapligocli.AristaEos.String(),
 		},
-		"simple-srl2": {
+		"simple-srl": {
 			description: "simple - get the running config",
 			platform:    scrapligocli.NokiaSrl.String(),
 		},
