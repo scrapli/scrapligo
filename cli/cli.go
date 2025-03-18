@@ -169,7 +169,7 @@ func (d *Driver) Open(ctx context.Context) (*Result, error) {
 			return
 		}
 
-		d.ffiMap.Cli.Free(d.ptr)
+		d.ffiMap.Shared.Free(d.ptr)
 	}()
 
 	var loggerCallback uintptr
@@ -198,7 +198,7 @@ func (d *Driver) Open(ctx context.Context) (*Result, error) {
 
 	var operationID uint32
 
-	status := d.ffiMap.Cli.Open(d.ptr, &operationID, &cancel)
+	status := d.ffiMap.Shared.Open(d.ptr, &operationID, &cancel)
 	if status != 0 {
 		cleanup = true
 
@@ -221,8 +221,8 @@ func (d *Driver) Close() {
 		return
 	}
 
-	d.ffiMap.Cli.Close(d.ptr)
-	d.ffiMap.Cli.Free(d.ptr)
+	d.ffiMap.Shared.Close(d.ptr)
+	d.ffiMap.Shared.Free(d.ptr)
 }
 
 func getPollDelay(curVal, minVal, maxVal uint64, backoffFactor uint8) uint64 {

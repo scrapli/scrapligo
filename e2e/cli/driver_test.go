@@ -1,7 +1,6 @@
 package cli_test
 
 import (
-	scrapligologging "github.com/scrapli/scrapligo/logging"
 	"os"
 	"runtime"
 	"strings"
@@ -107,7 +106,6 @@ func getDriver(t *testing.T, platform, transportName string) *scrapligocli.Drive
 			opts,
 			scrapligooptions.WithPassword("admin"),
 			scrapligooptions.WithPassword("NokiaSrl1!"),
-			scrapligooptions.WithLoggerCallback(scrapligologging.FfiLogger),
 		)
 
 		if runtime.GOOS == "darwin" {

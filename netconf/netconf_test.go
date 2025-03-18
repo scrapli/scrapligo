@@ -56,7 +56,7 @@ func getNetconf(t *testing.T, f string) *scrapligonetconf.Driver {
 func closeNetconf(t *testing.T, n *scrapligonetconf.Driver, f string) {
 	if *scrapligotesthelper.Record {
 		p, m := n.GetPtr()
-		m.Netconf.Free(p)
+		m.Shared.Free(p)
 
 		return
 	}

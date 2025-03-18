@@ -2,14 +2,19 @@ package ffi
 
 import "github.com/ebitengine/purego"
 
-func registerDriver(m *Mapping, libScrapliFfi uintptr) {
+func registerShared(m *Mapping, libScrapliFfi uintptr) {
+	purego.RegisterLibFunc(&m.Shared.Free, libScrapliFfi, "freeDriver")
+	purego.RegisterLibFunc(&m.Shared.Open, libScrapliFfi, "openDriver")
+	purego.RegisterLibFunc(&m.Shared.Close, libScrapliFfi, "closeDriver")
+
+	purego.RegisterLibFunc(&m.Shared.Read, libScrapliFfi, "readSession")
+	purego.RegisterLibFunc(&m.Shared.Write, libScrapliFfi, "writeSession")
+}
+
+func registerCli(m *Mapping, libScrapliFfi uintptr) {
 	// TODO is it possible to have my own register funcs that bypass reflection?
 	//  driver creation/destruction
 	purego.RegisterLibFunc(&m.Cli.Alloc, libScrapliFfi, "allocCliDriver")
-	purego.RegisterLibFunc(&m.Cli.Free, libScrapliFfi, "freeDriver")
-
-	purego.RegisterLibFunc(&m.Cli.Open, libScrapliFfi, "openDriver")
-	purego.RegisterLibFunc(&m.Cli.Close, libScrapliFfi, "closeDriver")
 
 	purego.RegisterLibFunc(&m.Cli.PollOperation, libScrapliFfi, "pollOperation")
 	purego.RegisterLibFunc(&m.Cli.FetchOperation, libScrapliFfi, "fetchOperation")
@@ -22,10 +27,6 @@ func registerDriver(m *Mapping, libScrapliFfi uintptr) {
 
 func registerNetconf(m *Mapping, libScrapliFfi uintptr) {
 	purego.RegisterLibFunc(&m.Netconf.Alloc, libScrapliFfi, "allocNetconfDriver")
-	purego.RegisterLibFunc(&m.Netconf.Free, libScrapliFfi, "freeDriver")
-
-	purego.RegisterLibFunc(&m.Netconf.Open, libScrapliFfi, "openDriver")
-	purego.RegisterLibFunc(&m.Netconf.Close, libScrapliFfi, "closeDriver")
 
 	purego.RegisterLibFunc(
 		&m.Netconf.PollOperation,

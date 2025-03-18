@@ -66,7 +66,7 @@ func TestSendInput(t *testing.T) {
 					t.Fatal(err)
 				}
 
-				ctx, cancel := context.WithTimeout(context.Background(), 15*time.Minute)
+				ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 				defer cancel()
 
 				d := getDriver(t, c.platform, transportName)

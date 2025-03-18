@@ -56,7 +56,7 @@ func getDriver(t *testing.T, f string) *scrapligocli.Driver {
 func closeDriver(t *testing.T, d *scrapligocli.Driver, f string) {
 	if *scrapligotesthelper.Record {
 		p, m := d.GetPtr()
-		m.Cli.Free(p)
+		m.Shared.Free(p)
 
 		return
 	}

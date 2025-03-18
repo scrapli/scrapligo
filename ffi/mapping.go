@@ -5,13 +5,39 @@ type Mapping struct {
 	// AssertNoLeaks returns "true" if no leaks were found, otherwise false.
 	AssertNoLeaks func() bool
 
-	// TODO need to expose read and write methods for the drivers
+	Shared  SharedMapping
 	Cli     CliMapping
 	Netconf NetconfMapping
 	Options OptionMapping
 }
 
-// CliMapping holds libscrapli mappings specifically for telnet/ssh drivers.
+// SharedMapping holds common mappings for both cli and netconf drivers.
+type SharedMapping struct {
+	// Free releases the memory of the driver object at driverPtr -- this should be called *after*
+	// Close where possible.
+	Free func(driverPtr uintptr)
+
+	// Open opens the driver connection of the driver at driverPtr.
+	Open func(
+		driverPtr uintptr,
+		operationID *uint32,
+		cancel *bool,
+	) int
+	Close func(driverPtr uintptr)
+
+	Read func(
+		driverPtr uintptr,
+		buf *[]byte,
+		readSize *uint64,
+	)
+	Write func(
+		driverPtr uintptr,
+		buf string,
+		redacted bool,
+	)
+}
+
+// CliMapping holds libscrapli mappings specifically for cli drivers.
 type CliMapping struct {
 	// Alloc allocates a driver object in zig -- it expects *all* the possible options.
 	Alloc func(
@@ -21,17 +47,6 @@ type CliMapping struct {
 		port uint16,
 		transportKind string,
 	) (driverPtr uintptr)
-	// Free releases the memory of the driver object at driverPtr -- this should be called *after*
-	// Close where possible.
-	Free func(driverPtr uintptr)
-
-	// Open opens the telnet/ssh connection of the Cli at driverPtr.
-	Open func(
-		driverPtr uintptr,
-		operationID *uint32,
-		cancel *bool,
-	) int
-	Close func(driverPtr uintptr)
 
 	// PollOperation checks to see if the given operationID is complete -- the state (done or not
 	// done) is set into the done bool pointer. If the state is done, the other pointers are also
@@ -117,17 +132,6 @@ type NetconfMapping struct {
 		port uint16,
 		transportKind string,
 	) (driverPtr uintptr)
-	// Free frees the driver. See CliMapping.Free for details.
-	Free func(driverPtr uintptr)
-
-	// Open opens the driver. See CliMapping.Open for details.
-	Open func(
-		driverPtr uintptr,
-		operationID *uint32,
-		cancel *bool,
-	) int
-	// Close closes the driver. See CliMapping.Close for details.
-	Close func(driverPtr uintptr)
 
 	// PollOperation polls the given operationID. See DriverMapping.PollerOperation for details.
 	PollOperation func(
@@ -236,6 +240,129 @@ type NetconfMapping struct {
 		operationID *uint32,
 		cancel *bool,
 		sessionID uint64,
+	) int
+
+	Commit func(
+		driverPtr uintptr,
+		operationID *uint32,
+		cancel *bool,
+	) int
+	Discard func(
+		driverPtr uintptr,
+		operationID *uint32,
+		cancel *bool,
+	) int
+	CancelCommit func(
+		driverPtr uintptr,
+		operationID *uint32,
+		cancel *bool,
+	) int
+	Validate func(
+		driverPtr uintptr,
+		operationID *uint32,
+		cancel *bool,
+		source string,
+	) int
+
+	CreateSubscription func(
+		driverPtr uintptr,
+		operationID *uint32,
+		cancel *bool,
+		stream,
+		filter,
+		filterType,
+		filterNamespacePrefix,
+		filterNamespace string,
+		startTime,
+		stopTime uint64,
+	) int
+	EstablishSubscription func(
+		driverPtr uintptr,
+		operationID *uint32,
+		cancel *bool,
+		stream,
+		filter,
+		filterType,
+		filterNamespacePrefix,
+		filterNamespace string,
+		period,
+		stopTime uint64,
+		dscp,
+		weighting uint,
+		dependency uint32,
+		encoding string,
+	) int
+	ModifySubscription func(
+		driverPtr uintptr,
+		operationID *uint32,
+		cancel *bool,
+		id uint64,
+		stream,
+		filter,
+		filterType,
+		filterNamespacePrefix,
+		filterNamespace string,
+		period,
+		stopTime uint64,
+		dscp,
+		weighting uint,
+		dependency uint32,
+		encoding string,
+	) int
+	DeleteSubscription func(
+		driverPtr uintptr,
+		operationID *uint32,
+		cancel *bool,
+		id uint64,
+	) int
+	ResyncSubscription func(
+		driverPtr uintptr,
+		operationID *uint32,
+		cancel *bool,
+		id uint64,
+	) int
+	KillSubscription func(
+		driverPtr uintptr,
+		operationID *uint32,
+		cancel *bool,
+		id uint64,
+	) int
+
+	GetSchema func(
+		driverPtr uintptr,
+		operationID *uint32,
+		cancel *bool,
+		identifier string,
+		version string,
+		format string,
+	) int
+	GetData func(
+		driverPtr uintptr,
+		operationID *uint32,
+		cancel *bool,
+		datastore,
+		filter,
+		filterType,
+		filterNamespacePrefix,
+		filterNamespace string,
+		configFilter bool,
+		originFilters string,
+		maxDepth uint32,
+		withOrigin bool,
+		defaultsType string,
+	) int
+	EditData func(
+		driverPtr uintptr,
+		operationID *uint32,
+		cancel *bool,
+		datastore string,
+		content string,
+	) int
+	Action func(
+		driverPtr uintptr,
+		operationID *uint32,
+		cancel *bool,
+		action string,
 	) int
 }
 

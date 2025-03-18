@@ -245,7 +245,8 @@ func GetMapping() (*Mapping, error) {
 
 		purego.RegisterLibFunc(&mappingInst.AssertNoLeaks, libScrapliFfi, "assertNoLeaks")
 
-		registerDriver(mappingInst, libScrapliFfi)
+		registerShared(mappingInst, libScrapliFfi)
+		registerCli(mappingInst, libScrapliFfi)
 		registerNetconf(mappingInst, libScrapliFfi)
 		registerOptions(mappingInst, libScrapliFfi)
 
