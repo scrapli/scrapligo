@@ -40,4 +40,7 @@ while IFS='  ' read -r checksum filepath; do
     fi
 done < ".tmp/checksums.txt"
 
+sed -i.bak 's|var LibScrapliVersion = "0.0.1"|var LibScrapliVersion = "'"$LIBSCRAPLI_TAG"'"|' \
+  constants/versions.go && rm -f constants/versions.go.bak
+
 rm -rf .tmp
