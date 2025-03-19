@@ -45,7 +45,7 @@ func (d *Driver) CopyConfig(
 		loadedOptions.source.String(),
 	)
 	if status != 0 {
-		return nil, scrapligoerrors.NewFfiError("failed to submit copyConfig operation", nil)
+		return nil, scrapligoerrors.NewFfiError("failed to submit copy-config operation", nil)
 	}
 
 	return d.getResult(ctx, &cancel, operationID)

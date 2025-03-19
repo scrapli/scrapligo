@@ -48,3 +48,19 @@ const (
 	DefaultsTypeTrim            DefaultsType = "trim"
 	DefaultsTypeExplicit        DefaultsType = "explicit"
 )
+
+// SchemaFormat is an enum(ish) representing the name of a schema format.
+type SchemaFormat string
+
+// String (stringer) method for SchemaFormat.
+func (t SchemaFormat) String() string {
+	return string(t)
+}
+
+const (
+	SchemaFormatXsd  SchemaFormat = "xsd"
+	SchemaFormatYang SchemaFormat = "yang"
+	SchemaFormatYin  SchemaFormat = "yin"
+	SchemaFormatRng  SchemaFormat = "rng"
+	SchemaFormatRnc  SchemaFormat = "rnc"
+)

@@ -288,7 +288,7 @@ type NetconfMapping struct {
 		period,
 		stopTime uint64,
 		dscp,
-		weighting uint,
+		weighting uint8,
 		dependency uint32,
 		encoding string,
 	) int
@@ -305,7 +305,7 @@ type NetconfMapping struct {
 		period,
 		stopTime uint64,
 		dscp,
-		weighting uint,
+		weighting uint8,
 		dependency uint32,
 		encoding string,
 	) int

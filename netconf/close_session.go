@@ -6,11 +6,13 @@ import (
 	scrapligoerrors "github.com/scrapli/scrapligo/errors"
 )
 
-// CloseSession executes a netconf delete config rpc. Supported options:
-//   - WithTargetType
+// CloseSession executes a netconf close-session rpc.
 func (d *Driver) CloseSession(
 	ctx context.Context,
+	options ...Option,
 ) (*Result, error) {
+	_ = options
+
 	cancel := false
 
 	var operationID uint32
@@ -21,7 +23,7 @@ func (d *Driver) CloseSession(
 		&cancel,
 	)
 	if status != 0 {
-		return nil, scrapligoerrors.NewFfiError("failed to submit closeSession operation", nil)
+		return nil, scrapligoerrors.NewFfiError("failed to submit close-session operation", nil)
 	}
 
 	return d.getResult(ctx, &cancel, operationID)

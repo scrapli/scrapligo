@@ -1,0 +1,72 @@
+package netconf
+
+import (
+	"context"
+
+	scrapligoerrors "github.com/scrapli/scrapligo/errors"
+)
+
+func newGetDataOptions(options ...Option) *getDataOptions {
+	o := &getDataOptions{
+		filterType:   FilterTypeSubtree,
+		defaultsType: DefaultsTypeUnset,
+	}
+
+	for _, opt := range options {
+		opt(o)
+	}
+
+	return o
+}
+
+type getDataOptions struct {
+	datastore             DatastoreType
+	filter                string
+	filterType            FilterType
+	filterNamespacePrefix string
+	filterNamespace       string
+	configFilter          bool
+	originFilters         string
+	maxDepth              uint32
+	withOrigin            bool
+	defaultsType          DefaultsType
+}
+
+// TODO docs, maybe need to make more option funcs
+// GetData executes a netconf get-data rpc. Supported options:
+//   - WithFilter
+//   - WithFilterType
+//   - WithFilterNamespacePrefix
+//   - WithFilterNamespace
+//   - WithDefaultsType
+func (d *Driver) GetData(
+	ctx context.Context,
+	options ...Option,
+) (*Result, error) {
+	cancel := false
+
+	var operationID uint32
+
+	loadedOptions := newGetDataOptions(options...)
+
+	status := d.ffiMap.Netconf.GetData(
+		d.ptr,
+		&operationID,
+		&cancel,
+		loadedOptions.datastore.String(),
+		loadedOptions.filter,
+		loadedOptions.filterType.String(),
+		loadedOptions.filterNamespacePrefix,
+		loadedOptions.filterNamespace,
+		loadedOptions.configFilter,
+		loadedOptions.originFilters,
+		loadedOptions.maxDepth,
+		loadedOptions.withOrigin,
+		loadedOptions.defaultsType.String(),
+	)
+	if status != 0 {
+		return nil, scrapligoerrors.NewFfiError("failed to submit get-data operation", nil)
+	}
+
+	return d.getResult(ctx, &cancel, operationID)
+}

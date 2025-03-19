@@ -25,7 +25,9 @@ func WithTargetType(t DatastoreType) Option {
 			to.target = t
 		case deleteConfigOptions:
 			to.target = t
-		case lockUnlockOptions:
+		case lockOptions:
+			to.target = t
+		case unlockOptions:
 			to.target = t
 		}
 	}
@@ -87,6 +89,26 @@ func WithDefaultsType(t DefaultsType) Option {
 			to.defaultsType = t
 		case getOptions:
 			to.defaultsType = t
+		}
+	}
+}
+
+// WithSchemaFormat apply a schema format for the rpc.
+func WithSchemaFormat(t SchemaFormat) Option {
+	return func(o any) {
+		switch to := o.(type) {
+		case getSchemaOptions:
+			to.format = t
+		}
+	}
+}
+
+// WithVersion apply a version argument for the rpc.
+func WithVersion(s string) Option {
+	return func(o any) {
+		switch to := o.(type) {
+		case getSchemaOptions:
+			to.version = s
 		}
 	}
 }

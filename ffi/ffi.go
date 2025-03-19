@@ -229,9 +229,6 @@ func GetMapping() (*Mapping, error) {
 			return
 		}
 
-		// TODO can/should we only register ssh stuff if ssh and netconf if netconf? is the overhead
-		// of the initial loading meaningful? this may be even more relevant/interesting if the
-		// filesize and startup time matter (due to having to load from binary then write to disk)
 		mappingInst = &Mapping{
 			Cli:     CliMapping{},
 			Netconf: NetconfMapping{},

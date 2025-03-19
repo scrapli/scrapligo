@@ -41,7 +41,7 @@ func (d *Driver) DeleteConfig(
 		loadedOptions.target.String(),
 	)
 	if status != 0 {
-		return nil, scrapligoerrors.NewFfiError("failed to submit deleteConfig operation", nil)
+		return nil, scrapligoerrors.NewFfiError("failed to submit delete-config operation", nil)
 	}
 
 	return d.getResult(ctx, &cancel, operationID)

@@ -12,7 +12,7 @@ func registerShared(m *Mapping, libScrapliFfi uintptr) {
 }
 
 func registerCli(m *Mapping, libScrapliFfi uintptr) {
-	// TODO is it possible to have my own register funcs that bypass reflection?
+	// ENHANCEMENT?: is it possible to have my own register funcs that bypass reflection?
 	//  driver creation/destruction
 	purego.RegisterLibFunc(&m.Cli.Alloc, libScrapliFfi, "allocCliDriver")
 
@@ -48,6 +48,43 @@ func registerNetconf(m *Mapping, libScrapliFfi uintptr) {
 	purego.RegisterLibFunc(&m.Netconf.Get, libScrapliFfi, "netconfGet")
 	purego.RegisterLibFunc(&m.Netconf.CloseSession, libScrapliFfi, "netconfCloseSession")
 	purego.RegisterLibFunc(&m.Netconf.KillSession, libScrapliFfi, "netconfKillSession")
+
+	purego.RegisterLibFunc(&m.Netconf.Commit, libScrapliFfi, "netconfCommit")
+	purego.RegisterLibFunc(&m.Netconf.Discard, libScrapliFfi, "netconfDiscard")
+	purego.RegisterLibFunc(&m.Netconf.CancelCommit, libScrapliFfi, "netconfCancelCommit")
+	purego.RegisterLibFunc(&m.Netconf.Validate, libScrapliFfi, "netconfValidate")
+
+	purego.RegisterLibFunc(
+		&m.Netconf.CreateSubscription,
+		libScrapliFfi,
+		"netconfCreateSubscription",
+	)
+	purego.RegisterLibFunc(
+		&m.Netconf.EstablishSubscription,
+		libScrapliFfi,
+		"netconfEstablishSubscription",
+	)
+	purego.RegisterLibFunc(
+		&m.Netconf.ModifySubscription,
+		libScrapliFfi,
+		"netconfModifySubscription",
+	)
+	purego.RegisterLibFunc(
+		&m.Netconf.DeleteSubscription,
+		libScrapliFfi,
+		"netconfDeleteSubscription",
+	)
+	purego.RegisterLibFunc(
+		&m.Netconf.ResyncSubscription,
+		libScrapliFfi,
+		"netconfResyncSubscription",
+	)
+	purego.RegisterLibFunc(&m.Netconf.KillSubscription, libScrapliFfi, "netconfKillSubscription")
+
+	purego.RegisterLibFunc(&m.Netconf.GetSchema, libScrapliFfi, "netconfGetSchema")
+	purego.RegisterLibFunc(&m.Netconf.GetData, libScrapliFfi, "netconfGetData")
+	purego.RegisterLibFunc(&m.Netconf.EditData, libScrapliFfi, "netconfEditData")
+	purego.RegisterLibFunc(&m.Netconf.Action, libScrapliFfi, "netconfAction")
 }
 
 func registerOptions(m *Mapping, libScrapliFfi uintptr) {
