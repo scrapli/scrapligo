@@ -6,18 +6,18 @@ import (
 )
 
 const (
-	timestampPattern = "\\d{4}-\\d{2}-\\d{2}T\\d+:\\d+:\\d+.\\d+Z"
-	sessionIDPattern = "<session-id>\\d+</session-id>"
-	passwordPattern  = "<password>.*</password>"
+	netconfTimestampPattern = "\\d{4}-\\d{2}-\\d{2}T\\d+:\\d+:\\d+.\\d+Z"
+	netconfSessionIDPattern = "<session-id>\\d+</session-id>"
+	netconfPasswordPattern  = "<password>.*</password>"
 )
 
 // CleanNetconfOutput does what it says. For testing consistency.
 func CleanNetconfOutput(t *testing.T, output string) []byte {
 	t.Helper()
 
-	tp := regexp.MustCompile(timestampPattern)
-	sp := regexp.MustCompile(sessionIDPattern)
-	pp := regexp.MustCompile(passwordPattern)
+	tp := regexp.MustCompile(netconfTimestampPattern)
+	sp := regexp.MustCompile(netconfSessionIDPattern)
+	pp := regexp.MustCompile(netconfPasswordPattern)
 
 	outputBytes := []byte(output)
 
