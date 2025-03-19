@@ -32,12 +32,16 @@ type getDataOptions struct {
 	defaultsType          DefaultsType
 }
 
-// TODO docs, maybe need to make more option funcs
 // GetData executes a netconf get-data rpc. Supported options:
+//   - WithDatastore
 //   - WithFilter
 //   - WithFilterType
 //   - WithFilterNamespacePrefix
 //   - WithFilterNamespace
+//   - WithDefaultsType
+//   - WithConfigFilter
+//   - WithMaxDepth
+//   - WithOrigin
 //   - WithDefaultsType
 func (d *Driver) GetData(
 	ctx context.Context,

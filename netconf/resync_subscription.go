@@ -12,6 +12,8 @@ func (d *Driver) ResyncSubscription(
 	id uint64,
 	options ...Option,
 ) (*Result, error) {
+	_ = options
+
 	cancel := false
 
 	var operationID uint32

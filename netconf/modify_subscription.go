@@ -31,7 +31,17 @@ type modifySubscriptionOptions struct {
 	encoding              string
 }
 
-// ModifySubscription executes a netconf modify-subscription rpc. Supported options: TODO
+// ModifySubscription executes a netconf modify-subscription rpc. Supported options:
+//   - WithFilter
+//   - WithFilterType
+//   - WithFilterNamespacePrefix
+//   - WithFilterNamespace
+//   - WithPeriod
+//   - WithStopTime
+//   - WithDSCP
+//   - WithWeighting
+//   - WithDependency
+//   - WithEncoding
 func (d *Driver) ModifySubscription(
 	ctx context.Context,
 	id uint64,

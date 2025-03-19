@@ -32,7 +32,16 @@ type establishSubscriptionOptions struct {
 }
 
 // EstablishSubscription executes a netconf establish-subscription rpc. Supported options:
-//   - WithTargetType
+//   - WithFilter
+//   - WithFilterType
+//   - WithFilterNamespacePrefix
+//   - WithFilterNamespace
+//   - WithPeriod
+//   - WithStopTime
+//   - WithDSCP
+//   - WithWeighting
+//   - WithDependency
+//   - WithEncoding
 func (d *Driver) EstablishSubscription(
 	ctx context.Context,
 	options ...Option,

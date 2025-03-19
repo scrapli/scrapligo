@@ -27,9 +27,13 @@ type createSubscriptionOptions struct {
 	stopTime              uint64
 }
 
-// TODO note options once go back and do that
 // CreateSubscription executes a netconf create-subscription rpc. Supported options:
-//   - WithTargetType
+//   - WithFilter
+//   - WithFilterType
+//   - WithFilterNamespacePrefix
+//   - WithFilterNamespace
+//   - WithStartTime
+//   - WithStopTime
 func (d *Driver) CreateSubscription(
 	ctx context.Context,
 	options ...Option,

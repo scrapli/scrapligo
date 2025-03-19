@@ -125,6 +125,13 @@ issues:
         - revive
       text: "exported: exported const"
 
+    # ignore single case switch for netconf options, just rather write them all as switches
+    # for consistency
+    - path: netconf/options
+      linters:
+        - gocritic
+      text: "singleCaseSwitch"
+
     # ignore some stuff for test packages
     - path: e2e/
       linters:
