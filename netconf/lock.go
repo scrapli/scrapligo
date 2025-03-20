@@ -2,7 +2,6 @@ package netconf
 
 import (
 	"context"
-
 	scrapligoerrors "github.com/scrapli/scrapligo/errors"
 )
 

@@ -1490,7 +1490,7 @@
                     <idle-timeout>7200</idle-timeout>
                     <authentication-method>local</authentication-method>
                     <linuxadmin-user>
-                        <password>$y$j9T$M4zc5SlI3znLz6Zk1B1sK.$V5GCtle0EBx7hWhngQ5u.pOQwO/KDVEQHtBqJ66EhW5</password>
+                        __PASSWORD__
                     </linuxadmin-user>
                 </authentication>
                 <server-group>

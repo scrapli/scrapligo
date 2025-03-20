@@ -1,12 +1,11 @@
 package netconf_test
 
 import (
-	"os"
-	"testing"
-
 	scrapligonetconf "github.com/scrapli/scrapligo/netconf"
 	scrapligooptions "github.com/scrapli/scrapligo/options"
 	scrapligotesthelper "github.com/scrapli/scrapligo/testhelper"
+	"os"
+	"testing"
 )
 
 const (

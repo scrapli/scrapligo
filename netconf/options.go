@@ -7,8 +7,12 @@ type Option func(o any)
 func WithDatastore(t DatastoreType) Option {
 	return func(o any) {
 		switch to := o.(type) {
-		case getDataOptions:
+		case *getDataOptions:
 			to.datastore = t
+		case *lockOptions:
+			to.target = t
+		case *unlockOptions:
+			to.target = t
 		}
 	}
 }
@@ -17,9 +21,9 @@ func WithDatastore(t DatastoreType) Option {
 func WithSourceType(t DatastoreType) Option {
 	return func(o any) {
 		switch to := o.(type) {
-		case getConfigOptions:
+		case *getConfigOptions:
 			to.source = t
-		case copyConfigOptions:
+		case *copyConfigOptions:
 			to.target = t
 		}
 	}
@@ -29,15 +33,15 @@ func WithSourceType(t DatastoreType) Option {
 func WithTargetType(t DatastoreType) Option {
 	return func(o any) {
 		switch to := o.(type) {
-		case editConfigOptions:
+		case *editConfigOptions:
 			to.target = t
-		case copyConfigOptions:
+		case *copyConfigOptions:
 			to.target = t
-		case deleteConfigOptions:
+		case *deleteConfigOptions:
 			to.target = t
-		case lockOptions:
+		case *lockOptions:
 			to.target = t
-		case unlockOptions:
+		case *unlockOptions:
 			to.target = t
 		}
 	}
@@ -47,9 +51,9 @@ func WithTargetType(t DatastoreType) Option {
 func WithFilter(s string) Option {
 	return func(o any) {
 		switch to := o.(type) {
-		case getConfigOptions:
+		case *getConfigOptions:
 			to.filter = s
-		case getOptions:
+		case *getOptions:
 			to.filter = s
 		}
 	}
@@ -59,9 +63,9 @@ func WithFilter(s string) Option {
 func WithFilterType(t FilterType) Option {
 	return func(o any) {
 		switch to := o.(type) {
-		case getConfigOptions:
+		case *getConfigOptions:
 			to.filterType = t
-		case getOptions:
+		case *getOptions:
 			to.filterType = t
 		}
 	}
@@ -71,9 +75,9 @@ func WithFilterType(t FilterType) Option {
 func WithFilterNamespacePrefix(s string) Option {
 	return func(o any) {
 		switch to := o.(type) {
-		case getConfigOptions:
+		case *getConfigOptions:
 			to.filterNamespacePrefix = s
-		case getOptions:
+		case *getOptions:
 			to.filterNamespacePrefix = s
 		}
 	}
@@ -83,9 +87,9 @@ func WithFilterNamespacePrefix(s string) Option {
 func WithFilterNamespace(s string) Option {
 	return func(o any) {
 		switch to := o.(type) {
-		case getConfigOptions:
+		case *getConfigOptions:
 			to.filterNamespace = s
-		case getOptions:
+		case *getOptions:
 			to.filterNamespace = s
 		}
 	}
@@ -95,9 +99,9 @@ func WithFilterNamespace(s string) Option {
 func WithDefaultsType(t DefaultsType) Option {
 	return func(o any) {
 		switch to := o.(type) {
-		case getConfigOptions:
+		case *getConfigOptions:
 			to.defaultsType = t
-		case getOptions:
+		case *getOptions:
 			to.defaultsType = t
 		}
 	}
@@ -107,7 +111,7 @@ func WithDefaultsType(t DefaultsType) Option {
 func WithSchemaFormat(t SchemaFormat) Option {
 	return func(o any) {
 		switch to := o.(type) {
-		case getSchemaOptions:
+		case *getSchemaOptions:
 			to.format = t
 		}
 	}
@@ -117,7 +121,7 @@ func WithSchemaFormat(t SchemaFormat) Option {
 func WithVersion(s string) Option {
 	return func(o any) {
 		switch to := o.(type) {
-		case getSchemaOptions:
+		case *getSchemaOptions:
 			to.version = s
 		}
 	}
@@ -127,7 +131,7 @@ func WithVersion(s string) Option {
 func WithStartTime(i uint64) Option {
 	return func(o any) {
 		switch to := o.(type) {
-		case createSubscriptionOptions:
+		case *createSubscriptionOptions:
 			to.startTime = i
 		}
 	}
@@ -137,7 +141,7 @@ func WithStartTime(i uint64) Option {
 func WithStopTime(i uint64) Option {
 	return func(o any) {
 		switch to := o.(type) {
-		case createSubscriptionOptions:
+		case *createSubscriptionOptions:
 			to.stopTime = i
 		}
 	}
@@ -147,7 +151,7 @@ func WithStopTime(i uint64) Option {
 func WithPeriod(i uint64) Option {
 	return func(o any) {
 		switch to := o.(type) {
-		case establishSubscriptionOptions:
+		case *establishSubscriptionOptions:
 			to.period = i
 		}
 	}
@@ -157,7 +161,7 @@ func WithPeriod(i uint64) Option {
 func WithDSCP(i uint8) Option {
 	return func(o any) {
 		switch to := o.(type) {
-		case establishSubscriptionOptions:
+		case *establishSubscriptionOptions:
 			to.dscp = i
 		}
 	}
@@ -167,7 +171,7 @@ func WithDSCP(i uint8) Option {
 func WithWeighting(i uint8) Option {
 	return func(o any) {
 		switch to := o.(type) {
-		case establishSubscriptionOptions:
+		case *establishSubscriptionOptions:
 			to.dscp = i
 		}
 	}
@@ -177,7 +181,7 @@ func WithWeighting(i uint8) Option {
 func WithDependency(i uint32) Option {
 	return func(o any) {
 		switch to := o.(type) {
-		case establishSubscriptionOptions:
+		case *establishSubscriptionOptions:
 			to.dependency = i
 		}
 	}
@@ -187,7 +191,7 @@ func WithDependency(i uint32) Option {
 func WithEncoding(s string) Option {
 	return func(o any) {
 		switch to := o.(type) {
-		case establishSubscriptionOptions:
+		case *establishSubscriptionOptions:
 			to.encoding = s
 		}
 	}
@@ -197,7 +201,7 @@ func WithEncoding(s string) Option {
 func WithConfigFilter() Option {
 	return func(o any) {
 		switch to := o.(type) {
-		case getDataOptions:
+		case *getDataOptions:
 			to.configFilter = true
 		}
 	}
@@ -207,7 +211,7 @@ func WithConfigFilter() Option {
 func WithMaxDepth(i uint32) Option {
 	return func(o any) {
 		switch to := o.(type) {
-		case getDataOptions:
+		case *getDataOptions:
 			to.maxDepth = i
 		}
 	}
@@ -217,7 +221,7 @@ func WithMaxDepth(i uint32) Option {
 func WithOrigin() Option {
 	return func(o any) {
 		switch to := o.(type) {
-		case getDataOptions:
+		case *getDataOptions:
 			to.withOrigin = true
 		}
 	}
