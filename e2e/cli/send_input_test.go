@@ -93,9 +93,11 @@ func TestSendInput(t *testing.T) {
 						scrapligotesthelper.CleanCliOutput(t, r.Result),
 					)
 				} else {
+					cleanedActual := scrapligotesthelper.CleanCliOutput(t, r.Result)
+
 					testGoldenContent := scrapligotesthelper.ReadFile(t, testGoldenPath)
 
-					if !bytes.Equal([]byte(r.Result), testGoldenContent) {
+					if !bytes.Equal(cleanedActual, testGoldenContent) {
 						scrapligotesthelper.FailOutput(t, r.Result, testGoldenContent)
 					}
 
