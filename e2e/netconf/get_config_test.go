@@ -51,12 +51,13 @@ func TestGetConfig(t *testing.T) {
 				defer cancel()
 
 				n := getNetconf(t, c.platform, transportName)
-				defer closeDriver(t, n)
 
 				_, err = n.Open(ctx)
 				if err != nil {
 					t.Fatal(err)
 				}
+
+				defer closeDriver(t, n)
 
 				r, err := n.GetConfig(ctx, c.options...)
 				if err != nil {

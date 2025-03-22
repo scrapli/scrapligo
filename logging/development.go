@@ -15,7 +15,7 @@ var (
 	// Logger is the main logging function, used mostly for "global" non connection/device related
 	// things like the ffi layer.
 	Logger = func(level LogLevel, m string, a ...any) { //nolint: gochecknoglobals
-		_, _ = fmt.Fprintln(os.Stderr, level, "|", fmt.Sprintf(m, a...))
+		_, _ = fmt.Fprintln(os.Stderr, level, "::", fmt.Sprintf(m, a...))
 	}
 )
 
