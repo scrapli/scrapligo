@@ -72,9 +72,7 @@ func shouldSkip(platform, transport string) bool {
 func getNetconf(t *testing.T, platform, transportName string) *scrapligonetconf.Driver {
 	var host string
 
-	opts := []scrapligooptions.Option{
-		scrapligooptions.WithUsername("admin"),
-	}
+	var opts []scrapligooptions.Option
 
 	switch transportName {
 	case "bin":
@@ -94,7 +92,7 @@ func getNetconf(t *testing.T, platform, transportName string) *scrapligonetconf.
 	if platform == scrapligocli.NokiaSrl.String() {
 		opts = append(
 			opts,
-			scrapligooptions.WithPassword("admin"),
+			scrapligooptions.WithUsername("admin"),
 			scrapligooptions.WithPassword("NokiaSrl1!"),
 		)
 
@@ -111,7 +109,7 @@ func getNetconf(t *testing.T, platform, transportName string) *scrapligonetconf.
 	} else {
 		opts = append(
 			opts,
-			scrapligooptions.WithPassword("admin"),
+			scrapligooptions.WithUsername("netconf-admin"),
 			scrapligooptions.WithPassword("admin"),
 		)
 

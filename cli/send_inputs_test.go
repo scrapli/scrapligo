@@ -53,12 +53,13 @@ func TestSendInputs(t *testing.T) {
 			defer cancel()
 
 			d := getDriver(t, testFixturePath)
-			defer closeDriver(t, d, testFixturePath)
 
 			_, err = d.Open(ctx)
 			if err != nil {
 				t.Fatal(err)
 			}
+
+			defer closeDriver(t, d)
 
 			if c.postOpenF != nil {
 				c.postOpenF(t, d)
@@ -73,7 +74,7 @@ func TestSendInputs(t *testing.T) {
 				scrapligotesthelper.WriteFile(
 					t,
 					testGoldenPath,
-					[]byte(r.JoinedResult()),
+					scrapligotesthelper.CleanCliOutput(t, r.JoinedResult()),
 				)
 			} else {
 				testGoldenContent := scrapligotesthelper.ReadFile(t, testGoldenPath)

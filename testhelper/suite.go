@@ -9,6 +9,10 @@ import (
 	scrapligocli "github.com/scrapli/scrapligo/cli"
 )
 
+const (
+	cliUserAtHostPattern = "(?im)\\w+@[\\w.]+"
+)
+
 // AssertNotDefault asserts `v` is not a default value for that type.
 func AssertNotDefault(t *testing.T, v any) {
 	switch typedV := v.(type) {

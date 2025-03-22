@@ -26,15 +26,12 @@ RUN apt-get update -yq && \
         --no-install-recommends \
         docker-ce \
         docker-ce-cli \
-        containerlab=0.65.1 && \
+        containerlab=0.66.0 && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /launcher
 
 COPY main.py .
-
-# TODO temp clab built for linux/aarm64 fixing darwin dind regression
-COPY containerlab /usr/bin/containerlab
 
 CMD ["/launcher/main.py"]

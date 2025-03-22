@@ -137,6 +137,10 @@ issues:
       linters:
         - nestif
         - gocognit
+    - path: _test\.go
+      linters:
+        # some duplication for v similar tests (lock/unlock etc.)
+        - dupl
 
   uniq-by-line: false
 

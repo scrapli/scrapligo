@@ -1,6 +1,6 @@
-Warning: Permanently added '[localhost]:22022' (ED25519) to the list of known hosts.
+Warning: Permanently added '[localhost]:22022' (ED25519) to the list of known hosts.
 (admin@localhost) Password: 
-Last login: Thu Mar 13 14:55:04 2025 from 192.168.65.1
+Last login: Fri Mar 21 23:13:19 2025 from 192.168.65.1
 eos1>
 eos1>
 eos1>enable
@@ -12,5 +12,3 @@ Pagination disabled.
 eos1#
 eos1#configure terminal
 eos1(config)#
-eos1(config)#end
-eos1#

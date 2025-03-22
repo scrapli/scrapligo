@@ -26,15 +26,35 @@ test-e2e-ci: ## Run e2e tests against "ci" test topology with race flag (count t
 cov:  ## Produce html coverage report
 	go tool cover -html=cover.out
 
-deploy-clab-full: ## Deploy "full" test topology
-	cd .clab && sudo clab deploy -t topo-full.yaml
+build-clab-launcher: ## Builds the clab launcher image
+	docker build \
+		-f e2e/clab/launcher/Dockerfile \
+		-t clab-launcher:latest \
+		e2e/clab/launcher
 
-destroy-clab-full: ## Destroy "full" test topology
-	cd .clab && sudo clab destroy -t topo-full.yaml
-
-deploy-clab-ci: ## Deploy "ci" test topology
-	cd .clab && sudo clab deploy -t topo-ci.yaml
-
-destroy-clab-ci: ## Destroy "ci" test topology
-	cd .clab && sudo clab destroy -t topo-ci.yaml
+run-clab: ## Runs the clab functional testing topo; uses the clab launcher to run nicely on darwin
+	docker network rm clab || true
+	docker network create \
+		--driver bridge \
+		--subnet=172.20.20.0/24 \
+		--gateway=172.20.20.1 \
+		--ipv6 \
+		--subnet=2001:172:20:20::/64 \
+		--gateway=2001:172:20:20::1 \
+		--opt com.docker.network.driver.mtu=65535 \
+		--label containerlab \
+		clab
+	docker run \
+		-d \
+		--rm \
+		--name clab-launcher \
+		--privileged \
+		--pid=host \
+		--stop-signal=SIGINT \
+		-v /var/run/docker.sock:/var/run/docker.sock \
+		-v /run/netns:/run/netns \
+		-v "$$(pwd)/e2e/clab:$$(pwd)/e2e/clab" \
+		-e "LAUNCHER_WORKDIR=$$(pwd)/e2e/clab" \
+		-e "HOST_ARCH=$$(uname -m)" \
+		clab-launcher:latest
 

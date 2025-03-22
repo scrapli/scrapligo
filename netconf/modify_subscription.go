@@ -8,6 +8,7 @@ import (
 
 func newModifySubscriptionOptions(options ...Option) *modifySubscriptionOptions {
 	o := &modifySubscriptionOptions{
+		stream:     DefaultStreamValue,
 		filterType: FilterTypeSubtree,
 	}
 
@@ -19,6 +20,7 @@ func newModifySubscriptionOptions(options ...Option) *modifySubscriptionOptions 
 }
 
 type modifySubscriptionOptions struct {
+	stream                string
 	filter                string
 	filterType            FilterType
 	filterNamespacePrefix string
@@ -32,6 +34,7 @@ type modifySubscriptionOptions struct {
 }
 
 // ModifySubscription executes a netconf modify-subscription rpc. Supported options:
+//   - WithStreamValue
 //   - WithFilter
 //   - WithFilterType
 //   - WithFilterNamespacePrefix
@@ -58,7 +61,7 @@ func (d *Driver) ModifySubscription(
 		&operationID,
 		&cancel,
 		id,
-		"stream", // TODO -- also are the start/stop optional or is at least one of those required?
+		loadedOptions.stream,
 		loadedOptions.filter,
 		loadedOptions.filterType.String(),
 		loadedOptions.filterNamespacePrefix,

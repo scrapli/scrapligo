@@ -1,11 +1,13 @@
 package netconf_test
 
 import (
+	"bytes"
+	"os"
+	"testing"
+
 	scrapligonetconf "github.com/scrapli/scrapligo/netconf"
 	scrapligooptions "github.com/scrapli/scrapligo/options"
 	scrapligotesthelper "github.com/scrapli/scrapligo/testhelper"
-	"os"
-	"testing"
 )
 
 const (
@@ -18,9 +20,12 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
-func getNetconf(t *testing.T, f string) *scrapligonetconf.Driver {
+func getDriver(t *testing.T, f string) *scrapligonetconf.Driver {
 	opts := []scrapligooptions.Option{
-		scrapligooptions.WithUsername("admin"),
+		// note that netconf-admin bypasses enable secret stuff, without this was getting
+		// permission denied committing things and such... but wanted to retain the enable
+		// secret stuff since its nice to validate default mode gets acquired and stuff
+		scrapligooptions.WithUsername("netconf-admin"),
 		scrapligooptions.WithPassword("admin"),
 		scrapligooptions.WithPort(22830),
 	}
@@ -52,19 +57,31 @@ func getNetconf(t *testing.T, f string) *scrapligonetconf.Driver {
 	return d
 }
 
-func closeNetconf(t *testing.T, n *scrapligonetconf.Driver, f string) {
-	if *scrapligotesthelper.Record {
-		p, m := n.GetPtr()
-		m.Shared.Free(p)
+func closeDriver(t *testing.T, d *scrapligonetconf.Driver) {
+	t.Helper()
 
-		return
+	// we simply free since we dont record/care about any closing bits
+	p, m := d.GetPtr()
+	m.Shared.Free(p)
+}
+
+func assertResult(t *testing.T, r *scrapligonetconf.Result, testGoldenPath string) {
+	cleanedActual := scrapligotesthelper.CleanNetconfOutput(t, r.Result)
+
+	// we can't just write the cleaned stuff to disk because then chunk sizes will be wrong if we
+	// just do the lazy cleanup method we are doing (and cant stop wont stop)
+	testGoldenContent := scrapligotesthelper.ReadFile(t, testGoldenPath)
+	cleanedGolden := scrapligotesthelper.CleanNetconfOutput(t, string(testGoldenContent))
+
+	if !bytes.Equal(cleanedActual, cleanedGolden) {
+		scrapligotesthelper.FailOutput(t, cleanedActual, cleanedGolden)
 	}
 
-	n.Close()
-
-	if !*scrapligotesthelper.Record {
-		return
-	}
-
-	scrapligotesthelper.WriteFile(t, f, scrapligotesthelper.ReadFile(t, f))
+	scrapligotesthelper.AssertEqual(t, 22830, r.Port)
+	scrapligotesthelper.AssertEqual(t, testHost, r.Host)
+	scrapligotesthelper.AssertNotDefault(t, r.StartTime)
+	scrapligotesthelper.AssertNotDefault(t, r.EndTime)
+	scrapligotesthelper.AssertNotDefault(t, r.ElapsedTimeSeconds)
+	scrapligotesthelper.AssertNotDefault(t, r.Host)
+	scrapligotesthelper.AssertNotDefault(t, r.ResultRaw)
 }

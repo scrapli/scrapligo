@@ -1,5 +1,11 @@
 package netconf
 
+const (
+	// DefaultStreamValue is the default value for "stream" field on create/establish/modify
+	// subscription rpcs.
+	DefaultStreamValue = "NETCONF"
+)
+
 // Option defines a functional option for a netconf rpc.
 type Option func(o any)
 
@@ -223,6 +229,20 @@ func WithOrigin() Option {
 		switch to := o.(type) {
 		case *getDataOptions:
 			to.withOrigin = true
+		}
+	}
+}
+
+// WithStreamValue apply a stream value for the rpc.
+func WithStreamValue(s string) Option {
+	return func(o any) {
+		switch to := o.(type) {
+		case *createSubscriptionOptions:
+			to.stream = s
+		case *establishSubscriptionOptions:
+			to.stream = s
+		case *modifySubscriptionOptions:
+			to.stream = s
 		}
 	}
 }

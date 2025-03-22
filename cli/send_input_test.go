@@ -1,7 +1,6 @@
 package cli_test
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"path/filepath"
@@ -79,12 +78,13 @@ func TestSendInput(t *testing.T) {
 			defer cancel()
 
 			d := getDriver(t, testFixturePath)
-			defer closeDriver(t, d, testFixturePath)
 
 			_, err = d.Open(ctx)
 			if err != nil {
 				t.Fatal(err)
 			}
+
+			defer closeDriver(t, d)
 
 			if c.postOpenF != nil {
 				c.postOpenF(t, d)
@@ -99,22 +99,10 @@ func TestSendInput(t *testing.T) {
 				scrapligotesthelper.WriteFile(
 					t,
 					testGoldenPath,
-					[]byte(r.Result),
+					scrapligotesthelper.CleanCliOutput(t, r.Result),
 				)
 			} else {
-				testGoldenContent := scrapligotesthelper.ReadFile(t, testGoldenPath)
-
-				if !bytes.Equal([]byte(r.Result), testGoldenContent) {
-					scrapligotesthelper.FailOutput(t, r.Result, testGoldenContent)
-				}
-
-				scrapligotesthelper.AssertEqual(t, 22, r.Port)
-				scrapligotesthelper.AssertEqual(t, testHost, r.Host)
-				scrapligotesthelper.AssertNotDefault(t, r.StartTime)
-				scrapligotesthelper.AssertNotDefault(t, r.EndTime)
-				scrapligotesthelper.AssertNotDefault(t, r.ElapsedTimeSeconds)
-				scrapligotesthelper.AssertNotDefault(t, r.Host)
-				scrapligotesthelper.AssertNotDefault(t, r.ResultRaw)
+				assertResult(t, r, testGoldenPath)
 			}
 		})
 	}

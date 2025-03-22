@@ -8,6 +8,7 @@ import (
 
 func newCreateSubscriptionOptions(options ...Option) *createSubscriptionOptions {
 	o := &createSubscriptionOptions{
+		stream:     DefaultStreamValue,
 		filterType: FilterTypeSubtree,
 	}
 
@@ -19,6 +20,7 @@ func newCreateSubscriptionOptions(options ...Option) *createSubscriptionOptions 
 }
 
 type createSubscriptionOptions struct {
+	stream                string
 	filter                string
 	filterType            FilterType
 	filterNamespacePrefix string
@@ -28,6 +30,7 @@ type createSubscriptionOptions struct {
 }
 
 // CreateSubscription executes a netconf create-subscription rpc. Supported options:
+//   - WithStreamValue
 //   - WithFilter
 //   - WithFilterType
 //   - WithFilterNamespacePrefix
@@ -48,7 +51,7 @@ func (d *Driver) CreateSubscription(
 		d.ptr,
 		&operationID,
 		&cancel,
-		"stream", // TODO -- also are the start/stop optional or is at least one of those required?
+		loadedOptions.stream,
 		loadedOptions.filter,
 		loadedOptions.filterType.String(),
 		loadedOptions.filterNamespacePrefix,

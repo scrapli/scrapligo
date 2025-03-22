@@ -1,7 +1,6 @@
 package netconf_test
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"path/filepath"
@@ -43,13 +42,14 @@ func TestGetConfig(t *testing.T) {
 			ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 			defer cancel()
 
-			n := getNetconf(t, testFixturePath)
-			defer closeNetconf(t, n, testFixturePath)
+			n := getDriver(t, testFixturePath)
 
 			_, err = n.Open(ctx)
 			if err != nil {
 				t.Fatal(err)
 			}
+
+			defer closeDriver(t, n)
 
 			r, err := n.GetConfig(ctx, c.options...)
 			if err != nil {
@@ -60,22 +60,10 @@ func TestGetConfig(t *testing.T) {
 				scrapligotesthelper.WriteFile(
 					t,
 					testGoldenPath,
-					[]byte(r.Result),
+					scrapligotesthelper.CleanNetconfOutput(t, r.Result),
 				)
 			} else {
-				testGoldenContent := scrapligotesthelper.ReadFile(t, testGoldenPath)
-
-				if !bytes.Equal([]byte(r.Result), testGoldenContent) {
-					scrapligotesthelper.FailOutput(t, r.Result, testGoldenContent)
-				}
-
-				scrapligotesthelper.AssertEqual(t, 22830, r.Port)
-				scrapligotesthelper.AssertEqual(t, testHost, r.Host)
-				scrapligotesthelper.AssertNotDefault(t, r.StartTime)
-				scrapligotesthelper.AssertNotDefault(t, r.EndTime)
-				scrapligotesthelper.AssertNotDefault(t, r.ElapsedTimeSeconds)
-				scrapligotesthelper.AssertNotDefault(t, r.Host)
-				scrapligotesthelper.AssertNotDefault(t, r.ResultRaw)
+				assertResult(t, r, testGoldenPath)
 			}
 		})
 	}

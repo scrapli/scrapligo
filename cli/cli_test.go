@@ -1,6 +1,7 @@
 package cli_test
 
 import (
+	"bytes"
 	"os"
 	"testing"
 
@@ -53,19 +54,28 @@ func getDriver(t *testing.T, f string) *scrapligocli.Driver {
 	return d
 }
 
-func closeDriver(t *testing.T, d *scrapligocli.Driver, f string) {
-	if *scrapligotesthelper.Record {
-		p, m := d.GetPtr()
-		m.Shared.Free(p)
+func closeDriver(t *testing.T, d *scrapligocli.Driver) {
+	t.Helper()
 
-		return
+	// we simply free since we dont record/care about any closing bits
+	p, m := d.GetPtr()
+	m.Shared.Free(p)
+}
+
+func assertResult(t *testing.T, r *scrapligocli.Result, testGoldenPath string) {
+	cleanedActual := scrapligotesthelper.CleanCliOutput(t, r.Result)
+
+	testGoldenContent := scrapligotesthelper.ReadFile(t, testGoldenPath)
+
+	if !bytes.Equal(cleanedActual, testGoldenContent) {
+		scrapligotesthelper.FailOutput(t, cleanedActual, testGoldenContent)
 	}
 
-	d.Close()
-
-	if !*scrapligotesthelper.Record {
-		return
-	}
-
-	scrapligotesthelper.WriteFile(t, f, scrapligotesthelper.ReadFile(t, f))
+	scrapligotesthelper.AssertEqual(t, 22, r.Port)
+	scrapligotesthelper.AssertEqual(t, testHost, r.Host)
+	scrapligotesthelper.AssertNotDefault(t, r.StartTime)
+	scrapligotesthelper.AssertNotDefault(t, r.EndTime)
+	scrapligotesthelper.AssertNotDefault(t, r.ElapsedTimeSeconds)
+	scrapligotesthelper.AssertNotDefault(t, r.Host)
+	scrapligotesthelper.AssertNotDefault(t, r.ResultRaw)
 }
