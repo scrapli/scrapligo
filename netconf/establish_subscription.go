@@ -2,6 +2,7 @@ package netconf
 
 import (
 	"context"
+	"time"
 
 	scrapligoerrors "github.com/scrapli/scrapligo/errors"
 )
@@ -55,20 +56,23 @@ func (d *Driver) EstablishSubscription(
 
 	loadedOptions := newEstablishSubscriptionOptions(options...)
 
+	// TODO ideally these are ordered how they used to be (and how the options are in docstring)
+	//  just from a sanity perspective, buuuuut, that caused all sorts of issues w/ zig not "seeing"
+	//  values in the right place... due to alignment maybe?
 	status := d.ffiMap.Netconf.EstablishSubscription(
 		d.ptr,
 		&operationID,
 		&cancel,
-		loadedOptions.stream,
-		loadedOptions.filter,
-		loadedOptions.filterType.String(),
-		loadedOptions.filterNamespacePrefix,
-		loadedOptions.filterNamespace,
 		loadedOptions.period,
 		loadedOptions.stopTime,
 		loadedOptions.dscp,
 		loadedOptions.weighting,
 		loadedOptions.dependency,
+		loadedOptions.stream,
+		loadedOptions.filter,
+		loadedOptions.filterType.String(),
+		loadedOptions.filterNamespacePrefix,
+		loadedOptions.filterNamespace,
 		loadedOptions.encoding,
 	)
 	if status != 0 {
@@ -77,6 +81,7 @@ func (d *Driver) EstablishSubscription(
 			nil,
 		)
 	}
+	time.Sleep(time.Minute)
 
 	return d.getResult(ctx, &cancel, operationID)
 }

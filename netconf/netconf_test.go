@@ -5,13 +5,15 @@ import (
 	"os"
 	"testing"
 
+	scrapligologging "github.com/scrapli/scrapligo/logging"
 	scrapligonetconf "github.com/scrapli/scrapligo/netconf"
 	scrapligooptions "github.com/scrapli/scrapligo/options"
 	scrapligotesthelper "github.com/scrapli/scrapligo/testhelper"
 )
 
 const (
-	testHost = "localhost"
+	testHost    = "localhost"
+	altTestHost = "devnetsandboxiosxe.cisco.com"
 )
 
 func TestMain(m *testing.M) {
@@ -48,6 +50,42 @@ func getDriver(t *testing.T, f string) *scrapligonetconf.Driver {
 
 	d, err := scrapligonetconf.NewDriver(
 		testHost,
+		opts...,
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return d
+}
+
+func getAltDriver(t *testing.T, f string) *scrapligonetconf.Driver {
+	// TODO - in progress for testing stuff w/ devnet sandbox iosxe for stuff that eos/srl dont
+	//  support (looks like at least some subscription stuff to start, though didnt look close)
+	opts := []scrapligooptions.Option{
+		scrapligooptions.WithUsername("admin"),
+		scrapligooptions.WithPassword("C1sco12345"),
+		scrapligooptions.WithLoggerCallback(scrapligologging.FfiLogger),
+	}
+
+	if *scrapligotesthelper.Record {
+		opts = append(
+			opts,
+			scrapligooptions.WithSessionRecorderPath(f),
+		)
+	} else {
+		opts = append(
+			opts,
+			scrapligooptions.WithTransportTest(),
+			scrapligooptions.WithTestTransportF(f),
+			scrapligooptions.WithReadSize(1),
+			// see libscrapli notes in integration netconf tests
+			scrapligooptions.WithOperationMaxSearchDepth(32),
+		)
+	}
+
+	d, err := scrapligonetconf.NewDriver(
+		altTestHost,
 		opts...,
 	)
 	if err != nil {
