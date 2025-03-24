@@ -40,6 +40,8 @@ func TestEnterMode(t *testing.T) {
 			description: "enter mode with multi stage change 'escalating' the mode'",
 			platform:    scrapligocli.AristaEos.String(),
 			postOpenF: func(t *testing.T, d *scrapligocli.Driver) {
+				t.Helper()
+
 				ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 				defer cancel()
 
@@ -54,6 +56,8 @@ func TestEnterMode(t *testing.T) {
 			description: "enter mode with multi stage change 'deescalating' the mode'",
 			platform:    scrapligocli.AristaEos.String(),
 			postOpenF: func(t *testing.T, d *scrapligocli.Driver) {
+				t.Helper()
+				
 				ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 				defer cancel()
 

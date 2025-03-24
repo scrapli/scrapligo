@@ -15,6 +15,8 @@ const (
 
 // AssertNotDefault asserts `v` is not a default value for that type.
 func AssertNotDefault(t *testing.T, v any) {
+	t.Helper()
+
 	switch typedV := v.(type) {
 	case int, int16, int32, int64, uint, uint8, uint16, uint32, uint64, float32, float64:
 		if typedV == 0 {
@@ -39,6 +41,8 @@ func AssertNotDefault(t *testing.T, v any) {
 
 // AssertEqual asserts a and b are equal.
 func AssertEqual[T comparable](t *testing.T, a, b T) {
+	t.Helper()
+
 	if a != b {
 		t.Fatalf("expected '%v', got '%v'", a, b)
 	}

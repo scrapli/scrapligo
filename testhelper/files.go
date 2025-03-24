@@ -9,6 +9,8 @@ import (
 
 // ReadFile reads the file or fatals.
 func ReadFile(t *testing.T, f string) []byte {
+	t.Helper()
+
 	b, err := os.ReadFile(f) //nolint: gosec
 	if err != nil {
 		t.Fatal(err)
@@ -20,6 +22,8 @@ func ReadFile(t *testing.T, f string) []byte {
 // WriteFile writes the content to the file or fatals.
 // content.
 func WriteFile(t *testing.T, f string, content []byte) {
+	t.Helper()
+
 	err := os.WriteFile(
 		f,
 		content,

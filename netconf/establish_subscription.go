@@ -2,8 +2,6 @@ package netconf
 
 import (
 	"context"
-	"time"
-
 	scrapligoerrors "github.com/scrapli/scrapligo/errors"
 )
 
@@ -81,7 +79,6 @@ func (d *Driver) EstablishSubscription(
 			nil,
 		)
 	}
-	time.Sleep(time.Minute)
 
 	return d.getResult(ctx, &cancel, operationID)
 }

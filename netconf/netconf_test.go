@@ -23,6 +23,8 @@ func TestMain(m *testing.M) {
 }
 
 func getDriver(t *testing.T, f string) *scrapligonetconf.Driver {
+	t.Helper()
+
 	opts := []scrapligooptions.Option{
 		// note that netconf-admin bypasses enable secret stuff, without this was getting
 		// permission denied committing things and such... but wanted to retain the enable
@@ -60,6 +62,8 @@ func getDriver(t *testing.T, f string) *scrapligonetconf.Driver {
 }
 
 func getAltDriver(t *testing.T, f string) *scrapligonetconf.Driver {
+	t.Helper()
+
 	// TODO - in progress for testing stuff w/ devnet sandbox iosxe for stuff that eos/srl dont
 	//  support (looks like at least some subscription stuff to start, though didnt look close)
 	opts := []scrapligooptions.Option{
@@ -104,6 +108,8 @@ func closeDriver(t *testing.T, d *scrapligonetconf.Driver) {
 }
 
 func assertResult(t *testing.T, r *scrapligonetconf.Result, testGoldenPath string) {
+	t.Helper()
+
 	cleanedActual := scrapligotesthelper.CleanNetconfOutput(t, r.Result)
 
 	// we can't just write the cleaned stuff to disk because then chunk sizes will be wrong if we

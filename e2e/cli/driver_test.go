@@ -75,6 +75,8 @@ func shouldSkip(platform, transport string) bool {
 }
 
 func getDriver(t *testing.T, platform, transportName string) *scrapligocli.Driver {
+	t.Helper()
+	
 	var host string
 
 	opts := []scrapligooptions.Option{
@@ -157,7 +159,7 @@ func getDriver(t *testing.T, platform, transportName string) *scrapligocli.Drive
 }
 
 func closeDriver(t *testing.T, d *scrapligocli.Driver) {
-	_ = t
+	t.Helper()
 
 	d.Close()
 }

@@ -21,6 +21,8 @@ func TestMain(m *testing.M) {
 }
 
 func getDriver(t *testing.T, f string) *scrapligocli.Driver {
+	t.Helper()
+
 	opts := []scrapligooptions.Option{
 		scrapligooptions.WithUsername("admin"),
 		scrapligooptions.WithPassword("admin"),
@@ -63,6 +65,8 @@ func closeDriver(t *testing.T, d *scrapligocli.Driver) {
 }
 
 func assertResult(t *testing.T, r *scrapligocli.Result, testGoldenPath string) {
+	t.Helper()
+
 	cleanedActual := scrapligotesthelper.CleanCliOutput(t, r.Result)
 
 	testGoldenContent := scrapligotesthelper.ReadFile(t, testGoldenPath)

@@ -34,6 +34,8 @@ func TestEnterMode(t *testing.T) {
 		"multi-stage-change-escalate": {
 			description: "enter mode with multi stage change 'escalating' the mode'",
 			postOpenF: func(t *testing.T, d *scrapligocli.Driver) {
+				t.Helper()
+
 				ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 				defer cancel()
 
@@ -47,6 +49,8 @@ func TestEnterMode(t *testing.T) {
 		"multi-stage-change-deescalate": {
 			description: "enter mode with multi stage change 'deescalating' the mode'",
 			postOpenF: func(t *testing.T, d *scrapligocli.Driver) {
+				t.Helper()
+
 				ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 				defer cancel()
 

@@ -36,6 +36,8 @@ func TestSendInput(t *testing.T) {
 		"simple-already-in-non-default-mode": {
 			description: "simple input executed in non-default mode we are already in",
 			postOpenF: func(t *testing.T, d *scrapligocli.Driver) {
+				t.Helper()
+
 				ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 				defer cancel()
 

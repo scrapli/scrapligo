@@ -57,10 +57,10 @@ func TestEstablishSubscription(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			//_, err = n.DeleteSubscription(ctx, c.options...)
-			//if err != nil {
-			//	t.Fatal(err)
-			//}
+			_, err = n.DeleteSubscription(ctx, 1, c.options...)
+			if err != nil {
+				t.Fatal(err)
+			}
 
 			if *scrapligotesthelper.Update {
 				scrapligotesthelper.WriteFile(
