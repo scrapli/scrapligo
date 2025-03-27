@@ -5,7 +5,6 @@ import (
 	"os"
 	"testing"
 
-	scrapligologging "github.com/scrapli/scrapligo/logging"
 	scrapligonetconf "github.com/scrapli/scrapligo/netconf"
 	scrapligooptions "github.com/scrapli/scrapligo/options"
 	scrapligotesthelper "github.com/scrapli/scrapligo/testhelper"
@@ -13,7 +12,7 @@ import (
 
 const (
 	testHost    = "localhost"
-	altTestHost = "devnetsandboxiosxe.cisco.com"
+	altTestHost = "10.201.0.2"
 )
 
 func TestMain(m *testing.M) {
@@ -68,8 +67,8 @@ func getAltDriver(t *testing.T, f string) *scrapligonetconf.Driver {
 	//  support (looks like at least some subscription stuff to start, though didnt look close)
 	opts := []scrapligooptions.Option{
 		scrapligooptions.WithUsername("admin"),
-		scrapligooptions.WithPassword("C1sco12345"),
-		scrapligooptions.WithLoggerCallback(scrapligologging.FfiLogger),
+		scrapligooptions.WithPassword("admin"),
+		// scrapligooptions.WithLoggerCallback(scrapligologging.FfiLogger),
 	}
 
 	if *scrapligotesthelper.Record {
@@ -121,8 +120,8 @@ func assertResult(t *testing.T, r *scrapligonetconf.Result, testGoldenPath strin
 		scrapligotesthelper.FailOutput(t, cleanedActual, cleanedGolden)
 	}
 
-	scrapligotesthelper.AssertEqual(t, 22830, r.Port)
-	scrapligotesthelper.AssertEqual(t, testHost, r.Host)
+	scrapligotesthelper.AssertIn(t, r.Port, []uint16{830, 22830})
+	scrapligotesthelper.AssertIn(t, r.Host, []string{testHost, altTestHost})
 	scrapligotesthelper.AssertNotDefault(t, r.StartTime)
 	scrapligotesthelper.AssertNotDefault(t, r.EndTime)
 	scrapligotesthelper.AssertNotDefault(t, r.ElapsedTimeSeconds)

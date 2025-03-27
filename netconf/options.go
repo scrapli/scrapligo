@@ -61,6 +61,10 @@ func WithFilter(s string) Option {
 			to.filter = s
 		case *getOptions:
 			to.filter = s
+		case *createSubscriptionOptions:
+			to.filter = s
+		case *establishSubscriptionOptions:
+			to.filter = s
 		}
 	}
 }

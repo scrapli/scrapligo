@@ -245,7 +245,7 @@ func (d *Driver) getResult(
 ) (*Result, error) {
 	var done bool
 
-	var resultRawSize, resultSize, resultFailedIndicatorSize, errSize uint64
+	var inputSize, resultRawSize, resultSize, resultFailedIndicatorSize, errSize uint64
 
 	minNs := scrapligoconstants.DefaultReadDelayMinNs
 
@@ -278,6 +278,7 @@ func (d *Driver) getResult(
 			d.ptr,
 			operationID,
 			&done,
+			&inputSize,
 			&resultRawSize,
 			&resultSize,
 			&resultFailedIndicatorSize,
@@ -296,6 +297,8 @@ func (d *Driver) getResult(
 
 	var resultStartTime, resultEndTime uint64
 
+	input := make([]byte, inputSize)
+
 	resultRaw := make([]byte, resultRawSize)
 
 	result := make([]byte, resultSize)
@@ -309,6 +312,7 @@ func (d *Driver) getResult(
 		operationID,
 		&resultStartTime,
 		&resultEndTime,
+		&input,
 		&resultRaw,
 		&result,
 		&resultFailedWhenIndicator,
@@ -323,7 +327,7 @@ func (d *Driver) getResult(
 	}
 
 	return NewResult(
-		"",
+		string(input),
 		d.host,
 		*d.options.Port,
 		resultStartTime,

@@ -1,0 +1,1 @@
+<rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="101"><rpc-error><error-type>application</error-type><error-tag>invalid-value</error-tag><error-severity>error</error-severity><error-message>Parameter &#34;session-id&#34; has invalid value: 1</error-message></rpc-error></rpc-reply>

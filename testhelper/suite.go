@@ -48,6 +48,19 @@ func AssertEqual[T comparable](t *testing.T, a, b T) {
 	}
 }
 
+// AssertIn asserts a is in b.
+func AssertIn[T comparable](t *testing.T, a T, b []T) {
+	t.Helper()
+
+	for _, bb := range b {
+		if a == bb {
+			return
+		}
+	}
+
+	t.Fatalf("expected '%v', got '%v'", a, b)
+}
+
 // FailOutput is a simple func to nicely print actual vs expected output when a test fails.
 func FailOutput(t *testing.T, actual, expected any) {
 	t.Helper()

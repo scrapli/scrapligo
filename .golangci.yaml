@@ -65,10 +65,8 @@ linters:
         path: e2e/
       - linters:
           - dupl
+          - lll
         path: _test\.go
-      - linters:
-          - goconst
-        path: (.+)_test\.go
     paths:
       - private
       - .private

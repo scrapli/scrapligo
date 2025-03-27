@@ -57,7 +57,7 @@ func TestEnterMode(t *testing.T) {
 			platform:    scrapligocli.AristaEos.String(),
 			postOpenF: func(t *testing.T, d *scrapligocli.Driver) {
 				t.Helper()
-				
+
 				ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 				defer cancel()
 

@@ -58,6 +58,7 @@ type CliMapping struct {
 		driverPtr uintptr,
 		operationID uint32,
 		done *bool,
+		inputSize,
 		resultRawSize,
 		resultSize,
 		resultFailedIndicatorSize,
@@ -71,6 +72,7 @@ type CliMapping struct {
 		operationID uint32,
 		resultStartTime *uint64,
 		resultEndTime *uint64,
+		input,
 		resultRaw,
 		result,
 		resultFailedIndicator,
@@ -138,6 +140,7 @@ type NetconfMapping struct {
 		driverPtr uintptr,
 		operationID uint32,
 		done *bool,
+		inputSize,
 		resultRawSize,
 		resultSize *uint64,
 	) int
@@ -147,6 +150,7 @@ type NetconfMapping struct {
 		operationID uint32,
 		resultStartTime *uint64,
 		resultEndTime *uint64,
+		input,
 		resultRaw,
 		result *[]byte,
 	) int
