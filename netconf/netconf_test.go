@@ -11,8 +11,7 @@ import (
 )
 
 const (
-	testHost    = "localhost"
-	altTestHost = "10.201.0.2"
+	testHost = "localhost"
 )
 
 func TestMain(m *testing.M) {
@@ -30,7 +29,7 @@ func getDriver(t *testing.T, f string) *scrapligonetconf.Driver {
 		// secret stuff since its nice to validate default mode gets acquired and stuff
 		scrapligooptions.WithUsername("root"),
 		scrapligooptions.WithPassword("password"),
-		scrapligooptions.WithPort(23830),
+		scrapligooptions.WithPort(830),
 	}
 
 	if *scrapligotesthelper.Record {
@@ -82,8 +81,8 @@ func assertResult(t *testing.T, r *scrapligonetconf.Result, testGoldenPath strin
 		scrapligotesthelper.FailOutput(t, cleanedActual, cleanedGolden)
 	}
 
-	scrapligotesthelper.AssertIn(t, r.Port, []uint16{830, 22830})
-	scrapligotesthelper.AssertIn(t, r.Host, []string{testHost, altTestHost})
+	scrapligotesthelper.AssertEqual(t, r.Port, 830)
+	scrapligotesthelper.AssertEqual(t, r.Host, testHost)
 	scrapligotesthelper.AssertNotDefault(t, r.StartTime)
 	scrapligotesthelper.AssertNotDefault(t, r.EndTime)
 	scrapligotesthelper.AssertNotDefault(t, r.ElapsedTimeSeconds)
