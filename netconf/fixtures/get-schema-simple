@@ -1,407 +1,494 @@
-Warning: Permanently added '[localhost]:22830' (ED25519) to the list of known hosts.
-(netconf-admin@localhost) Password: 
-<hello xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"><capabilities><capability>urn:ietf:params:netconf:base:1.0</capability><capability>urn:ietf:params:netconf:base:1.1</capability><capability>urn:ietf:params:xml:ns:netconf:base:1.0</capability><capability>urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring</capability><capability>urn:ietf:params:netconf:capability:writable-running:1.0</capability><capability>urn:ietf:params:netconf:capability:candidate:1.0</capability><capability>urn:ietf:params:netconf:capability:url:1.0?scheme=file,flash,ftp,http</capability><capability>http://arista.com/yang/openconfig/local-routing/deviations?module=arista-local-routing-deviations&amp;revision=2024-07-16</capability><capability>http://arista.com/yang/experimental/eos?module=arista-exp-eos&amp;revision=2016-11-09</capability><capability>http://openconfig.net/yang/openconfig-isis?module=openconfig-isis&amp;revision=2024-02-28</capability><capability>http://openconfig.net/yang/macsec?module=openconfig-macsec&amp;revision=2023-08-03</capability><capability>http://openconfig.net/yang/segment-routing-types?module=openconfig-segment-routing-types&amp;revision=2020-02-04</capability><capability>http://openconfig.net/yang/aaa/types?module=openconfig-aaa-types&amp;revision=2018-11-21</capability><capability>urn:ietf:params:xml:ns:yang:ietf-yang-types?module=ietf-yang-types&amp;revision=2013-07-15</capability><capability>http://arista.com/yang/experimental/eos/arista-fhrp-lib-varp-status?module=arista-fhrp-lib-varp-status&amp;revision=2023-03-13</capability><capability>http://openconfig.net/yang/vlan?module=openconfig-vlan&amp;revision=2023-02-07</capability><capability>http://arista.com/yang/openconfig/flex-algo/deviations?module=arista-flex-algo-deviations&amp;revision=2024-03-01</capability><capability>http://arista.com/yang/experimental/eos/l2protocolforwarding?module=arista-exp-eos-l2protocolforwarding&amp;revision=2022-08-18</capability><capability>http://arista.com/yang/openconfig/qos/notsupported-deviations?module=arista-qos-notsupported-deviations&amp;revision=2024-12-11</capability><capability>http://openconfig.net/yang/ospfv2?module=openconfig-ospfv2&amp;revision=2024-06-17</capability><capability>urn:ietf:params:xml:ns:netconf:base:1.0?module=ietf-netconf&amp;revision=2011-06-01</capability><capability>http://openconfig.net/yang/pim/types?module=openconfig-pim-types&amp;revision=2018-11-21</capability><capability>http://openconfig.net/yang/system/logging?module=openconfig-system-logging&amp;revision=2024-08-20</capability><capability>http://arista.com/yang/cli?module=arista-cli&amp;revision=2020-02-11</capability><capability>http://arista.com/yang/experimental/eos/arista-ebra-vlan-tag?module=arista-ebra-vlan-tag&amp;revision=2021-10-20</capability><capability>http://arista.com/yang/openconfig/network-instance/deviations?module=arista-vlan-deviations&amp;revision=2020-11-30</capability><capability>http://arista.com/yang/experimental/eos/arista-nat-nat?module=arista-nat-nat&amp;revision=2022-03-28</capability><capability>http://arista.com/yang/experimental/eos/arista-ebra-intf-encap?module=arista-ebra-intf-encap&amp;revision=2021-10-20</capability><capability>http://openconfig.net/yang/igmp/types?module=openconfig-igmp-types&amp;revision=2018-11-21</capability><capability>http://arista.com/yang/experimental/eos/arista-interfaces-rates?module=arista-interfaces-rates&amp;revision=2024-04-15</capability><capability>http://openconfig.net/yang/programming-errors?module=openconfig-programming-errors&amp;revision=2022-10-11</capability><capability>http://arista.com/yang/experimental/eos/arista-ale-counters-open-config-hardware-drop-counters?module=arista-ale-counters-open-config-hardware-drop-counters&amp;revision=2023-01-01</capability><capability>http://arista.com/yang/openconfig/mpls/augments?module=arista-mpls-augments&amp;revision=2024-07-19</capability><capability>http://arista.com/yang/openconfig/network-instance/vlan/augments?module=arista-vlan-augments&amp;revision=2020-11-30</capability><capability>http://arista.com/yang/experimental/eos/arista-rcf-rcf-open-config?module=arista-rcf-rcf-open-config&amp;revision=2023-09-12</capability><capability>http://openconfig.net/yang/license?module=openconfig-license&amp;revision=2020-04-22</capability><capability>http://arista.com/yang/experimental/eos/arista-arnet-conn-tuple?module=arista-arnet-conn-tuple&amp;revision=2022-03-28</capability><capability>http://arista.com/yang/openconfig/aft/augments?module=arista-aft-augments&amp;revision=2024-04-26</capability><capability>http://arista.com/yang/openconfig/sflow/augments?module=arista-sflow-augments&amp;revision=2023-04-26</capability><capability>http://arista.com/yang/openconfig/bgp/augments?module=arista-bgp-augments&amp;revision=2024-06-08</capability><capability>http://arista.com/yang/experimental/eos/arista-fhrp-fhrp-config?module=arista-fhrp-fhrp-config&amp;revision=2023-02-13</capability><capability>http://openconfig.net/yang/aaa?module=openconfig-aaa&amp;revision=2022-07-29</capability><capability>http://arista.com/yang/cert/gnoi-cert?module=arista-gnoi-cert&amp;revision=2018-01-15</capability><capability>http://openconfig.net/yang/local-routing?module=openconfig-local-routing&amp;revision=2022-11-01</capability><capability>http://openconfig.net/yang/platform/healthz?module=openconfig-platform-healthz&amp;revision=2023-04-11</capability><capability>http://arista.com/yang/openconfig/telemetry/augments?module=arista-telemetry-augments&amp;revision=2023-01-24</capability><capability>http://openconfig.net/yang/header-fields?module=openconfig-packet-match&amp;revision=2023-03-01</capability><capability>http://arista.com/yang/openconfig/mpls/deviations?module=arista-mpls-deviations&amp;revision=2024-03-30</capability><capability>http://openconfig.net/yang/platform/controller-card?module=openconfig-platform-controller-card&amp;revision=2024-04-10</capability><capability>http://arista.com/yang/openconfig/terminal-device/notsupported-deviations?module=arista-terminal-device-notsupported-deviations&amp;revision=2024-12-11</capability><capability>http://arista.com/yang/experimental/eos/arista-acl-spec?module=arista-acl-spec&amp;revision=2022-03-28</capability><capability>http://openconfig.net/yang/policy-types?module=openconfig-policy-types&amp;revision=2024-05-14</capability><capability>http://openconfig.net/yang/spanning-tree?module=openconfig-spanning-tree&amp;revision=2019-11-28</capability><capability>http://openconfig.net/yang/qos?module=openconfig-qos&amp;revision=2023-10-13</capability><capability>http://arista.com/yang/openconfig/lacp/augments?module=arista-lacp-augments&amp;revision=2020-11-30</capability><capability>http://openconfig.net/yang/hercules/interfaces?module=openconfig-hercules-interfaces&amp;revision=2018-06-01</capability><capability>http://arista.com/yang/openconfig/lldp/augments?module=arista-lldp-augments&amp;revision=2020-11-30</capability><capability>http://openconfig.net/yang/qos-types?module=openconfig-qos-types&amp;revision=2018-11-21</capability><capability>http://arista.com/yang/openconfig/isis/deviations?module=arista-isis-deviations&amp;revision=2024-09-19</capability><capability>http://arista.com/yang/experimental/eos/arista-ale-counters-open-config-fap-fe-serdes-info-augment?module=arista-ale-counters-open-config-fap-fe-serdes-info-augment&amp;revision=2024-08-22</capability><capability>http://arista.com/yang/openconfig/acl/deviations?module=arista-acl-deviations&amp;revision=2023-03-06</capability><capability>https://github.com/openconfig/gnsi/authz/yang?module=gnsi-authz&amp;revision=2023-09-13</capability><capability>http://arista.com/yang/experimental/eos/arista-arnet-rate?module=arista-arnet-rate&amp;revision=2023-08-15</capability><capability>https://arista.com/fmp/segmentation.v1?module=arista-segmentation.v1&amp;revision=2020-04-27</capability><capability>http://openconfig.net/yang/alarms/types?module=openconfig-alarm-types&amp;revision=2018-11-21</capability><capability>http://arista.com/yang/openconfig/qos/augments?module=arista-qos-augments&amp;revision=2020-11-30</capability><capability>http://arista.com/yang/openconfig/bfd/deviations?module=arista-bfd-deviations&amp;revision=2020-11-30</capability><capability>http://openconfig.net/yang/telemetry-types?module=openconfig-telemetry-types&amp;revision=2018-11-21</capability><capability>https://github.com/openconfig/gnsi/credentialz/yang?module=gnsi-credentialz&amp;revision=2024-01-01</capability><capability>http://openconfig.net/yang/oc-keychain?module=openconfig-keychain&amp;revision=2024-05-30</capability><capability>http://arista.com/yang/openconfig/routing-policy/notsupported-deviations?module=arista-routing-policy-notsupported-deviations&amp;revision=2024-12-11</capability><capability>http://openconfig.net/yang/platform/port?module=openconfig-platform-port&amp;revision=2023-03-22</capability><capability>http://arista.com/yang/openconfig/system/deviations?module=arista-system-deviations&amp;revision=2023-03-14</capability><capability>http://openconfig.net/yang/p4rt?module=openconfig-p4rt&amp;revision=2023-12-13</capability><capability>http://openconfig.net/yang/poe?module=openconfig-if-poe&amp;revision=2018-11-21</capability><capability>http://arista.com/yang/openconfig/system/augments?module=arista-system-augments&amp;revision=2024-07-15</capability><capability>http://openconfig.net/yang/pim?module=openconfig-pim&amp;revision=2023-03-06</capability><capability>http://openconfig.net/yang/openconfig-ext?module=openconfig-extensions&amp;revision=2022-10-05</capability><capability>http://openconfig.net/yang/system/procmon?module=openconfig-procmon&amp;revision=2019-03-15</capability><capability>http://openconfig.net/yang/interfaces/tunnel?module=openconfig-if-tunnel&amp;revision=2018-11-21</capability><capability>http://arista.com/yang/experimental/eos/arista-ebra-vlan-tpid?module=arista-ebra-vlan-tpid&amp;revision=2021-10-20</capability><capability>http://openconfig.net/yang/aft-summary?module=openconfig-aft-summary&amp;revision=2024-01-12</capability><capability>http://openconfig.net/yang/evpn?module=openconfig-evpn&amp;revision=2024-08-14</capability><capability>http://arista.com/yang/experimental/eos/qos/config?module=arista-exp-eos-qos-config&amp;revision=2022-10-31</capability><capability>http://arista.com/yang/openconfig/relay-agent/deviations?module=arista-relay-agent-deviations&amp;revision=2023-11-14</capability><capability>http://arista.com/yang/openconfig/defined-sets/notsupported-deviations?module=arista-defined-sets-notsupported-deviations&amp;revision=2024-12-11</capability><capability>http://openconfig.net/yang/platform/linecard?module=openconfig-platform-linecard&amp;revision=2024-04-12</capability><capability>http://arista.com/yang/experimental/eos/evpn?module=arista-exp-eos-evpn&amp;revision=2020-12-07</capability><capability>http://arista.com/yang/openconfig/lldp/notsupported-deviations?module=arista-lldp-notsupported-deviations&amp;revision=2024-12-11</capability><capability>http://arista.com/yang/vlan-translation?module=vlan-translation&amp;revision=2020-08-10</capability><capability>http://arista.com/yang/openconfig/platform/augments?module=arista-platform-augments&amp;revision=2024-07-19</capability><capability>http://openconfig.net/yang/openflow/types?module=openconfig-openflow-types&amp;revision=2022-05-24</capability><capability>http://arista.com/yang/experimental/multicast?module=arista-exp-eos-multicast&amp;revision=2017-10-20</capability><capability>http://arista.com/yang/openconfig/policy/deviations?module=arista-rpol-deviations&amp;revision=2024-09-12</capability><capability>http://openconfig.net/yang/messages?module=openconfig-messages&amp;revision=2024-07-15</capability><capability>http://arista.com/yang/openconfig/platform/notsupported-deviations?module=arista-platform-notsupported-deviations&amp;revision=2024-12-11</capability><capability>http://openconfig.net/yang/interfaces/aggregate?module=openconfig-if-aggregate&amp;revision=2022-06-28</capability><capability>http://arista.com/yang/openconfig/pim/augments?module=arista-pim-augments&amp;revision=2024-09-17</capability><capability>http://openconfig.net/yang/rsvp?module=openconfig-mpls-rsvp&amp;revision=2023-02-06</capability><capability>http://arista.com/yang/openconfig/sampling/notsupported-deviations?module=arista-sampling-notsupported-deviations&amp;revision=2024-12-11</capability><capability>http://arista.com/yang/experimental/eos/varp/intf?module=arista-exp-eos-varp-intf&amp;revision=2023-05-03</capability><capability>http://arista.com/yang/openconfig/spanning-tree/notsupported-deviations?module=arista-spanning-tree-notsupported-deviations&amp;revision=2024-12-11</capability><capability>http://openconfig.net/yang/policy-forwarding/sr-te?module=openconfig-pf-srte&amp;revision=2019-10-15</capability><capability>http://arista.com/yang/experimental/eos/arista-sand-control-plane-traffic-counters?module=arista-sand-control-plane-traffic-counters&amp;revision=2023-02-02</capability><capability>http://arista.com/yang/openconfig/interfaces/notsupported-deviations?module=arista-interfaces-notsupported-deviations&amp;revision=2024-12-11</capability><capability>http://openconfig.net/yang/platform/cpu?module=openconfig-platform-cpu&amp;revision=2018-11-21</capability><capability>http://openconfig.net/yang/system-grpc?module=openconfig-system-grpc&amp;revision=2024-05-29</capability><capability>http://openconfig.net/yang/system-controlplane?module=openconfig-system-controlplane&amp;revision=2023-03-03</capability><capability>http://arista.com/yang/openconfig/network-instances/augments?module=arista-netinst-augments&amp;revision=2023-02-08</capability><capability>http://openconfig.net/yang/openconfig-types?module=openconfig-types&amp;revision=2024-01-31</capability><capability>http://arista.com/yang/experimental/eos/arista-sand-hardware-drop-counters?module=arista-sand-hardware-drop-counters&amp;revision=2023-01-01</capability><capability>http://arista.com/yang/openconfig/bfd/notsupported-deviations?module=arista-bfd-notsupported-deviations&amp;revision=2024-12-11</capability><capability>urn:ietf:params:xml:ns:yang:ietf-yang-metadata?module=ietf-yang-metadata&amp;revision=2016-08-05</capability><capability>http://openconfig.net/yang/platform/software-module?module=openconfig-platform-software&amp;revision=2021-06-16</capability><capability>http://openconfig.net/yang/vlan-types?module=openconfig-vlan-types&amp;revision=2022-05-24</capability><capability>http://openconfig.net/yang/interfaces/ethernet?module=openconfig-if-ethernet&amp;revision=2023-03-10</capability><capability>urn:ietf:params:xml:ns:yang:iana-if-type?module=iana-if-type&amp;revision=2014-05-08</capability><capability>http://openconfig.net/yang/rib/bgp?module=openconfig-rib-bgp&amp;revision=2022-12-20</capability><capability>http://openconfig.net/yang/sampling?module=openconfig-sampling&amp;revision=2022-06-21</capability><capability>http://arista.com/yang/experimental/eos/arista-traffic-policy?module=arista-traffic-policy&amp;revision=2024-03-15</capability><capability>http://openconfig.net/yang/policy-forwarding?module=openconfig-policy-forwarding&amp;revision=2023-04-25</capability><capability>http://openconfig.net/yang/platform/fabric?module=openconfig-platform-fabric&amp;revision=2022-07-28</capability><capability>http://arista.com/yang/experimental/eos/arista-management-active-management-active-oc-redundancy-state?module=arista-management-active-management-active-oc-redundancy-state&amp;revision=2023-01-06</capability><capability>http://openconfig.net/yang/terminal-device?module=openconfig-terminal-device&amp;revision=2024-06-12</capability><capability>http://openconfig.net/yang/openconfig-icmpv6-types?module=openconfig-icmpv6-types&amp;revision=2023-05-02</capability><capability>http://arista.com/yang/experimental/eos/arista-ale-counters-open-config-control-plane-traffic-counters?module=arista-ale-counters-open-config-control-plane-traffic-counters&amp;revision=2023-02-02</capability><capability>http://arista.com/yang/openconfig/macsec/deviations?module=arista-macsec-deviations&amp;revision=2023-01-05</capability><capability>http://arista.com/yang/rpc/netconf?module=arista-rpc-netconf&amp;revision=2023-03-03</capability><capability>http://openconfig.net/yang/lacp?module=openconfig-lacp&amp;revision=2024-09-24</capability><capability>urn:ietf:params:xml:ns:yang:ietf-inet-types?module=ietf-inet-types&amp;revision=2013-07-15</capability><capability>http://arista.com/yang/openconfig/telemetry/notsupported-deviations?module=arista-telemetry-notsupported-deviations&amp;revision=2024-12-11</capability><capability>http://openconfig.net/yang/macsec/types?module=openconfig-macsec-types&amp;revision=2019-07-01</capability><capability>http://arista.com/yang/openconfig/sflow/deviations?module=arista-sflow-deviations&amp;revision=2023-07-27</capability><capability>http://arista.com/yang/experimental/eos/arista-intf-intf?module=arista-intf-intf&amp;revision=2023-08-15</capability><capability>http://arista.com/yang/experimental/eos/arista-system-session?module=arista-system-session&amp;revision=2023-12-19</capability><capability>http://arista.com/yang/experimental/eos/arista-tunnel-tunnel-basic-types?module=arista-tunnel-tunnel-basic-types&amp;revision=2021-10-20</capability><capability>http://openconfig.net/yang/hercules/platform?module=openconfig-hercules-platform&amp;revision=2018-06-01</capability><capability>http://openconfig.net/yang/igmp?module=openconfig-igmp&amp;revision=2023-02-03</capability><capability>http://arista.com/yang/experimental/eos/vxlan?module=arista-exp-eos-vxlan&amp;revision=2023-11-01</capability><capability>http://arista.com/yang/experimental/eos/arista-pseudowire-pseudowire-status?module=arista-pseudowire-pseudowire-status&amp;revision=2021-10-20</capability><capability>http://arista.com/yang/openconfig/lacp/deviations?module=arista-lacp-deviations&amp;revision=2022-03-16</capability><capability>http://arista.com/yang/experimental/eos/arista-nat-nat-dynamic?module=arista-nat-nat-dynamic&amp;revision=2022-03-28</capability><capability>http://arista.com/yang/openconfig/keychain/notsupported-deviations?module=arista-keychain-notsupported-deviations&amp;revision=2024-12-11</capability><capability>https://github.com/openconfig/gnsi/certz/yang?module=gnsi-certz&amp;revision=2024-02-13</capability><capability>http://openconfig.net/yang/mpls-types?module=openconfig-mpls-types&amp;revision=2023-12-14</capability><capability>http://openconfig.net/yang/types/inet?module=openconfig-inet-types&amp;revision=2024-01-05</capability><capability>http://arista.com/yang/experimental/eos/arista-l1-open-config-optical-channel-model-aug?module=arista-l1-open-config-optical-channel-model-aug&amp;revision=2022-05-12</capability><capability>http://openconfig.net/yang/interfaces/ip?module=openconfig-if-ip&amp;revision=2024-03-13</capability><capability>http://openconfig.net/yang/isis-lsdb-types?module=openconfig-isis-lsdb-types&amp;revision=2018-11-21</capability><capability>http://openconfig.net/yang/platform/integrated-circuit?module=openconfig-platform-integrated-circuit&amp;revision=2022-04-20</capability><capability>http://arista.com/yang/openconfig/ospf/augments?module=arista-ospf-augments&amp;revision=2023-04-20</capability><capability>http://openconfig.net/yang/openflow?module=openconfig-openflow&amp;revision=2018-11-21</capability><capability>http://openconfig.net/yang/aft?module=openconfig-aft&amp;revision=2024-04-25</capability><capability>http://arista.com/yang/openconfig/network-instance/notsupported-deviations?module=arista-network-instance-notsupported-deviations&amp;revision=2024-12-11</capability><capability>http://arista.com/yang/openconfig/interfaces/augments?module=arista-intf-augments&amp;revision=2023-07-20</capability><capability>http://arista.com/yang/experimental/eos/arista-ale-counters-open-config-specialized-counters?module=arista-ale-counters-open-config-specialized-counters&amp;revision=2021-10-20</capability><capability>http://arista.com/yang/experimental/eos/arista-l1-open-config-logical-otn-channel-model-aug?module=arista-l1-open-config-logical-otn-channel-model-aug&amp;revision=2022-05-12</capability><capability>http://arista.com/yang/openconfig/acl/notsupported-deviations?module=arista-acl-notsupported-deviations&amp;revision=2024-12-11</capability><capability>http://openconfig.net/yang/lldp/types?module=openconfig-lldp-types&amp;revision=2018-11-21</capability><capability>http://openconfig.net/yang/bgp-types?module=openconfig-bgp-types&amp;revision=2024-09-06</capability><capability>http://arista.com/yang/openconfig/interfaces/deviations?module=arista-intf-deviations&amp;revision=2024-02-12</capability><capability>http://openconfig.net/yang/aft/ni?module=openconfig-aft-network-instance&amp;revision=2023-04-25</capability><capability>urn:aristanetworks:yang:experimental:eos?module=arista-exp-eos-mlag&amp;revision=2021-09-27</capability><capability>http://openconfig.net/yang/network-instance-types?module=openconfig-network-instance-types&amp;revision=2021-07-14</capability><capability>http://openconfig.net/yang/alarms?module=openconfig-alarms&amp;revision=2019-07-09</capability><capability>http://arista.com/yang/openconfig/bfd/augments?module=arista-bfd-augments&amp;revision=2022-05-26</capability><capability>http://openconfig.net/yang/ldp?module=openconfig-mpls-ldp&amp;revision=2023-02-06</capability><capability>http://openconfig.net/yang/mpls?module=openconfig-mpls&amp;revision=2024-06-19</capability><capability>http://arista.com/yang/openconfig/policy-forwarding/augments?module=arista-srte-augments&amp;revision=2020-11-30</capability><capability>http://arista.com/yang/openconfig/flex-algo/augments?module=arista-flex-algo-augments&amp;revision=2024-03-01</capability><capability>http://openconfig.net/yang/packet-match-types?module=openconfig-packet-match-types&amp;revision=2023-01-29</capability><capability>http://arista.com/yang/openconfig/policy/augments?module=arista-rpol-augments&amp;revision=2024-06-28</capability><capability>http://openconfig.net/yang/evpn-types?module=openconfig-evpn-types&amp;revision=2021-06-21</capability><capability>http://arista.com/yang/experimental/eos/arista-bgp-common-augments?module=arista-bgp-common-augments&amp;revision=2023-12-01</capability><capability>http://openconfig.net/yang/isis-types?module=openconfig-isis-types&amp;revision=2022-02-11</capability><capability>http://arista.com/yang/openconfig/network-instances/deviations?module=arista-netinst-deviations&amp;revision=2024-04-23</capability><capability>http://arista.com/yang/openconfig/openflow/deviations?module=arista-openflow-deviations&amp;revision=2020-11-30</capability><capability>http://arista.com/yang/experimental/eos/arista-l1-open-config-platform-model-aug?module=arista-l1-open-config-platform-model-aug&amp;revision=2022-05-12</capability><capability>http://openconfig.net/yang/hercules/qos?module=openconfig-hercules-qos&amp;revision=2018-06-01</capability><capability>http://openconfig.net/yang/telemetry?module=openconfig-telemetry&amp;revision=2018-11-21</capability><capability>urn:ietf:params:xml:ns:yang:ietf-interfaces?module=ietf-interfaces&amp;revision=2018-02-20</capability><capability>http://openconfig.net/yang/acl?module=openconfig-acl&amp;revision=2023-02-06</capability><capability>http://openconfig.net/yang/system?module=openconfig-system&amp;revision=2024-09-24</capability><capability>http://arista.com/yang/experimental/eos/arista-l1-open-config-xcvr-oc-types?module=arista-l1-open-config-xcvr-oc-types&amp;revision=2023-12-05</capability><capability>http://arista.com/yang/experimental/eos/eos-types?module=arista-eos-types&amp;revision=2023-09-05</capability><capability>http://openconfig.net/yang/system/terminal?module=openconfig-system-terminal&amp;revision=2018-11-21</capability><capability>http://openconfig.net/yang/platform/fan?module=openconfig-platform-fan&amp;revision=2018-11-21</capability><capability>http://openconfig.net/yang/sr?module=openconfig-segment-routing&amp;revision=2023-08-09</capability><capability>http://openconfig.net/yang/fib-types?module=openconfig-aft-types&amp;revision=2022-05-05</capability><capability>http://arista.com/yang/openconfig/ntp/augments?module=arista-ntp-augments&amp;revision=2024-09-16</capability><capability>http://arista.com/yang/experimental/eos/qos?module=arista-exp-eos-qos&amp;revision=2017-09-26</capability><capability>http://arista.com/yang/openconfig/lldp/deviations?module=arista-lldp-deviations&amp;revision=2022-01-17</capability><capability>http://openconfig.net/yang/ospf-policy?module=openconfig-ospf-policy&amp;revision=2018-11-21</capability><capability>http://arista.com/yang/openconfig/ospf/deviations?module=arista-ospf-deviations&amp;revision=2023-11-16</capability><capability>http://openconfig.net/yang/platform?module=openconfig-platform&amp;revision=2024-10-13</capability><capability>http://openconfig.net/yang/platform-types?module=openconfig-platform-types&amp;revision=2024-04-30</capability><capability>http://openconfig.net/yang/platform-pipeline-counters?module=openconfig-platform-pipeline-counters&amp;revision=2023-10-08</capability><capability>http://openconfig.net/yang/mpls-sr?module=openconfig-mpls-sr&amp;revision=2018-11-21</capability><capability>http://openconfig.net/yang/segment-routing/srte-policy?module=openconfig-srte-policy&amp;revision=2021-07-28</capability><capability>http://arista.com/yang/openconfig/qos/deviations?module=arista-qos-deviations&amp;revision=2024-02-28</capability><capability>http://openconfig.net/yang/network-instance?module=openconfig-network-instance&amp;revision=2024-02-27</capability><capability>http://openconfig.net/yang/interfaces?module=openconfig-interfaces&amp;revision=2024-04-04</capability><capability>http://arista.com/yang/experimental/eos/vxlan/config?module=arista-exp-eos-vxlan-config&amp;revision=2023-11-01</capability><capability>http://openconfig.net/yang/openconfig-icmpv4-types?module=openconfig-icmpv4-types&amp;revision=2023-01-26</capability><capability>http://openconfig.net/yang/spanning-tree/types?module=openconfig-spanning-tree-types&amp;revision=2021-06-16</capability><capability>http://openconfig.net/yang/rib/bgp-ext?module=openconfig-rib-bgp-ext&amp;revision=2019-04-25</capability><capability>http://arista.com/yang/experimental/eos/bgp?module=arista-exp-eos-bgp&amp;revision=2024-05-10</capability><capability>http://openconfig.net/yang/bfd?module=openconfig-bfd&amp;revision=2024-03-05</capability><capability>http://openconfig.net/yang/network-instance-l3?module=openconfig-network-instance-l3&amp;revision=2022-11-08</capability><capability>urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring?module=ietf-netconf-monitoring&amp;revision=2010-10-04</capability><capability>http://arista.com/yang/experimental/eos/arista-ale-counters-open-config-interrupt-counters?module=arista-ale-counters-open-config-interrupt-counters&amp;revision=2021-10-20</capability><capability>http://arista.com/yang/experimental/eos/arista-arnet-vrf-name?module=arista-arnet-vrf-name&amp;revision=2022-03-28</capability><capability>http://openconfig.net/yang/defined-sets?module=openconfig-defined-sets&amp;revision=2022-12-14</capability><capability>http://arista.com/yang/openconfig/bgp/deviations?module=arista-bgp-deviations&amp;revision=2024-07-08</capability><capability>http://openconfig.net/yang/system-utilization?module=openconfig-system-utilization&amp;revision=2023-02-13</capability><capability>http://openconfig.net/yang/bgp?module=openconfig-bgp&amp;revision=2024-09-06</capability><capability>http://openconfig.net/interfaces/sdn-ext?module=openconfig-if-sdn-ext&amp;revision=2024-02-21</capability><capability>http://openconfig.net/yang/routing-policy?module=openconfig-routing-policy&amp;revision=2023-11-01</capability><capability>http://arista.com/yang/openconfig/macsec/notsupported-deviations?module=arista-macsec-notsupported-deviations&amp;revision=2024-12-11</capability><capability>http://openconfig.net/yang/relay-agent?module=openconfig-relay-agent&amp;revision=2023-02-06</capability><capability>http://openconfig.net/yang/oc-keychain-types?module=openconfig-keychain-types&amp;revision=2024-08-27</capability><capability>http://openconfig.net/yang/bgp-policy?module=openconfig-bgp-policy&amp;revision=2024-07-02</capability><capability>http://openconfig.net/yang/ospf-types?module=openconfig-ospf-types&amp;revision=2018-11-21</capability><capability>http://arista.com/yang/experimental/eos/qos/acl?module=arista-exp-eos-qos-acl-config&amp;revision=2024-04-18</capability><capability>http://arista.com/yang/experimental/igmpsnooping?module=arista-exp-eos-igmpsnooping&amp;revision=2017-10-23</capability><capability>http://openconfig.net/yang/lldp?module=openconfig-lldp&amp;revision=2018-11-21</capability><capability>http://openconfig.net/yang/flexalgo?module=openconfig-flexalgo&amp;revision=2023-05-24</capability><capability>http://openconfig.net/yang/transport-types?module=openconfig-transport-types&amp;revision=2024-07-24</capability><capability>http://openconfig.net/yang/sampling/sflow?module=openconfig-sampling-sflow&amp;revision=2022-06-21</capability><capability>http://openconfig.net/yang/pcep?module=openconfig-pcep&amp;revision=2023-04-25</capability><capability>http://arista.com/yang/experimental/isis-flex-algo?module=openconfig-isis-flex-algo&amp;revision=2021-09-30</capability><capability>http://openconfig.net/yang/platform/psu?module=openconfig-platform-psu&amp;revision=2018-11-21</capability><capability>http://arista.com/yang/openconfig/policy-forwarding/deviations?module=arista-srte-deviations&amp;revision=2021-04-19</capability><capability>http://arista.com/yang/openconfig/isis/augments?module=arista-isis-augments&amp;revision=2024-06-14</capability><capability>http://arista.com/yang/openconfig/system/notsupported-deviations?module=arista-system-notsupported-deviations&amp;revision=2024-12-11</capability><capability>http://openconfig.net/yang/openconfig-isis-policy?module=openconfig-isis-policy&amp;revision=2023-11-02</capability><capability>http://openconfig.net/yang/types/yang?module=openconfig-yang-types&amp;revision=2024-05-30</capability><capability>http://openconfig.net/yang/platform/transceiver?module=openconfig-platform-transceiver&amp;revision=2023-08-30</capability><capability>http://arista.com/yang/experimental/eos/arista-arnet-ip?module=arista-arnet-ip&amp;revision=2022-03-28</capability><capability>http://arista.com/yang/openconfig/lacp/notsupported-deviations?module=arista-lacp-notsupported-deviations&amp;revision=2024-12-11</capability><capability>http://arista.com/yang/experimental/eos/arista-l1-open-config-phy-model?module=arista-l1-open-config-phy-model&amp;revision=2023-12-05</capability><capability>http://openconfig.net/yang/rib/bgp-types?module=openconfig-rib-bgp-types&amp;revision=2019-03-14</capability><capability>http://openconfig.net/yang/openconfig-metadata?module=openconfig-metadata&amp;revision=2020-08-06</capability><capability>http://openconfig.net/yang/mpls?module=openconfig-mpls-te&amp;revision=2024-06-19</capability><capability>http://openconfig.net/yang/mpls?module=openconfig-mpls-igp&amp;revision=2024-06-19</capability><capability>http://openconfig.net/yang/policy-forwarding?module=openconfig-pf-path-groups&amp;revision=2023-04-25</capability><capability>http://openconfig.net/yang/bgp?module=openconfig-bgp-peer-group&amp;revision=2024-09-06</capability><capability>http://openconfig.net/yang/aft?module=openconfig-aft-ipv6&amp;revision=2024-04-25</capability><capability>http://openconfig.net/yang/aft?module=openconfig-aft-ethernet&amp;revision=2024-04-25</capability><capability>http://openconfig.net/yang/ospfv2?module=openconfig-ospfv2-area-interface&amp;revision=2024-06-17</capability><capability>http://openconfig.net/yang/openconfig-isis?module=openconfig-isis-lsp&amp;revision=2024-02-28</capability><capability>http://openconfig.net/yang/bgp?module=openconfig-bgp-common-structure&amp;revision=2024-09-06</capability><capability>http://openconfig.net/yang/rib/bgp?module=openconfig-rib-bgp-attributes&amp;revision=2022-12-20</capability><capability>http://openconfig.net/yang/aft?module=openconfig-aft-ipv4&amp;revision=2024-04-25</capability><capability>http://openconfig.net/yang/hercules/platform?module=openconfig-hercules-platform-chassis&amp;revision=2018-06-01</capability><capability>http://openconfig.net/yang/rib/bgp?module=openconfig-rib-bgp-tables&amp;revision=2022-12-20</capability><capability>http://openconfig.net/yang/rib/bgp?module=openconfig-rib-bgp-shared-attributes&amp;revision=2022-12-20</capability><capability>http://openconfig.net/yang/aft?module=openconfig-aft-mpls&amp;revision=2024-04-25</capability><capability>http://openconfig.net/yang/policy-forwarding?module=openconfig-pf-interfaces&amp;revision=2023-04-25</capability><capability>http://openconfig.net/yang/qos?module=openconfig-qos-interfaces&amp;revision=2023-10-13</capability><capability>http://openconfig.net/yang/aaa?module=openconfig-aaa-radius&amp;revision=2022-07-29</capability><capability>http://openconfig.net/yang/hercules/platform?module=openconfig-hercules-platform-port&amp;revision=2018-06-01</capability><capability>http://openconfig.net/yang/network-instance?module=openconfig-network-instance-l2&amp;revision=2024-02-27</capability><capability>http://openconfig.net/yang/aaa?module=openconfig-aaa-tacacs&amp;revision=2022-07-29</capability><capability>http://openconfig.net/yang/bgp-types?module=openconfig-bgp-errors&amp;revision=2024-09-06</capability><capability>http://openconfig.net/yang/bgp?module=openconfig-bgp-neighbor&amp;revision=2024-09-06</capability><capability>http://openconfig.net/yang/bgp?module=openconfig-bgp-global&amp;revision=2024-09-06</capability><capability>http://openconfig.net/yang/rib/bgp?module=openconfig-rib-bgp-table-attributes&amp;revision=2022-12-20</capability><capability>http://openconfig.net/yang/openconfig-isis?module=openconfig-isis-routing&amp;revision=2024-02-28</capability><capability>http://openconfig.net/yang/qos?module=openconfig-qos-mem-mgmt&amp;revision=2023-10-13</capability><capability>http://openconfig.net/yang/bgp?module=openconfig-bgp-common&amp;revision=2024-09-06</capability><capability>http://openconfig.net/yang/bgp?module=openconfig-bgp-common-multiprotocol&amp;revision=2024-09-06</capability><capability>http://openconfig.net/yang/ospfv2?module=openconfig-ospfv2-common&amp;revision=2024-06-17</capability><capability>http://openconfig.net/yang/ospfv2?module=openconfig-ospfv2-lsdb&amp;revision=2024-06-17</capability><capability>http://openconfig.net/yang/policy-forwarding?module=openconfig-pf-forwarding-policies&amp;revision=2023-04-25</capability><capability>http://openconfig.net/yang/mpls?module=openconfig-mpls-static&amp;revision=2024-06-19</capability><capability>http://openconfig.net/yang/hercules/platform?module=openconfig-hercules-platform-linecard&amp;revision=2018-06-01</capability><capability>http://openconfig.net/yang/aft?module=openconfig-aft-common&amp;revision=2024-04-25</capability><capability>http://openconfig.net/yang/aft?module=openconfig-aft-pf&amp;revision=2024-04-25</capability><capability>http://openconfig.net/yang/aft?module=openconfig-aft-state-synced&amp;revision=2024-04-25</capability><capability>http://openconfig.net/yang/hercules/platform?module=openconfig-hercules-platform-node&amp;revision=2018-06-01</capability><capability>http://openconfig.net/yang/ospfv2?module=openconfig-ospfv2-area&amp;revision=2024-06-17</capability><capability>http://openconfig.net/yang/qos?module=openconfig-qos-elements&amp;revision=2023-10-13</capability><capability>http://openconfig.net/yang/ospfv2?module=openconfig-ospfv2-global&amp;revision=2024-06-17</capability><capability>http://openconfig.net/yang/platform?module=openconfig-platform-common&amp;revision=2024-10-13</capability></capabilities><session-id>195999452</session-id></hello>]]>]]>
-#4096
-<rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="101"><data xmlns="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">module &#34;ietf-yang-types&#34; {
-&#x9;namespace &#34;urn:ietf:params:xml:ns:yang:ietf-yang-types&#34;;
-&#x9;prefix &#34;yang&#34;;
-&#x9;organization &#34;IETF NETMOD (NETCONF Data Modeling Language) Working Group&#34;;
-&#x9;contact &#34;WG Web:   &lt;http://tools.ietf.org/wg/netmod/&gt;
-&#x9;         WG List:  &lt;mailto:netmod@ietf.org&gt;
-&#x9;         
-&#x9;         WG Chair: David Kessens
-&#x9;                   &lt;mailto:david.kessens@nsn.com&gt;
-&#x9;         
-&#x9;         WG Chair: Juergen Schoenwaelder
-&#x9;                   &lt;mailto:j.schoenwaelder@jacobs-university.de&gt;
-&#x9;         
-&#x9;         Editor:   Juergen Schoenwaelder
-&#x9;                   &lt;mailto:j.schoenwaelder@jacobs-university.de&gt;&#34;;
-&#x9;description &#34;This module contains a collection of generally useful derived
-&#x9;             YANG data types.
-&#x9;             
-&#x9;             Copyright (c) 2013 IETF Trust and the persons identified as
-&#x9;             authors of the code.  All rights reserved.
-&#x9;             
-&#x9;             Redistribution and use in source and binary forms, with or
-&#x9;             without modification, is permitted pursuant to, and subject
-&#x9;             to the license terms contained in, the Simplified BSD License
-&#x9;             set forth in Section 4.c of the IETF Trust&#39;s Legal Provisions
-&#x9;             Relating to IETF Documents
-&#x9;             (http://trustee.ietf.org/license-info).
-&#x9;             
-&#x9;             This version of this YANG module is part of RFC 6991; see
-&#x9;             the RFC itself for full legal notices.&#34;;
-&#x9;revision &#34;2013-07-15&#34; {
-&#x9;&#x9;description &#34;This revision adds the following new data types:
-&#x9;&#x9;             - yang-identifier
-&#x9;&#x9;             - hex-string
-&#x9;&#x9;             - uuid
-&#x9;&#x9;             - dotted-quad&#34;;
-&#x9;&#x9;reference &#34;RFC 6991: Common YANG Data Types&#34;;
-&#x9;}
-&#x9;revision &#34;2010-09-24&#34; {
-&#x9;&#x9;description &#34;Initial revision.&#34;;
-&#x9;&#x9;reference &#34;RFC 6021: Common YANG Data Types&#34;;
-&#x9;}
-&#x9;typedef &#34;counter32&#34; {
-&#x9;&#x9;type &#34;uint32&#34;;
-&#x9;&#x9;description &#34;The counter32 type represents a non-negative integer
-&#x9;&#x9;             that monotonically increases until it reaches a
-&#x9;&#x9;             maximum value of 2^32-1 (4294967295 decimal), when it
-&#x9;&#x9;             wraps around and starts increasing again from zero.
-&#x9;&#x9;             
-&#x9;&#x9;             Counters have no defined &#39;initial&#39; value, and thus, a
-&#x9;&#x9;             single value of a counter has (in general) no information
-&#x9;&#x9;             content.  Discontinuities in the monotonically increasing
-&#x9;&#x9;             value normally occur at re-initialization of the
-&#x9;&#x9;             management system, and at other times as specified in the
-&#x9;&#x9;             description of a schema node using this type.  If such
-&#x9;&#x9;             other times can occur, for example, the creation of
-&#x9;&#x9;             a schema node of type counter32 at times other than
-&#x9;&#x9;             re-initialization, then a corresponding schema node
-&#x9;&#x9;             should be defined, with an appropriate type, to indicate
-&#x9;&#x9;             the last discontinuity.
-&#x9;&#x9;             
-&#x9;&#x9;             The counter32 type should not be used for configuration
-&#x9;&#x9;             schema nodes.  A default statement SHOULD NOT be used in
-&#x9;&#x9;             combination with the type counter32.
-&#x9;&#x9;             
-&#x9;&#x9;             In the value set and its semantics, this type is equivalent
-&#x9;&#x9;             to the Counter32 type of the SMIv2.&#34;;
-&#x9;&#x9;reference &#34;RFC 2578: Structure of Management Information Version 2
-&#x9;&#x9;                     (SMIv2)&#34;;
-&#x9;}
-&#x9;typedef &#34;zero-based-counter32&#34; {
-&#x9;&#x9;type &#34;yang:co
-#4096
-unter32&#34;;
-&#x9;&#x9;default &#34;0&#34;;
-&#x9;&#x9;description &#34;The zero-based-counter32 type represents a counter32
-&#x9;&#x9;             that has the defined &#39;initial&#39; value zero.
-&#x9;&#x9;             
-&#x9;&#x9;             A schema node of this type will be set to zero (0) on creation
-&#x9;&#x9;             and will thereafter increase monotonically until it reaches
-&#x9;&#x9;             a maximum value of 2^32-1 (4294967295 decimal), when it
-&#x9;&#x9;             wraps around and starts increasing again from zero.
-&#x9;&#x9;             
-&#x9;&#x9;             Provided that an application discovers a new schema node
-&#x9;&#x9;             of this type within the minimum time to wrap, it can use the
-&#x9;&#x9;             &#39;initial&#39; value as a delta.  It is important for a management
-&#x9;&#x9;             station to be aware of this minimum time and the actual time
-&#x9;&#x9;             between polls, and to discard data if the actual time is too
-&#x9;&#x9;             long or there is no defined minimum time.
-&#x9;&#x9;             
-&#x9;&#x9;             In the value set and its semantics, this type is equivalent
-&#x9;&#x9;             to the ZeroBasedCounter32 textual convention of the SMIv2.&#34;;
-&#x9;&#x9;reference &#34;RFC 4502: Remote Network Monitoring Management Information
-&#x9;&#x9;                     Base Version 2&#34;;
-&#x9;}
-&#x9;typedef &#34;counter64&#34; {
-&#x9;&#x9;type &#34;uint64&#34;;
-&#x9;&#x9;description &#34;The counter64 type represents a non-negative integer
-&#x9;&#x9;             that monotonically increases until it reaches a
-&#x9;&#x9;             maximum value of 2^64-1 (18446744073709551615 decimal),
-&#x9;&#x9;             when it wraps around and starts increasing again from zero.
-&#x9;&#x9;             
-&#x9;&#x9;             Counters have no defined &#39;initial&#39; value, and thus, a
-&#x9;&#x9;             single value of a counter has (in general) no information
-&#x9;&#x9;             content.  Discontinuities in the monotonically increasing
-&#x9;&#x9;             value normally occur at re-initialization of the
-&#x9;&#x9;             management system, and at other times as specified in the
-&#x9;&#x9;             description of a schema node using this type.  If such
-&#x9;&#x9;             other times can occur, for example, the creation of
-&#x9;&#x9;             a schema node of type counter64 at times other than
-&#x9;&#x9;             re-initialization, then a corresponding schema node
-&#x9;&#x9;             should be defined, with an appropriate type, to indicate
-&#x9;&#x9;             the last discontinuity.
-&#x9;&#x9;             
-&#x9;&#x9;             The counter64 type should not be used for configuration
-&#x9;&#x9;             schema nodes.  A default statement SHOULD NOT be used in
-&#x9;&#x9;             combination with the type counter64.
-&#x9;&#x9;             
-&#x9;&#x9;             In the value set and its semantics, this type is equivalent
-&#x9;&#x9;             to the Counter64 type of the SMIv2.&#34;;
-&#x9;&#x9;reference &#34;RFC 2578: Structure of Management Information Version 2
-&#x9;&#x9;                     (SMIv2)&#34;;
-&#x9;}
-&#x9;typedef &#34;zero-based-counter64&#34; {
-&#x9;&#x9;type &#34;yang:counter64&#34;;
-&#x9;&#x9;default &#34;0&#34;;
-&#x9;&#x9;description &#34;The zero-based-counter64 type represents a counter64 that
-&#x9;&#x9;             has the defined &#39;initial&#39; value zero.
-&#x9;&#x9;             
-&#x9;&#x9;             A schema node of this type will be set to zero (0) on creation
-&#x9;&#x9;             and will thereafter increase monotonically until it reaches
-&#x9;&#x9;             a maximum value of 2^64-1 (18446744073709551615 decimal),
-&#x9;&#x9;             when it wraps around and starts increasing again from zero.
-&#x9;&#x9;             
-&#x9;&#x9;             Provided that an application discovers a new schema node
-&#x9;&#x9;             of this type within the minimum time to wrap, it can use the
-&#x9;&#x9;             &#39;initial&#39; value as a delta.  It is important for a management
-&#x9;
-#4096
-&#x9;             station to be aware of this minimum time and the actual time
-&#x9;&#x9;             between polls, and to discard data if the actual time is too
-&#x9;&#x9;             long or there is no defined minimum time.
-&#x9;&#x9;             
-&#x9;&#x9;             In the value set and its semantics, this type is equivalent
-&#x9;&#x9;             to the ZeroBasedCounter64 textual convention of the SMIv2.&#34;;
-&#x9;&#x9;reference &#34;RFC 2856: Textual Conventions for Additional High Capacity
-&#x9;&#x9;                     Data Types&#34;;
-&#x9;}
-&#x9;typedef &#34;gauge32&#34; {
-&#x9;&#x9;type &#34;uint32&#34;;
-&#x9;&#x9;description &#34;The gauge32 type represents a non-negative integer, which
-&#x9;&#x9;             may increase or decrease, but shall never exceed a maximum
-&#x9;&#x9;             value, nor fall below a minimum value.  The maximum value
-&#x9;&#x9;             cannot be greater than 2^32-1 (4294967295 decimal), and
-&#x9;&#x9;             the minimum value cannot be smaller than 0.  The value of
-&#x9;&#x9;             a gauge32 has its maximum value whenever the information
-&#x9;&#x9;             being modeled is greater than or equal to its maximum
-&#x9;&#x9;             value, and has its minimum value whenever the information
-&#x9;&#x9;             being modeled is smaller than or equal to its minimum value.
-&#x9;&#x9;             If the information being modeled subsequently decreases
-&#x9;&#x9;             below (increases above) the maximum (minimum) value, the
-&#x9;&#x9;             gauge32 also decreases (increases).
-&#x9;&#x9;             
-&#x9;&#x9;             In the value set and its semantics, this type is equivalent
-&#x9;&#x9;             to the Gauge32 type of the SMIv2.&#34;;
-&#x9;&#x9;reference &#34;RFC 2578: Structure of Management Information Version 2
-&#x9;&#x9;                     (SMIv2)&#34;;
-&#x9;}
-&#x9;typedef &#34;gauge64&#34; {
-&#x9;&#x9;type &#34;uint64&#34;;
-&#x9;&#x9;description &#34;The gauge64 type represents a non-negative integer, which
-&#x9;&#x9;             may increase or decrease, but shall never exceed a maximum
-&#x9;&#x9;             value, nor fall below a minimum value.  The maximum value
-&#x9;&#x9;             cannot be greater than 2^64-1 (18446744073709551615), and
-&#x9;&#x9;             the minimum value cannot be smaller than 0.  The value of
-&#x9;&#x9;             a gauge64 has its maximum value whenever the information
-&#x9;&#x9;             being modeled is greater than or equal to its maximum
-&#x9;&#x9;             value, and has its minimum value whenever the information
-&#x9;&#x9;             being modeled is smaller than or equal to its minimum value.
-&#x9;&#x9;             If the information being modeled subsequently decreases
-&#x9;&#x9;             below (increases above) the maximum (minimum) value, the
-&#x9;&#x9;             gauge64 also decreases (increases).
-&#x9;&#x9;             
-&#x9;&#x9;             In the value set and its semantics, this type is equivalent
-&#x9;&#x9;             to the CounterBasedGauge64 SMIv2 textual convention defined
-&#x9;&#x9;             in RFC 2856&#34;;
-&#x9;&#x9;reference &#34;RFC 2856: Textual Conventions for Additional High Capacity
-&#x9;&#x9;                     Data Types&#34;;
-&#x9;}
-&#x9;typedef &#34;object-identifier&#34; {
-&#x9;&#x9;type &#34;string&#34; {
-&#x9;&#x9;&#x9;pattern &#34;(([0-1](\\.[1-3]?[0-9]))|(2\\.(0|([1-9]\\d*))))(\\.(0|([1-9]\\d*)))*&#34;;
-&#x9;&#x9;}
-&#x9;&#x9;description &#34;The object-identifier type represents administratively
-&#x9;&#x9;             assigned names in a registration-hierarchical-name tree.
-&#x9;&#x9;             
-&#x9;&#x9;             Values of this type are denoted as a sequence of numerical
-&#x9;&#x9;             non-negative sub-identifier values.  Each sub-identifier
-&#x9;&#x9;             value MUST NOT exceed 2^32-1 (4294967295).  Sub-identifiers
-&#x9;&#x9;             are separated by single dots and without any intermediate
-&#x9;&#x9;             whitespace.
-&#x9;&#x9;             
-&#x9;&#x9;             The ASN.1 standard restricts the value space 
-#4096
-of the first
-&#x9;&#x9;             sub-identifier to 0, 1, or 2.  Furthermore, the value space
-&#x9;&#x9;             of the second sub-identifier is restricted to the range
-&#x9;&#x9;             0 to 39 if the first sub-identifier is 0 or 1.  Finally,
-&#x9;&#x9;             the ASN.1 standard requires that an object identifier
-&#x9;&#x9;             has always at least two sub-identifiers.  The pattern
-&#x9;&#x9;             captures these restrictions.
-&#x9;&#x9;             
-&#x9;&#x9;             Although the number of sub-identifiers is not limited,
-&#x9;&#x9;             module designers should realize that there may be
-&#x9;&#x9;             implementations that stick with the SMIv2 limit of 128
-&#x9;&#x9;             sub-identifiers.
-&#x9;&#x9;             
-&#x9;&#x9;             This type is a superset of the SMIv2 OBJECT IDENTIFIER type
-&#x9;&#x9;             since it is not restricted to 128 sub-identifiers.  Hence,
-&#x9;&#x9;             this type SHOULD NOT be used to represent the SMIv2 OBJECT
-&#x9;&#x9;             IDENTIFIER type; the object-identifier-128 type SHOULD be
-&#x9;&#x9;             used instead.&#34;;
-&#x9;&#x9;reference &#34;ISO9834-1: Information technology -- Open Systems
-&#x9;&#x9;           Interconnection -- Procedures for the operation of OSI
-&#x9;&#x9;           Registration Authorities: General procedures and top
-&#x9;&#x9;           arcs of the ASN.1 Object Identifier tree&#34;;
-&#x9;}
-&#x9;typedef &#34;object-identifier-128&#34; {
-&#x9;&#x9;type &#34;object-identifier&#34; {
-&#x9;&#x9;&#x9;pattern &#34;\\d*(\\.\\d*){1,127}&#34;;
-&#x9;&#x9;}
-&#x9;&#x9;description &#34;This type represents object-identifiers restricted to 128
-&#x9;&#x9;             sub-identifiers.
-&#x9;&#x9;             
-&#x9;&#x9;             In the value set and its semantics, this type is equivalent
-&#x9;&#x9;             to the OBJECT IDENTIFIER type of the SMIv2.&#34;;
-&#x9;&#x9;reference &#34;RFC 2578: Structure of Management Information Version 2
-&#x9;&#x9;                     (SMIv2)&#34;;
-&#x9;}
-&#x9;typedef &#34;yang-identifier&#34; {
-&#x9;&#x9;type &#34;string&#34; {
-&#x9;&#x9;&#x9;length &#34;1..max&#34;;
-&#x9;&#x9;&#x9;pattern &#34;[a-zA-Z_][a-zA-Z0-9\\-_.]*&#34;;
-&#x9;&#x9;&#x9;pattern &#34;.|..|[^xX].*|.[^mM].*|..[^lL].*&#34;;
-&#x9;&#x9;}
-&#x9;&#x9;description &#34;A YANG identifier string as defined by the &#39;identifier&#39;
-&#x9;&#x9;             rule in Section 12 of RFC 6020.  An identifier must
-&#x9;&#x9;             start with an alphabetic character or an underscore
-&#x9;&#x9;             followed by an arbitrary sequence of alphabetic or
-&#x9;&#x9;             numeric characters, underscores, hyphens, or dots.
-&#x9;&#x9;             
-&#x9;&#x9;             A YANG identifier MUST NOT start with any possible
-&#x9;&#x9;             combination of the lowercase or uppercase character
-&#x9;&#x9;             sequence &#39;xml&#39;.&#34;;
-&#x9;&#x9;reference &#34;RFC 6020: YANG - A Data Modeling Language for the Network
-&#x9;&#x9;                     Configuration Protocol (NETCONF)&#34;;
-&#x9;}
-&#x9;typedef &#34;date-and-time&#34; {
-&#x9;&#x9;type &#34;string&#34; {
-&#x9;&#x9;&#x9;pattern &#34;\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?(Z|[\\+\\-]\\d{2}:\\d{2})&#34;;
-&#x9;&#x9;}
-&#x9;&#x9;description &#34;The date-and-time type is a profile of the ISO 8601
-&#x9;&#x9;             standard for representation of dates and times using the
-&#x9;&#x9;             Gregorian calendar.  The profile is defined by the
-&#x9;&#x9;             date-time production in Section 5.6 of RFC 3339.
-&#x9;&#x9;             
-&#x9;&#x9;             The date-and-time type is compatible with the dateTime XML
-&#x9;&#x9;             schema type with the following notable exceptions:
-&#x9;&#x9;             
-&#x9;&#x9;             (a) The date-and-time type does not allow negative years.
-&#x9;&#x9;             
-&#x9;&#x9;             (b) The date-and-time time-offset -00:00 indicates an unknown
-&#x9;&#x9;                 time zone (see RFC 3339) while -00:00 and +00:00 and Z
-&#x9;&#x9;                 all represent the
-#4096
- same time zone in dateTime.
-&#x9;&#x9;             
-&#x9;&#x9;             (c) The canonical format (see below) of data-and-time values
-&#x9;&#x9;                 differs from the canonical format used by the dateTime XML
-&#x9;&#x9;                 schema type, which requires all times to be in UTC using
-&#x9;&#x9;                 the time-offset &#39;Z&#39;.
-&#x9;&#x9;             
-&#x9;&#x9;             This type is not equivalent to the DateAndTime textual
-&#x9;&#x9;             convention of the SMIv2 since RFC 3339 uses a different
-&#x9;&#x9;             separator between full-date and full-time and provides
-&#x9;&#x9;             higher resolution of time-secfrac.
-&#x9;&#x9;             
-&#x9;&#x9;             The canonical format for date-and-time values with a known time
-&#x9;&#x9;             zone uses a numeric time zone offset that is calculated using
-&#x9;&#x9;             the device&#39;s configured known offset to UTC time.  A change of
-&#x9;&#x9;             the device&#39;s offset to UTC time will cause date-and-time values
-&#x9;&#x9;             to change accordingly.  Such changes might happen periodically
-&#x9;&#x9;             in case a server follows automatically daylight saving time
-&#x9;&#x9;             (DST) time zone offset changes.  The canonical format for
-&#x9;&#x9;             date-and-time values with an unknown time zone (usually
-&#x9;&#x9;             referring to the notion of local time) uses the time-offset
-&#x9;&#x9;             -00:00.&#34;;
-&#x9;&#x9;reference &#34;RFC 3339: Date and Time on the Internet: Timestamps
-&#x9;&#x9;           RFC 2579: Textual Conventions for SMIv2
-&#x9;&#x9;           XSD-TYPES: XML Schema Part 2: Datatypes Second Edition&#34;;
-&#x9;}
-&#x9;typedef &#34;timeticks&#34; {
-&#x9;&#x9;type &#34;uint32&#34;;
-&#x9;&#x9;description &#34;The timeticks type represents a non-negative integer that
-&#x9;&#x9;             represents the time, modulo 2^32 (4294967296 decimal), in
-&#x9;&#x9;             hundredths of a second between two epochs.  When a schema
-&#x9;&#x9;             node is defined that uses this type, the description of
-&#x9;&#x9;             the schema node identifies both of the reference epochs.
-&#x9;&#x9;             
-&#x9;&#x9;             In the value set and its semantics, this type is equivalent
-&#x9;&#x9;             to the TimeTicks type of the SMIv2.&#34;;
-&#x9;&#x9;reference &#34;RFC 2578: Structure of Management Information Version 2
-&#x9;&#x9;                     (SMIv2)&#34;;
-&#x9;}
-&#x9;typedef &#34;timestamp&#34; {
-&#x9;&#x9;type &#34;yang:timeticks&#34;;
-&#x9;&#x9;description &#34;The timestamp type represents the value of an associated
-&#x9;&#x9;             timeticks schema node at which a specific occurrence
-&#x9;&#x9;             happened.  The specific occurrence must be defined in the
-&#x9;&#x9;             description of any schema node defined using this type.  When
-&#x9;&#x9;             the specific occurrence occurred prior to the last time the
-&#x9;&#x9;             associated timeticks attribute was zero, then the timestamp
-&#x9;&#x9;             value is zero.  Note that this requires all timestamp values
-&#x9;&#x9;             to be reset to zero when the value of the associated timeticks
-&#x9;&#x9;             attribute reaches 497+ days and wraps around to zero.
-&#x9;&#x9;             
-&#x9;&#x9;             The associated timeticks schema node must be specified
-&#x9;&#x9;             in the description of any schema node using this type.
-&#x9;&#x9;             
-&#x9;&#x9;             In the value set and its semantics, this type is equivalent
-&#x9;&#x9;             to the TimeStamp textual convention of the SMIv2.&#34;;
-&#x9;&#x9;reference &#34;RFC 2579: Textual Conventions for SMIv2&#34;;
-&#x9;}
-&#x9;typedef &#34;phys-address&#34; {
-&#x9;&#x9;type &#34;string&#34; {
-&#x9;&#x9;&#x9;pattern &#34;([0-9a-fA-F]{2}(:[0-9a-fA-F]{2})*)?&#34;;
-&#x9;&#x9;}
-&#x9;&#x9;description &#34;Represents media- or physical-level addresses represented
-&#x9;&#x9;             as a sequence octets, each octet represented by two hexadecimal
-#3226
+Warning: Permanently added '[localhost]:23830' (RSA) to the list of known hosts.
+Keyboard-Interactive Authentication
+Please enter your authentication token
+(root@localhost) root's password:
+<hello xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"><capabilities><capability>urn:ietf:params:netconf:base:1.0</capability><capability>urn:ietf:params:netconf:base:1.1</capability><capability>urn:ietf:params:netconf:capability:writable-running:1.0</capability><capability>urn:ietf:params:netconf:capability:candidate:1.0</capability><capability>urn:ietf:params:netconf:capability:confirmed-commit:1.1</capability><capability>urn:ietf:params:netconf:capability:rollback-on-error:1.0</capability><capability>urn:ietf:params:netconf:capability:validate:1.1</capability><capability>urn:ietf:params:netconf:capability:startup:1.0</capability><capability>urn:ietf:params:netconf:capability:xpath:1.0</capability><capability>urn:ietf:params:netconf:capability:with-defaults:1.0?basic-mode=explicit&amp;also-supported=report-all,report-all-tagged,trim,explicit</capability><capability>urn:ietf:params:netconf:capability:notification:1.0</capability><capability>urn:ietf:params:netconf:capability:interleave:1.0</capability><capability>urn:ietf:params:netconf:capability:url:1.0?scheme=ftp,ftps,http,https,scp,sftp</capability><capability>urn:ietf:params:xml:ns:yang:ietf-yang-metadata?module=ietf-yang-metadata&amp;revision=2016-08-05</capability><capability>urn:ietf:params:xml:ns:yang:ietf-inet-types?module=ietf-inet-types&amp;revision=2013-07-15</capability><capability>urn:ietf:params:xml:ns:yang:ietf-yang-types?module=ietf-yang-types&amp;revision=2013-07-15</capability><capability>urn:ietf:params:xml:ns:yang:ietf-netconf-acm?module=ietf-netconf-acm&amp;revision=2018-02-14</capability><capability>urn:ietf:params:netconf:capability:yang-library:1.1?revision=2019-01-04&amp;content-id=3423615195</capability><capability>urn:sysrepo:plugind?module=sysrepo-plugind&amp;revision=2022-08-26</capability><capability>urn:ietf:params:xml:ns:netconf:base:1.0?module=ietf-netconf&amp;revision=2013-09-29&amp;features=writable-running,candidate,confirmed-commit,rollback-on-error,validate,startup,url,xpath</capability><capability>urn:ietf:params:xml:ns:yang:ietf-netconf-with-defaults?module=ietf-netconf-with-defaults&amp;revision=2011-06-01</capability><capability>urn:ietf:params:xml:ns:yang:ietf-netconf-notifications?module=ietf-netconf-notifications&amp;revision=2012-02-06</capability><capability>urn:ietf:params:xml:ns:netconf:notification:1.0?module=notifications&amp;revision=2008-07-14</capability><capability>urn:ietf:params:xml:ns:netmod:notification?module=nc-notifications&amp;revision=2008-07-14</capability><capability>urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring?module=ietf-netconf-monitoring&amp;revision=2010-10-04</capability><capability>urn:ietf:params:xml:ns:yang:ietf-x509-cert-to-name?module=ietf-x509-cert-to-name&amp;revision=2014-12-10</capability><capability>urn:ietf:params:xml:ns:yang:iana-crypt-hash?module=iana-crypt-hash&amp;revision=2014-04-04&amp;features=crypt-hash-md5,crypt-hash-sha-256,crypt-hash-sha-512</capability></capabilities><session-id>19</session-id></hello>]]>]]>
+#1024
+<rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="101"><data xmlns="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">module ietf-yang-types {
+  namespace "urn:ietf:params:xml:ns:yang:ietf-yang-types";
+  prefix yang;
 
-&#x9;&#x9;             numbers.  Octets are separated by colons.  The canonical
-&#x9;&#x9;             representation uses lowercase characters.
-&#x9;&#x9;             
-&#x9;&#x9;             In the value set and its semantics, this type is equivalent
-&#x9;&#x9;             to the PhysAddress textual convention of the SMIv2.&#34;;
-&#x9;&#x9;reference &#34;RFC 2579: Textual Conventions for SMIv2&#34;;
-&#x9;}
-&#x9;typedef &#34;mac-address&#34; {
-&#x9;&#x9;type &#34;string&#34; {
-&#x9;&#x9;&#x9;pattern &#34;[0-9a-fA-F]{2}(:[0-9a-fA-F]{2}){5}&#34;;
-&#x9;&#x9;}
-&#x9;&#x9;description &#34;The mac-address type represents an IEEE 802 MAC address.
-&#x9;&#x9;             The canonical representation uses lowercase characters.
-&#x9;&#x9;             
-&#x9;&#x9;             In the value set and its semantics, this type is equivalent
-&#x9;&#x9;             to the MacAddress textual convention of the SMIv2.&#34;;
-&#x9;&#x9;reference &#34;IEEE 802: IEEE Standard for Local and Metropolitan Area
-&#x9;&#x9;                     Networks: Overview and Architecture
-&#x9;&#x9;           RFC 2579: Textual Conventions for SMIv2&#34;;
-&#x9;}
-&#x9;typedef &#34;xpath1.0&#34; {
-&#x9;&#x9;type &#34;string&#34;;
-&#x9;&#x9;description &#34;This type represents an XPATH 1.0 expression.
-&#x9;&#x9;             
-&#x9;&#x9;             When a schema node is defined that uses this type, the
-&#x9;&#x9;             description of the schema node MUST specify the XPath
-&#x9;&#x9;             context in which the XPath expression is evaluated.&#34;;
-&#x9;&#x9;reference &#34;XPATH: XML Path Language (XPath) Version 1.0&#34;;
-&#x9;}
-&#x9;typedef &#34;hex-string&#34; {
-&#x9;&#x9;type &#34;string&#34; {
-&#x9;&#x9;&#x9;pattern &#34;([0-9a-fA-F]{2}(:[0-9a-fA-F]{2})*)?&#34;;
-&#x9;&#x9;}
-&#x9;&#x9;description &#34;A hexadecimal string with octets represented as hex digits
-&#x9;&#x9;             separated by colons.  The canonical representation uses
-&#x9;&#x9;             lowercase characters.&#34;;
-&#x9;}
-&#x9;typedef &#34;uuid&#34; {
-&#x9;&#x9;type &#34;string&#34; {
-&#x9;&#x9;&#x9;pattern &#34;[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}&#34;;
-&#x9;&#x9;}
-&#x9;&#x9;description &#34;A Universally Unique IDentifier in the string representation
-&#x9;&#x9;             defined in RFC 4122.  The canonical representation uses
-&#x9;&#x9;             lowercase characters.
-&#x9;&#x9;             
-&#x9;&#x9;             The following is an example of a UUID in string representation:
-&#x9;&#x9;             f81d4fae-7dec-11d0-a765-00a0c91e6bf6
-&#x9;&#x9;             &#34;;
-&#x9;&#x9;reference &#34;RFC 4122: A Universally Unique IDentifier (UUID) URN
-&#x9;&#x9;                     Namespace&#34;;
-&#x9;}
-&#x9;typedef &#34;dotted-quad&#34; {
-&#x9;&#x9;type &#34;string&#34; {
-&#x9;&#x9;&#x9;pattern &#34;(([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])&#34;;
-&#x9;&#x9;}
-&#x9;&#x9;description &#34;An unsigned 32-bit number expressed in the dotted-quad
-&#x9;&#x9;             notation, i.e., four octets written as decimal numbers
-&#x9;&#x9;             and separated with the &#39;.&#39; (full stop) character.&#34;;
-&#x9;}
+  organization
+    "IETF NETMOD (NETCONF Data Modeling Language) Working Group";
+  contact
+    "WG Web:   &lt;http://tools.ietf.org/wg/netmod/&gt;
+     WG List:  &lt;mailto:netmod@ietf.org&gt;
+
+     WG Chair: David Kessens
+               &lt;mailto:david.kessens@nsn.com&gt;
+
+     WG Chair: Juergen Schoenwaelder
+               &lt;mailto:j.schoenwaelder@jacobs-university.de&gt;
+
+     Editor:   Juergen Schoenwaelder
+               &lt;mailto:j.schoenwaelder@jacobs-university.de&gt;";
+  description
+    "This module contains a collection of generally useful derived
+     YANG data types.
+
+     Copyright (c) 2013 IETF Trust and the persons identified as
+     authors of the code.  All rights reserved.
+
+     Redistribution and use in source and binary forms, with or
+     without 
+#1024
+modification, is permitted pursuant to, and subject
+     to the license terms contained in, the Simplified BSD License
+     set forth in Section 4.c of the IETF Trust's Legal Provisions
+     Relating to IETF Documents
+     (http://trustee.ietf.org/license-info).
+
+     This version of this YANG module is part of RFC 6991; see
+     the RFC itself for full legal notices.";
+
+  revision 2013-07-15 {
+    description
+      "This revision adds the following new data types:
+       - yang-identifier
+       - hex-string
+       - uuid
+       - dotted-quad";
+    reference
+      "RFC 6991: Common YANG Data Types";
+  }
+  revision 2010-09-24 {
+    description
+      "Initial revision.";
+    reference
+      "RFC 6021: Common YANG Data Types";
+  }
+
+  typedef counter32 {
+    type uint32;
+    description
+      "The counter32 type represents a non-negative integer
+       that monotonically increases until it reaches a
+       maximum value of 2^32-1 (4294967295 decimal), when it
+       wraps around and starts increasing again from 
+#1024
+zero.
+
+       Counters have no defined 'initial' value, and thus, a
+       single value of a counter has (in general) no information
+       content.  Discontinuities in the monotonically increasing
+       value normally occur at re-initialization of the
+       management system, and at other times as specified in the
+       description of a schema node using this type.  If such
+       other times can occur, for example, the creation of
+       a schema node of type counter32 at times other than
+       re-initialization, then a corresponding schema node
+       should be defined, with an appropriate type, to indicate
+       the last discontinuity.
+
+       The counter32 type should not be used for configuration
+       schema nodes.  A default statement SHOULD NOT be used in
+       combination with the type counter32.
+
+       In the value set and its semantics, this type is equivalent
+       to the Counter32 type of the SMIv2.";
+    reference
+      "RFC 2578: Structure of Management Information Version 2
+         
+#1024
+        (SMIv2)";
+  }
+
+  typedef zero-based-counter32 {
+    type yang:counter32;
+    default "0";
+    description
+      "The zero-based-counter32 type represents a counter32
+       that has the defined 'initial' value zero.
+
+       A schema node of this type will be set to zero (0) on creation
+       and will thereafter increase monotonically until it reaches
+       a maximum value of 2^32-1 (4294967295 decimal), when it
+       wraps around and starts increasing again from zero.
+
+       Provided that an application discovers a new schema node
+       of this type within the minimum time to wrap, it can use the
+       'initial' value as a delta.  It is important for a management
+       station to be aware of this minimum time and the actual time
+       between polls, and to discard data if the actual time is too
+       long or there is no defined minimum time.
+
+       In the value set and its semantics, this type is equivalent
+       to the ZeroBasedCounter32 textual convention of the SMIv2.";
+    reference
+   
+#1024
+   "RFC 4502: Remote Network Monitoring Management Information
+                 Base Version 2";
+  }
+
+  typedef counter64 {
+    type uint64;
+    description
+      "The counter64 type represents a non-negative integer
+       that monotonically increases until it reaches a
+       maximum value of 2^64-1 (18446744073709551615 decimal),
+       when it wraps around and starts increasing again from zero.
+
+       Counters have no defined 'initial' value, and thus, a
+       single value of a counter has (in general) no information
+       content.  Discontinuities in the monotonically increasing
+       value normally occur at re-initialization of the
+       management system, and at other times as specified in the
+       description of a schema node using this type.  If such
+       other times can occur, for example, the creation of
+       a schema node of type counter64 at times other than
+       re-initialization, then a corresponding schema node
+       should be defined, with an appropriate type, to indicate
+      
+#1024
+ the last discontinuity.
+
+       The counter64 type should not be used for configuration
+       schema nodes.  A default statement SHOULD NOT be used in
+       combination with the type counter64.
+
+       In the value set and its semantics, this type is equivalent
+       to the Counter64 type of the SMIv2.";
+    reference
+      "RFC 2578: Structure of Management Information Version 2
+                 (SMIv2)";
+  }
+
+  typedef zero-based-counter64 {
+    type yang:counter64;
+    default "0";
+    description
+      "The zero-based-counter64 type represents a counter64 that
+       has the defined 'initial' value zero.
+
+       A schema node of this type will be set to zero (0) on creation
+       and will thereafter increase monotonically until it reaches
+       a maximum value of 2^64-1 (18446744073709551615 decimal),
+       when it wraps around and starts increasing again from zero.
+
+       Provided that an application discovers a new schema node
+       of this type within the minimum time to wrap, it can use the
+ 
+#1024
+      'initial' value as a delta.  It is important for a management
+       station to be aware of this minimum time and the actual time
+       between polls, and to discard data if the actual time is too
+       long or there is no defined minimum time.
+
+       In the value set and its semantics, this type is equivalent
+       to the ZeroBasedCounter64 textual convention of the SMIv2.";
+    reference
+      "RFC 2856: Textual Conventions for Additional High Capacity
+                 Data Types";
+  }
+
+  typedef gauge32 {
+    type uint32;
+    description
+      "The gauge32 type represents a non-negative integer, which
+       may increase or decrease, but shall never exceed a maximum
+       value, nor fall below a minimum value.  The maximum value
+       cannot be greater than 2^32-1 (4294967295 decimal), and
+       the minimum value cannot be smaller than 0.  The value of
+       a gauge32 has its maximum value whenever the information
+       being modeled is greater than or equal to its maximum
+       value, and 
+#1024
+has its minimum value whenever the information
+       being modeled is smaller than or equal to its minimum value.
+       If the information being modeled subsequently decreases
+       below (increases above) the maximum (minimum) value, the
+       gauge32 also decreases (increases).
+
+       In the value set and its semantics, this type is equivalent
+       to the Gauge32 type of the SMIv2.";
+    reference
+      "RFC 2578: Structure of Management Information Version 2
+                 (SMIv2)";
+  }
+
+  typedef gauge64 {
+    type uint64;
+    description
+      "The gauge64 type represents a non-negative integer, which
+       may increase or decrease, but shall never exceed a maximum
+       value, nor fall below a minimum value.  The maximum value
+       cannot be greater than 2^64-1 (18446744073709551615), and
+       the minimum value cannot be smaller than 0.  The value of
+       a gauge64 has its maximum value whenever the information
+       being modeled is greater than or equal to its maximum
+       value, a
+#1024
+nd has its minimum value whenever the information
+       being modeled is smaller than or equal to its minimum value.
+       If the information being modeled subsequently decreases
+       below (increases above) the maximum (minimum) value, the
+       gauge64 also decreases (increases).
+
+       In the value set and its semantics, this type is equivalent
+       to the CounterBasedGauge64 SMIv2 textual convention defined
+       in RFC 2856";
+    reference
+      "RFC 2856: Textual Conventions for Additional High Capacity
+                 Data Types";
+  }
+
+  typedef object-identifier {
+    type string {
+      pattern '(([0-1](\.[1-3]?[0-9]))|(2\.(0|([1-9]\d*))))(\.(0|([1-9]\d*)))*';
+    }
+    description
+      "The object-identifier type represents administratively
+       assigned names in a registration-hierarchical-name tree.
+
+       Values of this type are denoted as a sequence of numerical
+       non-negative sub-identifier values.  Each sub-identifier
+       value MUST NOT exceed 2^32-1 (4294967295).  Sub-id
+#1024
+entifiers
+       are separated by single dots and without any intermediate
+       whitespace.
+
+       The ASN.1 standard restricts the value space of the first
+       sub-identifier to 0, 1, or 2.  Furthermore, the value space
+       of the second sub-identifier is restricted to the range
+       0 to 39 if the first sub-identifier is 0 or 1.  Finally,
+       the ASN.1 standard requires that an object identifier
+       has always at least two sub-identifiers.  The pattern
+       captures these restrictions.
+
+       Although the number of sub-identifiers is not limited,
+       module designers should realize that there may be
+       implementations that stick with the SMIv2 limit of 128
+       sub-identifiers.
+
+       This type is a superset of the SMIv2 OBJECT IDENTIFIER type
+       since it is not restricted to 128 sub-identifiers.  Hence,
+       this type SHOULD NOT be used to represent the SMIv2 OBJECT
+       IDENTIFIER type; the object-identifier-128 type SHOULD be
+       used instead.";
+    reference
+    
+#1024
+  "ISO9834-1: Information technology -- Open Systems
+       Interconnection -- Procedures for the operation of OSI
+       Registration Authorities: General procedures and top
+       arcs of the ASN.1 Object Identifier tree";
+  }
+
+  typedef object-identifier-128 {
+    type object-identifier {
+      pattern '\d*(\.\d*){1,127}';
+    }
+    description
+      "This type represents object-identifiers restricted to 128
+       sub-identifiers.
+
+       In the value set and its semantics, this type is equivalent
+       to the OBJECT IDENTIFIER type of the SMIv2.";
+    reference
+      "RFC 2578: Structure of Management Information Version 2
+                 (SMIv2)";
+  }
+
+  typedef yang-identifier {
+    type string {
+      length "1..max";
+      pattern '[a-zA-Z_][a-zA-Z0-9\-_.]*';
+      pattern '.|..|[^xX].*|.[^mM].*|..[^lL].*';
+    }
+    description
+      "A YANG identifier string as defined by the 'identifier'
+       rule in Section 12 of RFC 6020.  An identifier must
+       start with an alphabetic character or an un
+#1024
+derscore
+       followed by an arbitrary sequence of alphabetic or
+       numeric characters, underscores, hyphens, or dots.
+
+       A YANG identifier MUST NOT start with any possible
+       combination of the lowercase or uppercase character
+       sequence 'xml'.";
+    reference
+      "RFC 6020: YANG - A Data Modeling Language for the Network
+                 Configuration Protocol (NETCONF)";
+  }
+
+  typedef date-and-time {
+    type string {
+      pattern '\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[\+\-]\d{2}:\d{2})';
+    }
+    description
+      "The date-and-time type is a profile of the ISO 8601
+       standard for representation of dates and times using the
+       Gregorian calendar.  The profile is defined by the
+       date-time production in Section 5.6 of RFC 3339.
+
+       The date-and-time type is compatible with the dateTime XML
+       schema type with the following notable exceptions:
+
+       (a) The date-and-time type does not allow negative years.
+
+       (b) The date-and-time time-offset -0
+#1024
+0:00 indicates an unknown
+           time zone (see RFC 3339) while -00:00 and +00:00 and Z
+           all represent the same time zone in dateTime.
+
+       (c) The canonical format (see below) of data-and-time values
+           differs from the canonical format used by the dateTime XML
+           schema type, which requires all times to be in UTC using
+           the time-offset 'Z'.
+
+       This type is not equivalent to the DateAndTime textual
+       convention of the SMIv2 since RFC 3339 uses a different
+       separator between full-date and full-time and provides
+       higher resolution of time-secfrac.
+
+       The canonical format for date-and-time values with a known time
+       zone uses a numeric time zone offset that is calculated using
+       the device's configured known offset to UTC time.  A change of
+       the device's offset to UTC time will cause date-and-time values
+       to change accordingly.  Such changes might happen periodically
+       in case a server follows automatically daylight
+#1024
+ saving time
+       (DST) time zone offset changes.  The canonical format for
+       date-and-time values with an unknown time zone (usually
+       referring to the notion of local time) uses the time-offset
+       -00:00.";
+    reference
+      "RFC 3339: Date and Time on the Internet: Timestamps
+       RFC 2579: Textual Conventions for SMIv2
+       XSD-TYPES: XML Schema Part 2: Datatypes Second Edition";
+  }
+
+  typedef timeticks {
+    type uint32;
+    description
+      "The timeticks type represents a non-negative integer that
+       represents the time, modulo 2^32 (4294967296 decimal), in
+       hundredths of a second between two epochs.  When a schema
+       node is defined that uses this type, the description of
+       the schema node identifies both of the reference epochs.
+
+       In the value set and its semantics, this type is equivalent
+       to the TimeTicks type of the SMIv2.";
+    reference
+      "RFC 2578: Structure of Management Information Version 2
+                 (SMIv2)";
+  }
+
+  typedef t
+#1024
+imestamp {
+    type yang:timeticks;
+    description
+      "The timestamp type represents the value of an associated
+       timeticks schema node at which a specific occurrence
+       happened.  The specific occurrence must be defined in the
+       description of any schema node defined using this type.  When
+       the specific occurrence occurred prior to the last time the
+       associated timeticks attribute was zero, then the timestamp
+       value is zero.  Note that this requires all timestamp values
+       to be reset to zero when the value of the associated timeticks
+       attribute reaches 497+ days and wraps around to zero.
+
+       The associated timeticks schema node must be specified
+       in the description of any schema node using this type.
+
+       In the value set and its semantics, this type is equivalent
+       to the TimeStamp textual convention of the SMIv2.";
+    reference
+      "RFC 2579: Textual Conventions for SMIv2";
+  }
+
+  typedef phys-address {
+    type string {
+      pattern '([0
+#1024
+-9a-fA-F]{2}(:[0-9a-fA-F]{2})*)?';
+    }
+    description
+      "Represents media- or physical-level addresses represented
+       as a sequence octets, each octet represented by two hexadecimal
+       numbers.  Octets are separated by colons.  The canonical
+       representation uses lowercase characters.
+
+       In the value set and its semantics, this type is equivalent
+       to the PhysAddress textual convention of the SMIv2.";
+    reference
+      "RFC 2579: Textual Conventions for SMIv2";
+  }
+
+  typedef mac-address {
+    type string {
+      pattern '[0-9a-fA-F]{2}(:[0-9a-fA-F]{2}){5}';
+    }
+    description
+      "The mac-address type represents an IEEE 802 MAC address.
+       The canonical representation uses lowercase characters.
+
+       In the value set and its semantics, this type is equivalent
+       to the MacAddress textual convention of the SMIv2.";
+    reference
+      "IEEE 802: IEEE Standard for Local and Metropolitan Area
+                 Networks: Overview and Architecture
+       RFC 2579: Tex
+#1024
+tual Conventions for SMIv2";
+  }
+
+  typedef xpath1.0 {
+    type string;
+    description
+      "This type represents an XPATH 1.0 expression.
+
+       When a schema node is defined that uses this type, the
+       description of the schema node MUST specify the XPath
+       context in which the XPath expression is evaluated.";
+    reference
+      "XPATH: XML Path Language (XPath) Version 1.0";
+  }
+
+  typedef hex-string {
+    type string {
+      pattern '([0-9a-fA-F]{2}(:[0-9a-fA-F]{2})*)?';
+    }
+    description
+      "A hexadecimal string with octets represented as hex digits
+       separated by colons.  The canonical representation uses
+       lowercase characters.";
+  }
+
+  typedef uuid {
+    type string {
+      pattern '[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}';
+    }
+    description
+      "A Universally Unique IDentifier in the string representation
+       defined in RFC 4122.  The canonical representation uses
+       lowercase characters.
+
+       The following is an exampl
+#597
+e of a UUID in string representation:
+       f81d4fae-7dec-11d0-a765-00a0c91e6bf6
+       ";
+    reference
+      "RFC 4122: A Universally Unique IDentifier (UUID) URN
+                 Namespace";
+  }
+
+  typedef dotted-quad {
+    type string {
+      pattern '(([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])';
+    }
+    description
+      "An unsigned 32-bit number expressed in the dotted-quad
+       notation, i.e., four octets written as decimal numbers
+       and separated with the '.' (full stop) character.";
+  }
 }
 </data></rpc-reply>
 ##

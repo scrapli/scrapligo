@@ -1,6 +1,7 @@
 package cli_test
 
 import (
+	"bytes"
 	"os"
 	"runtime"
 	"strings"
@@ -164,4 +165,23 @@ func closeDriver(t *testing.T, d *scrapligocli.Driver) {
 	t.Helper()
 
 	d.Close()
+}
+
+func assertResult(t *testing.T, r *scrapligocli.Result, testGoldenPath string) {
+	t.Helper()
+
+	cleanedActual := scrapligotesthelper.CleanCliOutput(t, r.Result)
+
+	testGoldenContent := scrapligotesthelper.ReadFile(t, testGoldenPath)
+
+	if !bytes.Equal(cleanedActual, testGoldenContent) {
+		scrapligotesthelper.FailOutput(t, cleanedActual, testGoldenContent)
+	}
+
+	scrapligotesthelper.AssertNotDefault(t, r.StartTime)
+	scrapligotesthelper.AssertNotDefault(t, r.EndTime)
+	scrapligotesthelper.AssertNotDefault(t, r.ElapsedTimeSeconds)
+	scrapligotesthelper.AssertNotDefault(t, r.Host)
+	scrapligotesthelper.AssertNotDefault(t, r.ResultRaw)
+	scrapligotesthelper.AssertEqual(t, false, r.Failed)
 }

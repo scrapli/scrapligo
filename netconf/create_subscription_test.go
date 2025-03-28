@@ -45,7 +45,7 @@ func TestCreateSubscription(t *testing.T) {
 			ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 			defer cancel()
 
-			n := getAltDriver(t, testFixturePath)
+			n := getDriver(t, testFixturePath)
 
 			_, err = n.Open(ctx)
 			if err != nil {

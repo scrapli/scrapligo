@@ -15,30 +15,11 @@ func TestCommit(t *testing.T) {
 	parentName := "commit"
 
 	cases := map[string]struct {
-		description   string
-		config        string
-		cleanupConfig string
-		options       []scrapligonetconf.Option
+		description string
+		options     []scrapligonetconf.Option
 	}{
 		"simple": {
 			description: "simple - commit a simple candidate config",
-			config: `
-			<interfaces xmlns="http://openconfig.net/yang/interfaces">
-			  <interface>
-			    <name>Loopback100</name>
-			    <config>
-			      <description>boop</description>
-			    </config>
-			  </interface>
-			</interfaces>
-			`,
-			cleanupConfig: `
-			<interfaces xmlns="http://openconfig.net/yang/interfaces">
-			  <interface operation="delete">
-				<name>Loopback100</name>
-			  </interface>
-			</interfaces>
-			`,
 			options: []scrapligonetconf.Option{
 				scrapligonetconf.WithTargetType(scrapligonetconf.DatastoreTypeCandidate),
 			},
@@ -73,22 +54,7 @@ func TestCommit(t *testing.T) {
 
 			defer closeDriver(t, n)
 
-			_, err = n.EditConfig(ctx, c.config, c.options...)
-			if err != nil {
-				t.Fatal(err)
-			}
-
 			r, err := n.Commit(ctx, c.options...)
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			_, err = n.EditConfig(ctx, c.cleanupConfig, c.options...)
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			_, err = n.Commit(ctx, c.options...)
 			if err != nil {
 				t.Fatal(err)
 			}

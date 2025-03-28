@@ -1,5 +1,7 @@
 package netconf
 
+import "strings"
+
 // NewResult prepares a new Result object from ffi integration pointers (the pointers we pass to
 // zig for it to populate the values of stuff).
 func NewResult(
@@ -10,6 +12,8 @@ func NewResult(
 	endTime uint64,
 	resultRaw []byte,
 	result string,
+	warnings string,
+	errors string,
 ) *Result {
 	return &Result{
 		Host:      host,
@@ -19,6 +23,8 @@ func NewResult(
 		Result:    result,
 		StartTime: startTime,
 		EndTime:   endTime,
+		Warnings:  strings.Split(warnings, "\n"),
+		Errors:    strings.Split(errors, "\n"),
 	}
 }
 
@@ -33,4 +39,6 @@ type Result struct {
 	EndTime            uint64
 	ElapsedTimeSeconds float64
 	Failed             bool
+	Warnings           []string
+	Errors             []string
 }

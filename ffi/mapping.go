@@ -142,7 +142,10 @@ type NetconfMapping struct {
 		done *bool,
 		inputSize,
 		resultRawSize,
-		resultSize *uint64,
+		resultSize,
+		rpcWarningsSize,
+		rpcErrorsSize,
+		errSize *uint64,
 	) int
 	// FetchOperation polls the given operationID. See CliMapping.FetchOperation for details.
 	FetchOperation func(
@@ -152,7 +155,10 @@ type NetconfMapping struct {
 		resultEndTime *uint64,
 		input,
 		resultRaw,
-		result *[]byte,
+		result,
+		rpcWarnings,
+		rpcErrors,
+		err *[]byte,
 	) int
 
 	// GetConfig submits a GetConfig operation to the underlying driver. The driver populates the
@@ -301,16 +307,16 @@ type NetconfMapping struct {
 		operationID *uint32,
 		cancel *bool,
 		id uint64,
-		stream,
-		filter,
-		filterType,
-		filterNamespacePrefix,
-		filterNamespace string,
 		period uint64,
 		stopTime uint64,
 		dscp uint8,
 		weighting uint8,
 		dependency uint32,
+		stream,
+		filter,
+		filterType,
+		filterNamespacePrefix,
+		filterNamespace,
 		encoding string,
 	) int
 	DeleteSubscription func(
@@ -344,15 +350,15 @@ type NetconfMapping struct {
 		driverPtr uintptr,
 		operationID *uint32,
 		cancel *bool,
+		configFilter bool,
+		maxDepth uint32,
+		withOrigin bool,
 		datastore,
 		filter,
 		filterType,
 		filterNamespacePrefix,
-		filterNamespace string,
-		configFilter bool,
-		originFilters string,
-		maxDepth uint32,
-		withOrigin bool,
+		filterNamespace,
+		originFilters,
 		defaultsType string,
 	) int
 	EditData func(

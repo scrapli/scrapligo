@@ -175,7 +175,7 @@ func (d *Driver) getResult(
 ) (*Result, error) {
 	var done bool
 
-	var inputSize, resultRawSize, resultSize, errSize uint64
+	var inputSize, resultRawSize, resultSize, rpcWarningsSize, rpcErrorsSize, errSize uint64
 
 	minNs := scrapligoconstants.DefaultReadDelayMinNs
 
@@ -211,6 +211,9 @@ func (d *Driver) getResult(
 			&inputSize,
 			&resultRawSize,
 			&resultSize,
+			&rpcWarningsSize,
+			&rpcErrorsSize,
+			&errSize,
 		)
 		if rc != 0 {
 			return nil, scrapligoerrors.NewFfiError("poll operation failed", nil)
@@ -231,6 +234,10 @@ func (d *Driver) getResult(
 
 	result := make([]byte, resultSize)
 
+	rpcWarnings := make([]byte, rpcWarningsSize)
+
+	rpcErrors := make([]byte, rpcErrorsSize)
+
 	errString := make([]byte, errSize)
 
 	rc := d.ffiMap.Netconf.FetchOperation(
@@ -241,6 +248,9 @@ func (d *Driver) getResult(
 		&input,
 		&resultRaw,
 		&result,
+		&rpcWarnings,
+		&rpcErrors,
+		&errString,
 	)
 	if rc != 0 {
 		return nil, scrapligoerrors.NewFfiError("fetch operation result failed", nil)
@@ -258,5 +268,7 @@ func (d *Driver) getResult(
 		resultEndTime,
 		resultRaw,
 		string(result),
+		string(rpcWarnings),
+		string(rpcErrors),
 	), nil
 }

@@ -57,15 +57,15 @@ func (d *Driver) GetData(
 		d.ptr,
 		&operationID,
 		&cancel,
+		loadedOptions.configFilter,
+		loadedOptions.maxDepth,
+		loadedOptions.withOrigin,
 		loadedOptions.datastore.String(),
 		loadedOptions.filter,
 		loadedOptions.filterType.String(),
 		loadedOptions.filterNamespacePrefix,
 		loadedOptions.filterNamespace,
-		loadedOptions.configFilter,
 		loadedOptions.originFilters,
-		loadedOptions.maxDepth,
-		loadedOptions.withOrigin,
 		loadedOptions.defaultsType.String(),
 	)
 	if status != 0 {

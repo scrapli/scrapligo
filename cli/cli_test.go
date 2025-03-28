@@ -82,4 +82,5 @@ func assertResult(t *testing.T, r *scrapligocli.Result, testGoldenPath string) {
 	scrapligotesthelper.AssertNotDefault(t, r.ElapsedTimeSeconds)
 	scrapligotesthelper.AssertNotDefault(t, r.Host)
 	scrapligotesthelper.AssertNotDefault(t, r.ResultRaw)
+	scrapligotesthelper.AssertEqual(t, false, r.Failed)
 }

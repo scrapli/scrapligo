@@ -28,9 +28,9 @@ func getDriver(t *testing.T, f string) *scrapligonetconf.Driver {
 		// note that netconf-admin bypasses enable secret stuff, without this was getting
 		// permission denied committing things and such... but wanted to retain the enable
 		// secret stuff since its nice to validate default mode gets acquired and stuff
-		scrapligooptions.WithUsername("netconf-admin"),
-		scrapligooptions.WithPassword("admin"),
-		scrapligooptions.WithPort(22830),
+		scrapligooptions.WithUsername("root"),
+		scrapligooptions.WithPassword("password"),
+		scrapligooptions.WithPort(23830),
 	}
 
 	if *scrapligotesthelper.Record {
@@ -51,44 +51,6 @@ func getDriver(t *testing.T, f string) *scrapligonetconf.Driver {
 
 	d, err := scrapligonetconf.NewDriver(
 		testHost,
-		opts...,
-	)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	return d
-}
-
-func getAltDriver(t *testing.T, f string) *scrapligonetconf.Driver {
-	t.Helper()
-
-	// TODO - in progress for testing stuff w/ devnet sandbox iosxe for stuff that eos/srl dont
-	//  support (looks like at least some subscription stuff to start, though didnt look close)
-	opts := []scrapligooptions.Option{
-		scrapligooptions.WithUsername("admin"),
-		scrapligooptions.WithPassword("admin"),
-		// scrapligooptions.WithLoggerCallback(scrapligologging.FfiLogger),
-	}
-
-	if *scrapligotesthelper.Record {
-		opts = append(
-			opts,
-			scrapligooptions.WithSessionRecorderPath(f),
-		)
-	} else {
-		opts = append(
-			opts,
-			scrapligooptions.WithTransportTest(),
-			scrapligooptions.WithTestTransportF(f),
-			scrapligooptions.WithReadSize(1),
-			// see libscrapli notes in integration netconf tests
-			scrapligooptions.WithOperationMaxSearchDepth(32),
-		)
-	}
-
-	d, err := scrapligonetconf.NewDriver(
-		altTestHost,
 		opts...,
 	)
 	if err != nil {
@@ -127,4 +89,5 @@ func assertResult(t *testing.T, r *scrapligonetconf.Result, testGoldenPath strin
 	scrapligotesthelper.AssertNotDefault(t, r.ElapsedTimeSeconds)
 	scrapligotesthelper.AssertNotDefault(t, r.Host)
 	scrapligotesthelper.AssertNotDefault(t, r.ResultRaw)
+	scrapligotesthelper.AssertEqual(t, false, r.Failed)
 }

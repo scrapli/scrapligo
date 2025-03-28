@@ -16,22 +16,10 @@ func TestDiscard(t *testing.T) {
 
 	cases := map[string]struct {
 		description string
-		config      string
 		options     []scrapligonetconf.Option
 	}{
 		"simple": {
 			description: "simple - load a candidate config and discard it",
-			config: `
-			<interfaces xmlns="http://openconfig.net/yang/interfaces">
-			  <interface>
-			    <name>Loopback100</name>
-			    <config>
-			      <name>Loopback100</name>
-			      <description>boop</description>
-			    </config>
-			  </interface>
-			</interfaces>
-			`,
 			options: []scrapligonetconf.Option{
 				scrapligonetconf.WithTargetType(scrapligonetconf.DatastoreTypeCandidate),
 			},
@@ -65,11 +53,6 @@ func TestDiscard(t *testing.T) {
 			}
 
 			defer closeDriver(t, n)
-
-			_, err = n.EditConfig(ctx, c.config, c.options...)
-			if err != nil {
-				t.Fatal(err)
-			}
 
 			r, err := n.Discard(ctx, c.options...)
 			if err != nil {
