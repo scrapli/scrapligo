@@ -1,0 +1,48 @@
+#!/build/venv/bin/python
+import signal
+import sys
+import time
+import threading
+
+import sysrepo
+
+counter_value = 0
+
+
+def main():
+    try:
+        with sysrepo.SysrepoConnection() as conn:
+            with conn.start_session() as sess:
+                sess.subscribe_module_change("boring-counter", None, boring_counter_change_cb)
+                threading.Thread(target=update_counter_periodically, args=(sess,), daemon=True).start()
+
+                signal.sigwait({signal.SIGINT, signal.SIGTERM})
+        return 0
+    except sysrepo.SysrepoError:
+        return 1
+
+
+def boring_counter_change_cb(event, req_id, changes, private_data):
+    _, _, _ = event, req_id, private_data
+
+    print("========================")
+    print("boring counter update:")
+    for c in changes:
+        print("change: %s" % c)
+
+    return 0
+
+
+def update_counter_periodically(sess):
+    global counter_value
+
+    while True:
+        counter_value += 1
+        xpath = "/boring-counter:system/counter"
+        sess.set_item(xpath, counter_value)
+        sess.apply_changes()
+        time.sleep(1)
+
+
+if __name__ == "__main__":
+    sys.exit(main())

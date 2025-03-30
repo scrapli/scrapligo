@@ -12,10 +12,10 @@ func NewResult(
 	endTime uint64,
 	resultRaw []byte,
 	result string,
-	warnings string,
-	errors string,
+	warnings []byte,
+	errors []byte,
 ) *Result {
-	return &Result{
+	r := &Result{
 		Host:      host,
 		Port:      port,
 		Input:     input,
@@ -23,9 +23,16 @@ func NewResult(
 		Result:    result,
 		StartTime: startTime,
 		EndTime:   endTime,
-		Warnings:  strings.Split(warnings, "\n"),
-		Errors:    strings.Split(errors, "\n"),
+		Warnings:  strings.Split(string(warnings), "\n"),
+		Errors:    strings.Split(string(errors), "\n"),
 	}
+
+	if len(errors) > 0 {
+		// only errors == failure, warnings are just... warnings
+		r.Failed = true
+	}
+
+	return r
 }
 
 // Result is a struct returned from all Cli operations.

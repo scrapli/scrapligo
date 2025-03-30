@@ -22,11 +22,11 @@ func TestAction(t *testing.T) {
 		"simple": {
 			description: "simple",
 			action: `
-			<interfaces xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces">
-			  <interface>
-				<name>eth0</name>
-			  </interface>
-			</interfaces>`,
+			<system xmlns="urn:dummy:actions">
+			  <reboot>
+				<delay>5</delay>
+			  </reboot>
+			</system>`,
 			options: []scrapligonetconf.Option{},
 		},
 	}

@@ -61,10 +61,6 @@ func WithFilter(s string) Option {
 			to.filter = s
 		case *getOptions:
 			to.filter = s
-		case *createSubscriptionOptions:
-			to.filter = s
-		case *establishSubscriptionOptions:
-			to.filter = s
 		}
 	}
 }
@@ -137,76 +133,6 @@ func WithVersion(s string) Option {
 	}
 }
 
-// WithStartTime apply a start time argument for the rpc.
-func WithStartTime(i uint64) Option {
-	return func(o any) {
-		switch to := o.(type) {
-		case *createSubscriptionOptions:
-			to.startTime = i
-		}
-	}
-}
-
-// WithStopTime apply a stop time argument for the rpc.
-func WithStopTime(i uint64) Option {
-	return func(o any) {
-		switch to := o.(type) {
-		case *createSubscriptionOptions:
-			to.stopTime = i
-		}
-	}
-}
-
-// WithPeriod apply a period argument for the rpc.
-func WithPeriod(i uint64) Option {
-	return func(o any) {
-		switch to := o.(type) {
-		case *establishSubscriptionOptions:
-			to.period = i
-		}
-	}
-}
-
-// WithDSCP apply a dscp argument for the rpc.
-func WithDSCP(i uint8) Option {
-	return func(o any) {
-		switch to := o.(type) {
-		case *establishSubscriptionOptions:
-			to.dscp = i
-		}
-	}
-}
-
-// WithWeighting apply a weighting argument for the rpc.
-func WithWeighting(i uint8) Option {
-	return func(o any) {
-		switch to := o.(type) {
-		case *establishSubscriptionOptions:
-			to.dscp = i
-		}
-	}
-}
-
-// WithDependency apply a dependency argument for the rpc.
-func WithDependency(i uint32) Option {
-	return func(o any) {
-		switch to := o.(type) {
-		case *establishSubscriptionOptions:
-			to.dependency = i
-		}
-	}
-}
-
-// WithEncoding apply an encoding argument for the rpc.
-func WithEncoding(s string) Option {
-	return func(o any) {
-		switch to := o.(type) {
-		case *establishSubscriptionOptions:
-			to.encoding = s
-		}
-	}
-}
-
 // WithConfigFilter apply the config filter option for the rpc.
 func WithConfigFilter() Option {
 	return func(o any) {
@@ -233,20 +159,6 @@ func WithOrigin() Option {
 		switch to := o.(type) {
 		case *getDataOptions:
 			to.withOrigin = true
-		}
-	}
-}
-
-// WithStreamValue apply a stream value for the rpc.
-func WithStreamValue(s string) Option {
-	return func(o any) {
-		switch to := o.(type) {
-		case *createSubscriptionOptions:
-			to.stream = s
-		case *establishSubscriptionOptions:
-			to.stream = s
-		case *modifySubscriptionOptions:
-			to.stream = s
 		}
 	}
 }

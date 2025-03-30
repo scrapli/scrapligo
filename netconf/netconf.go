@@ -268,7 +268,7 @@ func (d *Driver) getResult(
 		resultEndTime,
 		resultRaw,
 		string(result),
-		string(rpcWarnings),
-		string(rpcErrors),
+		rpcWarnings,
+		rpcErrors,
 	), nil
 }

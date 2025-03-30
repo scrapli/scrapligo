@@ -161,6 +161,15 @@ type NetconfMapping struct {
 		err *[]byte,
 	) int
 
+	// RawRPC submits a user defined rpc -- the library will ensure it is properly delimited but the
+	// given payload must be valid/correct.
+	RawRPC func(
+		driverPtr uintptr,
+		operationID *uint32,
+		cancel *bool,
+		payload string,
+	) int
+
 	// GetConfig submits a GetConfig operation to the underlying driver. The driver populates the
 	// operationID into the uint32 pointer.
 	GetConfig func(
@@ -272,70 +281,6 @@ type NetconfMapping struct {
 		operationID *uint32,
 		cancel *bool,
 		source string,
-	) int
-
-	CreateSubscription func(
-		driverPtr uintptr,
-		operationID *uint32,
-		cancel *bool,
-		stream,
-		filter,
-		filterType,
-		filterNamespacePrefix,
-		filterNamespace string,
-		startTime,
-		stopTime uint64,
-	) int
-	EstablishSubscription func(
-		driverPtr uintptr,
-		operationID *uint32,
-		cancel *bool,
-		period,
-		stopTime uint64,
-		dscp,
-		weighting uint8,
-		dependency uint32,
-		stream,
-		filter,
-		filterType,
-		filterNamespacePrefix,
-		filterNamespace,
-		encoding string,
-	) int
-	ModifySubscription func(
-		driverPtr uintptr,
-		operationID *uint32,
-		cancel *bool,
-		id uint64,
-		period uint64,
-		stopTime uint64,
-		dscp uint8,
-		weighting uint8,
-		dependency uint32,
-		stream,
-		filter,
-		filterType,
-		filterNamespacePrefix,
-		filterNamespace,
-		encoding string,
-	) int
-	DeleteSubscription func(
-		driverPtr uintptr,
-		operationID *uint32,
-		cancel *bool,
-		id uint64,
-	) int
-	ResyncSubscription func(
-		driverPtr uintptr,
-		operationID *uint32,
-		cancel *bool,
-		id uint64,
-	) int
-	KillSubscription func(
-		driverPtr uintptr,
-		operationID *uint32,
-		cancel *bool,
-		id uint64,
 	) int
 
 	GetSchema func(

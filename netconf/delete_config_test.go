@@ -20,7 +20,9 @@ func TestDeleteConfig(t *testing.T) {
 	}{
 		"simple": {
 			description: "simple",
-			options:     []scrapligonetconf.Option{},
+			options: []scrapligonetconf.Option{
+				scrapligonetconf.WithTargetType(scrapligonetconf.DatastoreTypeStartup),
+			},
 		},
 	}
 

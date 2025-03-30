@@ -30,6 +30,7 @@ func getDriver(t *testing.T, f string) *scrapligonetconf.Driver {
 		scrapligooptions.WithUsername("root"),
 		scrapligooptions.WithPassword("password"),
 		scrapligooptions.WithPort(830),
+		// scrapligooptions.WithLoggerCallback(scrapligologging.FfiLogger),
 	}
 
 	if *scrapligotesthelper.Record {

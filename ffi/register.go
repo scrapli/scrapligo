@@ -39,6 +39,8 @@ func registerNetconf(m *Mapping, libScrapliFfi uintptr) {
 		"netconfFetchOperation",
 	)
 
+	purego.RegisterLibFunc(&m.Netconf.RawRPC, libScrapliFfi, "netconfRawRpc")
+
 	purego.RegisterLibFunc(&m.Netconf.GetConfig, libScrapliFfi, "netconfGetConfig")
 	purego.RegisterLibFunc(&m.Netconf.EditConfig, libScrapliFfi, "netconfEditConfig")
 	purego.RegisterLibFunc(&m.Netconf.CopyConfig, libScrapliFfi, "netconfCopyConfig")
@@ -53,33 +55,6 @@ func registerNetconf(m *Mapping, libScrapliFfi uintptr) {
 	purego.RegisterLibFunc(&m.Netconf.Discard, libScrapliFfi, "netconfDiscard")
 	purego.RegisterLibFunc(&m.Netconf.CancelCommit, libScrapliFfi, "netconfCancelCommit")
 	purego.RegisterLibFunc(&m.Netconf.Validate, libScrapliFfi, "netconfValidate")
-
-	purego.RegisterLibFunc(
-		&m.Netconf.CreateSubscription,
-		libScrapliFfi,
-		"netconfCreateSubscription",
-	)
-	purego.RegisterLibFunc(
-		&m.Netconf.EstablishSubscription,
-		libScrapliFfi,
-		"netconfEstablishSubscription",
-	)
-	purego.RegisterLibFunc(
-		&m.Netconf.ModifySubscription,
-		libScrapliFfi,
-		"netconfModifySubscription",
-	)
-	purego.RegisterLibFunc(
-		&m.Netconf.DeleteSubscription,
-		libScrapliFfi,
-		"netconfDeleteSubscription",
-	)
-	purego.RegisterLibFunc(
-		&m.Netconf.ResyncSubscription,
-		libScrapliFfi,
-		"netconfResyncSubscription",
-	)
-	purego.RegisterLibFunc(&m.Netconf.KillSubscription, libScrapliFfi, "netconfKillSubscription")
 
 	purego.RegisterLibFunc(&m.Netconf.GetSchema, libScrapliFfi, "netconfGetSchema")
 	purego.RegisterLibFunc(&m.Netconf.GetData, libScrapliFfi, "netconfGetData")
