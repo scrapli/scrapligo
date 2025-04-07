@@ -74,6 +74,7 @@ WORKDIR /yang
 
 RUN sysrepoctl --install dummy-actions.yang
 RUN sysrepoctl --install boring-counter.yang
+RUN sysrepoctl --install some-data.yang
 
 WORKDIR /
 COPY entrypoint.sh .

@@ -23,9 +23,9 @@ def reboot(xpath, input_params, event, private_data):
     out = {"message": "bye bye"}
 
     print("========================")
-    print("rpc: %s" % xpath)
-    print("params: %s" % input_params)
-    print("returning %s" % out)
+    print(f"rpc: {xpath}")
+    print(f"params: {input_params}")
+    print(f"returning {out}")
 
     return out
 

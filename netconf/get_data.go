@@ -10,6 +10,7 @@ func newGetDataOptions(options ...Option) *getDataOptions {
 	o := &getDataOptions{
 		filterType:   FilterTypeSubtree,
 		defaultsType: DefaultsTypeUnset,
+		configFilter: ConfigFilterUnset,
 	}
 
 	for _, opt := range options {
@@ -25,7 +26,7 @@ type getDataOptions struct {
 	filterType            FilterType
 	filterNamespacePrefix string
 	filterNamespace       string
-	configFilter          bool
+	configFilter          ConfigFilter
 	originFilters         string
 	maxDepth              uint32
 	withOrigin            bool
@@ -57,7 +58,7 @@ func (d *Driver) GetData(
 		d.ptr,
 		&operationID,
 		&cancel,
-		loadedOptions.configFilter,
+		loadedOptions.configFilter.String(),
 		loadedOptions.maxDepth,
 		loadedOptions.withOrigin,
 		loadedOptions.datastore.String(),

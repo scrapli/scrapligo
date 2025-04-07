@@ -1,4 +1,1 @@
-<rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="101"><rpc-error><error-type>application</error-type><error-tag>operation-failed</error-tag><error-severity>error</error-severity><error-message xml:lang="en">Invalid union value "0" - no matching subtype found:
-    libyang 2 - integers, version 1: Unsatisfied range - value "0" is out of the allowed range.
-    libyang 2 - enumeration, version 1: Invalid enumeration value "0".
-</error-message></rpc-error></rpc-reply>
+<rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="101"><data xmlns="urn:ietf:params:xml:ns:yang:ietf-netconf-nmda"><system xmlns="urn:some:data"><hostname>foo-bar-baz</hostname><interfaces><name>eth0</name><enabled>true</enabled></interfaces></system></data></rpc-reply>

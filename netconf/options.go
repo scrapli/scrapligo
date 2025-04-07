@@ -61,6 +61,8 @@ func WithFilter(s string) Option {
 			to.filter = s
 		case *getOptions:
 			to.filter = s
+		case *getDataOptions:
+			to.filter = s
 		}
 	}
 }
@@ -134,11 +136,11 @@ func WithVersion(s string) Option {
 }
 
 // WithConfigFilter apply the config filter option for the rpc.
-func WithConfigFilter() Option {
+func WithConfigFilter(t ConfigFilter) Option {
 	return func(o any) {
 		switch to := o.(type) {
 		case *getDataOptions:
-			to.configFilter = true
+			to.configFilter = t
 		}
 	}
 }

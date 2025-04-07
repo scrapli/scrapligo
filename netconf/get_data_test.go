@@ -21,7 +21,9 @@ func TestGetData(t *testing.T) {
 	}{
 		"simple": {
 			description: "simple",
-			options:     []scrapligonetconf.Option{},
+			options: []scrapligonetconf.Option{
+				scrapligonetconf.WithFilter(`<system xmlns="urn:some:data"></system>`),
+			},
 		},
 	}
 

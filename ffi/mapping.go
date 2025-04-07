@@ -295,7 +295,7 @@ type NetconfMapping struct {
 		driverPtr uintptr,
 		operationID *uint32,
 		cancel *bool,
-		configFilter bool,
+		configFilter string,
 		maxDepth uint32,
 		withOrigin bool,
 		datastore,

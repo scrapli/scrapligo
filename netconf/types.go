@@ -64,3 +64,17 @@ const (
 	SchemaFormatRng  SchemaFormat = "rng"
 	SchemaFormatRnc  SchemaFormat = "rnc"
 )
+
+// ConfigFilter is an enum(ish) representing the valid config-filter options.
+type ConfigFilter string
+
+// String (stringer) method for ConfigFilter.
+func (t ConfigFilter) String() string {
+	return string(t)
+}
+
+const (
+	ConfigFilterTrue  = "true"
+	ConfigFilterFalse = "false"
+	ConfigFilterUnset = "unset"
+)

@@ -25,8 +25,6 @@ def main():
 def boring_counter_change_cb(event, req_id, changes, private_data):
     _, _, _ = event, req_id, private_data
 
-    print("========================")
-    print("boring counter update:")
     for c in changes:
         print("change: %s" % c)
 
