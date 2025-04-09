@@ -49,9 +49,21 @@ func TestKillSession(t *testing.T) {
 				t.Fatal(err)
 			}
 
+			n2 := getDriver(t, testFixturePath)
+
+			_, err = n2.Open(ctx)
+			if err != nil {
+				t.Fatal(err)
+			}
+
 			defer closeDriver(t, n)
 
-			r, err := n.KillSession(ctx, 1)
+			s, err := n2.GetSessionID()
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			r, err := n.KillSession(ctx, s)
 			if err != nil {
 				t.Fatal(err)
 			}

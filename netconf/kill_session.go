@@ -11,6 +11,10 @@ func (d *Driver) KillSession(
 	ctx context.Context,
 	sessionID uint64,
 ) (*Result, error) {
+	if d.ptr == 0 {
+		return nil, scrapligoerrors.NewFfiError("driver pointer nil", nil)
+	}
+
 	cancel := false
 
 	var operationID uint32

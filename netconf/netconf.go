@@ -151,6 +151,23 @@ func (d *Driver) Close() {
 	d.ffiMap.Shared.Free(d.ptr)
 }
 
+// GetSessionID returns the session-id as parsed during the capabilities exchange -- if we for some
+// reason didn't parse the session-id during capabilities exchange this will return an error.
+func (d *Driver) GetSessionID() (uint64, error) {
+	if d.ptr == 0 {
+		return 0, scrapligoerrors.NewFfiError("driver pointer nil", nil)
+	}
+
+	var sessionID uint64
+
+	status := d.ffiMap.Netconf.GetSessionID(d.ptr, &sessionID)
+	if status != 0 {
+		return 0, scrapligoerrors.NewFfiError("session-id not set", nil)
+	}
+
+	return sessionID, nil
+}
+
 func getPollDelay(curVal, minVal, maxVal uint64, backoffFactor uint8) uint64 {
 	newVal := curVal
 	newVal *= uint64(backoffFactor)

@@ -31,6 +31,10 @@ func (d *Driver) GetSchema(
 	identifier string,
 	options ...Option,
 ) (*Result, error) {
+	if d.ptr == 0 {
+		return nil, scrapligoerrors.NewFfiError("driver pointer nil", nil)
+	}
+
 	cancel := false
 
 	var operationID uint32

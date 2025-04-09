@@ -39,6 +39,8 @@ func registerNetconf(m *Mapping, libScrapliFfi uintptr) {
 		"netconfFetchOperation",
 	)
 
+	purego.RegisterLibFunc(&m.Netconf.GetSessionID, libScrapliFfi, "netconfGetSessionID")
+
 	purego.RegisterLibFunc(&m.Netconf.RawRPC, libScrapliFfi, "netconfRawRpc")
 
 	purego.RegisterLibFunc(&m.Netconf.GetConfig, libScrapliFfi, "netconfGetConfig")

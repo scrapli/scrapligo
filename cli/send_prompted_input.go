@@ -15,6 +15,10 @@ func (d *Driver) SendPromptedInput(
 	response string,
 	options ...OperationOption,
 ) (*Result, error) {
+	if d.ptr == 0 {
+		return nil, scrapligoerrors.NewFfiError("driver pointer nil", nil)
+	}
+
 	cancel := false
 
 	loadedOptions := newOperationOptions(options...)

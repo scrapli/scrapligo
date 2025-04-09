@@ -21,8 +21,18 @@ func TestEditData(t *testing.T) {
 	}{
 		"simple": {
 			description: "simple",
-			content:     "content",
-			options:     []scrapligonetconf.Option{},
+			content: `<system xmlns="urn:some:data">
+        <hostname>my-router</hostname>
+        <interfaces>
+          <name>eth0</name>
+          <enabled>true</enabled>
+        </interfaces>
+        <interfaces>
+          <name>eth1</name>
+          <enabled>false</enabled>
+        </interfaces>
+      </system>`,
+			options: []scrapligonetconf.Option{},
 		},
 	}
 

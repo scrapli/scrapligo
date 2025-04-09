@@ -28,6 +28,10 @@ func (d *Driver) DeleteConfig(
 	ctx context.Context,
 	options ...Option,
 ) (*Result, error) {
+	if d.ptr == 0 {
+		return nil, scrapligoerrors.NewFfiError("driver pointer nil", nil)
+	}
+
 	cancel := false
 
 	var operationID uint32

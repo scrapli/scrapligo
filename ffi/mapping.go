@@ -161,6 +161,12 @@ type NetconfMapping struct {
 		err *[]byte,
 	) int
 
+	// GetSessionID returns the session id of the current driver session object.
+	GetSessionID func(
+		driverPtr uintptr,
+		sessionID *uint64,
+	) int
+
 	// RawRPC submits a user defined rpc -- the library will ensure it is properly delimited but the
 	// given payload must be valid/correct.
 	RawRPC func(

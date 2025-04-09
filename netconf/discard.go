@@ -13,6 +13,10 @@ func (d *Driver) Discard(
 ) (*Result, error) {
 	_ = options
 
+	if d.ptr == 0 {
+		return nil, scrapligoerrors.NewFfiError("driver pointer nil", nil)
+	}
+
 	cancel := false
 
 	var operationID uint32

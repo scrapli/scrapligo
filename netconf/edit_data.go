@@ -29,6 +29,10 @@ func (d *Driver) EditData(
 	content string,
 	options ...Option,
 ) (*Result, error) {
+	if d.ptr == 0 {
+		return nil, scrapligoerrors.NewFfiError("driver pointer nil", nil)
+	}
+
 	cancel := false
 
 	var operationID uint32
