@@ -249,6 +249,7 @@ func (d *Driver) getResult(
 
 	minNs := scrapligoconstants.DefaultReadDelayMinNs
 
+	// TODO this seems dumb? shouldnt it just be the min to start?
 	curPollDelay := minNs * scrapligoconstants.ReadDelayMultiplier
 	if d.options.Session.ReadDelayMinNs != nil {
 		curPollDelay = *d.options.Session.ReadDelayMinNs * scrapligoconstants.ReadDelayMultiplier
@@ -263,6 +264,7 @@ func (d *Driver) getResult(
 		default:
 		}
 
+		// TODO shouldnt this be done after polling (see also curPollDelay comment)
 		// we obviously cant have too tight a loop here or cpu will go nuts and we'll block things,
 		// so we'll sleep the same as the zig read delay will be
 		curPollDelay = getPollDelay(

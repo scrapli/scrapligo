@@ -1,6 +1,7 @@
 FROM debian:bookworm-slim
 
 EXPOSE 830
+ENV PYTHONUNBUFFERED=1
 
 RUN apt-get update -yq && \
     apt-get install -yq \
@@ -51,6 +52,9 @@ RUN cmake .. && \
     make && \
     make install
 
+RUN rm -rf /build/libnetconf2-3.5.5
+COPY libnetconf2 /build/libnetconf2-3.5.5
+
 WORKDIR /build/libnetconf2-3.5.5/build
 RUN cmake .. && \
     make && \
@@ -63,7 +67,7 @@ RUN cmake .. && \
 
 WORKDIR /build/netopeer2-2.2.35/build
 RUN ldconfig && \
-    cmake .. && \
+    cmake -DTHREAD_COUNT=1 -DPOLL_IO_TIMEOUT=10000 .. && \
     make && \
     make install
 

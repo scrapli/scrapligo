@@ -16,6 +16,9 @@ func registerCli(m *Mapping, libScrapliFfi uintptr) {
 	//  driver creation/destruction
 	purego.RegisterLibFunc(&m.Cli.Alloc, libScrapliFfi, "allocCliDriver")
 
+	// TODO before we go much further should rationalize the naming of the extern funcs
+	//   so probably 1) figure out what is idiomatic for the c abi anyway, and
+	//   2) make sure things are "cli" and "netconf" and maybe "shared/common"?
 	purego.RegisterLibFunc(&m.Cli.PollOperation, libScrapliFfi, "pollOperation")
 	purego.RegisterLibFunc(&m.Cli.FetchOperation, libScrapliFfi, "fetchOperation")
 
@@ -207,6 +210,7 @@ func registerOptions(m *Mapping, libScrapliFfi uintptr) {
 	purego.RegisterLibFunc(
 		&m.Options.TransportTest.SetF,
 		libScrapliFfi,
+		// TODO shouldnt this be file? or did i name it etst... i forget
 		"setDriverOptionTestTransportF",
 	)
 }

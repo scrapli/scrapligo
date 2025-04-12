@@ -17,6 +17,8 @@ type SharedMapping struct {
 	// Close where possible.
 	Free func(driverPtr uintptr)
 
+	// TODO open/close should move to *not* shared because... they should have return values that
+	//   are results specific for cli vs netconf i would assume
 	// Open opens the driver connection of the driver at driverPtr.
 	Open func(
 		driverPtr uintptr,

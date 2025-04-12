@@ -13,7 +13,7 @@ def main():
     try:
         with sysrepo.SysrepoConnection() as conn:
             with conn.start_session() as sess:
-                sess.subscribe_module_change("boring-counter", None, boring_counter_change_cb)
+                # sess.subscribe_module_change("boring-counter", None, boring_counter_change_cb)
                 threading.Thread(target=update_counter_periodically, args=(sess,), daemon=True).start()
 
                 signal.sigwait({signal.SIGINT, signal.SIGTERM})
@@ -25,8 +25,7 @@ def main():
 def boring_counter_change_cb(event, req_id, changes, private_data):
     _, _, _ = event, req_id, private_data
 
-    for c in changes:
-        print("change: %s" % c)
+    print(changes)
 
     return 0
 
@@ -39,7 +38,11 @@ def update_counter_periodically(sess):
         xpath = "/boring-counter:system/counter"
         sess.set_item(xpath, counter_value)
         sess.apply_changes()
-        time.sleep(1)
+
+        notif_xpath = "/boring-counter:counter-update"
+        sess.notification_send(notif_xpath, {"/boring-counter:counter-update/counter-value": counter_value})
+
+        time.sleep(3)
 
 
 if __name__ == "__main__":
