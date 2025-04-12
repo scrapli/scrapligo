@@ -17,15 +17,17 @@ type SharedMapping struct {
 	// Close where possible.
 	Free func(driverPtr uintptr)
 
-	// TODO open/close should move to *not* shared because... they should have return values that
-	//   are results specific for cli vs netconf i would assume
 	// Open opens the driver connection of the driver at driverPtr.
 	Open func(
 		driverPtr uintptr,
 		operationID *uint32,
 		cancel *bool,
 	) int
-	Close func(driverPtr uintptr)
+	Close func(
+		driverPtr uintptr,
+		operationID *uint32,
+		cancel *bool,
+	) int
 
 	Read func(
 		driverPtr uintptr,
@@ -303,15 +305,15 @@ type NetconfMapping struct {
 		driverPtr uintptr,
 		operationID *uint32,
 		cancel *bool,
-		configFilter string,
-		maxDepth uint32,
-		withOrigin bool,
 		datastore,
 		filter,
 		filterType,
 		filterNamespacePrefix,
 		filterNamespace,
-		originFilters,
+		configFilter,
+		originFilters string,
+		maxDepth uint32,
+		withOrigin bool,
 		defaultsType string,
 	) int
 	EditData func(
@@ -387,8 +389,8 @@ type SessionOptions struct {
 		value uint64,
 	) int
 
-	// SetRecorderPath sets the recorder path for the driver at driverPtr.
-	SetRecorderPath func(
+	// SetRecordDestination sets the record destination path for the driver at driverPtr.
+	SetRecordDestination func(
 		driverPtr uintptr,
 		value string,
 	) int

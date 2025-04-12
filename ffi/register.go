@@ -3,68 +3,65 @@ package ffi
 import "github.com/ebitengine/purego"
 
 func registerShared(m *Mapping, libScrapliFfi uintptr) {
-	purego.RegisterLibFunc(&m.Shared.Free, libScrapliFfi, "freeDriver")
-	purego.RegisterLibFunc(&m.Shared.Open, libScrapliFfi, "openDriver")
-	purego.RegisterLibFunc(&m.Shared.Close, libScrapliFfi, "closeDriver")
+	purego.RegisterLibFunc(&m.Shared.Free, libScrapliFfi, "ls_free")
+	purego.RegisterLibFunc(&m.Shared.Open, libScrapliFfi, "ls_open")
+	purego.RegisterLibFunc(&m.Shared.Close, libScrapliFfi, "ls_close")
 
-	purego.RegisterLibFunc(&m.Shared.Read, libScrapliFfi, "readSession")
-	purego.RegisterLibFunc(&m.Shared.Write, libScrapliFfi, "writeSession")
+	purego.RegisterLibFunc(&m.Shared.Read, libScrapliFfi, "ls_read_session")
+	purego.RegisterLibFunc(&m.Shared.Write, libScrapliFfi, "ls_write_session")
 }
 
 func registerCli(m *Mapping, libScrapliFfi uintptr) {
 	// ENHANCEMENT?: is it possible to have my own register funcs that bypass reflection?
 	//  driver creation/destruction
-	purego.RegisterLibFunc(&m.Cli.Alloc, libScrapliFfi, "allocCliDriver")
+	purego.RegisterLibFunc(&m.Cli.Alloc, libScrapliFfi, "ls_alloc_cli")
 
-	// TODO before we go much further should rationalize the naming of the extern funcs
-	//   so probably 1) figure out what is idiomatic for the c abi anyway, and
-	//   2) make sure things are "cli" and "netconf" and maybe "shared/common"?
-	purego.RegisterLibFunc(&m.Cli.PollOperation, libScrapliFfi, "pollOperation")
-	purego.RegisterLibFunc(&m.Cli.FetchOperation, libScrapliFfi, "fetchOperation")
+	purego.RegisterLibFunc(&m.Cli.PollOperation, libScrapliFfi, "ls_cli_poll_operation")
+	purego.RegisterLibFunc(&m.Cli.FetchOperation, libScrapliFfi, "ls_cli_fetch_operation")
 
-	purego.RegisterLibFunc(&m.Cli.EnterMode, libScrapliFfi, "enterMode")
-	purego.RegisterLibFunc(&m.Cli.GetPrompt, libScrapliFfi, "getPrompt")
-	purego.RegisterLibFunc(&m.Cli.SendInput, libScrapliFfi, "sendInput")
-	purego.RegisterLibFunc(&m.Cli.SendPromptedInput, libScrapliFfi, "sendPromptedInput")
+	purego.RegisterLibFunc(&m.Cli.EnterMode, libScrapliFfi, "ls_cli_enter_mode")
+	purego.RegisterLibFunc(&m.Cli.GetPrompt, libScrapliFfi, "ls_cli_get_prompt")
+	purego.RegisterLibFunc(&m.Cli.SendInput, libScrapliFfi, "ls_cli_send_input")
+	purego.RegisterLibFunc(&m.Cli.SendPromptedInput, libScrapliFfi, "ls_cli_send_prompted_input")
 }
 
 func registerNetconf(m *Mapping, libScrapliFfi uintptr) {
-	purego.RegisterLibFunc(&m.Netconf.Alloc, libScrapliFfi, "allocNetconfDriver")
+	purego.RegisterLibFunc(&m.Netconf.Alloc, libScrapliFfi, "ls_alloc_netconf")
 
 	purego.RegisterLibFunc(
 		&m.Netconf.PollOperation,
 		libScrapliFfi,
-		"netconfPollOperation",
+		"ls_netconf_poll_operation",
 	)
 	purego.RegisterLibFunc(
 		&m.Netconf.FetchOperation,
 		libScrapliFfi,
-		"netconfFetchOperation",
+		"ls_netconf_fetch_operation",
 	)
 
-	purego.RegisterLibFunc(&m.Netconf.GetSessionID, libScrapliFfi, "netconfGetSessionID")
+	purego.RegisterLibFunc(&m.Netconf.GetSessionID, libScrapliFfi, "ls_netconf_get_session_id")
 
-	purego.RegisterLibFunc(&m.Netconf.RawRPC, libScrapliFfi, "netconfRawRpc")
+	purego.RegisterLibFunc(&m.Netconf.RawRPC, libScrapliFfi, "ls_netconf_raw_rpc")
 
-	purego.RegisterLibFunc(&m.Netconf.GetConfig, libScrapliFfi, "netconfGetConfig")
-	purego.RegisterLibFunc(&m.Netconf.EditConfig, libScrapliFfi, "netconfEditConfig")
-	purego.RegisterLibFunc(&m.Netconf.CopyConfig, libScrapliFfi, "netconfCopyConfig")
-	purego.RegisterLibFunc(&m.Netconf.DeleteConfig, libScrapliFfi, "netconfDeleteConfig")
-	purego.RegisterLibFunc(&m.Netconf.Lock, libScrapliFfi, "netconfLock")
-	purego.RegisterLibFunc(&m.Netconf.Unlock, libScrapliFfi, "netconfUnlock")
-	purego.RegisterLibFunc(&m.Netconf.Get, libScrapliFfi, "netconfGet")
-	purego.RegisterLibFunc(&m.Netconf.CloseSession, libScrapliFfi, "netconfCloseSession")
-	purego.RegisterLibFunc(&m.Netconf.KillSession, libScrapliFfi, "netconfKillSession")
+	purego.RegisterLibFunc(&m.Netconf.GetConfig, libScrapliFfi, "ls_netconf_get_config")
+	purego.RegisterLibFunc(&m.Netconf.EditConfig, libScrapliFfi, "ls_netconf_edit_config")
+	purego.RegisterLibFunc(&m.Netconf.CopyConfig, libScrapliFfi, "ls_netconf_copy_config")
+	purego.RegisterLibFunc(&m.Netconf.DeleteConfig, libScrapliFfi, "ls_netconf_delete_config")
+	purego.RegisterLibFunc(&m.Netconf.Lock, libScrapliFfi, "ls_netconf_lock")
+	purego.RegisterLibFunc(&m.Netconf.Unlock, libScrapliFfi, "ls_netconf_unlock")
+	purego.RegisterLibFunc(&m.Netconf.Get, libScrapliFfi, "ls_netconf_get")
+	purego.RegisterLibFunc(&m.Netconf.CloseSession, libScrapliFfi, "ls_netconf_close_session")
+	purego.RegisterLibFunc(&m.Netconf.KillSession, libScrapliFfi, "ls_netconf_kill_session")
 
-	purego.RegisterLibFunc(&m.Netconf.Commit, libScrapliFfi, "netconfCommit")
-	purego.RegisterLibFunc(&m.Netconf.Discard, libScrapliFfi, "netconfDiscard")
-	purego.RegisterLibFunc(&m.Netconf.CancelCommit, libScrapliFfi, "netconfCancelCommit")
-	purego.RegisterLibFunc(&m.Netconf.Validate, libScrapliFfi, "netconfValidate")
+	purego.RegisterLibFunc(&m.Netconf.Commit, libScrapliFfi, "ls_netconf_commit")
+	purego.RegisterLibFunc(&m.Netconf.Discard, libScrapliFfi, "ls_netconf_discard")
+	purego.RegisterLibFunc(&m.Netconf.CancelCommit, libScrapliFfi, "ls_netconf_cancel_commit")
+	purego.RegisterLibFunc(&m.Netconf.Validate, libScrapliFfi, "ls_netconf_validate")
 
-	purego.RegisterLibFunc(&m.Netconf.GetSchema, libScrapliFfi, "netconfGetSchema")
-	purego.RegisterLibFunc(&m.Netconf.GetData, libScrapliFfi, "netconfGetData")
-	purego.RegisterLibFunc(&m.Netconf.EditData, libScrapliFfi, "netconfEditData")
-	purego.RegisterLibFunc(&m.Netconf.Action, libScrapliFfi, "netconfAction")
+	purego.RegisterLibFunc(&m.Netconf.GetSchema, libScrapliFfi, "ls_netconf_get_schema")
+	purego.RegisterLibFunc(&m.Netconf.GetData, libScrapliFfi, "ls_netconf_get_data")
+	purego.RegisterLibFunc(&m.Netconf.EditData, libScrapliFfi, "ls_netconf_edit_data")
+	purego.RegisterLibFunc(&m.Netconf.Action, libScrapliFfi, "ls_netconf_action")
 }
 
 func registerOptions(m *Mapping, libScrapliFfi uintptr) {
@@ -72,145 +69,144 @@ func registerOptions(m *Mapping, libScrapliFfi uintptr) {
 	purego.RegisterLibFunc(
 		&m.Options.Session.SetReadSize,
 		libScrapliFfi,
-		"setDriverOptionSessionReadSize",
+		"ls_option_session_read_size",
 	)
 	purego.RegisterLibFunc(
 		&m.Options.Session.SetReadDelayMinNs,
 		libScrapliFfi,
-		"setDriverOptionSessionReadDelayMinNs",
+		"ls_option_session_read_delay_min_ns",
 	)
 	purego.RegisterLibFunc(
 		&m.Options.Session.SetReadDelayMaxNs,
 		libScrapliFfi,
-		"setDriverOptionSessionReadDelayMaxNs",
+		"ls_option_session_read_delay_max_ns",
 	)
 	purego.RegisterLibFunc(
 		&m.Options.Session.SetReadDelayBackoffFactor,
 		libScrapliFfi,
-		"setDriverOptionSessionReadDelayBackoffFactor",
+		"ls_option_session_read_delay_backoff_factor",
 	)
 	purego.RegisterLibFunc(
 		&m.Options.Session.SetReturnChar,
 		libScrapliFfi,
-		"setDriverOptionSessionReturnChar",
+		"ls_option_session_return_char",
 	)
 	purego.RegisterLibFunc(
 		&m.Options.Session.SetOperationTimeoutNs,
 		libScrapliFfi,
-		"setDriverOptionSessionOperationTimeoutNs",
+		"ls_option_session_operation_timeout_ns",
 	)
 	purego.RegisterLibFunc(
 		&m.Options.Session.SetOperationMaxSearchDepth,
 		libScrapliFfi,
-		"setDriverOptionSessionOperationMaxSearchDepth",
+		"ls_option_session_operation_max_search_depth",
 	)
 	purego.RegisterLibFunc(
-		&m.Options.Session.SetRecorderPath,
+		&m.Options.Session.SetRecordDestination,
 		libScrapliFfi,
-		"setDriverOptionSessionRecorderPath",
+		"ls_option_session_record_destination",
 	)
 
 	// auth
 	purego.RegisterLibFunc(
 		&m.Options.Auth.SetUsername,
 		libScrapliFfi,
-		"setDriverOptionAuthUsername",
+		"ls_option_auth_username",
 	)
 	purego.RegisterLibFunc(
 		&m.Options.Auth.SetPassword,
 		libScrapliFfi,
-		"setDriverOptionAuthPassword",
+		"ls_option_auth_password",
 	)
 	purego.RegisterLibFunc(
 		&m.Options.Auth.SetPrivateKeyPath,
 		libScrapliFfi,
-		"setDriverOptionAuthPrivateKeyPath",
+		"ls_option_auth_private_key_path",
 	)
 	purego.RegisterLibFunc(
 		&m.Options.Auth.SetPrivateKeyPassphrase,
 		libScrapliFfi,
-		"setDriverOptionAuthPrivateKeyPassphrase",
+		"ls_option_auth_private_key_passphrase",
 	)
 	purego.RegisterLibFunc(
 		&m.Options.Auth.SetDriverOptionAuthLookupKeyValue,
 		libScrapliFfi,
-		"setDriverOptionAuthLookupKeyValue",
+		"ls_option_auth_set_lookup_key_value",
 	)
 	purego.RegisterLibFunc(
 		&m.Options.Auth.SetInSessionAuthBypass,
 		libScrapliFfi,
-		"setDriverOptionAuthInSessionAuthBypass",
+		"ls_option_auth_in_session_auth_bypass",
 	)
 	purego.RegisterLibFunc(
 		&m.Options.Auth.SetUsernamePattern,
 		libScrapliFfi,
-		"setDriverOptionAuthUsernamePattern",
+		"ls_option_auth_username_pattern",
 	)
 	purego.RegisterLibFunc(
 		&m.Options.Auth.SetPasswordPattern,
 		libScrapliFfi,
-		"setDriverOptionAuthPasswordPattern",
+		"ls_option_auth_password_pattern",
 	)
 	purego.RegisterLibFunc(
 		&m.Options.Auth.SetPassphrasePattern,
 		libScrapliFfi,
-		"setDriverOptionAuthPassphrasePattern",
+		"ls_option_auth_private_key_passphrase_pattern",
 	)
 
 	// transport bin
 	purego.RegisterLibFunc(
 		&m.Options.TransportBin.SetBin,
 		libScrapliFfi,
-		"setDriverOptionBinTransportBin",
+		"ls_option_transport_bin_bin",
 	)
 	purego.RegisterLibFunc(
 		&m.Options.TransportBin.SetExtraOpenArgs,
 		libScrapliFfi,
-		"setDriverOptionBinTransportExtraOpenArgs",
+		"ls_option_transport_bin_extra_open_args",
 	)
 	purego.RegisterLibFunc(
 		&m.Options.TransportBin.SetOverrideOpenArgs,
 		libScrapliFfi,
-		"setDriverOptionBinTransportOverrideOpenArgs",
+		"ls_option_transport_bin_override_open_args",
 	)
 	purego.RegisterLibFunc(
 		&m.Options.TransportBin.SetSSHConfigPath,
 		libScrapliFfi,
-		"setDriverOptionBinTransportSSHConfigPath",
+		"ls_option_transport_bin_ssh_config_path",
 	)
 	purego.RegisterLibFunc(
 		&m.Options.TransportBin.SetKnownHostsPath,
 		libScrapliFfi,
-		"setDriverOptionBinTransportKnownHostsPath",
+		"ls_option_transport_bin_known_hosts_path",
 	)
 	purego.RegisterLibFunc(
 		&m.Options.TransportBin.SetEnableStrictKey,
 		libScrapliFfi,
-		"setDriverOptionBinTransportEnableStrictKey",
+		"ls_option_transport_bin_enable_strict_key",
 	)
 	purego.RegisterLibFunc(
 		&m.Options.TransportBin.SetTermHeight,
 		libScrapliFfi,
-		"setDriverOptionBinTransportTermHeight",
+		"ls_option_transport_bin_term_height",
 	)
 	purego.RegisterLibFunc(
 		&m.Options.TransportBin.SetTermWidth,
 		libScrapliFfi,
-		"setDriverOptionBinTransportTermWidth",
+		"ls_option_transport_bin_term_width",
 	)
 
 	// transport ssh2
 	purego.RegisterLibFunc(
 		&m.Options.TransportSSH2.SetLibSSH2Trace,
 		libScrapliFfi,
-		"setDriverOptionSSH2TransportSSH2Trace",
+		"ls_option_transport_ssh2_libssh2trace",
 	)
 
 	// transport test
 	purego.RegisterLibFunc(
 		&m.Options.TransportTest.SetF,
 		libScrapliFfi,
-		// TODO shouldnt this be file? or did i name it etst... i forget
-		"setDriverOptionTestTransportF",
+		"ls_option_transport_test_f",
 	)
 }

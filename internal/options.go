@@ -174,7 +174,7 @@ func (o *SessionOptions) apply( //nolint: gocyclo
 	}
 
 	if o.RecorderPath != "" {
-		rc := m.Options.Session.SetRecorderPath(driverPtr, o.RecorderPath)
+		rc := m.Options.Session.SetRecordDestination(driverPtr, o.RecorderPath)
 		if rc != 0 {
 			return scrapligoerrors.NewOptionsError("failed setting recorder path option", nil)
 		}

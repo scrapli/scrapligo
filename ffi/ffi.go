@@ -240,7 +240,7 @@ func GetMapping() (*Mapping, error) {
 			},
 		}
 
-		purego.RegisterLibFunc(&mappingInst.AssertNoLeaks, libScrapliFfi, "assertNoLeaks")
+		purego.RegisterLibFunc(&mappingInst.AssertNoLeaks, libScrapliFfi, "ls_assert_no_leaks")
 
 		registerShared(mappingInst, libScrapliFfi)
 		registerCli(mappingInst, libScrapliFfi)

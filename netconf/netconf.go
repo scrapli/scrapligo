@@ -142,13 +142,25 @@ func (d *Driver) Open(ctx context.Context) (*Result, error) {
 }
 
 // Close closes the netconf object. This also deallocates the underlying (zig) netconf object.
-func (d *Driver) Close() {
+func (d *Driver) Close(ctx context.Context) (*Result, error) {
 	if d.ptr == 0 {
-		return
+		return nil, scrapligoerrors.NewFfiError("driver pointer nil", nil)
 	}
 
-	d.ffiMap.Shared.Close(d.ptr)
+	cancel := false
+
+	var operationID uint32
+
+	status := d.ffiMap.Shared.Close(d.ptr, &operationID, &cancel)
+	if status != 0 {
+		return nil, scrapligoerrors.NewFfiError("failed to submit close operation", nil)
+	}
+
+	result, err := d.getResult(ctx, &cancel, operationID)
+
 	d.ffiMap.Shared.Free(d.ptr)
+
+	return result, err
 }
 
 // GetSessionID returns the session-id as parsed during the capabilities exchange -- if we for some
