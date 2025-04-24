@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/carlmontanari/difflibgo/difflibgo"
-	scrapligocli "github.com/scrapli/scrapligo/cli"
 )
 
 const (
@@ -26,11 +25,15 @@ func AssertNotDefault(t *testing.T, v any) {
 		if typedV == "" {
 			t.Fatal("expected non-default value")
 		}
+	case []string:
+		if len(typedV) == 0 {
+			t.Fatal("expected non-default value")
+		}
 	case []byte:
 		if typedV == nil {
 			t.Fatal("expected non-default value")
 		}
-	case []*scrapligocli.Result:
+	case [][]byte:
 		if len(typedV) == 0 {
 			t.Fatal("expected non-default value")
 		}

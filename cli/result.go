@@ -1,14 +1,16 @@
 package cli
 
 import (
+	"bytes"
 	"math"
 	"strings"
 	"time"
-
-	scrapligoutil "github.com/scrapli/scrapligo/util"
 )
 
-const elapsedTimeMultiplierDivider = 100
+const (
+	elapsedTimeMultiplierDivider = 100
+	operationDelimiter           = "__libscrapli__"
+)
 
 func elapsedTime(startTime, endTime uint64) float64 {
 	elapsed := endTime - startTime
@@ -25,52 +27,82 @@ func elapsedTime(startTime, endTime uint64) float64 {
 // NewResult prepares a new Result object from ffi integration pointers (the pointers we pass to
 // zig for it to populate the values of stuff).
 func NewResult(
-	input,
 	host string,
 	port uint16,
+	inputs []byte,
 	startTime uint64,
-	endTime uint64,
-	resultRaw []byte,
-	result string,
-	resultFailedWhenIndicator []byte,
+	splits []uint64,
+	resultsRaw []byte,
+	results []byte,
+	resultsFailedIndicator []byte,
 ) *Result {
-	return &Result{
-		Host:               host,
-		Port:               port,
-		Input:              input,
-		ResultRaw:          resultRaw,
-		Result:             result,
-		StartTime:          startTime,
-		EndTime:            endTime,
-		ElapsedTimeSeconds: elapsedTime(startTime, endTime),
-		Failed:             len(resultFailedWhenIndicator) > 0,
-		FailedIndicator:    string(resultFailedWhenIndicator),
-	}
-}
+	inputsS := strings.Split(string(inputs), operationDelimiter)
+	resultsS := strings.Split(string(results), operationDelimiter)
 
-// NewMultiResult creates a new MultiResult object.
-func NewMultiResult(
-	host string,
-	port uint16,
-) *MultiResult {
-	return &MultiResult{
-		Host: host,
-		Port: port,
+	var elapsed float64
+
+	if len(splits) > 0 {
+		elapsed = elapsedTime(startTime, splits[len(splits)-1])
+	}
+
+	return &Result{
+		Host:                   host,
+		Port:                   port,
+		Inputs:                 inputsS,
+		ResultsRaw:             bytes.Split(resultsRaw, []byte(operationDelimiter)),
+		Results:                resultsS,
+		StartTime:              startTime,
+		Splits:                 splits,
+		ElapsedTimeSeconds:     elapsed,
+		ResultsFailedIndicator: string(resultsFailedIndicator),
 	}
 }
 
 // Result is a struct returned from all Driver operations.
 type Result struct {
-	Host               string
-	Port               uint16
-	Input              string
-	ResultRaw          []byte
-	Result             string
-	StartTime          uint64
-	EndTime            uint64
-	ElapsedTimeSeconds float64
-	Failed             bool
-	FailedIndicator    string
+	Host                   string
+	Port                   uint16
+	Inputs                 []string
+	ResultsRaw             [][]byte
+	Results                []string
+	StartTime              uint64
+	Splits                 []uint64
+	ElapsedTimeSeconds     float64
+	ResultsFailedIndicator string
+}
+
+func (r *Result) extend(res *Result) error {
+	r.Inputs = append(r.Inputs, res.Inputs...)
+	r.ResultsRaw = append(r.ResultsRaw, res.ResultsRaw...)
+	r.Results = append(r.Results, res.Results...)
+	r.Splits = append(r.Splits, res.Splits...)
+
+	if len(res.Splits) > 0 {
+		r.ElapsedTimeSeconds = elapsedTime(r.StartTime, res.Splits[len(res.Splits)-1])
+	}
+
+	return nil
+}
+
+func (r *Result) EndTime() uint64 {
+	if len(r.ResultsRaw) == 0 {
+		return 0
+	}
+
+	return r.Splits[len(r.Splits)-1]
+}
+
+// Result returns all results joined on newline chars.
+func (r *Result) Result() string {
+	if len(r.Results) == 0 {
+		return ""
+	}
+
+	return strings.Join(r.Results, "\n")
+}
+
+func (r *Result) Failed() bool {
+	return len(r.ResultsFailedIndicator) > 0
 }
 
 // TextFsmParse parses recorded output w/ a provided textfsm template.
@@ -78,40 +110,7 @@ type Result struct {
 // response.TextFsmParse("http://example.com/textfsm.template") or
 // response.TextFsmParse("./local/textfsm.template").
 func (r *Result) TextFsmParse(path string) ([]map[string]interface{}, error) {
-	return scrapligoutil.TextFsmParse(r.Result, path)
-}
-
-// MultiResult defines a response object for plural operations -- contains a slice of `Result`
-// for each operation.
-type MultiResult struct {
-	Host               string
-	Port               uint16
-	Results            []*Result
-	StartTime          uint64
-	EndTime            uint64
-	ElapsedTimeSeconds float64
-}
-
-// AppendResult appends a `Result` to the `MultiResult`.
-func (mr *MultiResult) AppendResult(r *Result) {
-	if mr.StartTime == 0 {
-		mr.StartTime = r.StartTime
-	}
-
-	mr.EndTime = r.EndTime
-	mr.ElapsedTimeSeconds = elapsedTime(r.StartTime, r.EndTime)
-
-	mr.Results = append(mr.Results, r)
-}
-
-// JoinedResult is a convenience method to print out a single unified/joined result joined by
-// newlines.
-func (mr *MultiResult) JoinedResult() string {
-	resultsSlice := make([]string, len(mr.Results))
-
-	for idx, resp := range mr.Results {
-		resultsSlice[idx] = resp.Result
-	}
-
-	return strings.Join(resultsSlice, "\n")
+	// TODO
+	// return scrapligoutil.TextFsmParse(r.Result, path)
+	return nil, nil
 }

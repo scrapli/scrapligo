@@ -20,6 +20,7 @@ func CleanCliOutput(t *testing.T, output string) []byte {
 
 	outputBytes := []byte(output)
 
+	// TODO i think this can go away since i gutted the "open" tests
 	outputBytes = uhp.ReplaceAll(outputBytes, []byte("user@host"))
 	outputBytes = tp.ReplaceAll(outputBytes, []byte("Mon Jan 1 00:00:00 2025"))
 	outputBytes = pp.ReplaceAll(outputBytes, []byte("__PASSWORD__"))

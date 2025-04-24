@@ -70,6 +70,7 @@ func getDefinitionBytes[T PlatformNameOrString](definitionFileOrName T) ([]byte,
 	return definitionBytes, nil
 }
 
+// TODO rename to *NewCli*
 // NewDriver returns a new instance of Driver setup with the given options. The definitionFileOrName
 // should be the name of one of the platforms that has a definition embedded in this package's
 // assets, or a file path to a valid yaml definition.
@@ -116,17 +117,14 @@ func NewDriver[T PlatformNameOrString](
 		d.options.Port = &p
 	}
 
-	minNs := scrapligoconstants.DefaultReadDelayMinNs
-	maxNs := scrapligoconstants.DefaultReadDelayMaxNs
-
-	d.minPollDelay = minNs * scrapligoconstants.ReadDelayMultiplier
+	d.minPollDelay = scrapligoconstants.DefaultReadDelayMinNs
 	if d.options.Session.ReadDelayMinNs != nil {
-		d.minPollDelay = *d.options.Session.ReadDelayMinNs * scrapligoconstants.ReadDelayMultiplier
+		d.minPollDelay = *d.options.Session.ReadDelayMinNs
 	}
 
-	d.maxPollDelay = maxNs * scrapligoconstants.ReadDelayMultiplier
+	d.maxPollDelay = scrapligoconstants.DefaultReadDelayMaxNs
 	if d.options.Session.ReadDelayMaxNs != nil {
-		d.maxPollDelay = *d.options.Session.ReadDelayMaxNs * scrapligoconstants.ReadDelayMultiplier
+		d.maxPollDelay = *d.options.Session.ReadDelayMaxNs
 	}
 
 	d.backoffFactor = scrapligoconstants.DefaultReadDelayBackoffFactor
@@ -137,6 +135,7 @@ func NewDriver[T PlatformNameOrString](
 	return d, nil
 }
 
+// TODO rename to Cli
 // Driver is an object representing a connection to a device of some sort -- this object wraps the
 // underlying zig driver (created via libscrapli).
 type Driver struct {
@@ -221,6 +220,9 @@ func (d *Driver) Close(ctx context.Context) (*Result, error) {
 		return nil, scrapligoerrors.NewFfiError("driver pointer nil", nil)
 	}
 
+	// as long as driver ptr is not 0 we *always* want to free
+	defer d.ffiMap.Shared.Free(d.ptr)
+
 	cancel := false
 
 	var operationID uint32
@@ -230,11 +232,7 @@ func (d *Driver) Close(ctx context.Context) (*Result, error) {
 		return nil, scrapligoerrors.NewFfiError("failed to submit close operation", nil)
 	}
 
-	result, err := d.getResult(ctx, &cancel, operationID)
-
-	d.ffiMap.Shared.Free(d.ptr)
-
-	return result, err
+	return d.getResult(ctx, &cancel, operationID)
 }
 
 func getPollDelay(curVal, minVal, maxVal uint64, backoffFactor uint8) uint64 {
@@ -242,7 +240,8 @@ func getPollDelay(curVal, minVal, maxVal uint64, backoffFactor uint8) uint64 {
 	newVal *= uint64(backoffFactor)
 
 	if newVal > maxVal {
-		newVal = maxVal
+		// we backoff up to max then reset when we are over
+		newVal = minVal
 	}
 
 	return newVal + scrapligoutil.SafeInt64ToUint64(
@@ -257,15 +256,15 @@ func (d *Driver) getResult(
 ) (*Result, error) {
 	var done bool
 
-	var inputSize, resultRawSize, resultSize, resultFailedIndicatorSize, errSize uint64
+	var operationCount uint32
 
-	minNs := scrapligoconstants.DefaultReadDelayMinNs
+	var inputsSize, resultsRawSize, resultsSize, resultsFailedIndicatorSize, errSize uint64
 
-	// TODO this seems dumb? shouldnt it just be the min to start?
-	curPollDelay := minNs * scrapligoconstants.ReadDelayMultiplier
-	if d.options.Session.ReadDelayMinNs != nil {
-		curPollDelay = *d.options.Session.ReadDelayMinNs * scrapligoconstants.ReadDelayMultiplier
-	}
+	// start w/ max delay, its literally 0.001s so its not much and almost no chance anything is
+	// already ready to fetch in that time anyway! also, once/if we hit max dealy we reset to min
+	// delay before backing off back to max. so this causes us to have one slow check then fast
+	// checks up to the max again
+	curPollDelay := scrapligoconstants.DefaultReadDelayMaxNs
 
 	for {
 		select {
@@ -276,48 +275,48 @@ func (d *Driver) getResult(
 		default:
 		}
 
-		// TODO shouldnt this be done after polling (see also curPollDelay comment)
 		// we obviously cant have too tight a loop here or cpu will go nuts and we'll block things,
 		// so we'll sleep the same as the zig read delay will be
-		curPollDelay = getPollDelay(
-			curPollDelay,
-			d.minPollDelay,
-			d.maxPollDelay,
-			d.backoffFactor,
-		)
-
 		time.Sleep(time.Duration(scrapligoutil.SafeUint64ToInt64(curPollDelay)))
 
 		rc := d.ffiMap.Cli.PollOperation(
 			d.ptr,
 			operationID,
 			&done,
-			&inputSize,
-			&resultRawSize,
-			&resultSize,
-			&resultFailedIndicatorSize,
+			&operationCount,
+			&inputsSize,
+			&resultsRawSize,
+			&resultsSize,
+			&resultsFailedIndicatorSize,
 			&errSize,
 		)
 		if rc != 0 {
 			return nil, scrapligoerrors.NewFfiError("poll operation failed", nil)
 		}
 
-		if !done {
-			continue
+		if done {
+			break
 		}
 
-		break
+		curPollDelay = getPollDelay(
+			curPollDelay,
+			d.minPollDelay,
+			d.maxPollDelay,
+			d.backoffFactor,
+		)
 	}
 
-	var resultStartTime, resultEndTime uint64
+	var resultStartTime uint64
 
-	input := make([]byte, inputSize)
+	splits := make([]uint64, operationCount)
 
-	resultRaw := make([]byte, resultRawSize)
+	inputs := make([]byte, inputsSize)
 
-	result := make([]byte, resultSize)
+	resultsRaw := make([]byte, resultsRawSize)
 
-	resultFailedWhenIndicator := make([]byte, resultFailedIndicatorSize)
+	results := make([]byte, resultsSize)
+
+	resultsFailedWhenIndicator := make([]byte, resultsFailedIndicatorSize)
 
 	errString := make([]byte, errSize)
 
@@ -325,11 +324,11 @@ func (d *Driver) getResult(
 		d.ptr,
 		operationID,
 		&resultStartTime,
-		&resultEndTime,
-		&input,
-		&resultRaw,
-		&result,
-		&resultFailedWhenIndicator,
+		&splits,
+		&inputs,
+		&resultsRaw,
+		&results,
+		&resultsFailedWhenIndicator,
 		&errString,
 	)
 	if rc != 0 {
@@ -341,13 +340,13 @@ func (d *Driver) getResult(
 	}
 
 	return NewResult(
-		string(input),
 		d.host,
 		*d.options.Port,
+		inputs,
 		resultStartTime,
-		resultEndTime,
-		resultRaw,
-		string(result),
-		resultFailedWhenIndicator,
+		splits,
+		resultsRaw,
+		results,
+		resultsFailedWhenIndicator,
 	), nil
 }

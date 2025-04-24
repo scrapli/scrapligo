@@ -62,10 +62,11 @@ type CliMapping struct {
 		driverPtr uintptr,
 		operationID uint32,
 		done *bool,
-		inputSize,
-		resultRawSize,
-		resultSize,
-		resultFailedIndicatorSize,
+		operationCount *uint32,
+		inputsSize,
+		resultsRawSize,
+		resultsSize,
+		resultsFailedIndicatorSize,
 		errSize *uint64,
 	) int
 	// FetchOperation gets the result of the given operationID -- before calling this you must have
@@ -75,11 +76,11 @@ type CliMapping struct {
 		driverPtr uintptr,
 		operationID uint32,
 		resultStartTime *uint64,
-		resultEndTime *uint64,
-		input,
-		resultRaw,
-		result,
-		resultFailedIndicator,
+		splits *[]uint64,
+		inputs,
+		resultsRaw,
+		results,
+		resultsFailedIndicator,
 		err *[]byte,
 	) int
 
@@ -121,10 +122,10 @@ type CliMapping struct {
 		prompt string,
 		promptPattern string,
 		response string,
-		hiddenInput bool,
 		abortInput string,
 		requestedMode string,
 		inputHandling string,
+		hiddenInput bool,
 		retainTrailingPrompt bool,
 	) int
 }

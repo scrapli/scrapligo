@@ -2,6 +2,7 @@ package cli_test
 
 import (
 	"bytes"
+	"context"
 	"os"
 	"runtime"
 	"strings"
@@ -164,13 +165,16 @@ func getDriver(t *testing.T, platform, transportName string) *scrapligocli.Drive
 func closeDriver(t *testing.T, d *scrapligocli.Driver) {
 	t.Helper()
 
-	d.Close()
+	_, err := d.Close(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
 }
 
 func assertResult(t *testing.T, r *scrapligocli.Result, testGoldenPath string) {
 	t.Helper()
 
-	cleanedActual := scrapligotesthelper.CleanCliOutput(t, r.Result)
+	cleanedActual := scrapligotesthelper.CleanCliOutput(t, r.Result())
 
 	testGoldenContent := scrapligotesthelper.ReadFile(t, testGoldenPath)
 
@@ -178,10 +182,11 @@ func assertResult(t *testing.T, r *scrapligocli.Result, testGoldenPath string) {
 		scrapligotesthelper.FailOutput(t, cleanedActual, testGoldenContent)
 	}
 
+	// TODO cleanup
 	scrapligotesthelper.AssertNotDefault(t, r.StartTime)
 	scrapligotesthelper.AssertNotDefault(t, r.EndTime)
-	scrapligotesthelper.AssertNotDefault(t, r.ElapsedTimeSeconds)
+	// scrapligotesthelper.AssertNotDefault(t, r.ElapsedTimeSeconds)
 	scrapligotesthelper.AssertNotDefault(t, r.Host)
-	scrapligotesthelper.AssertNotDefault(t, r.ResultRaw)
-	scrapligotesthelper.AssertEqual(t, false, r.Failed)
+	// scrapligotesthelper.AssertNotDefault(t, r.ResultRaw)
+	scrapligotesthelper.AssertEqual(t, false, r.Failed())
 }

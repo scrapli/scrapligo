@@ -89,7 +89,7 @@ func TestSendInput(t *testing.T) {
 					scrapligotesthelper.WriteFile(
 						t,
 						testGoldenPath,
-						scrapligotesthelper.CleanCliOutput(t, r.Result),
+						scrapligotesthelper.CleanCliOutput(t, r.Result()),
 					)
 				} else {
 					assertResult(t, r, testGoldenPath)

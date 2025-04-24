@@ -11,7 +11,7 @@ func (d *Driver) SendInputs(
 	ctx context.Context,
 	inputs []string,
 	options ...OperationOption,
-) (*MultiResult, error) {
+) (*Result, error) {
 	if d.ptr == 0 {
 		return nil, scrapligoerrors.NewFfiError("driver pointer nil", nil)
 	}
@@ -20,7 +20,7 @@ func (d *Driver) SendInputs(
 
 	loadedOptions := newOperationOptions(options...)
 
-	results := NewMultiResult(d.host, *d.options.Port)
+	var results *Result
 
 	for _, input := range inputs {
 		var operationID uint32
@@ -44,9 +44,16 @@ func (d *Driver) SendInputs(
 			return nil, err
 		}
 
-		results.AppendResult(r)
+		if results == nil {
+			results = r
+		} else {
+			err = results.extend(r)
+			if err != nil {
+				return nil, err
+			}
+		}
 
-		if r.Failed && loadedOptions.stopOnIndicatedFailure {
+		if r.Failed() && loadedOptions.stopOnIndicatedFailure {
 			// note that this returns nil for an error since there was nothing unrecoverable
 			// (probably) that happened, just we saw some stuff in the output saying that we
 			// had a bad input or something

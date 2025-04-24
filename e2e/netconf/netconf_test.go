@@ -1,6 +1,7 @@
 package netconf_test
 
 import (
+	"context"
 	"os"
 	"runtime"
 	"strings"
@@ -141,5 +142,8 @@ func getNetconf(t *testing.T, platform, transportName string) *scrapligonetconf.
 func closeDriver(t *testing.T, n *scrapligonetconf.Driver) {
 	t.Helper()
 
-	n.Close()
+	_, err := n.Close(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
 }

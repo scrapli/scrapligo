@@ -1,7 +1,6 @@
 package cli_test
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"path/filepath"
@@ -74,22 +73,10 @@ func TestSendInputs(t *testing.T) {
 				scrapligotesthelper.WriteFile(
 					t,
 					testGoldenPath,
-					scrapligotesthelper.CleanCliOutput(t, r.JoinedResult()),
+					scrapligotesthelper.CleanCliOutput(t, r.Result()),
 				)
 			} else {
-				testGoldenContent := scrapligotesthelper.ReadFile(t, testGoldenPath)
-
-				if !bytes.Equal([]byte(r.JoinedResult()), testGoldenContent) {
-					scrapligotesthelper.FailOutput(t, r.JoinedResult(), testGoldenContent)
-				}
-
-				scrapligotesthelper.AssertEqual(t, 22, r.Port)
-				scrapligotesthelper.AssertEqual(t, testHost, r.Host)
-				scrapligotesthelper.AssertNotDefault(t, r.StartTime)
-				scrapligotesthelper.AssertNotDefault(t, r.EndTime)
-				scrapligotesthelper.AssertNotDefault(t, r.ElapsedTimeSeconds)
-				scrapligotesthelper.AssertNotDefault(t, r.Host)
-				scrapligotesthelper.AssertNotDefault(t, r.Results)
+				assertResult(t, r, testGoldenPath)
 			}
 		})
 	}

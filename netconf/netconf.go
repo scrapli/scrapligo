@@ -43,17 +43,14 @@ func NewDriver(
 		n.options.Port = &p
 	}
 
-	minNs := scrapligoconstants.DefaultReadDelayMinNs
-	maxNs := scrapligoconstants.DefaultReadDelayMaxNs
-
-	n.minPollDelay = minNs * scrapligoconstants.ReadDelayMultiplier
+	n.minPollDelay = scrapligoconstants.DefaultReadDelayMinNs
 	if n.options.Session.ReadDelayMinNs != nil {
-		n.minPollDelay = *n.options.Session.ReadDelayMinNs * scrapligoconstants.ReadDelayMultiplier
+		n.minPollDelay = *n.options.Session.ReadDelayMinNs
 	}
 
-	n.maxPollDelay = maxNs * scrapligoconstants.ReadDelayMultiplier
+	n.maxPollDelay = scrapligoconstants.DefaultReadDelayMaxNs
 	if n.options.Session.ReadDelayMaxNs != nil {
-		n.maxPollDelay = *n.options.Session.ReadDelayMaxNs * scrapligoconstants.ReadDelayMultiplier
+		n.maxPollDelay = *n.options.Session.ReadDelayMaxNs
 	}
 
 	n.backoffFactor = scrapligoconstants.DefaultReadDelayBackoffFactor
@@ -206,12 +203,7 @@ func (d *Driver) getResult(
 
 	var inputSize, resultRawSize, resultSize, rpcWarningsSize, rpcErrorsSize, errSize uint64
 
-	minNs := scrapligoconstants.DefaultReadDelayMinNs
-
-	curPollDelay := minNs * scrapligoconstants.ReadDelayMultiplier
-	if d.options.Session.ReadDelayMinNs != nil {
-		curPollDelay = *d.options.Session.ReadDelayMinNs * scrapligoconstants.ReadDelayMultiplier
-	}
+	curPollDelay := scrapligoconstants.DefaultReadDelayMaxNs
 
 	for {
 		select {
@@ -224,13 +216,6 @@ func (d *Driver) getResult(
 
 		// we obviously cant have too tight a loop here or cpu will go nuts and we'll block things,
 		// so we'll sleep the same as the zig read delay will be
-		curPollDelay = getPollDelay(
-			curPollDelay,
-			d.minPollDelay,
-			d.maxPollDelay,
-			d.backoffFactor,
-		)
-
 		time.Sleep(time.Duration(scrapligoutil.SafeUint64ToInt64(curPollDelay)))
 
 		rc := d.ffiMap.Netconf.PollOperation(
@@ -249,10 +234,15 @@ func (d *Driver) getResult(
 		}
 
 		if !done {
-			continue
+			break
 		}
 
-		break
+		curPollDelay = getPollDelay(
+			curPollDelay,
+			d.minPollDelay,
+			d.maxPollDelay,
+			d.backoffFactor,
+		)
 	}
 
 	var resultStartTime, resultEndTime uint64

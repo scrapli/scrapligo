@@ -33,10 +33,10 @@ func (d *Driver) SendPromptedInput(
 		prompt,
 		loadedOptions.promptPattern,
 		response,
-		loadedOptions.hiddenInput,
 		loadedOptions.abortInput,
 		loadedOptions.requestedMode,
 		string(loadedOptions.inputHandling),
+		loadedOptions.hiddenInput,
 		loadedOptions.retainTrailingPrompt,
 	)
 	if status != 0 {
