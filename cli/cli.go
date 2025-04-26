@@ -70,6 +70,19 @@ func getDefinitionBytes[T PlatformNameOrString](definitionFileOrName T) ([]byte,
 	return definitionBytes, nil
 }
 
+// Cli is an object representing a connection to a device of some sort -- this object wraps the
+// underlying zig driver (created via libscrapli).
+type Cli struct {
+	ptr     uintptr
+	ffiMap  *scrapligoffi.Mapping
+	host    string
+	options *scrapligointernal.Options
+
+	minPollDelay  uint64
+	maxPollDelay  uint64
+	backoffFactor uint8
+}
+
 // NewCli returns a new instance of Cli setup with the given options. The definitionFileOrName
 // should be the name of one of the platforms that has a definition embedded in this package's
 // assets, or a file path to a valid yaml definition.
@@ -132,19 +145,6 @@ func NewCli[T PlatformNameOrString](
 	}
 
 	return c, nil
-}
-
-// Cli is an object representing a connection to a device of some sort -- this object wraps the
-// underlying zig driver (created via libscrapli).
-type Cli struct {
-	ptr     uintptr
-	ffiMap  *scrapligoffi.Mapping
-	host    string
-	options *scrapligointernal.Options
-
-	minPollDelay  uint64
-	maxPollDelay  uint64
-	backoffFactor uint8
 }
 
 // GetPtr returns the pointer to the zig driver, don't use this unless you know what you are doing,

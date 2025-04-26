@@ -120,8 +120,6 @@ func TestRawRPCCreateSubscription(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			fmt.Println(">>>>", r.Result)
-
 			if *scrapligotesthelper.Update {
 				scrapligotesthelper.WriteFile(
 					t,

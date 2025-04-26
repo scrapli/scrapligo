@@ -70,7 +70,7 @@ func shouldSkip(platform, transport string) bool {
 	return false
 }
 
-func getNetconf(t *testing.T, platform, transportName string) *scrapligonetconf.Driver {
+func getNetconf(t *testing.T, platform, transportName string) *scrapligonetconf.Netconf {
 	t.Helper()
 
 	var host string
@@ -128,7 +128,7 @@ func getNetconf(t *testing.T, platform, transportName string) *scrapligonetconf.
 		}
 	}
 
-	n, err := scrapligonetconf.NewDriver(
+	n, err := scrapligonetconf.NewNetconf(
 		host,
 		opts...,
 	)
@@ -139,7 +139,7 @@ func getNetconf(t *testing.T, platform, transportName string) *scrapligonetconf.
 	return n
 }
 
-func closeDriver(t *testing.T, n *scrapligonetconf.Driver) {
+func closeDriver(t *testing.T, n *scrapligonetconf.Netconf) {
 	t.Helper()
 
 	_, err := n.Close(context.Background())

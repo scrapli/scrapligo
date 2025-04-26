@@ -20,20 +20,6 @@ const (
 	TransportKindTest TransportKind = "test_"
 )
 
-// NewOptions returns a new options object.
-func NewOptions() *Options {
-	return &Options{
-		LoggerCallback: nil,
-		TransportKind:  TransportKindBin,
-		Port:           nil,
-		Driver:         DriverOptions{},
-		Netconf:        NetconfOptions{},
-		Auth: AuthOptions{
-			LookupMap: make(map[string]string),
-		},
-	}
-}
-
 // Options holds options for all driver kinds ("normal" and netconf).
 type Options struct {
 	Driver  DriverOptions
@@ -48,6 +34,20 @@ type Options struct {
 	Session   SessionOptions
 	Auth      AuthOptions
 	Transport TransportOptions
+}
+
+// NewOptions returns a new options object.
+func NewOptions() *Options {
+	return &Options{
+		LoggerCallback: nil,
+		TransportKind:  TransportKindBin,
+		Port:           nil,
+		Driver:         DriverOptions{},
+		Netconf:        NetconfOptions{},
+		Auth: AuthOptions{
+			LookupMap: make(map[string]string),
+		},
+	}
 }
 
 // DriverOptions holds driver specific options.

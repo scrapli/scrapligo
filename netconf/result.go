@@ -2,6 +2,21 @@ package netconf
 
 import "strings"
 
+// Result is a struct returned from all Cli operations.
+type Result struct {
+	Host               string
+	Port               uint16
+	Input              string
+	ResultRaw          []byte
+	Result             string
+	StartTime          uint64
+	EndTime            uint64
+	ElapsedTimeSeconds float64
+	Failed             bool
+	Warnings           []string
+	Errors             []string
+}
+
 // NewResult prepares a new Result object from ffi integration pointers (the pointers we pass to
 // zig for it to populate the values of stuff).
 func NewResult(
@@ -33,19 +48,4 @@ func NewResult(
 	}
 
 	return r
-}
-
-// Result is a struct returned from all Cli operations.
-type Result struct {
-	Host               string
-	Port               uint16
-	Input              string
-	ResultRaw          []byte
-	Result             string
-	StartTime          uint64
-	EndTime            uint64
-	ElapsedTimeSeconds float64
-	Failed             bool
-	Warnings           []string
-	Errors             []string
 }

@@ -14,8 +14,21 @@ import (
 	scrapligoutil "github.com/scrapli/scrapligo/util"
 )
 
-// NewDriver returns a new instance of Netconf setup with the given options.
-func NewDriver(
+// Netconf is an object representing a netconf connection to a device of some sort -- this object
+// wraps the underlying zig (netconf) driver (created via libscrapli).
+type Netconf struct {
+	ptr     uintptr
+	ffiMap  *scrapligoffi.Mapping
+	host    string
+	options *scrapligointernal.Options
+
+	minPollDelay  uint64
+	maxPollDelay  uint64
+	backoffFactor uint8
+}
+
+// NewNetconf returns a new instance of Netconf setup with the given options.
+func NewNetconf(
 	host string,
 	opts ...scrapligooptions.Option,
 ) (*Netconf, error) {
@@ -59,19 +72,6 @@ func NewDriver(
 	}
 
 	return n, nil
-}
-
-// Netconf is an object representing a netconf connection to a device of some sort -- this object
-// wraps the underlying zig (netconf) driver (created via libscrapli).
-type Netconf struct {
-	ptr     uintptr
-	ffiMap  *scrapligoffi.Mapping
-	host    string
-	options *scrapligointernal.Options
-
-	minPollDelay  uint64
-	maxPollDelay  uint64
-	backoffFactor uint8
 }
 
 // GetPtr returns the pointer to the zig driver, don't use this unless you know what you are doing,

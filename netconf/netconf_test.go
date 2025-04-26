@@ -30,7 +30,6 @@ func getNetconf(t *testing.T, f string) *scrapligonetconf.Netconf {
 		scrapligooptions.WithUsername("root"),
 		scrapligooptions.WithPassword("password"),
 		scrapligooptions.WithPort(830),
-		//scrapligooptions.WithLoggerCallback(scrapligologging.FfiLogger),
 	}
 
 	if *scrapligotesthelper.Record {
@@ -49,7 +48,7 @@ func getNetconf(t *testing.T, f string) *scrapligonetconf.Netconf {
 		)
 	}
 
-	d, err := scrapligonetconf.NewDriver(
+	d, err := scrapligonetconf.NewNetconf(
 		testHost,
 		opts...,
 	)

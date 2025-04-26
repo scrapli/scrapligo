@@ -47,10 +47,7 @@ func (c *Cli) SendInputs(
 		if results == nil {
 			results = r
 		} else {
-			err = results.extend(r)
-			if err != nil {
-				return nil, err
-			}
+			results.extend(r)
 		}
 
 		if r.Failed() && loadedOptions.stopOnIndicatedFailure {
