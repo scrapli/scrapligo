@@ -172,6 +172,12 @@ type NetconfMapping struct {
 		sessionID *uint64,
 	) int
 
+	// GetSubscriptionID returns the subscription id from a given response message.
+	GetSubscriptionID func(
+		message string,
+		subscriptionID *uint64,
+	) int
+
 	// RawRPC submits a user defined rpc -- the library will ensure it is properly delimited but the
 	// given payload must be valid/correct.
 	RawRPC func(

@@ -177,6 +177,24 @@ func (n *Netconf) GetSessionID() (uint64, error) {
 	return sessionID, nil
 }
 
+// GetSubscriptionID attempts to parse a subscription id from a netconf rpc reply message. It can
+// parse a response from content like:
+// <?xml version="1.0" encoding="UTF-8"?>
+// <rpc-reply message-id="101">
+// <subscription-result>ok</subscription-result>
+// <subscription-id>2147483737</subscription-id>
+// </rpc-reply>
+func (n *Netconf) GetSubscriptionID(message string) (uint64, error) {
+	var subscriptionID uint64
+
+	status := n.ffiMap.Netconf.GetSubscriptionID(message, &subscriptionID)
+	if status != 0 {
+		return 0, scrapligoerrors.NewFfiError("failed parsing subscription id", nil)
+	}
+
+	return subscriptionID, nil
+}
+
 func getPollDelay(curVal, minVal, maxVal uint64, backoffFactor uint8) uint64 {
 	newVal := curVal
 	newVal *= uint64(backoffFactor)

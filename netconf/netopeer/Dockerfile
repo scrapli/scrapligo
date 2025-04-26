@@ -33,7 +33,7 @@ WORKDIR /build
 RUN python3 -m venv venv
 
 RUN curl -L https://github.com/CESNET/libyang/archive/refs/tags/v3.7.8.tar.gz -o libyang.tar.gz && \
-    curl -L https://github.com/CESNET/libnetconf2/archive/refs/tags/v3.5.5.tar.gz -o libnetconf2.tar.gz && \
+    curl -L https://github.com/carlmontanari/libnetconf2/archive/refs/tags/v3.5.5-cm.tar.gz -o libnetconf2.tar.gz && \
     curl -L https://github.com/sysrepo/sysrepo/archive/refs/tags/v3.3.10.tar.gz -o sysrepo.tar.gz && \
     curl -L https://github.com/CESNET/netopeer2/archive/refs/tags/v2.2.35.tar.gz -o netopeer2.tar.gz
 
@@ -43,7 +43,7 @@ RUN tar -xzf libyang.tar.gz && \
     tar -xzf netopeer2.tar.gz
 
 RUN mkdir libyang-3.7.8/build && \
-    mkdir libnetconf2-3.5.5/build && \
+    mkdir libnetconf2-3.5.5-cm/build && \
     mkdir sysrepo-3.3.10/build && \
     mkdir netopeer2-2.2.35/build
 
@@ -52,10 +52,7 @@ RUN cmake .. && \
     make && \
     make install
 
-RUN rm -rf /build/libnetconf2-3.5.5
-COPY libnetconf2 /build/libnetconf2-3.5.5
-
-WORKDIR /build/libnetconf2-3.5.5/build
+WORKDIR /build/libnetconf2-3.5.5-cm/build
 RUN cmake .. && \
     make && \
     make install
