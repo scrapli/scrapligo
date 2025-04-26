@@ -51,14 +51,14 @@ func TestSendInputs(t *testing.T) {
 			ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 			defer cancel()
 
-			d := getDriver(t, testFixturePath)
+			d := getCli(t, testFixturePath)
 
 			_, err = d.Open(ctx)
 			if err != nil {
 				t.Fatal(err)
 			}
 
-			defer closeDriver(t, d)
+			defer closeCli(t, d)
 
 			if c.postOpenF != nil {
 				c.postOpenF(t, d)

@@ -20,7 +20,7 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
-func getDriver(t *testing.T, f string) *scrapligocli.Cli {
+func getCli(t *testing.T, f string) *scrapligocli.Cli {
 	t.Helper()
 
 	opts := []scrapligooptions.Option{
@@ -56,7 +56,7 @@ func getDriver(t *testing.T, f string) *scrapligocli.Cli {
 	return d
 }
 
-func closeDriver(t *testing.T, d *scrapligocli.Cli) {
+func closeCli(t *testing.T, d *scrapligocli.Cli) {
 	t.Helper()
 
 	// we simply free since we dont record/care about any closing bits
