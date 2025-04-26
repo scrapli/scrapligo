@@ -1,5 +1,7 @@
 package errors
 
+import "errors"
+
 var (
 	_ error        = (*ScrapliError)(nil)
 	_ wrappedError = (*ScrapliError)(nil)
@@ -8,6 +10,8 @@ var (
 type wrappedError interface {
 	Unwrap() error
 }
+
+var ErrNoMessages = errors.New("errNoMessages")
 
 // ErrorKind is an enum(ish) representing the kind of error -- i.e. "ffi" or "auth".
 type ErrorKind string
@@ -18,8 +22,8 @@ const (
 	Ffi ErrorKind = "ffi"
 	// Options represents errors applying Cli options.
 	Options ErrorKind = "options"
-	// Auth represents errors encountered during authentication.
-	Auth ErrorKind = "auth"
+	// Netconf represents errors encountered during netconf operations.
+	Netconf ErrorKind = "netconf"
 	// Util represents errors encountered during utility funcs like parsing output.
 	Util ErrorKind = "util"
 )
@@ -67,20 +71,6 @@ func NewOptionsError(message string, inner error) error {
 	return e
 }
 
-// NewAuthError returns an "auth" flavor ScrapliError, wrapping the inner error if provided.
-func NewAuthError(message string, inner error) error {
-	e := &ScrapliError{
-		Kind:    Auth,
-		Message: message,
-	}
-
-	if inner != nil {
-		e.Inner = inner
-	}
-
-	return e
-}
-
 // NewUtilError returns a "util" flavor ScrapliError, wrapping the inner error if provided.
 func NewUtilError(message string, inner error) error {
 	e := &ScrapliError{
@@ -93,4 +83,13 @@ func NewUtilError(message string, inner error) error {
 	}
 
 	return e
+}
+
+// NewMessagesError returns a "netconf" flavor ScrapliError, wrapping the ErrNoMessages error type.
+func NewMessagesError() error {
+	return &ScrapliError{
+		Kind:    Netconf,
+		Message: "no messages",
+		Inner:   ErrNoMessages,
+	}
 }

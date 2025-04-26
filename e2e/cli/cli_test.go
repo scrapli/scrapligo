@@ -79,6 +79,7 @@ func shouldSkip(platform, transport string) bool {
 }
 
 func getCli(t *testing.T, platform, transportName string) *scrapligocli.Cli {
+	// TODO -- tests should be done with debug build so we can check allocator things
 	t.Helper()
 
 	var host string

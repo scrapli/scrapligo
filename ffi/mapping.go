@@ -172,10 +172,24 @@ type NetconfMapping struct {
 		sessionID *uint64,
 	) int
 
-	// GetSubscriptionID returns the subscription id from a given response message.
+	// GetSubscriptionID writes the subscription id of the given message to the pointer.
 	GetSubscriptionID func(
 		message string,
 		subscriptionID *uint64,
+	) int
+
+	// GetNextNotificationSize writes the size of the next (if any) notification message into the
+	// given size pointer.
+	GetNextNotificationSize func(
+		driverPtr uintptr,
+		size *uint64,
+	)
+
+	// GetNextNotificationSize writes the size of the next (if any) notification message into the
+	// given size pointer.
+	GetNextNotification func(
+		driverPtr uintptr,
+		notification *[]byte,
 	) int
 
 	// RawRPC submits a user defined rpc -- the library will ensure it is properly delimited but the

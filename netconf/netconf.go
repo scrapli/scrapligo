@@ -195,6 +195,28 @@ func (n *Netconf) GetSubscriptionID(message string) (uint64, error) {
 	return subscriptionID, nil
 }
 
+func (n *Netconf) GetNextNotification() (string, error) {
+	if n.ptr == 0 {
+		return "", scrapligoerrors.NewFfiError("driver pointer nil", nil)
+	}
+
+	var notifSize uint64
+
+	n.ffiMap.Netconf.GetNextNotificationSize(n.ptr, &notifSize)
+	if notifSize == 0 {
+		return "", scrapligoerrors.NewMessagesError()
+	}
+
+	notif := make([]byte, notifSize)
+
+	rc := n.ffiMap.Netconf.GetNextNotification(n.ptr, &notif)
+	if rc != 0 {
+		return "", scrapligoerrors.NewFfiError("get next notification failed", nil)
+	}
+
+	return string(notif), nil
+}
+
 func getPollDelay(curVal, minVal, maxVal uint64, backoffFactor uint8) uint64 {
 	newVal := curVal
 	newVal *= uint64(backoffFactor)
