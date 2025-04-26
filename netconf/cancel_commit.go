@@ -7,13 +7,13 @@ import (
 )
 
 // CancelCommit executes a netconf cancel-commit rpc.
-func (d *Driver) CancelCommit(
+func (n *Netconf) CancelCommit(
 	ctx context.Context,
 	options ...Option,
 ) (*Result, error) {
 	_ = options
 
-	if d.ptr == 0 {
+	if n.ptr == 0 {
 		return nil, scrapligoerrors.NewFfiError("driver pointer nil", nil)
 	}
 
@@ -21,8 +21,8 @@ func (d *Driver) CancelCommit(
 
 	var operationID uint32
 
-	status := d.ffiMap.Netconf.CancelCommit(
-		d.ptr,
+	status := n.ffiMap.Netconf.CancelCommit(
+		n.ptr,
 		&operationID,
 		&cancel,
 	)
@@ -30,5 +30,5 @@ func (d *Driver) CancelCommit(
 		return nil, scrapligoerrors.NewFfiError("failed to submit cancel-commit operation", nil)
 	}
 
-	return d.getResult(ctx, &cancel, operationID)
+	return n.getResult(ctx, &cancel, operationID)
 }

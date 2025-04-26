@@ -24,12 +24,12 @@ type editDataOptions struct {
 
 // EditData executes a netconf edit-data rpc. Supported options:
 //   - WithDatastore
-func (d *Driver) EditData(
+func (n *Netconf) EditData(
 	ctx context.Context,
 	content string,
 	options ...Option,
 ) (*Result, error) {
-	if d.ptr == 0 {
+	if n.ptr == 0 {
 		return nil, scrapligoerrors.NewFfiError("driver pointer nil", nil)
 	}
 
@@ -39,8 +39,8 @@ func (d *Driver) EditData(
 
 	loadedOptions := newEditDataOptions(options...)
 
-	status := d.ffiMap.Netconf.EditData(
-		d.ptr,
+	status := n.ffiMap.Netconf.EditData(
+		n.ptr,
 		&operationID,
 		&cancel,
 		loadedOptions.datastore.String(),
@@ -50,5 +50,5 @@ func (d *Driver) EditData(
 		return nil, scrapligoerrors.NewFfiError("failed to submit edit-data operation", nil)
 	}
 
-	return d.getResult(ctx, &cancel, operationID)
+	return n.getResult(ctx, &cancel, operationID)
 }

@@ -27,11 +27,11 @@ type copyConfigOptions struct {
 // CopyConfig executes a netconf copy config rpc. Supported options:
 //   - WithTargetType
 //   - WithSourceType
-func (d *Driver) CopyConfig(
+func (n *Netconf) CopyConfig(
 	ctx context.Context,
 	options ...Option,
 ) (*Result, error) {
-	if d.ptr == 0 {
+	if n.ptr == 0 {
 		return nil, scrapligoerrors.NewFfiError("driver pointer nil", nil)
 	}
 
@@ -41,8 +41,8 @@ func (d *Driver) CopyConfig(
 
 	loadedOptions := newCopyConfigOptions(options...)
 
-	status := d.ffiMap.Netconf.CopyConfig(
-		d.ptr,
+	status := n.ffiMap.Netconf.CopyConfig(
+		n.ptr,
 		&operationID,
 		&cancel,
 		loadedOptions.target.String(),
@@ -52,5 +52,5 @@ func (d *Driver) CopyConfig(
 		return nil, scrapligoerrors.NewFfiError("failed to submit copy-config operation", nil)
 	}
 
-	return d.getResult(ctx, &cancel, operationID)
+	return n.getResult(ctx, &cancel, operationID)
 }

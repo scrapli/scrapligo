@@ -20,7 +20,7 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
-func getDriver(t *testing.T, f string) *scrapligonetconf.Driver {
+func getNetconf(t *testing.T, f string) *scrapligonetconf.Netconf {
 	t.Helper()
 
 	opts := []scrapligooptions.Option{
@@ -30,7 +30,7 @@ func getDriver(t *testing.T, f string) *scrapligonetconf.Driver {
 		scrapligooptions.WithUsername("root"),
 		scrapligooptions.WithPassword("password"),
 		scrapligooptions.WithPort(830),
-		// scrapligooptions.WithLoggerCallback(scrapligologging.FfiLogger),
+		//scrapligooptions.WithLoggerCallback(scrapligologging.FfiLogger),
 	}
 
 	if *scrapligotesthelper.Record {
@@ -60,7 +60,7 @@ func getDriver(t *testing.T, f string) *scrapligonetconf.Driver {
 	return d
 }
 
-func closeDriver(t *testing.T, d *scrapligonetconf.Driver) {
+func closeNetconf(t *testing.T, d *scrapligonetconf.Netconf) {
 	t.Helper()
 
 	// we simply free since we dont record/care about any closing bits

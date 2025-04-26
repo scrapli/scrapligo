@@ -24,11 +24,11 @@ type validateOptions struct {
 
 // Validate executes a netconf validate rpc. Supported options:
 //   - WithTargetType
-func (d *Driver) Validate(
+func (n *Netconf) Validate(
 	ctx context.Context,
 	options ...Option,
 ) (*Result, error) {
-	if d.ptr == 0 {
+	if n.ptr == 0 {
 		return nil, scrapligoerrors.NewFfiError("driver pointer nil", nil)
 	}
 
@@ -38,8 +38,8 @@ func (d *Driver) Validate(
 
 	loadedOptions := newValidateOptions(options...)
 
-	status := d.ffiMap.Netconf.Validate(
-		d.ptr,
+	status := n.ffiMap.Netconf.Validate(
+		n.ptr,
 		&operationID,
 		&cancel,
 		loadedOptions.source.String(),
@@ -48,5 +48,5 @@ func (d *Driver) Validate(
 		return nil, scrapligoerrors.NewFfiError("failed to submit validate operation", nil)
 	}
 
-	return d.getResult(ctx, &cancel, operationID)
+	return n.getResult(ctx, &cancel, operationID)
 }

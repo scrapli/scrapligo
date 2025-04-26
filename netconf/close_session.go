@@ -7,13 +7,13 @@ import (
 )
 
 // CloseSession executes a netconf close-session rpc.
-func (d *Driver) CloseSession(
+func (n *Netconf) CloseSession(
 	ctx context.Context,
 	options ...Option,
 ) (*Result, error) {
 	_ = options
 
-	if d.ptr == 0 {
+	if n.ptr == 0 {
 		return nil, scrapligoerrors.NewFfiError("driver pointer nil", nil)
 	}
 
@@ -21,8 +21,8 @@ func (d *Driver) CloseSession(
 
 	var operationID uint32
 
-	status := d.ffiMap.Netconf.CloseSession(
-		d.ptr,
+	status := n.ffiMap.Netconf.CloseSession(
+		n.ptr,
 		&operationID,
 		&cancel,
 	)
@@ -30,5 +30,5 @@ func (d *Driver) CloseSession(
 		return nil, scrapligoerrors.NewFfiError("failed to submit close-session operation", nil)
 	}
 
-	return d.getResult(ctx, &cancel, operationID)
+	return n.getResult(ctx, &cancel, operationID)
 }

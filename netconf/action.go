@@ -7,14 +7,14 @@ import (
 )
 
 // Action executes a netconf action rpc.
-func (d *Driver) Action(
+func (n *Netconf) Action(
 	ctx context.Context,
 	action string,
 	options ...Option,
 ) (*Result, error) {
 	_ = options
 
-	if d.ptr == 0 {
+	if n.ptr == 0 {
 		return nil, scrapligoerrors.NewFfiError("driver pointer nil", nil)
 	}
 
@@ -22,8 +22,8 @@ func (d *Driver) Action(
 
 	var operationID uint32
 
-	status := d.ffiMap.Netconf.Action(
-		d.ptr,
+	status := n.ffiMap.Netconf.Action(
+		n.ptr,
 		&operationID,
 		&cancel,
 		action,
@@ -32,5 +32,5 @@ func (d *Driver) Action(
 		return nil, scrapligoerrors.NewFfiError("failed to submit action operation", nil)
 	}
 
-	return d.getResult(ctx, &cancel, operationID)
+	return n.getResult(ctx, &cancel, operationID)
 }

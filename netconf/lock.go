@@ -24,11 +24,11 @@ type lockOptions struct {
 
 // Lock executes a netconf lock rpc. Supported options:
 //   - WithTargetType
-func (d *Driver) Lock(
+func (n *Netconf) Lock(
 	ctx context.Context,
 	options ...Option,
 ) (*Result, error) {
-	if d.ptr == 0 {
+	if n.ptr == 0 {
 		return nil, scrapligoerrors.NewFfiError("driver pointer nil", nil)
 	}
 
@@ -38,8 +38,8 @@ func (d *Driver) Lock(
 
 	loadedOptions := newLockOptions(options...)
 
-	status := d.ffiMap.Netconf.Lock(
-		d.ptr,
+	status := n.ffiMap.Netconf.Lock(
+		n.ptr,
 		&operationID,
 		&cancel,
 		loadedOptions.target.String(),
@@ -48,5 +48,5 @@ func (d *Driver) Lock(
 		return nil, scrapligoerrors.NewFfiError("failed to submit lock operation", nil)
 	}
 
-	return d.getResult(ctx, &cancel, operationID)
+	return n.getResult(ctx, &cancel, operationID)
 }

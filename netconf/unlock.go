@@ -24,11 +24,11 @@ type unlockOptions struct {
 
 // Unlock executes a netconf unlock rpc. Supported options:
 //   - WithTargetType
-func (d *Driver) Unlock(
+func (n *Netconf) Unlock(
 	ctx context.Context,
 	options ...Option,
 ) (*Result, error) {
-	if d.ptr == 0 {
+	if n.ptr == 0 {
 		return nil, scrapligoerrors.NewFfiError("driver pointer nil", nil)
 	}
 
@@ -38,8 +38,8 @@ func (d *Driver) Unlock(
 
 	loadedOptions := newUnlockOptions(options...)
 
-	status := d.ffiMap.Netconf.Unlock(
-		d.ptr,
+	status := n.ffiMap.Netconf.Unlock(
+		n.ptr,
 		&operationID,
 		&cancel,
 		loadedOptions.target.String(),
@@ -48,5 +48,5 @@ func (d *Driver) Unlock(
 		return nil, scrapligoerrors.NewFfiError("failed to submit unlock operation", nil)
 	}
 
-	return d.getResult(ctx, &cancel, operationID)
+	return n.getResult(ctx, &cancel, operationID)
 }

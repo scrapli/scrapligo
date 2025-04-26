@@ -7,13 +7,13 @@ import (
 )
 
 // Discard executes a netconf discard rpc.
-func (d *Driver) Discard(
+func (n *Netconf) Discard(
 	ctx context.Context,
 	options ...Option,
 ) (*Result, error) {
 	_ = options
 
-	if d.ptr == 0 {
+	if n.ptr == 0 {
 		return nil, scrapligoerrors.NewFfiError("driver pointer nil", nil)
 	}
 
@@ -21,8 +21,8 @@ func (d *Driver) Discard(
 
 	var operationID uint32
 
-	status := d.ffiMap.Netconf.Discard(
-		d.ptr,
+	status := n.ffiMap.Netconf.Discard(
+		n.ptr,
 		&operationID,
 		&cancel,
 	)
@@ -30,5 +30,5 @@ func (d *Driver) Discard(
 		return nil, scrapligoerrors.NewFfiError("failed to submit discard operation", nil)
 	}
 
-	return d.getResult(ctx, &cancel, operationID)
+	return n.getResult(ctx, &cancel, operationID)
 }

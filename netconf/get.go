@@ -33,11 +33,11 @@ type getOptions struct {
 //   - WithFilterNamespacePrefix
 //   - WithFilterNamespace
 //   - WithDefaultsType
-func (d *Driver) Get(
+func (n *Netconf) Get(
 	ctx context.Context,
 	options ...Option,
 ) (*Result, error) {
-	if d.ptr == 0 {
+	if n.ptr == 0 {
 		return nil, scrapligoerrors.NewFfiError("driver pointer nil", nil)
 	}
 
@@ -47,8 +47,8 @@ func (d *Driver) Get(
 
 	loadedOptions := newGetOptions(options...)
 
-	status := d.ffiMap.Netconf.Get(
-		d.ptr,
+	status := n.ffiMap.Netconf.Get(
+		n.ptr,
 		&operationID,
 		&cancel,
 		loadedOptions.filter,
@@ -61,5 +61,5 @@ func (d *Driver) Get(
 		return nil, scrapligoerrors.NewFfiError("failed to submit get operation", nil)
 	}
 
-	return d.getResult(ctx, &cancel, operationID)
+	return n.getResult(ctx, &cancel, operationID)
 }

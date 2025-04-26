@@ -26,12 +26,12 @@ type getSchemaOptions struct {
 // GetSchema executes a netconf get-schema rpc
 //   - WithSchemaFormat
 //   - WithVersion
-func (d *Driver) GetSchema(
+func (n *Netconf) GetSchema(
 	ctx context.Context,
 	identifier string,
 	options ...Option,
 ) (*Result, error) {
-	if d.ptr == 0 {
+	if n.ptr == 0 {
 		return nil, scrapligoerrors.NewFfiError("driver pointer nil", nil)
 	}
 
@@ -41,8 +41,8 @@ func (d *Driver) GetSchema(
 
 	loadedOptions := newGetSchemaOptions(options...)
 
-	status := d.ffiMap.Netconf.GetSchema(
-		d.ptr,
+	status := n.ffiMap.Netconf.GetSchema(
+		n.ptr,
 		&operationID,
 		&cancel,
 		identifier,
@@ -53,5 +53,5 @@ func (d *Driver) GetSchema(
 		return nil, scrapligoerrors.NewFfiError("failed to submit get-schema operation", nil)
 	}
 
-	return d.getResult(ctx, &cancel, operationID)
+	return n.getResult(ctx, &cancel, operationID)
 }

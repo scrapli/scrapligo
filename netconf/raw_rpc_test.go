@@ -42,14 +42,14 @@ func TestRawRPC(t *testing.T) {
 			ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 			defer cancel()
 
-			n := getDriver(t, testFixturePath)
+			n := getNetconf(t, testFixturePath)
 
 			_, err = n.Open(ctx)
 			if err != nil {
 				t.Fatal(err)
 			}
 
-			defer closeDriver(t, n)
+			defer closeNetconf(t, n)
 
 			r, err := n.RawRPC(ctx, c.payload)
 			if err != nil {
@@ -106,14 +106,14 @@ func TestRawRPCCreateSubscription(t *testing.T) {
 			ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 			defer cancel()
 
-			n := getDriver(t, testFixturePath)
+			n := getNetconf(t, testFixturePath)
 
 			_, err = n.Open(ctx)
 			if err != nil {
 				t.Fatal(err)
 			}
 
-			defer closeDriver(t, n)
+			defer closeNetconf(t, n)
 
 			r, err := n.RawRPC(ctx, c.payload)
 			if err != nil {

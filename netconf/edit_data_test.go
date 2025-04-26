@@ -55,14 +55,14 @@ func TestEditData(t *testing.T) {
 			ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 			defer cancel()
 
-			n := getDriver(t, testFixturePath)
+			n := getNetconf(t, testFixturePath)
 
 			_, err = n.Open(ctx)
 			if err != nil {
 				t.Fatal(err)
 			}
 
-			defer closeDriver(t, n)
+			defer closeNetconf(t, n)
 
 			r, err := n.EditData(ctx, c.content, c.options...)
 			if err != nil {

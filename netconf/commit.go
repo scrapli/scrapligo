@@ -7,13 +7,13 @@ import (
 )
 
 // Commit executes a netconf commit rpc.
-func (d *Driver) Commit(
+func (n *Netconf) Commit(
 	ctx context.Context,
 	options ...Option,
 ) (*Result, error) {
 	_ = options
 
-	if d.ptr == 0 {
+	if n.ptr == 0 {
 		return nil, scrapligoerrors.NewFfiError("driver pointer nil", nil)
 	}
 
@@ -21,8 +21,8 @@ func (d *Driver) Commit(
 
 	var operationID uint32
 
-	status := d.ffiMap.Netconf.Commit(
-		d.ptr,
+	status := n.ffiMap.Netconf.Commit(
+		n.ptr,
 		&operationID,
 		&cancel,
 	)
@@ -30,5 +30,5 @@ func (d *Driver) Commit(
 		return nil, scrapligoerrors.NewFfiError("failed to submit commit operation", nil)
 	}
 
-	return d.getResult(ctx, &cancel, operationID)
+	return n.getResult(ctx, &cancel, operationID)
 }

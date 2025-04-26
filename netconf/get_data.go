@@ -44,11 +44,11 @@ type getDataOptions struct {
 //   - WithMaxDepth
 //   - WithOrigin
 //   - WithDefaultsType
-func (d *Driver) GetData(
+func (n *Netconf) GetData(
 	ctx context.Context,
 	options ...Option,
 ) (*Result, error) {
-	if d.ptr == 0 {
+	if n.ptr == 0 {
 		return nil, scrapligoerrors.NewFfiError("driver pointer nil", nil)
 	}
 
@@ -58,8 +58,8 @@ func (d *Driver) GetData(
 
 	loadedOptions := newGetDataOptions(options...)
 
-	status := d.ffiMap.Netconf.GetData(
-		d.ptr,
+	status := n.ffiMap.Netconf.GetData(
+		n.ptr,
 		&operationID,
 		&cancel,
 		loadedOptions.datastore.String(),
@@ -77,5 +77,5 @@ func (d *Driver) GetData(
 		return nil, scrapligoerrors.NewFfiError("failed to submit get-data operation", nil)
 	}
 
-	return d.getResult(ctx, &cancel, operationID)
+	return n.getResult(ctx, &cancel, operationID)
 }

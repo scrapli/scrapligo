@@ -7,11 +7,11 @@ import (
 )
 
 // RawRPC executes a user provided "raw" rpc.
-func (d *Driver) RawRPC(
+func (n *Netconf) RawRPC(
 	ctx context.Context,
 	payload string,
 ) (*Result, error) {
-	if d.ptr == 0 {
+	if n.ptr == 0 {
 		return nil, scrapligoerrors.NewFfiError("driver pointer nil", nil)
 	}
 
@@ -19,8 +19,8 @@ func (d *Driver) RawRPC(
 
 	var operationID uint32
 
-	status := d.ffiMap.Netconf.RawRPC(
-		d.ptr,
+	status := n.ffiMap.Netconf.RawRPC(
+		n.ptr,
 		&operationID,
 		&cancel,
 		payload,
@@ -29,5 +29,5 @@ func (d *Driver) RawRPC(
 		return nil, scrapligoerrors.NewFfiError("failed to submit raw-rpc operation", nil)
 	}
 
-	return d.getResult(ctx, &cancel, operationID)
+	return n.getResult(ctx, &cancel, operationID)
 }
