@@ -68,8 +68,8 @@ func TestSendInput(t *testing.T) {
 				ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 				defer cancel()
 
-				d := getDriver(t, c.platform, transportName)
-				defer closeDriver(t, d)
+				d := getCli(t, c.platform, transportName)
+				defer closeCli(t, d)
 
 				_, err = d.Open(ctx)
 				if err != nil {

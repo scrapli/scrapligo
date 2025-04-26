@@ -3,6 +3,7 @@ package netconf_test
 import (
 	"bytes"
 	"context"
+	"encoding/xml"
 	"fmt"
 	"path/filepath"
 	"testing"
@@ -57,7 +58,7 @@ func TestGetConfig(t *testing.T) {
 					t.Fatal(err)
 				}
 
-				defer closeDriver(t, n)
+				defer closeNetconf(t, n)
 
 				r, err := n.GetConfig(ctx, c.options...)
 				if err != nil {
@@ -75,8 +76,19 @@ func TestGetConfig(t *testing.T) {
 
 					testGoldenContent := scrapligotesthelper.ReadFile(t, testGoldenPath)
 
-					if !bytes.Equal(cleanedActual, testGoldenContent) {
-						scrapligotesthelper.FailOutput(t, string(cleanedActual), testGoldenContent)
+					if !xmlIsValid(cleanedActual) {
+						t.Fatal("result xml is invalid")
+					}
+
+					if c.platform == scrapligocli.NokiaSrl.String() {
+						// nokia is much nicer to us and returns the config in order always
+						// and without any variable stuff in it (ex: EOS
+						//  <{http://arista.com/yang/experimental/eos/qos/acl}index>), so we will
+						// just compare nokia. this is ok probably since we also have a gigantic
+						// config to compare w/ nokia so it is a pretty solid test
+						if !bytes.Equal(cleanedActual, testGoldenContent) {
+							scrapligotesthelper.FailOutput(t, string(cleanedActual), testGoldenContent)
+						}
 					}
 
 					scrapligotesthelper.AssertNotDefault(t, r.StartTime)
@@ -86,6 +98,21 @@ func TestGetConfig(t *testing.T) {
 					scrapligotesthelper.AssertNotDefault(t, r.ResultRaw)
 				}
 			})
+		}
+	}
+}
+
+func xmlIsValid(result []byte) bool {
+	decoder := xml.NewDecoder(bytes.NewReader(result))
+
+	for {
+		_, err := decoder.Token()
+		if err != nil {
+			if err.Error() == "EOF" {
+				return true
+			}
+
+			return false
 		}
 	}
 }

@@ -139,7 +139,7 @@ func getNetconf(t *testing.T, platform, transportName string) *scrapligonetconf.
 	return n
 }
 
-func closeDriver(t *testing.T, n *scrapligonetconf.Netconf) {
+func closeNetconf(t *testing.T, n *scrapligonetconf.Netconf) {
 	t.Helper()
 
 	_, err := n.Close(context.Background())

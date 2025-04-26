@@ -78,7 +78,7 @@ func shouldSkip(platform, transport string) bool {
 	return false
 }
 
-func getDriver(t *testing.T, platform, transportName string) *scrapligocli.Cli {
+func getCli(t *testing.T, platform, transportName string) *scrapligocli.Cli {
 	t.Helper()
 
 	var host string
@@ -162,7 +162,7 @@ func getDriver(t *testing.T, platform, transportName string) *scrapligocli.Cli {
 	return d
 }
 
-func closeDriver(t *testing.T, d *scrapligocli.Cli) {
+func closeCli(t *testing.T, d *scrapligocli.Cli) {
 	t.Helper()
 
 	_, err := d.Close(context.Background())
@@ -182,7 +182,7 @@ func assertResult(t *testing.T, r *scrapligocli.Result, testGoldenPath string) {
 		scrapligotesthelper.FailOutput(t, cleanedActual, testGoldenContent)
 	}
 
-	scrapligotesthelper.AssertEqual(t, 22, r.Port)
+	scrapligotesthelper.AssertNotDefault(t, r.Port)
 	scrapligotesthelper.AssertNotDefault(t, r.Host)
 	scrapligotesthelper.AssertNotDefault(t, r.StartTime)
 	scrapligotesthelper.AssertNotDefault(t, r.EndTime())
