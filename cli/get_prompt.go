@@ -7,8 +7,8 @@ import (
 )
 
 // GetPrompt returns a Result object containing the current "prompt" of the target device.
-func (d *Driver) GetPrompt(ctx context.Context) (*Result, error) {
-	if d.ptr == 0 {
+func (c *Cli) GetPrompt(ctx context.Context) (*Result, error) {
+	if c.ptr == 0 {
 		return nil, scrapligoerrors.NewFfiError("driver pointer nil", nil)
 	}
 
@@ -16,10 +16,10 @@ func (d *Driver) GetPrompt(ctx context.Context) (*Result, error) {
 
 	var operationID uint32
 
-	status := d.ffiMap.Cli.GetPrompt(d.ptr, &operationID, &cancel)
+	status := c.ffiMap.Cli.GetPrompt(c.ptr, &operationID, &cancel)
 	if status != 0 {
 		return nil, scrapligoerrors.NewFfiError("failed to submit getPrompt operation", nil)
 	}
 
-	return d.getResult(ctx, &cancel, operationID)
+	return c.getResult(ctx, &cancel, operationID)
 }

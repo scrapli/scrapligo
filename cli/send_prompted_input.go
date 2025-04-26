@@ -8,14 +8,14 @@ import (
 
 // SendPromptedInput sends an `input` to the device expecting the given `prompt`, finally sending
 // the `response`.
-func (d *Driver) SendPromptedInput(
+func (c *Cli) SendPromptedInput(
 	ctx context.Context,
 	input,
 	prompt,
 	response string,
 	options ...OperationOption,
 ) (*Result, error) {
-	if d.ptr == 0 {
+	if c.ptr == 0 {
 		return nil, scrapligoerrors.NewFfiError("driver pointer nil", nil)
 	}
 
@@ -25,8 +25,8 @@ func (d *Driver) SendPromptedInput(
 
 	var operationID uint32
 
-	status := d.ffiMap.Cli.SendPromptedInput(
-		d.ptr,
+	status := c.ffiMap.Cli.SendPromptedInput(
+		c.ptr,
 		&operationID,
 		&cancel,
 		input,
@@ -43,5 +43,5 @@ func (d *Driver) SendPromptedInput(
 		return nil, scrapligoerrors.NewFfiError("failed to submit sendPromptedInput operation", nil)
 	}
 
-	return d.getResult(ctx, &cancel, operationID)
+	return c.getResult(ctx, &cancel, operationID)
 }

@@ -7,12 +7,12 @@ import (
 )
 
 // SendInputs send multiple "inputs" to the device.
-func (d *Driver) SendInputs(
+func (c *Cli) SendInputs(
 	ctx context.Context,
 	inputs []string,
 	options ...OperationOption,
 ) (*Result, error) {
-	if d.ptr == 0 {
+	if c.ptr == 0 {
 		return nil, scrapligoerrors.NewFfiError("driver pointer nil", nil)
 	}
 
@@ -25,8 +25,8 @@ func (d *Driver) SendInputs(
 	for _, input := range inputs {
 		var operationID uint32
 
-		status := d.ffiMap.Cli.SendInput(
-			d.ptr,
+		status := c.ffiMap.Cli.SendInput(
+			c.ptr,
 			&operationID,
 			&cancel,
 			input,
@@ -39,7 +39,7 @@ func (d *Driver) SendInputs(
 			return nil, scrapligoerrors.NewFfiError("failed to submit sendInput operation", nil)
 		}
 
-		r, err := d.getResult(ctx, &cancel, operationID)
+		r, err := c.getResult(ctx, &cancel, operationID)
 		if err != nil {
 			return nil, err
 		}

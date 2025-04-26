@@ -10,12 +10,12 @@ import (
 // "SendConfig(s)" operations, but these no longer exist. Instead, we have SendInput or SendInputs
 // which accept their respective options -- the options can (among other things) control the "mode"
 // (historically "privilege level") at which to send the input(s).
-func (d *Driver) SendInput(
+func (c *Cli) SendInput(
 	ctx context.Context,
 	input string,
 	options ...OperationOption,
 ) (*Result, error) {
-	if d.ptr == 0 {
+	if c.ptr == 0 {
 		return nil, scrapligoerrors.NewFfiError("driver pointer nil", nil)
 	}
 
@@ -25,8 +25,8 @@ func (d *Driver) SendInput(
 
 	loadedOptions := newOperationOptions(options...)
 
-	status := d.ffiMap.Cli.SendInput(
-		d.ptr,
+	status := c.ffiMap.Cli.SendInput(
+		c.ptr,
 		&operationID,
 		&cancel,
 		input,
@@ -39,5 +39,5 @@ func (d *Driver) SendInput(
 		return nil, scrapligoerrors.NewFfiError("failed to submit sendInput operation", nil)
 	}
 
-	return d.getResult(ctx, &cancel, operationID)
+	return c.getResult(ctx, &cancel, operationID)
 }

@@ -16,7 +16,7 @@ func TestEnterMode(t *testing.T) {
 
 	cases := map[string]struct {
 		description   string
-		postOpenF     func(t *testing.T, d *scrapligocli.Driver)
+		postOpenF     func(t *testing.T, d *scrapligocli.Cli)
 		requestedMode string
 	}{
 		"no-change": {
@@ -33,7 +33,7 @@ func TestEnterMode(t *testing.T) {
 		},
 		"multi-stage-change-escalate": {
 			description: "enter mode with multi stage change 'escalating' the mode'",
-			postOpenF: func(t *testing.T, d *scrapligocli.Driver) {
+			postOpenF: func(t *testing.T, d *scrapligocli.Cli) {
 				t.Helper()
 
 				ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
@@ -48,7 +48,7 @@ func TestEnterMode(t *testing.T) {
 		},
 		"multi-stage-change-deescalate": {
 			description: "enter mode with multi stage change 'deescalating' the mode'",
-			postOpenF: func(t *testing.T, d *scrapligocli.Driver) {
+			postOpenF: func(t *testing.T, d *scrapligocli.Cli) {
 				t.Helper()
 
 				ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)

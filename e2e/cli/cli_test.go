@@ -78,7 +78,7 @@ func shouldSkip(platform, transport string) bool {
 	return false
 }
 
-func getDriver(t *testing.T, platform, transportName string) *scrapligocli.Driver {
+func getDriver(t *testing.T, platform, transportName string) *scrapligocli.Cli {
 	t.Helper()
 
 	var host string
@@ -150,7 +150,7 @@ func getDriver(t *testing.T, platform, transportName string) *scrapligocli.Drive
 		)
 	}
 
-	d, err := scrapligocli.NewDriver(
+	d, err := scrapligocli.NewCli(
 		platform,
 		host,
 		opts...,
@@ -162,7 +162,7 @@ func getDriver(t *testing.T, platform, transportName string) *scrapligocli.Drive
 	return d
 }
 
-func closeDriver(t *testing.T, d *scrapligocli.Driver) {
+func closeDriver(t *testing.T, d *scrapligocli.Cli) {
 	t.Helper()
 
 	_, err := d.Close(context.Background())

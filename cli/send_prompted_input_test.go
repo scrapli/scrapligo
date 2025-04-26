@@ -16,7 +16,7 @@ func TestSendPromptedInput(t *testing.T) {
 
 	cases := map[string]struct {
 		description string
-		postOpenF   func(t *testing.T, d *scrapligocli.Driver)
+		postOpenF   func(t *testing.T, d *scrapligocli.Cli)
 		input       string
 		prompt      string
 		response    string

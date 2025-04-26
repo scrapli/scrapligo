@@ -17,7 +17,7 @@ func TestEnterMode(t *testing.T) {
 	cases := map[string]struct {
 		description   string
 		platform      string
-		postOpenF     func(t *testing.T, d *scrapligocli.Driver)
+		postOpenF     func(t *testing.T, d *scrapligocli.Cli)
 		requestedMode string
 	}{
 		"no-change-eos": {
@@ -38,7 +38,7 @@ func TestEnterMode(t *testing.T) {
 		"multi-stage-change-escalate-eos": {
 			description: "enter mode with multi stage change 'escalating' the mode'",
 			platform:    scrapligocli.AristaEos.String(),
-			postOpenF: func(t *testing.T, d *scrapligocli.Driver) {
+			postOpenF: func(t *testing.T, d *scrapligocli.Cli) {
 				t.Helper()
 
 				ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
@@ -54,7 +54,7 @@ func TestEnterMode(t *testing.T) {
 		"multi-stage-change-deescalate-eos": {
 			description: "enter mode with multi stage change 'deescalating' the mode'",
 			platform:    scrapligocli.AristaEos.String(),
-			postOpenF: func(t *testing.T, d *scrapligocli.Driver) {
+			postOpenF: func(t *testing.T, d *scrapligocli.Cli) {
 				t.Helper()
 
 				ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)

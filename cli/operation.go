@@ -1,6 +1,6 @@
 package cli
 
-// OperationOption is a type used for functional options for Driver operations.
+// OperationOption is a type used for functional options for Cli operations.
 type OperationOption func(o *operationOptions)
 
 // InputHandling is an enum(ish) representing the kind of InputHandling an operation should use.

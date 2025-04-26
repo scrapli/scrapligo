@@ -16,7 +16,7 @@ func TestSendInput(t *testing.T) {
 
 	cases := map[string]struct {
 		description string
-		postOpenF   func(t *testing.T, d *scrapligocli.Driver)
+		postOpenF   func(t *testing.T, d *scrapligocli.Cli)
 		input       string
 		options     []scrapligocli.OperationOption
 	}{
@@ -35,7 +35,7 @@ func TestSendInput(t *testing.T) {
 		},
 		"simple-already-in-non-default-mode": {
 			description: "simple input executed in non-default mode we are already in",
-			postOpenF: func(t *testing.T, d *scrapligocli.Driver) {
+			postOpenF: func(t *testing.T, d *scrapligocli.Cli) {
 				t.Helper()
 
 				ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)

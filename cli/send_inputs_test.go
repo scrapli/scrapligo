@@ -16,7 +16,7 @@ func TestSendInputs(t *testing.T) {
 
 	cases := map[string]struct {
 		description string
-		postOpenF   func(t *testing.T, d *scrapligocli.Driver)
+		postOpenF   func(t *testing.T, d *scrapligocli.Cli)
 		inputs      []string
 		options     []scrapligocli.OperationOption
 	}{

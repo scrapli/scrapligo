@@ -31,7 +31,7 @@ const (
 
 // GetPlatformNames is used to get the "core" (as in embedded in assets and used in testing)
 // platform names. If your platform isn't listed here, or you need to have a tweaked platform
-// definition you can always pass a definition filename instead of a platform name on Driver
+// definition you can always pass a definition filename instead of a platform name on Cli
 // creation.
 func GetPlatformNames() []string {
 	return []string{

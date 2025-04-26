@@ -70,21 +70,20 @@ func getDefinitionBytes[T PlatformNameOrString](definitionFileOrName T) ([]byte,
 	return definitionBytes, nil
 }
 
-// TODO rename to *NewCli*
-// NewDriver returns a new instance of Driver setup with the given options. The definitionFileOrName
+// NewCli returns a new instance of Cli setup with the given options. The definitionFileOrName
 // should be the name of one of the platforms that has a definition embedded in this package's
 // assets, or a file path to a valid yaml definition.
-func NewDriver[T PlatformNameOrString](
+func NewCli[T PlatformNameOrString](
 	definitionFileOrName T,
 	host string,
 	opts ...scrapligooptions.Option,
-) (*Driver, error) {
+) (*Cli, error) {
 	ffiMap, err := scrapligoffi.GetMapping()
 	if err != nil {
 		return nil, err
 	}
 
-	d := &Driver{
+	c := &Cli{
 		ffiMap:  ffiMap,
 		host:    host,
 		options: scrapligointernal.NewOptions(),
@@ -95,50 +94,49 @@ func NewDriver[T PlatformNameOrString](
 		return nil, err
 	}
 
-	d.options.Driver.DefinitionString = string(definitionBytes)
+	c.options.Driver.DefinitionString = string(definitionBytes)
 
 	for _, opt := range opts {
-		err = opt(d.options)
+		err = opt(c.options)
 		if err != nil {
 			return nil, scrapligoerrors.NewOptionsError("failed applying option", err)
 		}
 	}
 
-	if d.options.Port == nil {
+	if c.options.Port == nil {
 		var p uint16
 
-		switch d.options.TransportKind { //nolint: exhaustive
+		switch c.options.TransportKind { //nolint: exhaustive
 		case scrapligointernal.TransportKindTelnet:
 			p = scrapligoconstants.DefaultTelnetPort
 		default:
 			p = scrapligoconstants.DefaultSSHPort
 		}
 
-		d.options.Port = &p
+		c.options.Port = &p
 	}
 
-	d.minPollDelay = scrapligoconstants.DefaultReadDelayMinNs
-	if d.options.Session.ReadDelayMinNs != nil {
-		d.minPollDelay = *d.options.Session.ReadDelayMinNs
+	c.minPollDelay = scrapligoconstants.DefaultReadDelayMinNs
+	if c.options.Session.ReadDelayMinNs != nil {
+		c.minPollDelay = *c.options.Session.ReadDelayMinNs
 	}
 
-	d.maxPollDelay = scrapligoconstants.DefaultReadDelayMaxNs
-	if d.options.Session.ReadDelayMaxNs != nil {
-		d.maxPollDelay = *d.options.Session.ReadDelayMaxNs
+	c.maxPollDelay = scrapligoconstants.DefaultReadDelayMaxNs
+	if c.options.Session.ReadDelayMaxNs != nil {
+		c.maxPollDelay = *c.options.Session.ReadDelayMaxNs
 	}
 
-	d.backoffFactor = scrapligoconstants.DefaultReadDelayBackoffFactor
-	if d.options.Session.ReadDelayBackoffFactor != nil {
-		d.backoffFactor = *d.options.Session.ReadDelayBackoffFactor
+	c.backoffFactor = scrapligoconstants.DefaultReadDelayBackoffFactor
+	if c.options.Session.ReadDelayBackoffFactor != nil {
+		c.backoffFactor = *c.options.Session.ReadDelayBackoffFactor
 	}
 
-	return d, nil
+	return c, nil
 }
 
-// TODO rename to Cli
-// Driver is an object representing a connection to a device of some sort -- this object wraps the
+// Cli is an object representing a connection to a device of some sort -- this object wraps the
 // underlying zig driver (created via libscrapli).
-type Driver struct {
+type Cli struct {
 	ptr     uintptr
 	ffiMap  *scrapligoffi.Mapping
 	host    string
@@ -151,14 +149,14 @@ type Driver struct {
 
 // GetPtr returns the pointer to the zig driver, don't use this unless you know what you are doing,
 // this is just exposed so you *can* get to it if you want to.
-func (d *Driver) GetPtr() (uintptr, *scrapligoffi.Mapping) {
-	return d.ptr, d.ffiMap
+func (c *Cli) GetPtr() (uintptr, *scrapligoffi.Mapping) {
+	return c.ptr, c.ffiMap
 }
 
-// Open opens the driver object. This method spawns the underlying zig driver which the Driver then
-// holds a pointer to. All Driver operations operate against this pointer (though this is
+// Open opens the driver object. This method spawns the underlying zig driver which the Cli then
+// holds a pointer to. All Cli operations operate against this pointer (though this is
 // transparent to the user).
-func (d *Driver) Open(ctx context.Context) (*Result, error) {
+func (c *Cli) Open(ctx context.Context) (*Result, error) {
 	// ensure we dealloc if something happens, otherwise users calls to defer close would not be
 	// super handy
 	cleanup := false
@@ -168,27 +166,27 @@ func (d *Driver) Open(ctx context.Context) (*Result, error) {
 			return
 		}
 
-		d.ffiMap.Shared.Free(d.ptr)
+		c.ffiMap.Shared.Free(c.ptr)
 	}()
 
 	var loggerCallback uintptr
-	if d.options.LoggerCallback != nil {
-		loggerCallback = purego.NewCallback(d.options.LoggerCallback)
+	if c.options.LoggerCallback != nil {
+		loggerCallback = purego.NewCallback(c.options.LoggerCallback)
 	}
 
-	d.ptr = d.ffiMap.Cli.Alloc(
-		d.options.Driver.DefinitionString,
+	c.ptr = c.ffiMap.Cli.Alloc(
+		c.options.Driver.DefinitionString,
 		loggerCallback,
-		d.host,
-		*d.options.Port,
-		string(d.options.TransportKind),
+		c.host,
+		*c.options.Port,
+		string(c.options.TransportKind),
 	)
 
-	if d.ptr == 0 {
+	if c.ptr == 0 {
 		return nil, scrapligoerrors.NewFfiError("failed to allocate driver", nil)
 	}
 
-	err := d.options.Apply(d.ptr, d.ffiMap)
+	err := c.options.Apply(c.ptr, c.ffiMap)
 	if err != nil {
 		return nil, scrapligoerrors.NewFfiError("failed to applying driver options", err)
 	}
@@ -197,14 +195,14 @@ func (d *Driver) Open(ctx context.Context) (*Result, error) {
 
 	var operationID uint32
 
-	status := d.ffiMap.Shared.Open(d.ptr, &operationID, &cancel)
+	status := c.ffiMap.Shared.Open(c.ptr, &operationID, &cancel)
 	if status != 0 {
 		cleanup = true
 
 		return nil, scrapligoerrors.NewFfiError("failed to submit open operation", nil)
 	}
 
-	result, err := d.getResult(ctx, &cancel, operationID)
+	result, err := c.getResult(ctx, &cancel, operationID)
 	if err != nil {
 		cleanup = true
 
@@ -215,24 +213,24 @@ func (d *Driver) Open(ctx context.Context) (*Result, error) {
 }
 
 // Close closes the driver object. This also deallocates the underlying (zig) driver object.
-func (d *Driver) Close(ctx context.Context) (*Result, error) {
-	if d.ptr == 0 {
+func (c *Cli) Close(ctx context.Context) (*Result, error) {
+	if c.ptr == 0 {
 		return nil, scrapligoerrors.NewFfiError("driver pointer nil", nil)
 	}
 
 	// as long as driver ptr is not 0 we *always* want to free
-	defer d.ffiMap.Shared.Free(d.ptr)
+	defer c.ffiMap.Shared.Free(c.ptr)
 
 	cancel := false
 
 	var operationID uint32
 
-	status := d.ffiMap.Shared.Close(d.ptr, &operationID, &cancel)
+	status := c.ffiMap.Shared.Close(c.ptr, &operationID, &cancel)
 	if status != 0 {
 		return nil, scrapligoerrors.NewFfiError("failed to submit close operation", nil)
 	}
 
-	return d.getResult(ctx, &cancel, operationID)
+	return c.getResult(ctx, &cancel, operationID)
 }
 
 func getPollDelay(curVal, minVal, maxVal uint64, backoffFactor uint8) uint64 {
@@ -249,7 +247,7 @@ func getPollDelay(curVal, minVal, maxVal uint64, backoffFactor uint8) uint64 {
 	)
 }
 
-func (d *Driver) getResult(
+func (c *Cli) getResult(
 	ctx context.Context,
 	cancel *bool,
 	operationID uint32,
@@ -279,8 +277,8 @@ func (d *Driver) getResult(
 		// so we'll sleep the same as the zig read delay will be
 		time.Sleep(time.Duration(scrapligoutil.SafeUint64ToInt64(curPollDelay)))
 
-		rc := d.ffiMap.Cli.PollOperation(
-			d.ptr,
+		rc := c.ffiMap.Cli.PollOperation(
+			c.ptr,
 			operationID,
 			&done,
 			&operationCount,
@@ -300,9 +298,9 @@ func (d *Driver) getResult(
 
 		curPollDelay = getPollDelay(
 			curPollDelay,
-			d.minPollDelay,
-			d.maxPollDelay,
-			d.backoffFactor,
+			c.minPollDelay,
+			c.maxPollDelay,
+			c.backoffFactor,
 		)
 	}
 
@@ -320,8 +318,8 @@ func (d *Driver) getResult(
 
 	errString := make([]byte, errSize)
 
-	rc := d.ffiMap.Cli.FetchOperation(
-		d.ptr,
+	rc := c.ffiMap.Cli.FetchOperation(
+		c.ptr,
 		operationID,
 		&resultStartTime,
 		&splits,
@@ -340,8 +338,8 @@ func (d *Driver) getResult(
 	}
 
 	return NewResult(
-		d.host,
-		*d.options.Port,
+		c.host,
+		*c.options.Port,
 		inputs,
 		resultStartTime,
 		splits,
