@@ -224,6 +224,31 @@ func (n *Netconf) GetNextNotification() (string, error) {
 	return string(notif), nil
 }
 
+// GetNextSubscription returns the next subscription type message for the given subscription id,
+// if any. If there are no messages, a ErrNoMessages will be returned.
+func (n *Netconf) GetNextSubscription(subscriptionID uint64) (string, error) {
+	if n.ptr == 0 {
+		return "", scrapligoerrors.NewFfiError("driver pointer nil", nil)
+	}
+
+	var subSize uint64
+
+	n.ffiMap.Netconf.GetNextSubscriptionSize(n.ptr, subscriptionID, &subSize)
+
+	if subSize == 0 {
+		return "", scrapligoerrors.NewMessagesError()
+	}
+
+	sub := make([]byte, subSize)
+
+	rc := n.ffiMap.Netconf.GetNextSubscription(n.ptr, subscriptionID, &sub)
+	if rc != 0 {
+		return "", scrapligoerrors.NewFfiError("get next subscription failed", nil)
+	}
+
+	return string(sub), nil
+}
+
 func getPollDelay(curVal, minVal, maxVal uint64, backoffFactor uint8) uint64 {
 	newVal := curVal
 	newVal *= uint64(backoffFactor)

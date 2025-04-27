@@ -185,11 +185,27 @@ type NetconfMapping struct {
 		size *uint64,
 	)
 
-	// GetNextNotificationSize writes the size of the next (if any) notification message into the
-	// given size pointer.
+	// GetNextNotificationSize writes the content of the next (if any) notification message into the
+	// given message pointer.
 	GetNextNotification func(
 		driverPtr uintptr,
 		notification *[]byte,
+	) int
+
+	// GetNextSubscriptionSize writes the size of the next (if any) subscription message for the
+	// given id into the given size pointer.
+	GetNextSubscriptionSize func(
+		driverPtr uintptr,
+		subscriptionID uint64,
+		size *uint64,
+	)
+
+	// GetNextSubscription writes the content of the next (if any) subscription message for the
+	// given id into the given message pointer.
+	GetNextSubscription func(
+		driverPtr uintptr,
+		subscriptionID uint64,
+		subscription *[]byte,
 	) int
 
 	// RawRPC submits a user defined rpc -- the library will ensure it is properly delimited but the
