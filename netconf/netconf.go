@@ -184,17 +184,23 @@ func (n *Netconf) GetSessionID() (uint64, error) {
 // <subscription-result>ok</subscription-result>
 // <subscription-id>2147483737</subscription-id>
 // </rpc-reply>
+// In case of failure, a ffi error will wrap an ErrSubscriptionId error.
 func (n *Netconf) GetSubscriptionID(message string) (uint64, error) {
 	var subscriptionID uint64
 
 	status := n.ffiMap.Netconf.GetSubscriptionID(message, &subscriptionID)
 	if status != 0 {
-		return 0, scrapligoerrors.NewFfiError("failed parsing subscription id", nil)
+		return 0, scrapligoerrors.NewFfiError(
+			"failed parsing subscription id",
+			scrapligoerrors.ErrSubscriptionID,
+		)
 	}
 
 	return subscriptionID, nil
 }
 
+// GetNextNotification returns the next notification type message, if any. If there are no messages,
+// a ErrNoMessages will be returned.
 func (n *Netconf) GetNextNotification() (string, error) {
 	if n.ptr == 0 {
 		return "", scrapligoerrors.NewFfiError("driver pointer nil", nil)
@@ -203,6 +209,7 @@ func (n *Netconf) GetNextNotification() (string, error) {
 	var notifSize uint64
 
 	n.ffiMap.Netconf.GetNextNotificationSize(n.ptr, &notifSize)
+
 	if notifSize == 0 {
 		return "", scrapligoerrors.NewMessagesError()
 	}

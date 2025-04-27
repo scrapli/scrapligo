@@ -40,10 +40,22 @@ func registerNetconf(m *Mapping, libScrapliFfi uintptr) {
 	)
 
 	purego.RegisterLibFunc(&m.Netconf.GetSessionID, libScrapliFfi, "ls_netconf_get_session_id")
-	purego.RegisterLibFunc(&m.Netconf.GetSubscriptionID, libScrapliFfi, "ls_netconf_get_subscription_id")
+	purego.RegisterLibFunc(
+		&m.Netconf.GetSubscriptionID,
+		libScrapliFfi,
+		"ls_netconf_get_subscription_id",
+	)
 
-	purego.RegisterLibFunc(&m.Netconf.GetNextNotificationSize, libScrapliFfi, "ls_netconf_next_notification_message_size")
-	purego.RegisterLibFunc(&m.Netconf.GetNextNotification, libScrapliFfi, "ls_netconf_next_notification_message")
+	purego.RegisterLibFunc(
+		&m.Netconf.GetNextNotificationSize,
+		libScrapliFfi,
+		"ls_netconf_next_notification_message_size",
+	)
+	purego.RegisterLibFunc(
+		&m.Netconf.GetNextNotification,
+		libScrapliFfi,
+		"ls_netconf_next_notification_message",
+	)
 
 	purego.RegisterLibFunc(&m.Netconf.RawRPC, libScrapliFfi, "ls_netconf_raw_rpc")
 

@@ -11,7 +11,12 @@ type wrappedError interface {
 	Unwrap() error
 }
 
+// ErrNoMessages is an error returned when there are no more messages to check for a subscription or
+// notification stream.
 var ErrNoMessages = errors.New("errNoMessages")
+
+// ErrSubscriptionID is an error returned when failing to parse a subscription id from a message.
+var ErrSubscriptionID = errors.New("errSubscriptionID")
 
 // ErrorKind is an enum(ish) representing the kind of error -- i.e. "ffi" or "auth".
 type ErrorKind string

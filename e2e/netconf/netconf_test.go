@@ -2,12 +2,14 @@ package netconf_test
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"runtime"
 	"strings"
 	"testing"
 
 	scrapligocli "github.com/scrapli/scrapligo/cli"
+	scrapligoffi "github.com/scrapli/scrapligo/ffi"
 	scrapligonetconf "github.com/scrapli/scrapligo/netconf"
 	scrapligooptions "github.com/scrapli/scrapligo/options"
 	scrapligotesthelper "github.com/scrapli/scrapligo/testhelper"
@@ -16,7 +18,17 @@ import (
 func TestMain(m *testing.M) {
 	scrapligotesthelper.Flags()
 
-	os.Exit(m.Run())
+	exitCode := m.Run()
+
+	if scrapligoffi.AssertNoLeaks() != nil {
+		_, _ = fmt.Fprintln(os.Stderr, "memory leak(s) detected!")
+
+		os.Exit(127)
+	}
+
+	_, _ = fmt.Fprintln(os.Stderr, "no memory leak(s) detected!")
+
+	os.Exit(exitCode)
 }
 
 func getTransports() []string {
