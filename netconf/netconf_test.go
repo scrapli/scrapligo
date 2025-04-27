@@ -41,7 +41,7 @@ func getNetconf(t *testing.T, f string) *scrapligonetconf.Netconf {
 		// secret stuff since its nice to validate default mode gets acquired and stuff
 		scrapligooptions.WithUsername("root"),
 		scrapligooptions.WithPassword("password"),
-		scrapligooptions.WithPort(830),
+		scrapligooptions.WithPort(23830),
 	}
 
 	if *scrapligotesthelper.Record {
@@ -93,7 +93,7 @@ func assertResult(t *testing.T, r *scrapligonetconf.Result, testGoldenPath strin
 		scrapligotesthelper.FailOutput(t, cleanedActual, cleanedGolden)
 	}
 
-	scrapligotesthelper.AssertEqual(t, r.Port, 830)
+	scrapligotesthelper.AssertEqual(t, r.Port, 23830)
 	scrapligotesthelper.AssertEqual(t, r.Host, testHost)
 	scrapligotesthelper.AssertNotDefault(t, r.StartTime)
 	scrapligotesthelper.AssertNotDefault(t, r.EndTime)

@@ -26,7 +26,11 @@ test-e2e-ci: ## Run e2e tests against "ci" test topology with race flag (count t
 cov:  ## Produce html coverage report
 	go tool cover -html=cover.out
 
-build-clab-launcher: ## Builds the clab launcher image
+build-clab-launcher: ## Builds the netopeer and clab launcher images
+	docker build \
+		-f e2e/clab/netopeer/Dockerfile \
+		-t libscrapli-netopeer2:latest \
+		e2e/clab/netopeer
 	docker build \
 		-f e2e/clab/launcher/Dockerfile \
 		-t clab-launcher:latest \

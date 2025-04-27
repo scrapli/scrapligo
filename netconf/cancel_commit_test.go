@@ -79,7 +79,7 @@ func TestCancelCommit(t *testing.T) {
 					scrapligotesthelper.FailOutput(t, cleanedActual, cleanedGolden)
 				}
 
-				scrapligotesthelper.AssertEqual(t, r.Port, 830)
+				scrapligotesthelper.AssertEqual(t, r.Port, 23830)
 				scrapligotesthelper.AssertEqual(t, r.Host, testHost)
 				scrapligotesthelper.AssertNotDefault(t, r.StartTime)
 				scrapligotesthelper.AssertNotDefault(t, r.EndTime)
