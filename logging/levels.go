@@ -21,6 +21,26 @@ const (
 // LogLeveLAsInt is a uint8 that represents LogLevel values.
 type LogLeveLAsInt uint8
 
+// IntFromLevel returns the uint8 value of the given log level.
+func IntFromLevel(level LogLevel) LogLeveLAsInt {
+	switch level {
+	case Debug:
+		return DebugAsInt
+	case Info:
+		return InfoAsInt
+	case Warn:
+		return WarnAsInt
+	case Critical:
+		return CriticalAsInt
+	case Fatal:
+		return FatalAsInt
+	case Disabled:
+		return DisabledAsInt
+	default:
+		return DisabledAsInt
+	}
+}
+
 const (
 	// DebugAsInt is the debug log level.
 	DebugAsInt LogLeveLAsInt = 0
