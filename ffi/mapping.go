@@ -547,6 +547,12 @@ type TransportBinOptions struct {
 
 // TransportSSH2Options holds options setters for the ssh2 transport.
 type TransportSSH2Options struct {
+	// SetKnownHostsPath sets the known hosts path for the driver at driverPtr.
+	SetKnownHostsPath func(
+		driverPtr uintptr,
+		value string,
+	) int
+
 	// SetLibSSH2Trace enables libssh2 trace for the driver at driverPtr.
 	SetLibSSH2Trace func(
 		driverPtr uintptr,

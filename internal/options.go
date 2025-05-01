@@ -381,10 +381,21 @@ func (o *TransportBinOptions) apply( //nolint: gocyclo
 
 // TransportSSH2Options holds (lib)"ssh2" transport specific options.
 type TransportSSH2Options struct {
-	LibSSH2Trace bool
+	KnownHostsPath string
+	LibSSH2Trace   bool
 }
 
 func (o *TransportSSH2Options) apply(driverPtr uintptr, m *scrapligoffi.Mapping) error {
+	if o.KnownHostsPath != "" {
+		rc := m.Options.TransportSSH2.SetKnownHostsPath(driverPtr, o.KnownHostsPath)
+		if rc != 0 {
+			return scrapligoerrors.NewOptionsError(
+				"failed setting libssh2 known hosts path option",
+				nil,
+			)
+		}
+	}
+
 	if o.LibSSH2Trace {
 		rc := m.Options.TransportSSH2.SetLibSSH2Trace(driverPtr)
 		if rc != 0 {

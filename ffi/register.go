@@ -225,6 +225,11 @@ func registerOptions(m *Mapping, libScrapliFfi uintptr) {
 
 	// transport ssh2
 	purego.RegisterLibFunc(
+		&m.Options.TransportSSH2.SetKnownHostsPath,
+		libScrapliFfi,
+		"ls_option_transport_ssh2_known_hosts_path",
+	)
+	purego.RegisterLibFunc(
 		&m.Options.TransportSSH2.SetLibSSH2Trace,
 		libScrapliFfi,
 		"ls_option_transport_ssh2_libssh2trace",
