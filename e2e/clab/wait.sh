@@ -7,11 +7,12 @@ while [ $SECONDS -lt $END_TIME ]; do
     echo "waiting for ssh..."
     # ensure srl is up and running and displays the normal banner (is past the initial boot stuff
     # basically where it is only basic cli)
-    sshpass -p "NokiaSrl1!" \
-      ssh -o ConnectTimeout=5 -o StrictHostKeyChecking=no -l admin 172.20.20.16 quit  2>&1 \
-      | grep "Welcome to Nokia SR Linux"
+    OUT=$(sshpass -p "NokiaSrl1!" \
+      ssh -o ConnectTimeout=5 -o StrictHostKeyChecking=no -l admin 172.20.20.16 quit  2>&1)
 
-    if [ $? -eq 0 ]; then
+    echo "read: $OUT"
+
+    if echo "$OUT" | grep -q "Welcome to Nokia SR Linux"; then
         echo "ssh available..."
         break
     fi
@@ -22,11 +23,12 @@ done
 while [ $SECONDS -lt $END_TIME ]; do
     echo "waiting for netconf..."
     # same thing for netconf port just to be safe!
-    sshpass -p "NokiaSrl1!" \
-      ssh -o ConnectTimeout=5 -o StrictHostKeyChecking=no -l admin -p 830 172.20.20.16 quit  2>&1 \
-      | grep "Welcome to Nokia SR Linux"
+    OUT=$(sshpass -p "NokiaSrl1!" \
+      ssh -o ConnectTimeout=5 -o StrictHostKeyChecking=no -l admin -p 830 172.20.20.16 quit  2>&1)
 
-    if [ $? -eq 0 ]; then
+    echo "read: $OUT"
+
+    if echo "$OUT" | grep -q "Welcome to Nokia SR Linux"; then
         echo "netconf available..."
         exit 0
     fi
