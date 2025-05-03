@@ -215,6 +215,7 @@ type NetconfMapping struct {
 		operationID *uint32,
 		cancel *bool,
 		payload string,
+		extraNamespaces string,
 	) int
 
 	// GetConfig submits a GetConfig operation to the underlying driver. The driver populates the
@@ -375,6 +376,7 @@ type OptionMapping struct {
 	TransportBin  TransportBinOptions
 	TransportSSH2 TransportSSH2Options
 	TransportTest TransportTestOptions
+	Netconf       NetconfOptions
 }
 
 // SessionOptions holds options setters for session related things.
@@ -563,6 +565,34 @@ type TransportSSH2Options struct {
 type TransportTestOptions struct {
 	// SetF sets the "f" (source file) option for the driver at driverPtr.
 	SetF func(
+		driverPtr uintptr,
+		value string,
+	) int
+}
+
+// NetconfOptions holds options setters for netconf objects.
+type NetconfOptions struct {
+	// SetErrorTag sets the error tag option for the driver at driverPtr. Default is "rpc-error>".
+	SetErrorTag func(
+		driverPtr uintptr,
+		value string,
+	) int
+
+	// SetPreferredVersion sets the preferred netconf version for the driver at driverPtr.
+	SetPreferredVersion func(
+		driverPtr uintptr,
+		value string,
+	) int
+
+	// SetMessagePollIntervalNS sets the message poll interval in ns for the driver at driverPtr.
+	SetMessagePollIntervalNS func(
+		driverPtr uintptr,
+		value uint64,
+	) int
+
+	// SetBaseNamespacePrefix sets the prefix to apply for the base namespaces for operations with
+	// the driver at driverPtr.
+	SetBaseNamespacePrefix func(
 		driverPtr uintptr,
 		value string,
 	) int

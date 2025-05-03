@@ -91,7 +91,7 @@ func registerNetconf(m *Mapping, libScrapliFfi uintptr) {
 	purego.RegisterLibFunc(&m.Netconf.Action, libScrapliFfi, "ls_netconf_action")
 }
 
-func registerOptions(m *Mapping, libScrapliFfi uintptr) {
+func registerOptions(m *Mapping, libScrapliFfi uintptr) { //nolint: funlen
 	// session
 	purego.RegisterLibFunc(
 		&m.Options.Session.SetReadSize,
@@ -240,5 +240,30 @@ func registerOptions(m *Mapping, libScrapliFfi uintptr) {
 		&m.Options.TransportTest.SetF,
 		libScrapliFfi,
 		"ls_option_transport_test_f",
+	)
+
+	// netconf
+	purego.RegisterLibFunc(
+		&m.Options.Netconf.SetErrorTag,
+		libScrapliFfi,
+		"ls_option_netconf_error_tag",
+	)
+
+	purego.RegisterLibFunc(
+		&m.Options.Netconf.SetPreferredVersion,
+		libScrapliFfi,
+		"ls_option_netconf_preferred_version",
+	)
+
+	purego.RegisterLibFunc(
+		&m.Options.Netconf.SetMessagePollIntervalNS,
+		libScrapliFfi,
+		"ls_option_netconf_message_poll_interval",
+	)
+
+	purego.RegisterLibFunc(
+		&m.Options.Netconf.SetBaseNamespacePrefix,
+		libScrapliFfi,
+		"ls_option_netconf_base_namespace_prefix",
 	)
 }

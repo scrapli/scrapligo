@@ -55,12 +55,14 @@ type DriverOptions struct {
 	DefinitionString string
 }
 
-// NetconfOptions holds netconf specific options.
-type NetconfOptions struct{}
-
 // Apply applies the Options to the given driver at driverPtr.
 func (o *Options) Apply(driverPtr uintptr, m *scrapligoffi.Mapping) error {
-	err := o.Session.apply(driverPtr, m)
+	err := o.Netconf.apply(driverPtr, m)
+	if err != nil {
+		return err
+	}
+
+	err = o.Session.apply(driverPtr, m)
 	if err != nil {
 		return err
 	}
@@ -86,6 +88,55 @@ func (o *Options) Apply(driverPtr uintptr, m *scrapligoffi.Mapping) error {
 		err = o.Transport.Test.apply(driverPtr, m)
 		if err != nil {
 			return err
+		}
+	}
+
+	return nil
+}
+
+// NetconfOptions holds netconf specific options.
+type NetconfOptions struct {
+	ErrorTag              string
+	PreferredVersion      string
+	MessagePollIntervalNS uint64
+	BaseNamespacePrefix   string
+}
+
+func (o *NetconfOptions) apply(
+	driverPtr uintptr,
+	m *scrapligoffi.Mapping,
+) error {
+	if o.ErrorTag != "" {
+		rc := m.Options.Netconf.SetErrorTag(driverPtr, o.ErrorTag)
+		if rc != 0 {
+			return scrapligoerrors.NewOptionsError("failed setting error tag option", nil)
+		}
+	}
+
+	if o.PreferredVersion != "" {
+		rc := m.Options.Netconf.SetPreferredVersion(driverPtr, o.PreferredVersion)
+		if rc != 0 {
+			return scrapligoerrors.NewOptionsError("failed setting preferred version option", nil)
+		}
+	}
+
+	if o.MessagePollIntervalNS != 0 {
+		rc := m.Options.Netconf.SetMessagePollIntervalNS(driverPtr, o.MessagePollIntervalNS)
+		if rc != 0 {
+			return scrapligoerrors.NewOptionsError(
+				"failed setting message poll interval option",
+				nil,
+			)
+		}
+	}
+
+	if o.BaseNamespacePrefix != "" {
+		rc := m.Options.Netconf.SetBaseNamespacePrefix(driverPtr, o.BaseNamespacePrefix)
+		if rc != 0 {
+			return scrapligoerrors.NewOptionsError(
+				"failed setting base namespace prefix option",
+				nil,
+			)
 		}
 	}
 

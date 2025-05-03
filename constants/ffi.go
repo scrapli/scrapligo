@@ -16,4 +16,9 @@ const (
 	// HomeEnv is the key for the HOME env var, we use this and/or the XdgCacheHomeEnv to figure
 	// out where to put the libscrapli dynamic library file.
 	HomeEnv = "HOME"
+
+	// LibScrapliDelimiter is the delimiter used to delim string lists going to/from the ffi -- this
+	// is used so we dont have to pass lengths of slices back and forth over the ffi. Its a bit
+	// hacky but works.
+	LibScrapliDelimiter = "__libscrapli__"
 )

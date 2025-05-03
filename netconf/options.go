@@ -9,6 +9,17 @@ const (
 // Option defines a functional option for a netconf rpc.
 type Option func(o any)
 
+// WithExtraNamespaces sets additional namespaces for the rpc. The value is a list of pairs of
+// strings representing the prefix and URI.
+func WithExtraNamespaces(e [][2]string) Option {
+	return func(o any) {
+		switch to := o.(type) {
+		case *rawRPCOptions:
+			to.extraNamespaces = e
+		}
+	}
+}
+
 // WithDatastore set the datastore type for the rpc.
 func WithDatastore(t DatastoreType) Option {
 	return func(o any) {

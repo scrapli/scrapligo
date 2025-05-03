@@ -49,6 +49,8 @@ func TestKillSession(t *testing.T) {
 				t.Fatal(err)
 			}
 
+			defer closeNetconf(t, n)
+
 			n2 := getNetconf(t, testFixturePath)
 
 			_, err = n2.Open(ctx)
@@ -56,7 +58,7 @@ func TestKillSession(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			defer closeNetconf(t, n)
+			defer closeNetconf(t, n2)
 
 			s, err := n2.GetSessionID()
 			if err != nil {

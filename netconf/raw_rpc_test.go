@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	scrapligonetconf "github.com/scrapli/scrapligo/netconf"
 	scrapligotesthelper "github.com/scrapli/scrapligo/testhelper"
 )
 
@@ -16,10 +17,18 @@ func TestRawRPC(t *testing.T) {
 	cases := map[string]struct {
 		description string
 		payload     string
+		options     []scrapligonetconf.Option
 	}{
 		"simple": {
 			description: "simple",
 			payload:     "<get-config><source><running/></source></get-config>",
+		},
+		"simple-extra-namespaces": {
+			description: "simple",
+			payload:     "<get-config><source><running/></source></get-config>",
+			options: []scrapligonetconf.Option{
+				scrapligonetconf.WithExtraNamespaces([][2]string{{"foo", "bar"}, {"baz", "qux"}}),
+			},
 		},
 	}
 
@@ -51,7 +60,7 @@ func TestRawRPC(t *testing.T) {
 
 			defer closeNetconf(t, n)
 
-			r, err := n.RawRPC(ctx, c.payload)
+			r, err := n.RawRPC(ctx, c.payload, c.options...)
 			if err != nil {
 				t.Fatal(err)
 			}

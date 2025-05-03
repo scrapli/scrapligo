@@ -6,12 +6,12 @@ import (
 	"strings"
 	"time"
 
+	scrapligoconstants "github.com/scrapli/scrapligo/constants"
 	scrapligoutil "github.com/scrapli/scrapligo/util"
 )
 
 const (
 	elapsedTimeMultiplierDivider = 100
-	operationDelimiter           = "__libscrapli__"
 )
 
 func elapsedTime(startTime, endTime uint64) float64 {
@@ -51,8 +51,8 @@ func NewResult(
 	results []byte,
 	resultsFailedIndicator []byte,
 ) *Result {
-	inputsS := strings.Split(string(inputs), operationDelimiter)
-	resultsS := strings.Split(string(results), operationDelimiter)
+	inputsS := strings.Split(string(inputs), scrapligoconstants.LibScrapliDelimiter)
+	resultsS := strings.Split(string(results), scrapligoconstants.LibScrapliDelimiter)
 
 	var elapsed float64
 
@@ -61,10 +61,13 @@ func NewResult(
 	}
 
 	return &Result{
-		Host:                   host,
-		Port:                   port,
-		Inputs:                 inputsS,
-		ResultsRaw:             bytes.Split(resultsRaw, []byte(operationDelimiter)),
+		Host:   host,
+		Port:   port,
+		Inputs: inputsS,
+		ResultsRaw: bytes.Split(
+			resultsRaw,
+			[]byte(scrapligoconstants.LibScrapliDelimiter),
+		),
 		Results:                resultsS,
 		StartTime:              startTime,
 		Splits:                 splits,
