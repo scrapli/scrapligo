@@ -18,15 +18,19 @@ for url in $ASSETS_URL; do
     curl -L -o ".tmp/$filename" "$url"
 done
 
-# get the "lib version" (doesnt include any tag alpha/post/etc. suffix)
-LIB_VERSION=$(find .tmp | grep -E -o "\d+\.\d+\.\d+" | head -1)
+# clean old assets
+rm assets/lib/aarch64-linux/*
+rm assets/lib/aarch64-macos/*
+rm assets/lib/x86_64-linux-gnu/*
+rm assets/lib/x86_64-linux-musl/*
+rm assets/lib/x86_64-macos/*
 
 # revert the naming shenanigans libscrapli does to appease gh release assets
-mv .tmp/libscrapli-aarch64-linux.so.* assets/lib/aarch64-linux/libscrapli.so.$LIB_VERSION
-mv .tmp/libscrapli-aarch64-macos.dylib.* assets/lib/aarch64-macos/libscrapli.$LIB_VERSION.dylib
-mv .tmp/libscrapli-x86_64-linux-gnu.so.* assets/lib/x86_64-linux-gnu/libscrapli.so.$LIB_VERSION
-mv .tmp/libscrapli-x86_64-linux-musl.so.* assets/lib/x86_64-linux-musl/libscrapli.so.$LIB_VERSION
-mv .tmp/libscrapli-x86_64-macos.dylib.* assets/lib/x86_64-macos/libscrapli.$LIB_VERSION.dylib
+mv .tmp/libscrapli-aarch64-linux.so.* assets/lib/aarch64-linux/libscrapli.so.${LIBSCRAPLI_TAG#v}
+mv .tmp/libscrapli-aarch64-macos.dylib.* assets/lib/aarch64-macos/libscrapli.${LIBSCRAPLI_TAG#v}.dylib
+mv .tmp/libscrapli-x86_64-linux-gnu.so.* assets/lib/x86_64-linux-gnu/libscrapli.so.${LIBSCRAPLI_TAG#v}
+mv .tmp/libscrapli-x86_64-linux-musl.so.* assets/lib/x86_64-linux-musl/libscrapli.so.${LIBSCRAPLI_TAG#v}
+mv .tmp/libscrapli-x86_64-macos.dylib.* assets/lib/x86_64-macos/libscrapli.${LIBSCRAPLI_TAG#v}.dylib
 
 while IFS='  ' read -r checksum filepath; do
     new_path=$(echo "$filepath" | sed 's/^zig-out\//assets\/lib\//')
@@ -40,7 +44,7 @@ while IFS='  ' read -r checksum filepath; do
     fi
 done < ".tmp/checksums.txt"
 
-sed -i.bak 's|var LibScrapliVersion = ".*"|var LibScrapliVersion = "'"$LIBSCRAPLI_TAG"'"|' \
+sed -i.bak 's|var LibScrapliVersion = ".*"|var LibScrapliVersion = "'"${LIBSCRAPLI_TAG#v}"'"|' \
   constants/versions.go && rm -f constants/versions.go.bak
 
 rm -rf .tmp
