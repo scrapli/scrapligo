@@ -209,6 +209,10 @@ func (d *Driver) handleCallbacks(
 
 	select {
 	case r := <-c:
+        if r == nil {
+            return
+        }
+
 		if r.err != nil {
 			return nil, r.err
 		}
