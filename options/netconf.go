@@ -38,12 +38,3 @@ func WithNetconfMessagePollIntervalNS(v uint64) Option {
 		return nil
 	}
 }
-
-// WithNetconfBaseNamespacePrefix sets the prefix to use for base namespaces for a netconf object.
-func WithNetconfBaseNamespacePrefix(s string) Option {
-	return func(o *scrapligointernal.Options) error {
-		o.Netconf.BaseNamespacePrefix = s
-
-		return nil
-	}
-}

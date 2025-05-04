@@ -260,10 +260,4 @@ func registerOptions(m *Mapping, libScrapliFfi uintptr) { //nolint: funlen
 		libScrapliFfi,
 		"ls_option_netconf_message_poll_interval",
 	)
-
-	purego.RegisterLibFunc(
-		&m.Options.Netconf.SetBaseNamespacePrefix,
-		libScrapliFfi,
-		"ls_option_netconf_base_namespace_prefix",
-	)
 }

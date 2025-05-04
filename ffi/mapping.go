@@ -215,6 +215,7 @@ type NetconfMapping struct {
 		operationID *uint32,
 		cancel *bool,
 		payload string,
+		baseNamespacePrefix string,
 		extraNamespaces string,
 	) int
 
@@ -588,12 +589,5 @@ type NetconfOptions struct {
 	SetMessagePollIntervalNS func(
 		driverPtr uintptr,
 		value uint64,
-	) int
-
-	// SetBaseNamespacePrefix sets the prefix to apply for the base namespaces for operations with
-	// the driver at driverPtr.
-	SetBaseNamespacePrefix func(
-		driverPtr uintptr,
-		value string,
 	) int
 }

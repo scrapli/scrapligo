@@ -99,7 +99,6 @@ type NetconfOptions struct {
 	ErrorTag              string
 	PreferredVersion      string
 	MessagePollIntervalNS uint64
-	BaseNamespacePrefix   string
 }
 
 func (o *NetconfOptions) apply(
@@ -125,16 +124,6 @@ func (o *NetconfOptions) apply(
 		if rc != 0 {
 			return scrapligoerrors.NewOptionsError(
 				"failed setting message poll interval option",
-				nil,
-			)
-		}
-	}
-
-	if o.BaseNamespacePrefix != "" {
-		rc := m.Options.Netconf.SetBaseNamespacePrefix(driverPtr, o.BaseNamespacePrefix)
-		if rc != 0 {
-			return scrapligoerrors.NewOptionsError(
-				"failed setting base namespace prefix option",
 				nil,
 			)
 		}

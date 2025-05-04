@@ -20,7 +20,8 @@ func newRawRPCOptions(options ...Option) *rawRPCOptions {
 }
 
 type rawRPCOptions struct {
-	extraNamespaces [][2]string
+	baseNamespacePrefix string
+	extraNamespaces     [][2]string
 }
 
 func (o *rawRPCOptions) extraNamespacesToFFI() string {
@@ -54,6 +55,7 @@ func (n *Netconf) RawRPC(
 		&operationID,
 		&cancel,
 		payload,
+		loadedOptions.baseNamespacePrefix,
 		loadedOptions.extraNamespacesToFFI(),
 	)
 	if status != 0 {

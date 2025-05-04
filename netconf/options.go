@@ -9,6 +9,16 @@ const (
 // Option defines a functional option for a netconf rpc.
 type Option func(o any)
 
+// WithNetconfBaseNamespacePrefix sets the prefix to use for base namespaces for a netconf rpc.
+func WithNetconfBaseNamespacePrefix(s string) Option {
+	return func(o any) {
+		switch to := o.(type) {
+		case *rawRPCOptions:
+			to.baseNamespacePrefix = s
+		}
+	}
+}
+
 // WithExtraNamespaces sets additional namespaces for the rpc. The value is a list of pairs of
 // strings representing the prefix and URI.
 func WithExtraNamespaces(e [][2]string) Option {
