@@ -80,9 +80,9 @@ func (n *Netconf) GetPtr() (uintptr, *scrapligoffi.Mapping) {
 	return n.ptr, n.ffiMap
 }
 
-// Open opens the driver object. This method spawns the underlying zig driver which the Cli then
-// holds a pointer to. All Cli operations operate against this pointer (though this is
-// transparent to the user).
+// Open opens the driver object. This method spawns the underlying zig driver which the Netconf
+// object then holds a pointer to. All Netconf operations operate against this pointer (though
+// this is transparent to the user).
 func (n *Netconf) Open(ctx context.Context) (*Result, error) {
 	// ensure we dealloc if something happens, otherwise users calls to defer close would not be
 	// super handy
@@ -121,7 +121,7 @@ func (n *Netconf) Open(ctx context.Context) (*Result, error) {
 
 	var operationID uint32
 
-	status := n.ffiMap.Shared.Open(n.ptr, &operationID, &cancel)
+	status := n.ffiMap.Netconf.Open(n.ptr, &operationID, &cancel)
 	if status != 0 {
 		cleanup = true
 
@@ -148,7 +148,8 @@ func (n *Netconf) Close(ctx context.Context) (*Result, error) {
 
 	var operationID uint32
 
-	status := n.ffiMap.Shared.Close(n.ptr, &operationID, &cancel)
+	// TODO decide if the bools should just be options or what (probably)
+	status := n.ffiMap.Netconf.Close(n.ptr, &operationID, &cancel, false, false)
 	if status != 0 {
 		return nil, scrapligoerrors.NewFfiError("failed to submit close operation", nil)
 	}

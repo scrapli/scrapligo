@@ -17,18 +17,6 @@ type SharedMapping struct {
 	// Close where possible.
 	Free func(driverPtr uintptr)
 
-	// Open opens the driver connection of the driver at driverPtr.
-	Open func(
-		driverPtr uintptr,
-		operationID *uint32,
-		cancel *bool,
-	) int
-	Close func(
-		driverPtr uintptr,
-		operationID *uint32,
-		cancel *bool,
-	) int
-
 	Read func(
 		driverPtr uintptr,
 		buf *[]byte,
@@ -51,6 +39,18 @@ type CliMapping struct {
 		port uint16,
 		transportKind string,
 	) (driverPtr uintptr)
+
+	// Open opens the driver connection of the driver at driverPtr.
+	Open func(
+		driverPtr uintptr,
+		operationID *uint32,
+		cancel *bool,
+	) int
+	Close func(
+		driverPtr uintptr,
+		operationID *uint32,
+		cancel *bool,
+	) int
 
 	// PollOperation checks to see if the given operationID is complete -- the state (done or not
 	// done) is set into the done bool pointer. If the state is done, the other pointers are also
@@ -139,6 +139,20 @@ type NetconfMapping struct {
 		port uint16,
 		transportKind string,
 	) (driverPtr uintptr)
+
+	// Open opens the driver connection of the driver at driverPtr.
+	Open func(
+		driverPtr uintptr,
+		operationID *uint32,
+		cancel *bool,
+	) int
+	Close func(
+		driverPtr uintptr,
+		operationID *uint32,
+		cancel *bool,
+		expectNoReply,
+		force bool,
+	) int
 
 	// PollOperation polls the given operationID. See DriverMapping.PollerOperation for details.
 	PollOperation func(

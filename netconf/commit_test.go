@@ -19,10 +19,8 @@ func TestCommit(t *testing.T) {
 		options     []scrapligonetconf.Option
 	}{
 		"simple": {
-			description: "simple - commit a simple candidate config",
-			options: []scrapligonetconf.Option{
-				scrapligonetconf.WithTargetType(scrapligonetconf.DatastoreTypeCandidate),
-			},
+			description: "simple",
+			options:     []scrapligonetconf.Option{},
 		},
 	}
 

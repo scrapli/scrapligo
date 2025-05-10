@@ -195,7 +195,7 @@ func (c *Cli) Open(ctx context.Context) (*Result, error) {
 
 	var operationID uint32
 
-	status := c.ffiMap.Shared.Open(c.ptr, &operationID, &cancel)
+	status := c.ffiMap.Cli.Open(c.ptr, &operationID, &cancel)
 	if status != 0 {
 		cleanup = true
 
@@ -225,7 +225,7 @@ func (c *Cli) Close(ctx context.Context) (*Result, error) {
 
 	var operationID uint32
 
-	status := c.ffiMap.Shared.Close(c.ptr, &operationID, &cancel)
+	status := c.ffiMap.Cli.Close(c.ptr, &operationID, &cancel)
 	if status != 0 {
 		return nil, scrapligoerrors.NewFfiError("failed to submit close operation", nil)
 	}

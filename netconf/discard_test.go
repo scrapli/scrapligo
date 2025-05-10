@@ -20,9 +20,7 @@ func TestDiscard(t *testing.T) {
 	}{
 		"simple": {
 			description: "simple - load a candidate config and discard it",
-			options: []scrapligonetconf.Option{
-				scrapligonetconf.WithTargetType(scrapligonetconf.DatastoreTypeCandidate),
-			},
+			options:     []scrapligonetconf.Option{},
 		},
 	}
 
