@@ -184,8 +184,6 @@ func writeHTTPContentsFromPath(
 		)
 	}
 
-	fmt.Println("RESP STATUS CODE > ", resp.StatusCode)
-
 	_, err = io.Copy(w, resp.Body)
 	if err != nil {
 		return err
