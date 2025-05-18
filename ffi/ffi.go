@@ -208,6 +208,9 @@ func GetMapping() (*Mapping, error) {
 	mappingInstOnce.Do(func() {
 		start := time.Now()
 
+		// TODO i think that this needs to *also* support fetching the correct libscrapli from
+		// the libscrapli repo because if we do the git history nuking then you wont be able to
+		// pin to commits w/out having to go build yourself etc.
 		libscrapliPath, err := getLibscrapliPath()
 		if err != nil {
 			onceErrorString = err.Error()

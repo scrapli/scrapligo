@@ -70,8 +70,6 @@ func TestKillSession(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			// for now this just asserts that we killed some invalid session id -- but at least that
-			// means we sent a valid kill-session rpc
 			if *scrapligotesthelper.Update {
 				scrapligotesthelper.WriteFile(
 					t,
