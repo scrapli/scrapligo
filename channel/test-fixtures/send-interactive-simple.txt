@@ -1,3 +1,0 @@
-C3560CX#clear logging
-Clear logging buffer [confirm]
-C3560CX#

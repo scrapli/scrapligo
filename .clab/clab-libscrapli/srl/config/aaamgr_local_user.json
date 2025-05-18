@@ -1,0 +1,15 @@
+{
+ "users": {
+  "admin": {
+   "password": [
+    "$y$j9T$pNVjOgcNNGIWjBcdDfK/7.$Ir4uYxszxtqzVj5AGiZvdWJGs.bpLWBJvHON3YgqnC2"
+   ],
+   "failed_login_count": 0,
+   "locked_out": false,
+   "password_changed_after_first_login": false,
+   "password_update_time": "2026-02-05T01:11:13Z"
+  }
+ },
+ "ntp_sync": false,
+ "password_change_after_first_login": false
+}
