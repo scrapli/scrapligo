@@ -78,8 +78,8 @@ func NewResult(
 
 // EndTime returns the endtime of the Result, if for whatever reason there isnt one it returns 0.
 func (r *Result) EndTime() uint64 {
-	if len(r.ResultsRaw) == 0 {
-		return 0
+	if len(r.Splits) == 0 {
+		return r.StartTime + 1
 	}
 
 	return r.Splits[len(r.Splits)-1]
