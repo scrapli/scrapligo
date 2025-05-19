@@ -44,6 +44,9 @@ linters:
           - revive
         text: package-comments
       - linters:
+          - gochecknoglobals
+        path: constants/versions.go
+      - linters:
           - revive
         path: cli/platforms.go
         text: exported

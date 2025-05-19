@@ -10,4 +10,4 @@ fi
 
 LIBSCRAPLI_TAG="${LIBSCRAPLI_TAG#v}"
 
-sed -i.bak -E "s|(var LibScrapliVersion = )(.*)|\1\"${LIBSCRAPLI_TAG}\"|g" scrapli/ffi.py
+sed -i.bak -E "s|(var LibScrapliVersion = )(.*)|\1\"${LIBSCRAPLI_TAG}\"|g" constants/versions.go
