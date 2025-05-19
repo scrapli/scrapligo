@@ -96,7 +96,9 @@ func getLibscrapliCachePath() string {
 	return cacheDir
 }
 
-func getLibscrapliPath() (string, error) {
+// EnsureLibscrapli ensures libscrapli is present at the cache path. It returns the final path
+// or an error.
+func EnsureLibscrapli() (string, error) {
 	overridePath := os.Getenv(scrapligoconstants.LibScrapliPathOverrideEnv)
 	if overridePath != "" {
 		scrapligologging.Logger(
@@ -193,7 +195,7 @@ func writeHTTPContentsFromPath(
 }
 
 func writeLibScrapliToCache(cachedLibFilename string) error {
-	f, err := os.Create(cachedLibFilename)
+	f, err := os.Create(cachedLibFilename) //nolint: gosec
 	if err != nil {
 		return err
 	}
@@ -252,7 +254,7 @@ func GetMapping() (*Mapping, error) {
 	mappingInstOnce.Do(func() {
 		start := time.Now()
 
-		libscrapliPath, err := getLibscrapliPath()
+		libscrapliPath, err := EnsureLibscrapli()
 		if err != nil {
 			onceErrorString = err.Error()
 
