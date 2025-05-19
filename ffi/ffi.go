@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"path/filepath"
 	"runtime"
 	"sync"
 	"time"
@@ -195,7 +196,17 @@ func writeHTTPContentsFromPath(
 }
 
 func writeLibScrapliToCache(cachedLibFilename string) error {
-	f, err := os.Create(cachedLibFilename) //nolint: gosec
+	err := os.MkdirAll(
+		filepath.Dir(cachedLibFilename),
+		scrapligoconstants.PermissionsOwnerReadWriteExecute,
+	)
+	if err != nil {
+		panic("failed ensuring cache directory")
+	}
+
+	var f *os.File
+
+	f, err = os.Create(cachedLibFilename) //nolint: gosec
 	if err != nil {
 		return err
 	}
@@ -217,7 +228,7 @@ func writeLibScrapliToCache(cachedLibFilename string) error {
 		}
 
 		releaseFilename = fmt.Sprintf(
-			"libscrapli-%s-linux-%s-%s.so",
+			"libscrapli-%s-linux-%s.so.%s",
 			getZigStyleArch(),
 			abi,
 			scrapligoconstants.LibScrapliVersion,
