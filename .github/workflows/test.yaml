@@ -37,6 +37,10 @@ jobs:
         with:
           go-version: ${{ env.GO_VERSION }}
 
+      - name: ensure libscrapli is available
+        run: |
+          go run build/write_libscrapli_to_cache.go
+
       - name: install go test tools
         run: |
           go install gotest.tools/gotestsum@${{ env.GOTESTSUM_VERSION }}
@@ -85,6 +89,10 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: ${{ env.GO_VERSION }}
+
+      - name: ensure libscrapli is available
+        run: |
+          go run build/write_libscrapli_to_cache.go
 
       - name: install go test tools
         run: |
