@@ -43,7 +43,7 @@ func NewDriver(
 	if d.DefaultDesiredPriv == "" || len(d.PrivilegeLevels) == 0 {
 		return nil, fmt.Errorf(
 			"%w: no default desired privilege level and/or privilege levels provided, "+
-				"these are required with 'netework' driver",
+				"these are required with 'network' driver",
 			util.ErrBadOption,
 		)
 	}
