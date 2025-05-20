@@ -21,7 +21,7 @@ const (
 	HuaweiVrp        PlatformName = "huawei_vrp"
 	IpInfusionOcnos  PlatformName = "ip_infusion_ocnos"
 	JuniperJunos     PlatformName = "juniper_junos"
-	NokiaSrl         PlatformName = "nokia_srl"
+	NokiaSrl         PlatformName = "nokia_srlinux"
 	NokiaSros        PlatformName = "nokia_sros"
 	NokiaSrosClassic PlatformName = "nokia_sros_classic"
 	PaloAltoPanos    PlatformName = "paloalto_panos"
