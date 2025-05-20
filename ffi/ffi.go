@@ -7,7 +7,9 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"sync"
 	"time"
@@ -24,9 +26,10 @@ var (
 )
 
 const (
-	darwin         = "darwin"
-	linux          = "linux"
-	libscrapliRepo = "https://github.com/scrapli/libscrapli"
+	darwin          = "darwin"
+	linux           = "linux"
+	libscrapliRepo  = "https://github.com/scrapli/libscrapli"
+	maxBuildMinutes = 5
 )
 
 // AssertNoLeaks is a dev/test type function that asserts (using the general purpose allocator used
@@ -95,6 +98,12 @@ func getLibscrapliCachePath() string {
 	)
 
 	return cacheDir
+}
+
+func libscrapliVersionIsHash() bool {
+	return regexp.MustCompile(
+		`(?i)^[0-9a-f]{7,40}$`,
+	).MatchString(scrapligoconstants.LibScrapliVersion)
 }
 
 // EnsureLibscrapli ensures libscrapli is present at the cache path. It returns the final path
@@ -195,8 +204,8 @@ func writeHTTPContentsFromPath(
 	return nil
 }
 
-func writeLibScrapliToCache(cachedLibFilename string) error {
-	err := os.MkdirAll(
+func writeLibScrapliToCache(cachedLibFilename string) (err error) { //nolint: nonamedreturns
+	err = os.MkdirAll(
 		filepath.Dir(cachedLibFilename),
 		scrapligoconstants.PermissionsOwnerReadWriteExecute,
 	)
@@ -211,10 +220,24 @@ func writeLibScrapliToCache(cachedLibFilename string) error {
 		return err
 	}
 
+	defer func() {
+		// best effort close and remove if errored
+		_ = f.Close()
+
+		if err == nil {
+			return
+		}
+
+		_ = os.Remove(cachedLibFilename)
+	}()
+
+	var zigTriple string
+
 	var releaseFilename string
 
 	switch runtime.GOOS {
 	case darwin:
+		zigTriple = fmt.Sprintf("%s-macos", getZigStyleArch())
 		releaseFilename = fmt.Sprintf(
 			"libscrapli-%s-macos.dylib.%s",
 			getZigStyleArch(),
@@ -227,6 +250,7 @@ func writeLibScrapliToCache(cachedLibFilename string) error {
 			abi = "musl"
 		}
 
+		zigTriple = fmt.Sprintf("%s-linux-%s", getZigStyleArch(), abi)
 		releaseFilename = fmt.Sprintf(
 			"libscrapli-%s-linux-%s.so.%s",
 			getZigStyleArch(),
@@ -237,21 +261,61 @@ func writeLibScrapliToCache(cachedLibFilename string) error {
 		panic("unsupported platform")
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
-	defer cancel()
+	if libscrapliVersionIsHash() {
+		scrapligologging.Logger(
+			scrapligologging.Debug,
+			"libscrapli target version is hash, attempting to build via docker...",
+		)
 
-	err = writeHTTPContentsFromPath(
-		ctx,
-		fmt.Sprintf(
-			"%s/releases/download/v%s/%s",
-			libscrapliRepo,
-			scrapligoconstants.LibScrapliVersion,
-			releaseFilename,
-		),
-		f,
-	)
-	if err != nil {
-		return err
+		_, err = exec.LookPath("docker")
+		if err != nil {
+			return scrapligoerrors.NewFfiError("docker unavailable and version is a hash", err)
+		}
+
+		ctx, cancel := context.WithTimeout(context.Background(), maxBuildMinutes*time.Minute)
+		defer cancel()
+
+		buildCmd := exec.CommandContext( //nolint: gosec
+			ctx,
+			"docker",
+			"run",
+			"-v",
+			fmt.Sprintf("%s:/out", filepath.Dir(cachedLibFilename)),
+			"-e",
+			fmt.Sprintf("TAG=%s", scrapligoconstants.LibScrapliVersion),
+			"-e",
+			fmt.Sprintf("TARGET=%s", zigTriple),
+			"-e",
+			fmt.Sprintf("OUT_NAME=%s", filepath.Base(f.Name())),
+			"ghcr.io/scrapli/libscrapli/builder:latest",
+		)
+
+		err := buildCmd.Run()
+		if err != nil {
+			return scrapligoerrors.NewFfiError("failed running build container", err)
+		}
+	} else {
+		scrapligologging.Logger(
+			scrapligologging.Debug,
+			"libscrapli target version is tag, attempting to fetch from github...",
+		)
+
+		ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+		defer cancel()
+
+		err = writeHTTPContentsFromPath(
+			ctx,
+			fmt.Sprintf(
+				"%s/releases/download/v%s/%s",
+				libscrapliRepo,
+				scrapligoconstants.LibScrapliVersion,
+				releaseFilename,
+			),
+			f,
+		)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
