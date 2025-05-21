@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -114,4 +115,34 @@ func assertResult(t *testing.T, r *scrapligonetconf.Result, testGoldenPath strin
 	scrapligotesthelper.AssertNotDefault(t, r.Host)
 	scrapligotesthelper.AssertNotDefault(t, r.ResultRaw)
 	scrapligotesthelper.AssertEqual(t, false, r.Failed)
+}
+
+func TestGetSessionID(t *testing.T) {
+	testName := "get-session-id"
+
+	testFixturePath, err := filepath.Abs(fmt.Sprintf("./fixtures/%s", testName))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	n := getNetconf(t, testFixturePath)
+
+	_, err = n.Open(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	defer closeNetconf(t, n)
+
+	actual, err := n.GetSessionID()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if actual == 0 {
+		t.Fatal("expected sesion id to be non zero")
+	}
 }
