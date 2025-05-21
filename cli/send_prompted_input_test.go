@@ -8,7 +8,6 @@ import (
 	"time"
 
 	scrapligocli "github.com/scrapli/scrapligo/cli"
-	scrapligotesthelper "github.com/scrapli/scrapligo/testhelper"
 )
 
 func TestSendPromptedInput(t *testing.T) {
@@ -33,7 +32,7 @@ func TestSendPromptedInput(t *testing.T) {
 		},
 	}
 
-	for caseName, c := range cases {
+	for caseName, caseData := range cases {
 		testName := fmt.Sprintf("%s-%s", parentName, caseName)
 
 		t.Run(testName, func(t *testing.T) {
@@ -52,33 +51,32 @@ func TestSendPromptedInput(t *testing.T) {
 			ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 			defer cancel()
 
-			d := getCli(t, testFixturePath)
+			c := getCli(t, testFixturePath)
 
-			_, err = d.Open(ctx)
+			_, err = c.Open(ctx)
 			if err != nil {
 				t.Fatal(err)
 			}
 
-			defer closeCli(t, d)
+			defer func() {
+				_, _ = c.Close(ctx)
+			}()
 
-			if c.postOpenF != nil {
-				c.postOpenF(t, d)
+			if caseData.postOpenF != nil {
+				caseData.postOpenF(t, c)
 			}
 
-			r, err := d.SendPromptedInput(ctx, c.input, c.prompt, c.response, c.options...)
+			r, err := c.SendPromptedInput(
+				ctx,
+				caseData.input,
+				caseData.prompt,
+				caseData.response,
+				caseData.options...)
 			if err != nil {
 				t.Fatal(err)
 			}
 
-			if *scrapligotesthelper.Update {
-				scrapligotesthelper.WriteFile(
-					t,
-					testGoldenPath,
-					scrapligotesthelper.CleanCliOutput(t, r.Result()),
-				)
-			} else {
-				assertResult(t, r, testGoldenPath)
-			}
+			assertResult(t, r, testGoldenPath)
 		})
 	}
 }

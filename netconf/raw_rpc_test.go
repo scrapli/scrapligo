@@ -65,15 +65,7 @@ func TestRawRPC(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			if *scrapligotesthelper.Update {
-				scrapligotesthelper.WriteFile(
-					t,
-					testGoldenPath,
-					scrapligotesthelper.CleanNetconfOutput(t, r.Result),
-				)
-			} else {
-				assertResult(t, r, testGoldenPath)
-			}
+			assertResult(t, r, testGoldenPath)
 		})
 	}
 }

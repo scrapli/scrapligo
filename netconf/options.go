@@ -185,3 +185,13 @@ func WithOrigin() Option {
 		}
 	}
 }
+
+// WithForceClose closes a netconf session without "nicely" sending a close-session rpc.
+func WithForceClose() Option {
+	return func(o any) {
+		switch to := o.(type) {
+		case *closeOptions:
+			to.force = true
+		}
+	}
+}

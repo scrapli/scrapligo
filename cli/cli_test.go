@@ -68,16 +68,18 @@ func getCli(t *testing.T, f string) *scrapligocli.Cli {
 	return d
 }
 
-func closeCli(t *testing.T, d *scrapligocli.Cli) {
-	t.Helper()
-
-	// we simply free since we dont record/care about any closing bits
-	p, m := d.GetPtr()
-	m.Shared.Free(p)
-}
-
 func assertResult(t *testing.T, r *scrapligocli.Result, testGoldenPath string) {
 	t.Helper()
+
+	if *scrapligotesthelper.Update {
+		scrapligotesthelper.WriteFile(
+			t,
+			testGoldenPath,
+			scrapligotesthelper.CleanCliOutput(t, r.Result()),
+		)
+
+		return
+	}
 
 	cleanedActual := scrapligotesthelper.CleanCliOutput(t, r.Result())
 

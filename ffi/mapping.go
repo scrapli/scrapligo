@@ -150,7 +150,6 @@ type NetconfMapping struct {
 		driverPtr uintptr,
 		operationID *uint32,
 		cancel *bool,
-		expectNoReply,
 		force bool,
 	) int
 
