@@ -14,6 +14,20 @@ import (
 	scrapligoutil "github.com/scrapli/scrapligo/util"
 )
 
+func newCloseOptions(options ...Option) *closeOptions {
+	o := &closeOptions{}
+
+	for _, opt := range options {
+		opt(o)
+	}
+
+	return o
+}
+
+type closeOptions struct {
+	force bool
+}
+
 // Netconf is an object representing a netconf connection to a device of some sort -- this object
 // wraps the underlying zig (netconf) driver (created via libscrapli).
 type Netconf struct {
@@ -139,7 +153,7 @@ func (n *Netconf) Open(ctx context.Context) (*Result, error) {
 }
 
 // Close closes the netconf object. This also deallocates the underlying (zig) netconf object.
-func (n *Netconf) Close(ctx context.Context) (*Result, error) {
+func (n *Netconf) Close(ctx context.Context, options ...Option) (*Result, error) {
 	if n.ptr == 0 {
 		return nil, scrapligoerrors.NewFfiError("driver pointer nil", nil)
 	}
@@ -148,8 +162,9 @@ func (n *Netconf) Close(ctx context.Context) (*Result, error) {
 
 	var operationID uint32
 
-	// TODO decide if the bools should just be options or what (probably)
-	status := n.ffiMap.Netconf.Close(n.ptr, &operationID, &cancel, false, false)
+	loadedOptions := newCloseOptions(options...)
+
+	status := n.ffiMap.Netconf.Close(n.ptr, &operationID, &cancel, loadedOptions.force)
 	if status != 0 {
 		return nil, scrapligoerrors.NewFfiError("failed to submit close operation", nil)
 	}
