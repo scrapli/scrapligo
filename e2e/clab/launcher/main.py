@@ -82,7 +82,7 @@ class Launcher:
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
-            cwd=os.getenv("LAUNCHER_WORKDIR", "/launcher")
+            cwd=os.getenv("LAUNCHER_WORKDIR", "/launcher"),
         )
 
         reconfigure = False
@@ -113,7 +113,6 @@ class Launcher:
             print("stopping container...")
             self.shutdown = True
             self.exit_code = 1
-
 
     def start(self) -> None:
         """
@@ -182,6 +181,7 @@ class Launcher:
             destroy_command,
             capture_output=True,
             cwd=os.getenv("LAUNCHER_WORKDIR", "/launcher"),
+            check=True,
         )
 
         if proc.returncode != 0:

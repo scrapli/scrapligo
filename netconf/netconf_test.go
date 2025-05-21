@@ -2,9 +2,11 @@ package netconf_test
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"os"
 	"testing"
+	"time"
 
 	scrapligoffi "github.com/scrapli/scrapligo/ffi"
 	scrapligonetconf "github.com/scrapli/scrapligo/netconf"
@@ -71,16 +73,27 @@ func getNetconf(t *testing.T, f string) *scrapligonetconf.Netconf {
 	return d
 }
 
-func closeNetconf(t *testing.T, d *scrapligonetconf.Netconf) {
+func closeNetconf(t *testing.T, n *scrapligonetconf.Netconf) {
 	t.Helper()
 
-	// we simply free since we dont record/care about any closing bits
-	p, m := d.GetPtr()
-	m.Shared.Free(p)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	_, _ = n.Close(ctx, scrapligonetconf.WithForceClose())
 }
 
 func assertResult(t *testing.T, r *scrapligonetconf.Result, testGoldenPath string) {
 	t.Helper()
+
+	if *scrapligotesthelper.Update {
+		scrapligotesthelper.WriteFile(
+			t,
+			testGoldenPath,
+			scrapligotesthelper.CleanNetconfOutput(t, r.Result),
+		)
+
+		return
+	}
 
 	cleanedActual := scrapligotesthelper.CleanNetconfOutput(t, r.Result)
 
