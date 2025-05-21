@@ -74,6 +74,42 @@ func getNetconf(t *testing.T, f string) *scrapligonetconf.Netconf {
 	return d
 }
 
+func getNetconfSrl(t *testing.T, f string) *scrapligonetconf.Netconf {
+	t.Helper()
+
+	opts := []scrapligooptions.Option{
+		scrapligooptions.WithUsername("admin"),
+		scrapligooptions.WithPassword("NokiaSrl1!"),
+		scrapligooptions.WithPort(21830),
+	}
+
+	if *scrapligotesthelper.Record {
+		opts = append(
+			opts,
+			scrapligooptions.WithSessionRecorderPath(f),
+		)
+	} else {
+		opts = append(
+			opts,
+			scrapligooptions.WithTransportTest(),
+			scrapligooptions.WithTestTransportF(f),
+			scrapligooptions.WithReadSize(1),
+			// see libscrapli notes in integration netconf tests
+			scrapligooptions.WithOperationMaxSearchDepth(32),
+		)
+	}
+
+	d, err := scrapligonetconf.NewNetconf(
+		testHost,
+		opts...,
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return d
+}
+
 func closeNetconf(t *testing.T, n *scrapligonetconf.Netconf) {
 	t.Helper()
 
@@ -107,8 +143,6 @@ func assertResult(t *testing.T, r *scrapligonetconf.Result, testGoldenPath strin
 		scrapligotesthelper.FailOutput(t, cleanedActual, cleanedGolden)
 	}
 
-	scrapligotesthelper.AssertEqual(t, r.Port, 23830)
-	scrapligotesthelper.AssertEqual(t, r.Host, testHost)
 	scrapligotesthelper.AssertNotDefault(t, r.StartTime)
 	scrapligotesthelper.AssertNotDefault(t, r.EndTime)
 	scrapligotesthelper.AssertNotDefault(t, r.ElapsedTimeSeconds)
