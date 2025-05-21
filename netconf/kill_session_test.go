@@ -41,7 +41,7 @@ func TestKillSession(t *testing.T) {
 			ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 			defer cancel()
 
-			n := getNetconf(t, testFixturePath)
+			n := getNetconfSrl(t, testFixturePath)
 
 			_, err = n.Open(ctx)
 			if err != nil {
@@ -50,14 +50,12 @@ func TestKillSession(t *testing.T) {
 
 			defer closeNetconf(t, n)
 
-			n2 := getNetconf(t, testFixturePath)
+			n2 := getNetconfSrl(t, testFixturePath)
 
 			_, err = n2.Open(ctx)
 			if err != nil {
 				t.Fatal(err)
 			}
-
-			defer closeNetconf(t, n2)
 
 			s, err := n2.GetSessionID()
 			if err != nil {
