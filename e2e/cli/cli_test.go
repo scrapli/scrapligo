@@ -2,19 +2,49 @@ package cli_test
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 	"os"
+	"os/exec"
 	"runtime"
+	"slices"
 	"strings"
+	"sync"
 	"testing"
 
 	scrapligocli "github.com/scrapli/scrapligo/cli"
 	scrapligoffi "github.com/scrapli/scrapligo/ffi"
-	scrapligointernal "github.com/scrapli/scrapligo/internal"
 	scrapligooptions "github.com/scrapli/scrapligo/options"
 	scrapligotesthelper "github.com/scrapli/scrapligo/testhelper"
 )
+
+var (
+	isEosAvailable     *bool     //nolint: gochecknoglobals
+	isEosAvailableOnce sync.Once //nolint: gochecknoglobals
+)
+
+func slowTests() []string {
+	return []string{
+		"send-input-enormous-srl-bin",
+		"send-input-enormous-srl-ssh2",
+	}
+}
+
+func eosAvailable() bool {
+	isEosAvailableOnce.Do(func() {
+		isAvailable := false
+
+		o, err := exec.Command("docker", "ps").CombinedOutput()
+		if err == nil {
+			if bytes.Contains(o, []byte("ceos")) {
+				isAvailable = true
+			}
+		}
+
+		isEosAvailable = &isAvailable
+	})
+
+	return *isEosAvailable
+}
 
 func TestMain(m *testing.M) {
 	scrapligotesthelper.Flags()
@@ -32,66 +62,16 @@ func TestMain(m *testing.M) {
 	os.Exit(exitCode)
 }
 
-func getTransports() []string {
-	return []string{
-		"bin",
-		"ssh2",
-		"telnet",
-	}
-}
-
-func shouldSkipPlatform(platform string) bool {
-	if *scrapligotesthelper.Platforms == "all" {
-		return false
-	}
-
-	platforms := strings.Split(*scrapligotesthelper.Platforms, ",")
-
-	for _, platformName := range platforms {
-		if platformName == platform {
-			return false
-		}
-	}
-
-	return true
-}
-
-func shouldSkipTransport(transport string) bool {
-	if *scrapligotesthelper.Transports == "all" {
-		return false
-	}
-
-	transports := strings.Split(*scrapligotesthelper.Transports, ",")
-
-	for _, transportName := range transports {
-		if transportName == transport {
-			return false
-		}
-	}
-
-	return true
-}
-
-func shouldSkip(platform, transport string) bool {
-	if shouldSkipPlatform(platform) {
-		return true
-	}
-
-	if shouldSkipTransport(transport) {
-		return true
-	}
-
-	if transport == string(scrapligointernal.TransportKindTelnet) &&
-		platform != scrapligocli.AristaEos.String() {
-		// now we just check against telnet, since we only run that against eos for now
-		return true
-	}
-
-	return false
-}
-
 func getCli(t *testing.T, platform, transportName string) *scrapligocli.Cli {
 	t.Helper()
+
+	if strings.Contains(*scrapligotesthelper.Platforms, transportName) {
+		t.Skipf("skipping platform %q, due to cli flag...", platform)
+	}
+
+	if strings.Contains(*scrapligotesthelper.Transports, transportName) {
+		t.Skipf("skipping transport %q, due to cli flag...", transportName)
+	}
 
 	var host string
 
@@ -119,24 +99,11 @@ func getCli(t *testing.T, platform, transportName string) *scrapligocli.Cli {
 		t.Fatal("unsupported transport name")
 	}
 
-	if platform == scrapligocli.NokiaSrl.String() {
-		opts = append(
-			opts,
-			scrapligooptions.WithPassword("admin"),
-			scrapligooptions.WithPassword("NokiaSrl1!"),
-		)
-
-		if runtime.GOOS == "darwin" {
-			host = "localhost"
-
-			opts = append(
-				opts,
-				scrapligooptions.WithPort(21022),
-			)
-		} else {
-			host = "172.20.20.16"
+	if platform == scrapligocli.AristaEos.String() {
+		if !eosAvailable() {
+			t.Skip("skipping case, arista eos unavailable...")
 		}
-	} else {
+
 		opts = append(
 			opts,
 			scrapligooptions.WithPassword("admin"),
@@ -160,6 +127,22 @@ func getCli(t *testing.T, platform, transportName string) *scrapligocli.Cli {
 			opts,
 			scrapligooptions.WithPort(port),
 		)
+	} else {
+		opts = append(
+			opts,
+			scrapligooptions.WithPassword("NokiaSrl1!"),
+		)
+
+		if runtime.GOOS == "darwin" {
+			host = "localhost"
+
+			opts = append(
+				opts,
+				scrapligooptions.WithPort(21022),
+			)
+		} else {
+			host = "172.20.20.16"
+		}
 	}
 
 	d, err := scrapligocli.NewCli(
@@ -174,24 +157,27 @@ func getCli(t *testing.T, platform, transportName string) *scrapligocli.Cli {
 	return d
 }
 
-func closeCli(t *testing.T, d *scrapligocli.Cli) {
-	t.Helper()
-
-	_, err := d.Close(context.Background())
-	if err != nil {
-		t.Fatal(err)
-	}
-}
-
 func assertResult(t *testing.T, r *scrapligocli.Result, testGoldenPath string) {
 	t.Helper()
 
-	cleanedActual := scrapligotesthelper.CleanCliOutput(t, r.Result())
+	if *scrapligotesthelper.Update {
+		scrapligotesthelper.WriteFile(
+			t,
+			testGoldenPath,
+			scrapligotesthelper.CleanCliOutput(t, r.Result()),
+		)
 
-	testGoldenContent := scrapligotesthelper.ReadFile(t, testGoldenPath)
+		return
+	}
 
-	if !bytes.Equal(cleanedActual, testGoldenContent) {
-		scrapligotesthelper.FailOutput(t, cleanedActual, testGoldenContent)
+	if !(*scrapligotesthelper.SkipSlow && slices.Contains(slowTests(), t.Name())) {
+		cleanedActual := scrapligotesthelper.CleanCliOutput(t, r.Result())
+
+		testGoldenContent := scrapligotesthelper.ReadFile(t, testGoldenPath)
+
+		if !bytes.Equal(cleanedActual, testGoldenContent) {
+			scrapligotesthelper.FailOutput(t, cleanedActual, testGoldenContent)
+		}
 	}
 
 	scrapligotesthelper.AssertNotDefault(t, r.Port)

@@ -6,7 +6,7 @@ help:
 fmt: ## Run formatters
 	gofumpt -w .
 	gci write .
-	golines -w .
+	golines --base-formatter="gofmt" -w .
 
 lint: fmt ## Run linters
 	golangci-lint run
@@ -21,7 +21,7 @@ test-e2e: ## Run e2e tests against "full" test topology (count to never cache e2
 	gotestsum --format testname --hide-summary=skipped -- ./e2e/... -count=1
 
 test-e2e-ci: ## Run e2e tests against "ci" test topology with race flag (count to never cache e2e tests)
-	gotestsum --format testname --hide-summary=skipped -- ./e2e/... -platforms nokia_srl -race -count=1
+	gotestsum --format testname --hide-summary=skipped -- ./e2e/... -platforms nokia_srl -race -count=1 -skip-slow
 
 cov:  ## Produce html coverage report
 	go tool cover -html=cover.out
@@ -63,4 +63,3 @@ run-clab: ## Runs the clab functional testing topo; uses the clab launcher to ru
 		-e "LAUNCHER_WORKDIR=$$(pwd)/e2e/clab" \
 		-e "HOST_ARCH=$$(uname -m)" \
 		clab-launcher:latest
-
