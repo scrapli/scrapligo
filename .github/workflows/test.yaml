@@ -51,7 +51,7 @@ jobs:
 
       - name: unit tests
         run: |
-          LIBSCRAPLI_DEBUG_MODE=1 make test-race
+          make test-race
 
   e2e:
     runs-on: ubuntu-latest
@@ -111,4 +111,4 @@ jobs:
 
       - name: e2e tests
         run: |
-          LIBSCRAPLI_DEBUG_MODE=1 make test-e2e-ci
+          make test-e2e-ci

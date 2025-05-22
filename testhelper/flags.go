@@ -6,7 +6,7 @@ import (
 
 // Record is the flag indicating if we should record the fixture for the unit test data from the
 // target (eos) test device.
-var Record = flag.Bool("record", false, "record") //nolint: gochecknoglobals
+var Record = flag.Bool("record", false, "record unit test fixture") //nolint: gochecknoglobals
 
 // Update is the flag indicating if golden files should be updated.
 var Update = flag.Bool("update", false, "update the golden files") //nolint: gochecknoglobals
@@ -24,6 +24,9 @@ var Transports = flag.String( //nolint: gochecknoglobals
 	"all",
 	"comma sep list of transports(s) to target",
 )
+
+// SkipSlow is a flag to skip slow e2e tests.
+var SkipSlow = flag.Bool("skip-slow", false, "skip slow tests") //nolint: gochecknoglobals
 
 // Flags handles parsing test flags.
 func Flags() {
