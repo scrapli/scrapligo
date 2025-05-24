@@ -10,11 +10,7 @@ on:
 
 jobs:
   lint:
-    env:
-      SCRAPLIGO_DEBUG: debug
     uses: ./.github/workflows/lint.yaml
 
   test:
-    env:
-      SCRAPLIGO_DEBUG: debug
     uses: ./.github/workflows/test.yaml
