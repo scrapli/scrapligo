@@ -167,7 +167,6 @@ func assertResult(t *testing.T, r *scrapligonetconf.Result, testGoldenPath strin
 		[]string{"TestGet/get-simple-netopeer-bin", "TestGet/get-simple-netopeer-ssh2"},
 		t.Name(),
 	) {
-
 		// we can't just write the cleaned stuff to disk because then chunk sizes will be wrong if
 		// we just do the lazy cleanup method we are doing (and cant stop wont stop)
 		testGoldenContent := scrapligotesthelper.ReadFile(t, testGoldenPath)
