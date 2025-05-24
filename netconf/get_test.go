@@ -8,7 +8,6 @@ import (
 	"time"
 
 	scrapligonetconf "github.com/scrapli/scrapligo/netconf"
-	scrapligotesthelper "github.com/scrapli/scrapligo/testhelper"
 )
 
 func TestGet(t *testing.T) {
@@ -57,22 +56,16 @@ func TestGet(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			defer closeNetconf(t, n)
+			defer func() {
+				_, _ = n.Close(ctx)
+			}()
 
 			r, err := n.Get(ctx, c.options...)
 			if err != nil {
 				t.Fatal(err)
 			}
 
-			if *scrapligotesthelper.Update {
-				scrapligotesthelper.WriteFile(
-					t,
-					testGoldenPath,
-					scrapligotesthelper.CleanNetconfOutput(t, r.Result),
-				)
-			} else {
-				assertResult(t, r, testGoldenPath)
-			}
+			assertResult(t, r, testGoldenPath)
 		})
 	}
 }
