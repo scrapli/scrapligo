@@ -1,7 +1,8 @@
 package netconf_test
 
 import (
-	"context"
+	"bytes"
+	"encoding/xml"
 	"fmt"
 	"os"
 	"runtime"
@@ -9,11 +10,16 @@ import (
 	"testing"
 
 	scrapligocli "github.com/scrapli/scrapligo/cli"
+	scrapligoconstants "github.com/scrapli/scrapligo/constants"
 	scrapligoffi "github.com/scrapli/scrapligo/ffi"
 	scrapligonetconf "github.com/scrapli/scrapligo/netconf"
 	scrapligooptions "github.com/scrapli/scrapligo/options"
 	scrapligotesthelper "github.com/scrapli/scrapligo/testhelper"
 )
+
+func netconfTransports() []string {
+	return []string{"bin", "ssh2"}
+}
 
 func TestMain(m *testing.M) {
 	scrapligotesthelper.Flags()
@@ -31,61 +37,16 @@ func TestMain(m *testing.M) {
 	os.Exit(exitCode)
 }
 
-func getTransports() []string {
-	return []string{
-		"bin",
-		"ssh2",
-	}
-}
-
-func shouldSkipPlatform(platform string) bool {
-	if *scrapligotesthelper.Platforms == "all" {
-		return false
-	}
-
-	platforms := strings.Split(*scrapligotesthelper.Platforms, ",")
-
-	for _, platformName := range platforms {
-		if platformName == platform {
-			return false
-		}
-	}
-
-	return true
-}
-
-func shouldSkipTransport(transport string) bool {
-	if *scrapligotesthelper.Transports == "all" {
-		return false
-	}
-
-	transports := strings.Split(*scrapligotesthelper.Transports, ",")
-
-	for _, transportName := range transports {
-		if transportName == transport {
-			return false
-		}
-	}
-
-	return true
-}
-
-func shouldSkip(platform, transport string) bool {
-	if shouldSkipPlatform(platform) {
-		return true
-	}
-
-	if shouldSkipTransport(transport) {
-		return true
-	}
-
-	return false
-}
-
 func getNetconf(t *testing.T, platform, transportName string) *scrapligonetconf.Netconf {
 	t.Helper()
 
-	var host string
+	if strings.Contains(*scrapligotesthelper.Platforms, transportName) {
+		t.Skipf("skipping platform %q, due to cli flag...", platform)
+	}
+
+	if strings.Contains(*scrapligotesthelper.Transports, transportName) {
+		t.Skipf("skipping transport %q, due to cli flag...", transportName)
+	}
 
 	var opts []scrapligooptions.Option
 
@@ -104,16 +65,32 @@ func getNetconf(t *testing.T, platform, transportName string) *scrapligonetconf.
 		t.Fatal("unsupported transport name")
 	}
 
-	if platform == scrapligocli.NokiaSrl.String() {
+	host := "localhost"
+
+	switch platform {
+	case scrapligocli.AristaEos.String():
+		opts = append(
+			opts,
+			scrapligooptions.WithUsername("netconf-admin"),
+			scrapligooptions.WithPassword("admin"),
+		)
+
+		if runtime.GOOS == scrapligoconstants.Darwin {
+			opts = append(
+				opts,
+				scrapligooptions.WithPort(22830),
+			)
+		} else {
+			host = "172.20.20.17"
+		}
+	case scrapligocli.NokiaSrl.String():
 		opts = append(
 			opts,
 			scrapligooptions.WithUsername("admin"),
 			scrapligooptions.WithPassword("NokiaSrl1!"),
 		)
 
-		if runtime.GOOS == "darwin" {
-			host = "localhost"
-
+		if runtime.GOOS == scrapligoconstants.Darwin {
 			opts = append(
 				opts,
 				scrapligooptions.WithPort(21830),
@@ -121,22 +98,21 @@ func getNetconf(t *testing.T, platform, transportName string) *scrapligonetconf.
 		} else {
 			host = "172.20.20.16"
 		}
-	} else {
+	default:
+		// netopeer server
 		opts = append(
 			opts,
-			scrapligooptions.WithUsername("netconf-admin"),
-			scrapligooptions.WithPassword("admin"),
+			scrapligooptions.WithUsername("root"),
+			scrapligooptions.WithPassword("password"),
 		)
 
-		if runtime.GOOS == "darwin" {
-			host = "localhost"
-
+		if runtime.GOOS == scrapligoconstants.Darwin {
 			opts = append(
 				opts,
-				scrapligooptions.WithPort(22830),
+				scrapligooptions.WithPort(23830),
 			)
 		} else {
-			host = "172.20.20.17"
+			host = "172.20.20.18"
 		}
 	}
 
@@ -151,11 +127,53 @@ func getNetconf(t *testing.T, platform, transportName string) *scrapligonetconf.
 	return n
 }
 
-func closeNetconf(t *testing.T, n *scrapligonetconf.Netconf) {
+func xmlIsValid(result []byte) bool {
+	decoder := xml.NewDecoder(bytes.NewReader(result))
+
+	for {
+		_, err := decoder.Token()
+		if err != nil {
+			if err.Error() == "EOF" {
+				return true
+			}
+
+			return false
+		}
+	}
+}
+
+func assertResult(t *testing.T, r *scrapligonetconf.Result, testGoldenPath string) {
 	t.Helper()
 
-	_, err := n.Close(context.Background())
-	if err != nil {
-		t.Fatal(err)
+	if *scrapligotesthelper.Update {
+		scrapligotesthelper.WriteFile(
+			t,
+			testGoldenPath,
+			scrapligotesthelper.CleanNetconfOutput(t, r.Result),
+		)
+
+		return
 	}
+
+	cleanedActual := scrapligotesthelper.CleanNetconfOutput(t, r.Result)
+
+	if !xmlIsValid(cleanedActual) {
+		t.Fatal("result xml is invalid")
+	}
+
+	// we can't just write the cleaned stuff to disk because then chunk sizes will be wrong if we
+	// just do the lazy cleanup method we are doing (and cant stop wont stop)
+	testGoldenContent := scrapligotesthelper.ReadFile(t, testGoldenPath)
+	cleanedGolden := scrapligotesthelper.CleanNetconfOutput(t, string(testGoldenContent))
+
+	if !bytes.Equal(cleanedActual, cleanedGolden) {
+		scrapligotesthelper.FailOutput(t, cleanedActual, cleanedGolden)
+	}
+
+	scrapligotesthelper.AssertNotDefault(t, r.StartTime)
+	scrapligotesthelper.AssertNotDefault(t, r.EndTime)
+	scrapligotesthelper.AssertNotDefault(t, r.ElapsedTimeSeconds)
+	scrapligotesthelper.AssertNotDefault(t, r.Host)
+	scrapligotesthelper.AssertNotDefault(t, r.ResultRaw)
+	scrapligotesthelper.AssertEqual(t, false, r.Failed)
 }
