@@ -4,22 +4,16 @@ import (
 	"bytes"
 	"fmt"
 	"os"
-	"os/exec"
 	"runtime"
 	"slices"
 	"strings"
-	"sync"
 	"testing"
 
 	scrapligocli "github.com/scrapli/scrapligo/cli"
+	scrapligoconstants "github.com/scrapli/scrapligo/constants"
 	scrapligoffi "github.com/scrapli/scrapligo/ffi"
 	scrapligooptions "github.com/scrapli/scrapligo/options"
 	scrapligotesthelper "github.com/scrapli/scrapligo/testhelper"
-)
-
-var (
-	isEosAvailable     *bool     //nolint: gochecknoglobals
-	isEosAvailableOnce sync.Once //nolint: gochecknoglobals
 )
 
 func slowTests() []string {
@@ -27,23 +21,6 @@ func slowTests() []string {
 		"send-input-enormous-srl-bin",
 		"send-input-enormous-srl-ssh2",
 	}
-}
-
-func eosAvailable() bool {
-	isEosAvailableOnce.Do(func() {
-		isAvailable := false
-
-		o, err := exec.Command("docker", "ps").CombinedOutput()
-		if err == nil {
-			if bytes.Contains(o, []byte("ceos")) {
-				isAvailable = true
-			}
-		}
-
-		isEosAvailable = &isAvailable
-	})
-
-	return *isEosAvailable
 }
 
 func TestMain(m *testing.M) {
@@ -100,7 +77,7 @@ func getCli(t *testing.T, platform, transportName string) *scrapligocli.Cli {
 	}
 
 	if platform == scrapligocli.AristaEos.String() {
-		if !eosAvailable() {
+		if !scrapligotesthelper.EosAvailable() {
 			t.Skip("skipping case, arista eos unavailable...")
 		}
 
@@ -112,7 +89,7 @@ func getCli(t *testing.T, platform, transportName string) *scrapligocli.Cli {
 
 		var port uint16
 
-		if runtime.GOOS == "darwin" {
+		if runtime.GOOS == scrapligoconstants.Darwin {
 			host = "localhost"
 			port = 22022
 		} else {
@@ -133,7 +110,7 @@ func getCli(t *testing.T, platform, transportName string) *scrapligocli.Cli {
 			scrapligooptions.WithPassword("NokiaSrl1!"),
 		)
 
-		if runtime.GOOS == "darwin" {
+		if runtime.GOOS == scrapligoconstants.Darwin {
 			host = "localhost"
 
 			opts = append(

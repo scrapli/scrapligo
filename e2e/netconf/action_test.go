@@ -10,17 +10,25 @@ import (
 	scrapligonetconf "github.com/scrapli/scrapligo/netconf"
 )
 
-func TestGetConfig(t *testing.T) {
-	parentName := "get-config"
+func TestAction(t *testing.T) {
+	parentName := "action"
 
 	cases := map[string]struct {
 		description string
 		platform    string
+		action      string
 		options     []scrapligonetconf.Option
 	}{
 		"simple": {
-			description: "simple - get the running config",
+			description: "simple",
 			platform:    "netopeer",
+			action: `
+			<system xmlns="urn:dummy:actions">
+			  <reboot>
+				<delay>5</delay>
+			  </reboot>
+			</system>`,
+			options: []scrapligonetconf.Option{},
 		},
 	}
 
@@ -50,7 +58,7 @@ func TestGetConfig(t *testing.T) {
 					_, _ = n.Close(ctx)
 				}()
 
-				r, err := n.GetConfig(ctx, c.options...)
+				r, err := n.Action(ctx, c.action, c.options...)
 				if err != nil {
 					t.Fatal(err)
 				}
