@@ -1,16 +1,17 @@
-//go:build !release
-// +build !release
-
 package logging
 
 import (
 	"fmt"
 	"os"
+
+	scrapligoconstants "github.com/scrapli/scrapligo/constants"
 )
 
 var (
-	// Level is the level at which to emit log messages.
-	Level = Debug //nolint: gochecknoglobals
+	// Level is the level at which to emit log messages. When the ScrapligoDebug env var is set
+	// we use that value (if it == one of the log levels, otherwise it defaults to debug), for all
+	// other cases this defaults to warn.
+	Level LogLevel //nolint: gochecknoglobals
 
 	// Logger is the main logging function, used mostly for "global" non connection/device related
 	// things like the ffi layer.
@@ -35,5 +36,30 @@ func FfiLogger(level uint8, message *string) {
 	case uint8(FatalAsInt):
 		fmt.Println("fatal :: ", *message) //nolint:forbidigo
 	case uint8(DisabledAsInt):
+	}
+}
+
+// normally i *really* dislike inits but... meh?
+func init() { //nolint: gochecknoinits
+	v := os.Getenv(scrapligoconstants.ScrapligoDebug)
+	if v != "" {
+		switch v {
+		case Debug.String():
+			Level = Debug
+		case Info.String():
+			Level = Info
+		case Warn.String():
+			Level = Warn
+		case Critical.String():
+			Level = Critical
+		case Fatal.String():
+			Level = Fatal
+		case Disabled.String():
+			Level = Disabled
+		default:
+			Level = Debug
+		}
+	} else {
+		Level = Warn
 	}
 }

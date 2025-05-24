@@ -3,6 +3,11 @@ package logging
 // LogLevel is an enum(ish) for log levels.
 type LogLevel string
 
+// String (stringer) method for LogLevel.
+func (l LogLevel) String() string {
+	return string(l)
+}
+
 const (
 	// Debug is the debug log level.
 	Debug LogLevel = "debug"
