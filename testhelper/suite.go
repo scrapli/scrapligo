@@ -1,16 +1,38 @@
 package testhelper
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"os/exec"
+	"sync"
 	"testing"
 
 	"github.com/carlmontanari/difflibgo/difflibgo"
 )
 
-const (
-	cliUserAtHostPattern = "(?im)\\w+@[\\w.]+"
+var (
+	isEosAvailable     *bool     //nolint: gochecknoglobals
+	isEosAvailableOnce sync.Once //nolint: gochecknoglobals
 )
+
+// EosAvailable returns true if an eos container is available to test with.
+func EosAvailable() bool {
+	isEosAvailableOnce.Do(func() {
+		isAvailable := false
+
+		o, err := exec.Command("docker", "ps").CombinedOutput()
+		if err == nil {
+			if bytes.Contains(o, []byte("ceos")) {
+				isAvailable = true
+			}
+		}
+
+		isEosAvailable = &isAvailable
+	})
+
+	return *isEosAvailable
+}
 
 // AssertNotDefault asserts `v` is not a default value for that type.
 func AssertNotDefault(t *testing.T, v any) {

@@ -6,8 +6,9 @@ import (
 )
 
 const (
-	cliTimestampPattern = "(?im)((mon)|(tue)|(wed)|(thu)|(fri)|(sat)|(sun))\\s+((jan)|(feb)|(mar)|(apr)|(may)|(jun)|(jul)|(aug)|(sep)|(oct)|(nov)|(dec))\\s+\\d+\\s+\\d+:\\d+:\\d+ \\d+" //nolint:lll
-	cliPasswordPattern  = "(?im)^\\s+password .*$"                                                                                                                                       //nolint:gosec
+	cliUserAtHostPattern = "(?im)\\w+@[\\w.]+"
+	cliTimestampPattern  = "(?im)((mon)|(tue)|(wed)|(thu)|(fri)|(sat)|(sun))\\s+((jan)|(feb)|(mar)|(apr)|(may)|(jun)|(jul)|(aug)|(sep)|(oct)|(nov)|(dec))\\s+\\d+\\s+\\d+:\\d+:\\d+ \\d+" //nolint:lll
+	cliPasswordPattern   = "(?im)^\\s+password .*$"                                                                                                                                       //nolint:gosec
 )
 
 // CleanCliOutput does what it says. For testing consistency.
