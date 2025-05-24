@@ -63,7 +63,7 @@ func getNetconf(t *testing.T, f string) *scrapligonetconf.Netconf {
 		)
 	}
 
-	d, err := scrapligonetconf.NewNetconf(
+	n, err := scrapligonetconf.NewNetconf(
 		testHost,
 		opts...,
 	)
@@ -71,7 +71,7 @@ func getNetconf(t *testing.T, f string) *scrapligonetconf.Netconf {
 		t.Fatal(err)
 	}
 
-	return d
+	return n
 }
 
 func getNetconfSrl(t *testing.T, f string) *scrapligonetconf.Netconf {
@@ -99,7 +99,7 @@ func getNetconfSrl(t *testing.T, f string) *scrapligonetconf.Netconf {
 		)
 	}
 
-	d, err := scrapligonetconf.NewNetconf(
+	n, err := scrapligonetconf.NewNetconf(
 		testHost,
 		opts...,
 	)
@@ -107,7 +107,7 @@ func getNetconfSrl(t *testing.T, f string) *scrapligonetconf.Netconf {
 		t.Fatal(err)
 	}
 
-	return d
+	return n
 }
 
 func assertResult(t *testing.T, r *scrapligonetconf.Result, testGoldenPath string) {
@@ -173,4 +173,136 @@ func TestGetSessionID(t *testing.T) {
 	if actual == 0 {
 		t.Fatal("expected sesion id to be non zero")
 	}
+}
+
+func TestGetNextNotification(t *testing.T) {
+	testName := "get-next-notification"
+
+	testFixturePath, err := filepath.Abs(fmt.Sprintf("./fixtures/%s", testName))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	n := getNetconf(t, testFixturePath)
+
+	_, err = n.Open(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	defer func() {
+		_, _ = n.Close(ctx)
+	}()
+
+	_, err = n.RawRPC(
+		ctx,
+		`<create-subscription xmlns="urn:ietf:params:xml:ns:netconf:notification:1.0">
+			<stream>NETCONF</stream>
+			<filter type="subtree">
+				<counter-update xmlns="urn:boring:counter"/>
+			</filter>
+		</create-subscription>`,
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if *scrapligotesthelper.Record {
+		// boring counter updates every 3s; obviously only when not using fixture
+		time.Sleep(4 * time.Second)
+	}
+
+	notif, err := n.GetNextNotification()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	scrapligotesthelper.AssertNotDefault(t, notif)
+}
+
+func TestGetNextSubscription(t *testing.T) {
+	testName := "get-next-subscription"
+
+	testFixturePath, err := filepath.Abs(fmt.Sprintf("./fixtures/%s", testName))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	opts := []scrapligooptions.Option{
+		scrapligooptions.WithUsername("SOMEUSER"),
+		scrapligooptions.WithPassword("SOMEPASSWORD"),
+		scrapligooptions.WithPort(830),
+	}
+
+	if *scrapligotesthelper.Record {
+		t.Fatal( //nolint: revive
+			// if you see this and are actually going to update stuff, user/pass above and
+			// host below plz kthxbye
+			"are you really sure? this is not using the clab setup, " +
+				"make sure you have either cisco sandbox or something else " +
+				"handy to re-record this test fixture",
+		)
+
+		opts = append(
+			opts,
+			scrapligooptions.WithSessionRecorderPath(testFixturePath),
+		)
+	} else {
+		opts = append(
+			opts,
+			scrapligooptions.WithTransportTest(),
+			scrapligooptions.WithTestTransportF(testFixturePath),
+			scrapligooptions.WithReadSize(1),
+			// see libscrapli notes in integration netconf tests
+			scrapligooptions.WithOperationMaxSearchDepth(32),
+		)
+	}
+
+	n, err := scrapligonetconf.NewNetconf(
+		"HOST",
+		opts...,
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = n.Open(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	r, err := n.RawRPC(
+		ctx,
+		`<establish-subscription xmlns="urn:ietf:params:xml:ns:yang:ietf-event-notifications" xmlns:yp="urn:ietf:params:xml:ns:yang:ietf-yang-push">
+			<stream>yp:yang-push</stream>
+			<yp:xpath-filter>/mdt-oper:mdt-oper-data/mdt-subscriptions</yp:xpath-filter>
+			<yp:period>1000</yp:period>
+		</establish-subscription>`,
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	subID, err := n.GetSubscriptionID(r.Result)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if *scrapligotesthelper.Record {
+		// obviously only have to wait w/ a real device
+		time.Sleep(10 * time.Second)
+	}
+
+	sub, err := n.GetNextSubscription(subID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	scrapligotesthelper.AssertNotDefault(t, sub)
 }
