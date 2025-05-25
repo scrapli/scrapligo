@@ -25,4 +25,4 @@ cp "$TMP_DIR"/definitions/*.yaml assets/definitions/
 
 rm -rf "$TMP_DIR"
 
-sed -i.bak -E "s|(var ScrapliDefinitionsVersion = )(.*)|\1\"${TARGET_DEFINITIONS_TAG#v} //nolint: gochecknoglobals\"|g" constants/versions.go
+sed -i.bak -E "s|(var ScrapliDefinitionsVersion = )(.*)|\1\"${TARGET_DEFINITIONS_TAG#v}"|g" constants/versions.go
