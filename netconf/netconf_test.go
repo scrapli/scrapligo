@@ -235,8 +235,8 @@ func TestGetNextSubscription(t *testing.T) {
 	defer cancel()
 
 	opts := []scrapligooptions.Option{
-		scrapligooptions.WithUsername("SOMEUSER"),
-		scrapligooptions.WithPassword("SOMEPASSWORD"),
+		scrapligooptions.WithUsername("SETME"),
+		scrapligooptions.WithPassword("SETME"),
 		scrapligooptions.WithPort(830),
 	}
 
@@ -265,7 +265,7 @@ func TestGetNextSubscription(t *testing.T) {
 	}
 
 	n, err := scrapligonetconf.NewNetconf(
-		"HOST",
+		"SETME",
 		opts...,
 	)
 	if err != nil {
