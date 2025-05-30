@@ -134,11 +134,8 @@ func (o *NetconfOptions) apply(
 
 // SessionOptions holds options specific to the zig "Session" that lives in a driver.
 type SessionOptions struct {
-	ReadSize               *uint64
-	ReadDelayMinNs         *uint64
-	ReadDelayMaxNs         *uint64
-	ReadDelayBackoffFactor *uint8
-	ReturnChar             string
+	ReadSize   *uint64
+	ReturnChar string
 
 	OperationTimeoutNs      *uint64
 	OperationMaxSearchDepth *uint64
@@ -147,7 +144,7 @@ type SessionOptions struct {
 	RecorderPath string
 }
 
-func (o *SessionOptions) apply( //nolint: gocyclo
+func (o *SessionOptions) apply(
 	driverPtr uintptr,
 	m *scrapligoffi.Mapping,
 ) error {
@@ -155,30 +152,6 @@ func (o *SessionOptions) apply( //nolint: gocyclo
 		rc := m.Options.Session.SetReadSize(driverPtr, *o.ReadSize)
 		if rc != 0 {
 			return scrapligoerrors.NewOptionsError("failed setting read size option", nil)
-		}
-	}
-
-	if o.ReadDelayMinNs != nil {
-		rc := m.Options.Session.SetReadDelayMinNs(driverPtr, *o.ReadDelayMinNs)
-		if rc != 0 {
-			return scrapligoerrors.NewOptionsError("failed setting min read delay option", nil)
-		}
-	}
-
-	if o.ReadDelayMaxNs != nil {
-		rc := m.Options.Session.SetReadDelayMaxNs(driverPtr, *o.ReadDelayMaxNs)
-		if rc != 0 {
-			return scrapligoerrors.NewOptionsError("failed setting max read delay option", nil)
-		}
-	}
-
-	if o.ReadDelayBackoffFactor != nil {
-		rc := m.Options.Session.SetReadDelayBackoffFactor(driverPtr, *o.ReadDelayBackoffFactor)
-		if rc != 0 {
-			return scrapligoerrors.NewOptionsError(
-				"failed setting read delay backoff factor option",
-				nil,
-			)
 		}
 	}
 

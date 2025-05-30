@@ -2,8 +2,6 @@ package netconf
 
 import (
 	"context"
-	"math/rand"
-	"time"
 
 	"github.com/ebitengine/purego"
 	scrapligoconstants "github.com/scrapli/scrapligo/constants"
@@ -11,7 +9,7 @@ import (
 	scrapligoffi "github.com/scrapli/scrapligo/ffi"
 	scrapligointernal "github.com/scrapli/scrapligo/internal"
 	scrapligooptions "github.com/scrapli/scrapligo/options"
-	scrapligoutil "github.com/scrapli/scrapligo/util"
+	"golang.org/x/sys/unix"
 )
 
 func newCloseOptions(options ...Option) *closeOptions {
@@ -32,13 +30,10 @@ type closeOptions struct {
 // wraps the underlying zig (netconf) driver (created via libscrapli).
 type Netconf struct {
 	ptr     uintptr
+	pollFd  int
 	ffiMap  *scrapligoffi.Mapping
 	host    string
 	options *scrapligointernal.Options
-
-	minPollDelay  uint64
-	maxPollDelay  uint64
-	backoffFactor uint8
 }
 
 // NewNetconf returns a new instance of Netconf setup with the given options.
@@ -68,21 +63,6 @@ func NewNetconf(
 		p := scrapligoconstants.DefaultNetconfPort
 
 		n.options.Port = &p
-	}
-
-	n.minPollDelay = scrapligoconstants.DefaultReadDelayMinNs
-	if n.options.Session.ReadDelayMinNs != nil {
-		n.minPollDelay = *n.options.Session.ReadDelayMinNs
-	}
-
-	n.maxPollDelay = scrapligoconstants.DefaultReadDelayMaxNs
-	if n.options.Session.ReadDelayMaxNs != nil {
-		n.maxPollDelay = *n.options.Session.ReadDelayMaxNs
-	}
-
-	n.backoffFactor = scrapligoconstants.DefaultReadDelayBackoffFactor
-	if n.options.Session.ReadDelayBackoffFactor != nil {
-		n.backoffFactor = *n.options.Session.ReadDelayBackoffFactor
 	}
 
 	return n, nil
@@ -123,12 +103,17 @@ func (n *Netconf) Open(ctx context.Context) (*Result, error) {
 	)
 
 	if n.ptr == 0 {
-		return nil, scrapligoerrors.NewFfiError("failed to allocate driver", nil)
+		return nil, scrapligoerrors.NewFfiError("failed to allocate netconf", nil)
+	}
+
+	n.pollFd = int(n.ffiMap.Shared.GetPollFd(n.ptr))
+	if n.pollFd == 0 {
+		return nil, scrapligoerrors.NewFfiError("failed to allocate netconf", nil)
 	}
 
 	err := n.options.Apply(n.ptr, n.ffiMap)
 	if err != nil {
-		return nil, scrapligoerrors.NewFfiError("failed to applying driver options", err)
+		return nil, scrapligoerrors.NewFfiError("failed to applying netconf options", err)
 	}
 
 	cancel := false
@@ -265,72 +250,55 @@ func (n *Netconf) GetNextSubscription(subscriptionID uint64) (string, error) {
 	return string(sub), nil
 }
 
-func getPollDelay(curVal, minVal, maxVal uint64, backoffFactor uint8) uint64 {
-	newVal := curVal
-	newVal *= uint64(backoffFactor)
-
-	if newVal > maxVal {
-		newVal = maxVal
-	}
-
-	if minVal == 0 {
-		return newVal
-	}
-
-	return newVal + scrapligoutil.SafeInt64ToUint64(
-		rand.Int63n(scrapligoutil.SafeUint64ToInt64(minVal)), //nolint:gosec
-	)
-}
-
 func (n *Netconf) getResult(
 	ctx context.Context,
 	cancel *bool,
 	operationID uint32,
 ) (*Result, error) {
-	var done bool
+	done := make(chan struct{}, 1)
+	defer close(done)
 
-	var inputSize, resultRawSize, resultSize, rpcWarningsSize, rpcErrorsSize, errSize uint64
-
-	curPollDelay := scrapligoconstants.DefaultReadDelayMaxNs
-
-	for {
+	go func() {
 		select {
 		case <-ctx.Done():
 			*cancel = true
 
-			return nil, ctx.Err()
-		default:
+			return
+		case <-done:
+			return
 		}
+	}()
 
-		// we obviously cant have too tight a loop here or cpu will go nuts and we'll block things,
-		// so we'll sleep the same as the zig read delay will be
-		time.Sleep(time.Duration(scrapligoutil.SafeUint64ToInt64(curPollDelay)))
+	pollFd := &unix.FdSet{}
+	pollFd.Set(n.pollFd)
 
-		rc := n.ffiMap.Netconf.PollOperation(
-			n.ptr,
-			operationID,
-			&done,
-			&inputSize,
-			&resultRawSize,
-			&resultSize,
-			&rpcWarningsSize,
-			&rpcErrorsSize,
-			&errSize,
-		)
-		if rc != 0 {
-			return nil, scrapligoerrors.NewFfiError("poll operation failed", nil)
-		}
+	_n, err := unix.Select(n.pollFd+1, pollFd, &unix.FdSet{}, &unix.FdSet{}, nil)
+	if err != nil {
+		// TODO do ... something
+		panic("select errrrrrr")
+	}
 
-		if done {
-			break
-		}
+	// if the context wasn't cancelled the goroutine will still be running, this will stop it
+	done <- struct{}{}
 
-		curPollDelay = getPollDelay(
-			curPollDelay,
-			n.minPollDelay,
-			n.maxPollDelay,
-			n.backoffFactor,
-		)
+	out := make([]byte, _n)
+
+	_, _ = unix.Read(n.pollFd, out)
+
+	var inputSize, resultRawSize, resultSize, rpcWarningsSize, rpcErrorsSize, errSize uint64
+
+	rc := n.ffiMap.Netconf.FetchOperationSizes(
+		n.ptr,
+		operationID,
+		&inputSize,
+		&resultRawSize,
+		&resultSize,
+		&rpcWarningsSize,
+		&rpcErrorsSize,
+		&errSize,
+	)
+	if rc != 0 {
+		return nil, scrapligoerrors.NewFfiError("poll operation failed", nil)
 	}
 
 	var resultStartTime, resultEndTime uint64
@@ -347,7 +315,7 @@ func (n *Netconf) getResult(
 
 	errString := make([]byte, errSize)
 
-	rc := n.ffiMap.Netconf.FetchOperation(
+	rc = n.ffiMap.Netconf.FetchOperation(
 		n.ptr,
 		operationID,
 		&resultStartTime,

@@ -3,9 +3,7 @@ package cli
 import (
 	"context"
 	"fmt"
-	"math/rand"
 	"os"
-	"time"
 
 	"github.com/ebitengine/purego"
 	scrapligoassets "github.com/scrapli/scrapligo/assets"
@@ -14,7 +12,7 @@ import (
 	scrapligoffi "github.com/scrapli/scrapligo/ffi"
 	scrapligointernal "github.com/scrapli/scrapligo/internal"
 	scrapligooptions "github.com/scrapli/scrapligo/options"
-	scrapligoutil "github.com/scrapli/scrapligo/util"
+	"golang.org/x/sys/unix"
 )
 
 // PlatformNameOrString is a string-like interface so you can pass a PlatformName or "normal" string
@@ -74,13 +72,10 @@ func getDefinitionBytes[T PlatformNameOrString](definitionFileOrName T) ([]byte,
 // underlying zig driver (created via libscrapli).
 type Cli struct {
 	ptr     uintptr
+	pollFd  int
 	ffiMap  *scrapligoffi.Mapping
 	host    string
 	options *scrapligointernal.Options
-
-	minPollDelay  uint64
-	maxPollDelay  uint64
-	backoffFactor uint8
 }
 
 // NewCli returns a new instance of Cli setup with the given options. The definitionFileOrName
@@ -129,21 +124,6 @@ func NewCli[T PlatformNameOrString](
 		c.options.Port = &p
 	}
 
-	c.minPollDelay = scrapligoconstants.DefaultReadDelayMinNs
-	if c.options.Session.ReadDelayMinNs != nil {
-		c.minPollDelay = *c.options.Session.ReadDelayMinNs
-	}
-
-	c.maxPollDelay = scrapligoconstants.DefaultReadDelayMaxNs
-	if c.options.Session.ReadDelayMaxNs != nil {
-		c.maxPollDelay = *c.options.Session.ReadDelayMaxNs
-	}
-
-	c.backoffFactor = scrapligoconstants.DefaultReadDelayBackoffFactor
-	if c.options.Session.ReadDelayBackoffFactor != nil {
-		c.backoffFactor = *c.options.Session.ReadDelayBackoffFactor
-	}
-
 	return c, nil
 }
 
@@ -183,12 +163,17 @@ func (c *Cli) Open(ctx context.Context) (*Result, error) {
 	)
 
 	if c.ptr == 0 {
-		return nil, scrapligoerrors.NewFfiError("failed to allocate driver", nil)
+		return nil, scrapligoerrors.NewFfiError("failed to allocate cli", nil)
+	}
+
+	c.pollFd = int(c.ffiMap.Shared.GetPollFd(c.ptr))
+	if c.pollFd == 0 {
+		return nil, scrapligoerrors.NewFfiError("failed to allocate cli", nil)
 	}
 
 	err := c.options.Apply(c.ptr, c.ffiMap)
 	if err != nil {
-		return nil, scrapligoerrors.NewFfiError("failed to applying driver options", err)
+		return nil, scrapligoerrors.NewFfiError("failed to applying cli options", err)
 	}
 
 	cancel := false
@@ -233,75 +218,68 @@ func (c *Cli) Close(ctx context.Context) (*Result, error) {
 	return c.getResult(ctx, &cancel, operationID)
 }
 
-func getPollDelay(curVal, minVal, maxVal uint64, backoffFactor uint8) uint64 {
-	newVal := curVal
-	newVal *= uint64(backoffFactor)
-
-	if newVal > maxVal {
-		// we backoff up to max then reset when we are over
-		newVal = minVal
-	}
-
-	return newVal + scrapligoutil.SafeInt64ToUint64(
-		rand.Int63n(scrapligoutil.SafeUint64ToInt64(minVal)), //nolint:gosec
-	)
-}
-
 func (c *Cli) getResult(
 	ctx context.Context,
 	cancel *bool,
 	operationID uint32,
 ) (*Result, error) {
-	var done bool
+	done := make(chan struct{}, 1)
+	defer close(done)
 
 	var operationCount uint32
 
-	var inputsSize, resultsRawSize, resultsSize, resultsFailedIndicatorSize, errSize uint64
-
-	// start w/ max delay, its literally 0.001s so its not much and almost no chance anything is
-	// already ready to fetch in that time anyway! also, once/if we hit max dealy we reset to min
-	// delay before backing off back to max. so this causes us to have one slow check then fast
-	// checks up to the max again
-	curPollDelay := scrapligoconstants.DefaultReadDelayMaxNs
-
-	for {
+	// TODO: so in go flavor we actually use ctx to cause libscrapli to timeout vs python where
+	// we rely on the timeouts. so in this case we need to ensure that we do not block the context
+	// so it can properly cancel on timeout/cnacellation... which means we gotta do something like:
+	//
+	// run a goroutine that listens/waits on cancellation and obviously updates the cancel pointer
+	// if/when a cancellation occurs.
+	//
+	// in the main thing we block on a select that has no timeout... if/when cancellation happens
+	// we the select will have something to read because libscrpali will have cancelled the op
+	// which will have in turn written to the fd that the select is listening for -- from that point
+	// we simply fetch the failed result and return or proceed (in the case of not cancelled)
+	go func() {
 		select {
 		case <-ctx.Done():
 			*cancel = true
 
-			return nil, ctx.Err()
-		default:
+			return
+		case <-done:
+			return
 		}
+	}()
 
-		// we obviously cant have too tight a loop here or cpu will go nuts and we'll block things,
-		// so we'll sleep the same as the zig read delay will be
-		time.Sleep(time.Duration(scrapligoutil.SafeUint64ToInt64(curPollDelay)))
+	pollFd := &unix.FdSet{}
+	pollFd.Set(c.pollFd)
 
-		rc := c.ffiMap.Cli.PollOperation(
-			c.ptr,
-			operationID,
-			&done,
-			&operationCount,
-			&inputsSize,
-			&resultsRawSize,
-			&resultsSize,
-			&resultsFailedIndicatorSize,
-			&errSize,
-		)
-		if rc != 0 {
-			return nil, scrapligoerrors.NewFfiError("poll operation failed", nil)
-		}
+	n, err := unix.Select(c.pollFd+1, pollFd, &unix.FdSet{}, &unix.FdSet{}, nil)
+	if err != nil {
+		// TODO do ... something
+		panic("select errrrrrr")
+	}
 
-		if done {
-			break
-		}
+	// if the context wasn't cancelled the goroutine will still be running, this will stop it
+	done <- struct{}{}
 
-		curPollDelay = getPollDelay(
-			curPollDelay,
-			c.minPollDelay,
-			c.maxPollDelay,
-			c.backoffFactor,
-		)
+	out := make([]byte, n)
+
+	_, _ = unix.Read(c.pollFd, out)
+
+	var inputsSize, resultsRawSize, resultsSize, resultsFailedIndicatorSize, errSize uint64
+
+	rc := c.ffiMap.Cli.FetchOperationSizes(
+		c.ptr,
+		operationID,
+		&operationCount,
+		&inputsSize,
+		&resultsRawSize,
+		&resultsSize,
+		&resultsFailedIndicatorSize,
+		&errSize,
+	)
+	if rc != 0 {
+		return nil, scrapligoerrors.NewFfiError("poll operation failed", nil)
 	}
 
 	var resultStartTime uint64
@@ -318,7 +296,7 @@ func (c *Cli) getResult(
 
 	errString := make([]byte, errSize)
 
-	rc := c.ffiMap.Cli.FetchOperation(
+	rc = c.ffiMap.Cli.FetchOperation(
 		c.ptr,
 		operationID,
 		&resultStartTime,

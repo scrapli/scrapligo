@@ -13,6 +13,8 @@ type Mapping struct {
 
 // SharedMapping holds common mappings for both cli and netconf drivers.
 type SharedMapping struct {
+	GetPollFd func(driverPtr uintptr) uint32
+
 	// Free releases the memory of the driver object at driverPtr -- this should be called *after*
 	// Close where possible.
 	Free func(driverPtr uintptr)
@@ -52,16 +54,9 @@ type CliMapping struct {
 		cancel *bool,
 	) int
 
-	// PollOperation checks to see if the given operationID is complete -- the state (done or not
-	// done) is set into the done bool pointer. If the state is done, the other pointers are also
-	// populated such that the Cli "knows" how much space to allocate for the result(raw) and
-	// fail/error indicators. Note that while there is a "waitOperation" method in zig, we do *not*
-	// use that here as that would block the goroutine -- we simply poll repeatedly until the
-	// operation result is ready.
-	PollOperation func(
+	FetchOperationSizes func(
 		driverPtr uintptr,
 		operationID uint32,
-		done *bool,
 		operationCount *uint32,
 		inputsSize,
 		resultsRawSize,
@@ -154,10 +149,9 @@ type NetconfMapping struct {
 	) int
 
 	// PollOperation polls the given operationID. See DriverMapping.PollerOperation for details.
-	PollOperation func(
+	FetchOperationSizes func(
 		driverPtr uintptr,
 		operationID uint32,
-		done *bool,
 		inputSize,
 		resultRawSize,
 		resultSize,
@@ -399,27 +393,6 @@ type SessionOptions struct {
 	SetReadSize func(
 		driverPtr uintptr,
 		value uint64,
-	) int
-
-	// SetReadDelayMinNs sets the session minimum read delay in nanoseconds for the driver
-	// at driverPtr.
-	SetReadDelayMinNs func(
-		driverPtr uintptr,
-		value uint64,
-	) int
-
-	// SetReadDelayMaxNs sets the session minimum read delay in nanoseconds for the driver
-	// at driverPtr.
-	SetReadDelayMaxNs func(
-		driverPtr uintptr,
-		value uint64,
-	) int
-
-	// SetReadDelayBackoffFactor sets the backoff factor for the read delay for the driver
-	// at driverPtr.
-	SetReadDelayBackoffFactor func(
-		driverPtr uintptr,
-		value uint8,
 	) int
 
 	// SetReturnChar sets the return char string for the driver at driverPtr.

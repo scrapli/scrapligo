@@ -3,6 +3,8 @@ package ffi
 import "github.com/ebitengine/purego"
 
 func registerShared(m *Mapping, libScrapliFfi uintptr) {
+	purego.RegisterLibFunc(&m.Shared.GetPollFd, libScrapliFfi, "ls_shared_get_poll_fd")
+
 	purego.RegisterLibFunc(&m.Shared.Free, libScrapliFfi, "ls_shared_free")
 
 	purego.RegisterLibFunc(&m.Shared.Read, libScrapliFfi, "ls_shared_read_session")
@@ -17,7 +19,11 @@ func registerCli(m *Mapping, libScrapliFfi uintptr) {
 	purego.RegisterLibFunc(&m.Cli.Open, libScrapliFfi, "ls_cli_open")
 	purego.RegisterLibFunc(&m.Cli.Close, libScrapliFfi, "ls_cli_close")
 
-	purego.RegisterLibFunc(&m.Cli.PollOperation, libScrapliFfi, "ls_cli_poll_operation")
+	purego.RegisterLibFunc(
+		&m.Cli.FetchOperationSizes,
+		libScrapliFfi,
+		"ls_cli_fetch_operation_sizes",
+	)
 	purego.RegisterLibFunc(&m.Cli.FetchOperation, libScrapliFfi, "ls_cli_fetch_operation")
 
 	purego.RegisterLibFunc(&m.Cli.EnterMode, libScrapliFfi, "ls_cli_enter_mode")
@@ -33,9 +39,9 @@ func registerNetconf(m *Mapping, libScrapliFfi uintptr) {
 	purego.RegisterLibFunc(&m.Netconf.Close, libScrapliFfi, "ls_netconf_close")
 
 	purego.RegisterLibFunc(
-		&m.Netconf.PollOperation,
+		&m.Netconf.FetchOperationSizes,
 		libScrapliFfi,
-		"ls_netconf_poll_operation",
+		"ls_netconf_fetch_operation_sizes",
 	)
 	purego.RegisterLibFunc(
 		&m.Netconf.FetchOperation,
@@ -101,21 +107,6 @@ func registerOptions(m *Mapping, libScrapliFfi uintptr) { //nolint: funlen
 		&m.Options.Session.SetReadSize,
 		libScrapliFfi,
 		"ls_option_session_read_size",
-	)
-	purego.RegisterLibFunc(
-		&m.Options.Session.SetReadDelayMinNs,
-		libScrapliFfi,
-		"ls_option_session_read_delay_min_ns",
-	)
-	purego.RegisterLibFunc(
-		&m.Options.Session.SetReadDelayMaxNs,
-		libScrapliFfi,
-		"ls_option_session_read_delay_max_ns",
-	)
-	purego.RegisterLibFunc(
-		&m.Options.Session.SetReadDelayBackoffFactor,
-		libScrapliFfi,
-		"ls_option_session_read_delay_backoff_factor",
 	)
 	purego.RegisterLibFunc(
 		&m.Options.Session.SetReturnChar,
