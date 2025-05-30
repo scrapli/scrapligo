@@ -2,138 +2,64 @@ package logging
 
 import (
 	"fmt"
-	"sync"
+	"os"
 
-	"github.com/scrapli/scrapligo/util"
+	scrapligoconstants "github.com/scrapli/scrapligo/constants"
 )
 
-const (
-	// Debug is the debug log level.
-	Debug = "debug"
-	// Info is the info(rmational) log level.
-	Info = "info"
-	// Critical is the critical log level.
-	Critical = "critical"
-)
+var (
+	// Level is the level at which to emit log messages. When the ScrapligoDebug env var is set
+	// we use that value (if it == one of the log levels, otherwise it defaults to debug), for all
+	// other cases this defaults to warn.
+	Level LogLevel //nolint: gochecknoglobals
 
-// NewInstance returns a new logging Instance.
-func NewInstance(opts ...util.Option) (*Instance, error) {
-	i := &Instance{
-		Level:     Info,
-		Formatter: DefaultFormatter,
-		Loggers:   nil,
-	}
-
-	for _, o := range opts {
-		err := o(i)
-		if err != nil {
-			return nil, err
+	// Logger is the main logging function, used mostly for "global" non connection/device related
+	// things like the ffi layer.
+	Logger = func(level LogLevel, m string, a ...any) { //nolint: gochecknoglobals
+		if IntFromLevel(Level) <= IntFromLevel(level) {
+			_, _ = fmt.Fprintln(os.Stderr, level, "::", fmt.Sprintf(m, a...))
 		}
 	}
+)
 
-	return i, nil
-}
-
-// Instance is a simple logging object.
-type Instance struct {
-	Level     string
-	Formatter func(string, string) string
-	Loggers   []func(...interface{})
-}
-
-// Emit "emits" a logging message m to all the loggers in the Instance.
-func (i *Instance) Emit(m interface{}) {
-	wg := sync.WaitGroup{}
-
-	for _, f := range i.Loggers {
-		wg.Add(1)
-
-		lf := f
-
-		go func() {
-			lf(m)
-
-			wg.Done()
-		}()
+// FfiLogger is a simple logger that can be passed as a logging callback to the zig layer.
+func FfiLogger(level uint8, message *string) {
+	switch level {
+	case uint8(DebugAsInt):
+		fmt.Println("debug :: ", *message) //nolint:forbidigo
+	case uint8(InfoAsInt):
+		fmt.Println(" info :: ", *message) //nolint:forbidigo
+	case uint8(WarnAsInt):
+		fmt.Println(" warn :: ", *message) //nolint:forbidigo
+	case uint8(CriticalAsInt):
+		fmt.Println(" crit :: ", *message) //nolint:forbidigo
+	case uint8(FatalAsInt):
+		fmt.Println("fatal :: ", *message) //nolint:forbidigo
+	case uint8(DisabledAsInt):
 	}
-
-	wg.Wait()
 }
 
-func (i *Instance) shouldLog(l string) bool {
-	if len(i.Loggers) == 0 {
-		return false
-	}
-
-	switch i.Level {
-	case Debug:
-		return true
-	case Info:
-		switch l {
-		case Info, Critical:
-			return true
+// normally i *really* dislike inits but... meh?
+func init() { //nolint: gochecknoinits
+	v := os.Getenv(scrapligoconstants.ScrapligoDebug)
+	if v != "" {
+		switch v {
+		case Debug.String():
+			Level = Debug
+		case Info.String():
+			Level = Info
+		case Warn.String():
+			Level = Warn
+		case Critical.String():
+			Level = Critical
+		case Fatal.String():
+			Level = Fatal
+		case Disabled.String():
+			Level = Disabled
 		default:
-			return false
+			Level = Debug
 		}
-	case Critical:
-		if l == Critical {
-			return true
-		}
+	} else {
+		Level = Warn
 	}
-
-	return false
-}
-
-// Debug accepts a Debug level log message with no formatting.
-func (i *Instance) Debug(f string) {
-	if !i.shouldLog(Debug) {
-		return
-	}
-
-	i.Emit(i.Formatter(Debug, f))
-}
-
-// Debugf accepts a Debug level log message normal fmt.Sprintf type formatting.
-func (i *Instance) Debugf(f string, a ...interface{}) {
-	if !i.shouldLog(Debug) {
-		return
-	}
-
-	i.Emit(i.Formatter(Debug, fmt.Sprintf(f, a...)))
-}
-
-// Info accepts an Info level log message with no formatting.
-func (i *Instance) Info(f string) {
-	if !i.shouldLog(Info) {
-		return
-	}
-
-	i.Emit(i.Formatter(Info, f))
-}
-
-// Infof accepts an Info level log message normal fmt.Sprintf type formatting.
-func (i *Instance) Infof(f string, a ...interface{}) {
-	if !i.shouldLog(Info) {
-		return
-	}
-
-	i.Emit(i.Formatter(Info, fmt.Sprintf(f, a...)))
-}
-
-// Critical accepts a Critical level log message with no formatting.
-func (i *Instance) Critical(f string) {
-	if !i.shouldLog(Critical) {
-		return
-	}
-
-	i.Emit(i.Formatter(Critical, f))
-}
-
-// Criticalf accepts a Critical level log message normal fmt.Sprintf type formatting.
-func (i *Instance) Criticalf(f string, a ...interface{}) {
-	if !i.shouldLog(Critical) {
-		return
-	}
-
-	i.Emit(i.Formatter(Critical, fmt.Sprintf(f, a...)))
 }
