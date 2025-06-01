@@ -1,2 +1,0 @@
-interface loopback1
-no interface loopback1
