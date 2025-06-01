@@ -33,7 +33,5 @@ cover.out
 # clab build dir
 .clab/clab-scrapligo
 
-# functional testing things (containerlab bin will go away once dind fix is merged and released)
-e2e/clab/clab-libscrapli
-e2e/clab/*.bak
-e2e/clab/launcher/containerlab
+# where we mount stuff when running clab bits
+.clab
