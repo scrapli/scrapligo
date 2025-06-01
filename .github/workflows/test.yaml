@@ -70,11 +70,7 @@ jobs:
           source .github/vars.env
           echo "GO_VERSION=$GO_VERSION" >> "$GITHUB_ENV"
           echo "GOTESTSUM_VERSION=$GOTESTSUM_VERSION" >> "$GITHUB_ENV"
-          echo "CONTAINERLAB_VERSION=$CONTAINERLAB_VERSION" >> "$GITHUB_ENV"
-
-      - name: install containerlab
-        run: |
-          bash -c "$(curl -sL https://get.containerlab.dev)" -- -v ${{ env.CONTAINERLAB_VERSION }}
+          echo "SCRAPLI_CLAB_VERSION=$SCRAPLI_CLAB_VERSION" >> "$GITHUB_ENV"
 
       # launcher should be setting the network but seems to be having issues at least
       # on darwin, so just also create the bridge, worst case duplicated effort, not a big deal
