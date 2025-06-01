@@ -76,14 +76,37 @@ jobs:
         run: |
           bash -c "$(curl -sL https://get.containerlab.dev)" -- -v ${{ env.CONTAINERLAB_VERSION }}
 
-      - name: build netopeer server image
+      # launcher should be setting the network but seems to be having issues at least
+      # on darwin, so just also create the bridge, worst case duplicated effort, not a big deal
+      - name: run scrapli-clab
         run: |
-          make build-netopeer-server
-
-      - name: run containerlab topology
-        run: |
-          sudo clab deploy -t topo.ci.amd64.yaml
-        working-directory: e2e/clab
+          mkdir .clab || true
+          rm -r .clab/* || true
+          docker network rm clab || true
+          docker network create \
+              --driver bridge \
+              --subnet=172.20.20.0/24 \
+              --gateway=172.20.20.1 \
+              --ipv6 \
+              --subnet=2001:172:20:20::/64 \
+              --gateway=2001:172:20:20::1 \
+              --opt com.docker.network.driver.mtu=65535 \
+              --label containerlab \
+              clab
+          docker run \
+              -d \
+              --rm \
+              --name clab-launcher \
+              --privileged \
+              --pid=host \
+              --stop-signal=SIGINT \
+              -v /var/run/docker.sock:/var/run/docker.sock \
+              -v /run/netns:/run/netns \
+              -v "$(pwd):$(pwd)" \
+              -e "WORKDIR=$(pwd)/.clab" \
+              -e "HOST_ARCH=$(uname -m)" \
+              -e CLAB_TOPO=topo.ci.amd64.yaml \
+                "ghcr.io/scrapli/scrapli_clab/launcher:${{ env.SCRAPLI_CLAB_VERSION }}"
 
       - name: set up go
         uses: actions/setup-go@v5
@@ -102,12 +125,10 @@ jobs:
         uses: mxschmitt/action-tmate@v3
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.debug_e2e }}
 
-      - name: wait for srl node to be available
+      - name: wait for test nodes to be available
+        working-directory: .clab
         run: |
           ./wait.sh
-        working-directory: e2e/clab
-        # wait.sh should timeout but seems like it sometimes gets hung in actions
-        timeout-minutes: 5
 
       - name: e2e tests
         run: |
