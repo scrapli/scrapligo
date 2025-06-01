@@ -2,6 +2,7 @@ package cli
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 
@@ -228,17 +229,9 @@ func (c *Cli) getResult(
 
 	var operationCount uint32
 
-	// TODO: so in go flavor we actually use ctx to cause libscrapli to timeout vs python where
-	// we rely on the timeouts. so in this case we need to ensure that we do not block the context
-	// so it can properly cancel on timeout/cnacellation... which means we gotta do something like:
-	//
-	// run a goroutine that listens/waits on cancellation and obviously updates the cancel pointer
-	// if/when a cancellation occurs.
-	//
-	// in the main thing we block on a select that has no timeout... if/when cancellation happens
-	// we the select will have something to read because libscrpali will have cancelled the op
-	// which will have in turn written to the fd that the select is listening for -- from that point
-	// we simply fetch the failed result and return or proceed (in the case of not cancelled)
+	// so in go flavor we actually use ctx to cause libscrapli to timeout vs python where we rely on
+	// the timeouts in libscrapli itself. so in this case we need to ensure that we do not block the
+	// context so it can properly cancel on timeout/cancellation...
 	go func() {
 		select {
 		case <-ctx.Done():
@@ -253,10 +246,23 @@ func (c *Cli) getResult(
 	pollFd := &unix.FdSet{}
 	pollFd.Set(c.pollFd)
 
-	n, err := unix.Select(c.pollFd+1, pollFd, &unix.FdSet{}, &unix.FdSet{}, nil)
-	if err != nil {
-		// TODO do ... something
-		panic("select errrrrrr")
+	var n int
+
+	for {
+		var err error
+
+		n, err = unix.Select(c.pollFd+1, pollFd, &unix.FdSet{}, &unix.FdSet{}, nil)
+		if err != nil {
+			if errors.Is(err, unix.EINTR) {
+				// python automagically handles interrupts i guess go doesnt, so just act like
+				// we do on the python side when polling the wakeup fd
+				continue
+			}
+
+			return nil, scrapligoerrors.NewFfiError("waiting on operation ready signal", err)
+		}
+
+		break
 	}
 
 	// if the context wasn't cancelled the goroutine will still be running, this will stop it
