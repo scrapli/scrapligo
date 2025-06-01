@@ -101,7 +101,7 @@ func registerNetconf(m *Mapping, libScrapliFfi uintptr) {
 	purego.RegisterLibFunc(&m.Netconf.Action, libScrapliFfi, "ls_netconf_action")
 }
 
-func registerOptions(m *Mapping, libScrapliFfi uintptr) { //nolint: funlen
+func registerOptions(m *Mapping, libScrapliFfi uintptr) {
 	// session
 	purego.RegisterLibFunc(
 		&m.Options.Session.SetReadSize,
