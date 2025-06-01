@@ -2,6 +2,7 @@ package netconf
 
 import (
 	"context"
+	"errors"
 
 	"github.com/ebitengine/purego"
 	scrapligoconstants "github.com/scrapli/scrapligo/constants"
@@ -272,10 +273,23 @@ func (n *Netconf) getResult(
 	pollFd := &unix.FdSet{}
 	pollFd.Set(n.pollFd)
 
-	_n, err := unix.Select(n.pollFd+1, pollFd, &unix.FdSet{}, &unix.FdSet{}, nil)
-	if err != nil {
-		// TODO do ... something
-		panic("select errrrrrr")
+	var _n int
+
+	for {
+		var err error
+
+		_n, err = unix.Select(n.pollFd+1, pollFd, &unix.FdSet{}, &unix.FdSet{}, nil)
+		if err != nil {
+			if errors.Is(err, unix.EINTR) {
+				// python automagically handles interrupts i guess go doesnt, so just act like
+				// we do on the python side when polling the wakeup fd
+				continue
+			}
+
+			return nil, scrapligoerrors.NewFfiError("waiting on operation ready signal", err)
+		}
+
+		break
 	}
 
 	// if the context wasn't cancelled the goroutine will still be running, this will stop it
