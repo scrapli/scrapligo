@@ -3,6 +3,7 @@ package internal
 import (
 	scrapligoerrors "github.com/scrapli/scrapligo/errors"
 	scrapligoffi "github.com/scrapli/scrapligo/ffi"
+	scrapligologging "github.com/scrapli/scrapligo/logging"
 )
 
 // TransportKind is an enum(ish) representing the kind of transport a Cli should use.
@@ -25,7 +26,8 @@ type Options struct {
 	Driver  DriverOptions
 	Netconf NetconfOptions
 
-	LoggerCallback func(level uint8, message *string)
+	Logger      any
+	LoggerLevel scrapligologging.LogLevel
 
 	Port *uint16
 
@@ -39,11 +41,12 @@ type Options struct {
 // NewOptions returns a new options object.
 func NewOptions() *Options {
 	return &Options{
-		LoggerCallback: nil,
-		TransportKind:  TransportKindBin,
-		Port:           nil,
-		Driver:         DriverOptions{},
-		Netconf:        NetconfOptions{},
+		Logger:        nil,
+		LoggerLevel:   scrapligologging.Warn,
+		TransportKind: TransportKindBin,
+		Port:          nil,
+		Driver:        DriverOptions{},
+		Netconf:       NetconfOptions{},
 		Auth: AuthOptions{
 			LookupMap: make(map[string]string),
 		},
