@@ -4,11 +4,11 @@ import (
 	"context"
 	"errors"
 
-	"github.com/ebitengine/purego"
 	scrapligoconstants "github.com/scrapli/scrapligo/constants"
 	scrapligoerrors "github.com/scrapli/scrapligo/errors"
 	scrapligoffi "github.com/scrapli/scrapligo/ffi"
 	scrapligointernal "github.com/scrapli/scrapligo/internal"
+	scrapligologging "github.com/scrapli/scrapligo/logging"
 	scrapligooptions "github.com/scrapli/scrapligo/options"
 	"golang.org/x/sys/unix"
 )
@@ -91,13 +91,11 @@ func (n *Netconf) Open(ctx context.Context) (*Result, error) {
 		n.ffiMap.Shared.Free(n.ptr)
 	}()
 
-	var loggerCallback uintptr
-	if n.options.LoggerCallback != nil {
-		loggerCallback = purego.NewCallback(n.options.LoggerCallback)
-	}
-
 	n.ptr = n.ffiMap.Netconf.Alloc(
-		loggerCallback,
+		scrapligologging.LoggerToLoggerCallback(
+			n.options.Logger,
+			uint8(scrapligologging.IntFromLevel(n.options.LoggerLevel)),
+		),
 		n.host,
 		*n.options.Port,
 		string(n.options.TransportKind),
