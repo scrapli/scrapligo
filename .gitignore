@@ -2,8 +2,6 @@
 *.exe
 *.exe~
 *.dll
-*.so
-*.dylib
 
 # Test binary, built with `go test -c`
 *.test
@@ -34,3 +32,6 @@ cover.out
 
 # clab build dir
 .clab/clab-scrapligo
+
+# where we mount stuff when running clab bits
+.clab

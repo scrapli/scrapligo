@@ -1,0 +1,73 @@
+package options
+
+import scrapligointernal "github.com/scrapli/scrapligo/internal"
+
+// WithUsername sets the username to use for authentication to the target device.
+func WithUsername(username string) Option {
+	return func(o *scrapligointernal.Options) error {
+		o.Auth.Username = username
+
+		return nil
+	}
+}
+
+// WithPassword sets the password to use for authentication to the target device.
+func WithPassword(password string) Option {
+	return func(o *scrapligointernal.Options) error {
+		o.Auth.Password = password
+
+		return nil
+	}
+}
+
+// WithLookupKeyValue adds an entry to the lookup map for the driver instance.
+func WithLookupKeyValue(key, value string) Option {
+	return func(o *scrapligointernal.Options) error {
+		o.Auth.LookupMap[key] = value
+
+		return nil
+	}
+}
+
+// WithAuthBypass bypasses/disables the "in session" authentication process where applicable (which
+// means in the bin/telnet transports basically).
+func WithAuthBypass() Option {
+	return func(o *scrapligointernal.Options) error {
+		o.Auth.InSessionAuthBypass = true
+
+		return nil
+	}
+}
+
+// WithUsernamePattern is a string that will be compiled via pcre2 in the underlying zig session
+// object -- this pattern should match a username prompt for "in session" authentication (auth
+// that happens "in" the session rather than in the transport natively (i.e. ssh2)).
+func WithUsernamePattern(s string) Option {
+	return func(o *scrapligointernal.Options) error {
+		o.Auth.UsernamePattern = s
+
+		return nil
+	}
+}
+
+// WithPasswordPattern is a string that will be compiled via pcre2 in the underlying zig session
+// object -- this pattern should match a password prompt for "in session" authentication (auth
+// that happens "in" the session rather than in the transport natively (i.e. ssh2)).
+func WithPasswordPattern(s string) Option {
+	return func(o *scrapligointernal.Options) error {
+		o.Auth.PasswordPattern = s
+
+		return nil
+	}
+}
+
+// WithPassphrasePattern is a string that will be compiled via pcre2 in the underlying zig session
+// object -- this pattern should match a passphrase prompt for "in session" authentication (auth
+// that happens "in" the session rather than in the transport natively (i.e. ssh2)).
+func WithPassphrasePattern(s string) Option {
+	return func(o *scrapligointernal.Options) error {
+		o.Auth.PassphrasePattern = s
+
+		return nil
+	}
+}
