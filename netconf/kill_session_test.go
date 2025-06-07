@@ -69,6 +69,11 @@ func TestKillSession(t *testing.T) {
 				t.Fatal(err)
 			}
 
+			// ensure we free n2, if we dont could have segfaults if logging callbacks
+			// end up poking something that got gc'd etc.
+			n2ptr, ffiMapping := n2.GetPtr()
+			ffiMapping.Shared.Free(n2ptr)
+
 			assertResult(t, r, testGoldenPath)
 		})
 	}

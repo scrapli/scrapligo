@@ -48,10 +48,6 @@ func TestCloseSession(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			defer func() {
-				_, _ = n.Close(ctx)
-			}()
-
 			r, err := n.CloseSession(ctx, c.options...)
 			if err != nil {
 				t.Fatal(err)
