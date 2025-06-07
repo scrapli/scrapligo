@@ -6,12 +6,12 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/ebitengine/purego"
 	scrapligoassets "github.com/scrapli/scrapligo/assets"
 	scrapligoconstants "github.com/scrapli/scrapligo/constants"
 	scrapligoerrors "github.com/scrapli/scrapligo/errors"
 	scrapligoffi "github.com/scrapli/scrapligo/ffi"
 	scrapligointernal "github.com/scrapli/scrapligo/internal"
+	scrapligologging "github.com/scrapli/scrapligo/logging"
 	scrapligooptions "github.com/scrapli/scrapligo/options"
 	"golang.org/x/sys/unix"
 )
@@ -150,14 +150,12 @@ func (c *Cli) Open(ctx context.Context) (*Result, error) {
 		c.ffiMap.Shared.Free(c.ptr)
 	}()
 
-	var loggerCallback uintptr
-	if c.options.LoggerCallback != nil {
-		loggerCallback = purego.NewCallback(c.options.LoggerCallback)
-	}
-
 	c.ptr = c.ffiMap.Cli.Alloc(
 		c.options.Driver.DefinitionString,
-		loggerCallback,
+		scrapligologging.LoggerToLoggerCallback(
+			c.options.Logger,
+			uint8(scrapligologging.IntFromLevel(c.options.LoggerLevel)),
+		),
 		c.host,
 		*c.options.Port,
 		string(c.options.TransportKind),

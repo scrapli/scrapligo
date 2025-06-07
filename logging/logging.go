@@ -2,8 +2,11 @@ package logging
 
 import (
 	"fmt"
+	"log"
+	"log/slog"
 	"os"
 
+	"github.com/ebitengine/purego"
 	scrapligoconstants "github.com/scrapli/scrapligo/constants"
 )
 
@@ -22,21 +25,64 @@ var (
 	}
 )
 
-// FfiLogger is a simple logger that can be passed as a logging callback to the zig layer.
-func FfiLogger(level uint8, message *string) {
-	switch level {
-	case uint8(DebugAsInt):
-		fmt.Println("debug :: ", *message) //nolint:forbidigo
-	case uint8(InfoAsInt):
-		fmt.Println(" info :: ", *message) //nolint:forbidigo
-	case uint8(WarnAsInt):
-		fmt.Println(" warn :: ", *message) //nolint:forbidigo
-	case uint8(CriticalAsInt):
-		fmt.Println(" crit :: ", *message) //nolint:forbidigo
-	case uint8(FatalAsInt):
-		fmt.Println("fatal :: ", *message) //nolint:forbidigo
-	case uint8(DisabledAsInt):
+// LoggerToLoggerCallback wraps a given supported logger type in a callback to be passed to the
+// underlying libscrapli bits.
+func LoggerToLoggerCallback(logger any, logLevel uint8) uintptr { //nolint: gocyclo
+	var loggerCallback uintptr
+
+	switch l := logger.(type) {
+	case *log.Logger:
+		loggerCallback = purego.NewCallback(func(level uint8, message *string) {
+			if logLevel > level {
+				return
+			}
+
+			switch level {
+			case uint8(DebugAsInt):
+				l.Printf("debug :: %s", *message)
+			case uint8(InfoAsInt):
+				l.Printf(" info :: %s", *message)
+			case uint8(WarnAsInt):
+				l.Printf(" warn :: %s", *message)
+			case uint8(CriticalAsInt):
+				l.Printf(" crit :: %s", *message)
+			case uint8(FatalAsInt):
+				l.Printf("fatal :: %s", *message)
+			case uint8(DisabledAsInt):
+			}
+		})
+	case *slog.Logger:
+		loggerCallback = purego.NewCallback(func(level uint8, message *string) {
+			if logLevel > level {
+				return
+			}
+
+			switch level {
+			case uint8(DebugAsInt):
+				l.Debug(*message)
+			case uint8(InfoAsInt):
+				l.Info(*message)
+			case uint8(WarnAsInt):
+				l.Warn(*message)
+			case uint8(CriticalAsInt):
+				l.Error(*message)
+			case uint8(FatalAsInt):
+				l.Error(*message)
+			case uint8(DisabledAsInt):
+			}
+		})
+	case func(LogLevel, string):
+		loggerCallback = purego.NewCallback(func(level uint8, message *string) {
+			if logLevel > level {
+				return
+			}
+
+			l(LevelFromInt(level), *message)
+		})
+	default:
 	}
+
+	return loggerCallback
 }
 
 // normally i *really* dislike inits but... meh?

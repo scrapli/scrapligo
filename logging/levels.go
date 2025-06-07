@@ -46,6 +46,26 @@ func IntFromLevel(level LogLevel) LogLeveLAsInt {
 	}
 }
 
+// LevelFromInt returns the LogLevel value of the given uint8 level.
+func LevelFromInt(level uint8) LogLevel {
+	switch level {
+	case uint8(DebugAsInt):
+		return Debug
+	case uint8(InfoAsInt):
+		return Info
+	case uint8(WarnAsInt):
+		return Warn
+	case uint8(CriticalAsInt):
+		return Critical
+	case uint8(FatalAsInt):
+		return Fatal
+	case uint8(DisabledAsInt):
+		return Disabled
+	default:
+		return Disabled
+	}
+}
+
 const (
 	// DebugAsInt is the debug log level.
 	DebugAsInt LogLeveLAsInt = 0

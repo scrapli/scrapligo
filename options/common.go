@@ -1,17 +1,63 @@
 package options
 
-import scrapligointernal "github.com/scrapli/scrapligo/internal"
+import (
+	"log"
+	"log/slog"
+
+	scrapligoerrors "github.com/scrapli/scrapligo/errors"
+	scrapligointernal "github.com/scrapli/scrapligo/internal"
+	scrapligologging "github.com/scrapli/scrapligo/logging"
+)
 
 // Option is a type used for functional options for the Cli object's options.
 type Option func(o *scrapligointernal.Options) error
 
-// WithLoggerCallback sets the logger callback for the Cli to use -- this is passed as pointer
-// to the zig bits.
-func WithLoggerCallback(
-	loggerCallback func(level uint8, message *string),
+// WithLogger accepts one of:
+//
+// log.Logger
+// slog.Logger
+// func(level scrapligologging.LogLevel, message string)
+//
+//   - log.Logger will log everything with a level prefix (i.e. info, warn, etc.)
+//   - slog.Logger will map scrapligologging.LogLevel to the most appropriate log function (i.e.
+//     .Debug, .Info)
+//   - the function will be invoked and passed the level/message if the cli/netconf objects
+//     LoggingLevel is equal or higher
+func WithLogger(
+	logger any,
+) Option {
+	switch logger.(type) {
+	case *log.Logger:
+		return func(o *scrapligointernal.Options) error {
+			o.Logger = logger
+
+			return nil
+		}
+	case *slog.Logger:
+		return func(o *scrapligointernal.Options) error {
+			o.Logger = logger
+
+			return nil
+		}
+	case func(scrapligologging.LogLevel, string):
+		return func(o *scrapligointernal.Options) error {
+			o.Logger = logger
+
+			return nil
+		}
+	default:
+		return func(_ *scrapligointernal.Options) error {
+			return scrapligoerrors.NewOptionsError("invalid logger type provided", nil)
+		}
+	}
+}
+
+// WithLoggerLevel sets the log level for the given driver.
+func WithLoggerLevel(
+	level scrapligologging.LogLevel,
 ) Option {
 	return func(o *scrapligointernal.Options) error {
-		o.LoggerCallback = loggerCallback
+		o.LoggerLevel = level
 
 		return nil
 	}
