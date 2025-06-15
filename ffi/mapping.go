@@ -123,6 +123,21 @@ type CliMapping struct {
 		hiddenInput bool,
 		retainTrailingPrompt bool,
 	) int
+	// ReadWithCallbacks submit a ReadWithCallbacks operaiton to the driver.
+	ReadWithCallbacks func(
+		driverPtr uintptr,
+		operationID *uint32,
+		cancel *bool,
+		initialInput string,
+		names string,
+		callbacks []uintptr,
+		contains string,
+		containsPattern string,
+		notContains string,
+		onlyOnce string,
+		resetTimer string,
+		complets string,
+	) int
 }
 
 // NetconfMapping holds libscrapli mappings specifically for the netconf driver.
