@@ -94,6 +94,15 @@ func (r *Result) Result() string {
 	return strings.Join(r.Results, "\n")
 }
 
+// ResultRaw returns all raw results joined on newline chars.
+func (r *Result) ResultRaw() []byte {
+	if len(r.Results) == 0 {
+		return nil
+	}
+
+	return bytes.Join(r.ResultsRaw, []byte("\n"))
+}
+
 // Failed returns true if any result has any failed indicator present.
 func (r *Result) Failed() bool {
 	return r.ResultsFailedIndicator != ""

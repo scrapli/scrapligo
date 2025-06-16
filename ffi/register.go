@@ -4,11 +4,13 @@ import "github.com/ebitengine/purego"
 
 func registerShared(m *Mapping, libScrapliFfi uintptr) {
 	purego.RegisterLibFunc(&m.Shared.GetPollFd, libScrapliFfi, "ls_shared_get_poll_fd")
-
 	purego.RegisterLibFunc(&m.Shared.Free, libScrapliFfi, "ls_shared_free")
+}
 
-	purego.RegisterLibFunc(&m.Shared.Read, libScrapliFfi, "ls_shared_read_session")
-	purego.RegisterLibFunc(&m.Shared.Write, libScrapliFfi, "ls_shared_write_session")
+func registerSession(m *Mapping, libScrapliFfi uintptr) {
+	purego.RegisterLibFunc(&m.Session.Read, libScrapliFfi, "ls_session_read")
+	purego.RegisterLibFunc(&m.Session.Write, libScrapliFfi, "ls_session_write")
+	purego.RegisterLibFunc(&m.Session.WriteAndReturn, libScrapliFfi, "ls_session_write_and_return")
 }
 
 func registerCli(m *Mapping, libScrapliFfi uintptr) {
@@ -30,7 +32,13 @@ func registerCli(m *Mapping, libScrapliFfi uintptr) {
 	purego.RegisterLibFunc(&m.Cli.GetPrompt, libScrapliFfi, "ls_cli_get_prompt")
 	purego.RegisterLibFunc(&m.Cli.SendInput, libScrapliFfi, "ls_cli_send_input")
 	purego.RegisterLibFunc(&m.Cli.SendPromptedInput, libScrapliFfi, "ls_cli_send_prompted_input")
-	purego.RegisterLibFunc(&m.Cli.ReadWithCallbacks, libScrapliFfi, "ls_cli_read_with_callbacks")
+
+	purego.RegisterLibFunc(&m.Cli.ReadAny, libScrapliFfi, "ls_cli_read_any")
+	purego.RegisterLibFunc(
+		&m.Cli.ReadCallbackShouldExecute,
+		libScrapliFfi,
+		"ls_cli_read_callback_should_execute",
+	)
 }
 
 func registerNetconf(m *Mapping, libScrapliFfi uintptr) {

@@ -17,12 +17,12 @@ func TestSendInput(t *testing.T) {
 		description string
 		postOpenF   func(t *testing.T, d *scrapligocli.Cli)
 		input       string
-		options     []scrapligocli.OperationOption
+		options     []scrapligocli.Option
 	}{
 		"simple": {
 			description: "simple input that requires no pagination",
 			input:       "show version | i Kern",
-			options:     []scrapligocli.OperationOption{},
+			options:     []scrapligocli.Option{},
 		},
 		"simple-requires-pagination": {
 			description: "simple input that requires pagination",
@@ -30,7 +30,7 @@ func TestSendInput(t *testing.T) {
 			// prompt pattern because of test transport reading one byte at a time, so just show the
 			// transceiver stuff since thats enough to require pagination!
 			input:   "show running-config all | include snmp",
-			options: []scrapligocli.OperationOption{},
+			options: []scrapligocli.Option{},
 		},
 		"simple-already-in-non-default-mode": {
 			description: "simple input executed in non-default mode we are already in",
@@ -46,49 +46,49 @@ func TestSendInput(t *testing.T) {
 				}
 			},
 			input: "do show version | i Kern",
-			options: []scrapligocli.OperationOption{
+			options: []scrapligocli.Option{
 				scrapligocli.WithRequestedMode("configuration"),
 			},
 		},
 		"simple-acquire-non-default-mode": {
 			description: "simple input executed in freshly acquired non-default mode",
 			input:       "do show version | i Kern",
-			options: []scrapligocli.OperationOption{
+			options: []scrapligocli.Option{
 				scrapligocli.WithRequestedMode("configuration"),
 			},
 		},
 		"simple-input-handling-exact": {
 			description: "simple with exact input handling mode",
 			input:       "show version | i Kern",
-			options: []scrapligocli.OperationOption{
+			options: []scrapligocli.Option{
 				scrapligocli.WithInputHandling(scrapligocli.InputHandlingExact),
 			},
 		},
 		"simple-input-handling-ignore": {
 			description: "simple with ignore input handling mode",
 			input:       "show version | i Kern",
-			options: []scrapligocli.OperationOption{
+			options: []scrapligocli.Option{
 				scrapligocli.WithInputHandling(scrapligocli.InputHandlingIgnore),
 			},
 		},
 		"simple-retain-input": {
 			description: "simple with retain input",
 			input:       "show version | i Kern",
-			options: []scrapligocli.OperationOption{
+			options: []scrapligocli.Option{
 				scrapligocli.WithRetainInput(),
 			},
 		},
 		"simple-retain-trailing-prompt": {
 			description: "simple with retain trailing prompt",
 			input:       "show version | i Kern",
-			options: []scrapligocli.OperationOption{
+			options: []scrapligocli.Option{
 				scrapligocli.WithRetainTrailingPrompt(),
 			},
 		},
 		"simple-retain-all": {
 			description: "simple with retain input and trailing prompt",
 			input:       "show version | i Kern",
-			options: []scrapligocli.OperationOption{
+			options: []scrapligocli.Option{
 				scrapligocli.WithRetainInput(),
 				scrapligocli.WithRetainTrailingPrompt(),
 			},

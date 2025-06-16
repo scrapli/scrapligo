@@ -17,17 +17,17 @@ func TestSendInputs(t *testing.T) {
 		description string
 		postOpenF   func(t *testing.T, d *scrapligocli.Cli)
 		inputs      []string
-		options     []scrapligocli.OperationOption
+		options     []scrapligocli.Option
 	}{
 		"simple-single-input": {
 			description: "simple single input no pagination required",
 			inputs:      []string{"show version | i Kern"},
-			options:     []scrapligocli.OperationOption{},
+			options:     []scrapligocli.Option{},
 		},
 		"simple-multi-input": {
 			description: "simple multi input no pagination required",
 			inputs:      []string{"show version | i Kern", "show version | i Kern"},
-			options:     []scrapligocli.OperationOption{},
+			options:     []scrapligocli.Option{},
 		},
 	}
 

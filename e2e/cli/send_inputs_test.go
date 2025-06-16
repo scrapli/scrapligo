@@ -19,28 +19,28 @@ func TestSendInputs(t *testing.T) {
 		transports  []string
 		postOpenF   func(t *testing.T, d *scrapligocli.Cli)
 		inputs      []string
-		options     []scrapligocli.OperationOption
+		options     []scrapligocli.Option
 	}{
 		"eos-single-input": {
 			description: "simple input that requires no pagination",
 			platform:    scrapligocli.AristaEos.String(),
 			transports:  []string{"bin", "ssh2", "telnet"},
 			inputs:      []string{"show version | i Kern"},
-			options:     []scrapligocli.OperationOption{},
+			options:     []scrapligocli.Option{},
 		},
 		"eos-multi-input": {
 			description: "simple input that requires pagination",
 			platform:    scrapligocli.AristaEos.String(),
 			transports:  []string{"bin", "ssh2", "telnet"},
 			inputs:      []string{"show version | i Kern", "show run"},
-			options:     []scrapligocli.OperationOption{},
+			options:     []scrapligocli.Option{},
 		},
 		"srl-multi-input": {
 			description: "simple input that requires a mode change and requires pagination",
 			platform:    scrapligocli.NokiaSrl.String(),
 			transports:  []string{"bin", "ssh2"},
 			inputs:      []string{"info system", "info"},
-			options:     []scrapligocli.OperationOption{},
+			options:     []scrapligocli.Option{},
 		},
 	}
 
