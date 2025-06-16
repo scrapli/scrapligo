@@ -6,11 +6,31 @@ import (
 	scrapligoerrors "github.com/scrapli/scrapligo/errors"
 )
 
+func newSendInputsOptions(options ...Option) *sendInputsOptions {
+	o := &sendInputsOptions{
+		inputHandling: InputHandlingFuzzy,
+	}
+
+	for _, opt := range options {
+		opt(o)
+	}
+
+	return o
+}
+
+type sendInputsOptions struct {
+	requestedMode          string
+	inputHandling          InputHandling
+	retainInput            bool
+	retainTrailingPrompt   bool
+	stopOnIndicatedFailure bool
+}
+
 // SendInputs send multiple "inputs" to the device.
 func (c *Cli) SendInputs(
 	ctx context.Context,
 	inputs []string,
-	options ...OperationOption,
+	options ...Option,
 ) (*Result, error) {
 	if c.ptr == 0 {
 		return nil, scrapligoerrors.NewFfiError("driver pointer nil", nil)
@@ -18,7 +38,7 @@ func (c *Cli) SendInputs(
 
 	cancel := false
 
-	loadedOptions := newOperationOptions(options...)
+	loadedOptions := newSendInputsOptions(options...)
 
 	var results *Result
 

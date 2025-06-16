@@ -20,7 +20,7 @@ func TestSendPromptedInput(t *testing.T) {
 		input       string
 		prompt      string
 		response    string
-		options     []scrapligocli.OperationOption
+		options     []scrapligocli.Option
 	}{
 		"eos-simple": {
 			description: "simple input that requires no pagination",
@@ -29,7 +29,7 @@ func TestSendPromptedInput(t *testing.T) {
 			input:       "read -p \"Will you prompt me plz? \" answer",
 			prompt:      "Will you prompt me plz?",
 			response:    "nou",
-			options: []scrapligocli.OperationOption{
+			options: []scrapligocli.Option{
 				scrapligocli.WithRequestedMode("bash"),
 			},
 		},

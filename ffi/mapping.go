@@ -6,6 +6,7 @@ type Mapping struct {
 	AssertNoLeaks func() bool
 
 	Shared  SharedMapping
+	Session SessionMapping
 	Cli     CliMapping
 	Netconf NetconfMapping
 	Options OptionMapping
@@ -18,17 +19,25 @@ type SharedMapping struct {
 	// Free releases the memory of the driver object at driverPtr -- this should be called *after*
 	// Close where possible.
 	Free func(driverPtr uintptr)
+}
 
+// SessionMapping holds session specific mappings.
+type SessionMapping struct {
 	Read func(
 		driverPtr uintptr,
 		buf *[]byte,
 		readSize *uint64,
-	)
+	) uint8
 	Write func(
 		driverPtr uintptr,
 		buf string,
 		redacted bool,
-	)
+	) uint8
+	WriteAndReturn func(
+		driverPtr uintptr,
+		buf string,
+		redacted bool,
+	) uint8
 }
 
 // CliMapping holds libscrapli mappings specifically for cli drivers.
@@ -47,12 +56,12 @@ type CliMapping struct {
 		driverPtr uintptr,
 		operationID *uint32,
 		cancel *bool,
-	) int
+	) uint8
 	Close func(
 		driverPtr uintptr,
 		operationID *uint32,
 		cancel *bool,
-	) int
+	) uint8
 
 	FetchOperationSizes func(
 		driverPtr uintptr,
@@ -63,7 +72,7 @@ type CliMapping struct {
 		resultsSize,
 		resultsFailedIndicatorSize,
 		errSize *uint64,
-	) int
+	) uint8
 	// FetchOperation gets the result of the given operationID -- before calling this you must have
 	// already understood what the result sizes are such that those pointers can be appropriately
 	// allocated for zig to write the results into.
@@ -77,7 +86,7 @@ type CliMapping struct {
 		results,
 		resultsFailedIndicator,
 		err *[]byte,
-	) int
+	) uint8
 
 	// EnterMode submits an EnterMode operation to the underlying driver with the given mode and the
 	// configured options. The driver populates the operationID into the uint32 pointer.
@@ -86,14 +95,14 @@ type CliMapping struct {
 		operationID *uint32,
 		cancel *bool,
 		requestedMode string,
-	) int
+	) uint8
 	// GetPrompt submits a GetPrompt operation to the underlying driver with the configured options.
 	// The driver populates the operationID into the uint32 pointer.
 	GetPrompt func(
 		driverPtr uintptr,
 		operationID *uint32,
 		cancel *bool,
-	) int
+	) uint8
 	// SendInput submits a SendInput operation to the underlying driver with the given input and
 	// configured options. The driver populates the operationID into the uint32 pointer.
 	SendInput func(
@@ -105,7 +114,7 @@ type CliMapping struct {
 		inputHandling string,
 		retainInput bool,
 		retainTrailingPrompt bool,
-	) int
+	) uint8
 	// SendPromptedInput submits a SendPromptedInput operation to the underlying driver with the
 	// given input, prompt, response, and configured options. The driver populates the operationID
 	// into the uint32 pointer.
@@ -122,22 +131,24 @@ type CliMapping struct {
 		inputHandling string,
 		hiddenInput bool,
 		retainTrailingPrompt bool,
-	) int
-	// ReadWithCallbacks submit a ReadWithCallbacks operaiton to the driver.
-	ReadWithCallbacks func(
+	) uint8
+
+	// ReadAny submit a ReadAny operaiton to the driver.
+	ReadAny func(
 		driverPtr uintptr,
 		operationID *uint32,
 		cancel *bool,
-		initialInput string,
-		names string,
-		callbacks []uintptr,
+	) uint8
+
+	// ReadCallbackShouldExecute returns true if a readcallback should be executed otherwise false.
+	ReadCallbackShouldExecute func(
+		buf string,
+		name string,
 		contains string,
 		containsPattern string,
 		notContains string,
-		onlyOnce string,
-		resetTimer string,
-		complets string,
-	) int
+		execute *bool,
+	) uint8
 }
 
 // NetconfMapping holds libscrapli mappings specifically for the netconf driver.
@@ -155,13 +166,13 @@ type NetconfMapping struct {
 		driverPtr uintptr,
 		operationID *uint32,
 		cancel *bool,
-	) int
+	) uint8
 	Close func(
 		driverPtr uintptr,
 		operationID *uint32,
 		cancel *bool,
 		force bool,
-	) int
+	) uint8
 
 	// PollOperation polls the given operationID. See DriverMapping.PollerOperation for details.
 	FetchOperationSizes func(
@@ -173,7 +184,7 @@ type NetconfMapping struct {
 		rpcWarningsSize,
 		rpcErrorsSize,
 		errSize *uint64,
-	) int
+	) uint8
 	// FetchOperation polls the given operationID. See CliMapping.FetchOperation for details.
 	FetchOperation func(
 		driverPtr uintptr,
@@ -186,19 +197,19 @@ type NetconfMapping struct {
 		rpcWarnings,
 		rpcErrors,
 		err *[]byte,
-	) int
+	) uint8
 
 	// GetSessionID returns the session id of the current driver session object.
 	GetSessionID func(
 		driverPtr uintptr,
 		sessionID *uint64,
-	) int
+	) uint8
 
 	// GetSubscriptionID writes the subscription id of the given message to the pointer.
 	GetSubscriptionID func(
 		message string,
 		subscriptionID *uint64,
-	) int
+	) uint8
 
 	// GetNextNotificationSize writes the size of the next (if any) notification message into the
 	// given size pointer.
@@ -212,7 +223,7 @@ type NetconfMapping struct {
 	GetNextNotification func(
 		driverPtr uintptr,
 		notification *[]byte,
-	) int
+	) uint8
 
 	// GetNextSubscriptionSize writes the size of the next (if any) subscription message for the
 	// given id into the given size pointer.
@@ -228,7 +239,7 @@ type NetconfMapping struct {
 		driverPtr uintptr,
 		subscriptionID uint64,
 		subscription *[]byte,
-	) int
+	) uint8
 
 	// RawRPC submits a user defined rpc -- the library will ensure it is properly delimited but the
 	// given payload must be valid/correct.
@@ -239,7 +250,7 @@ type NetconfMapping struct {
 		payload string,
 		baseNamespacePrefix string,
 		extraNamespaces string,
-	) int
+	) uint8
 
 	// GetConfig submits a GetConfig operation to the underlying driver. The driver populates the
 	// operationID into the uint32 pointer.
@@ -253,7 +264,7 @@ type NetconfMapping struct {
 		filterNamespacePrefix string,
 		filterNamespace string,
 		defaultsType string,
-	) int
+	) uint8
 
 	// EditConfig submits an EditConfig operation to the underlying driver. The driver populates the
 	// operationID into the uint32 pointer.
@@ -263,7 +274,7 @@ type NetconfMapping struct {
 		cancel *bool,
 		config string,
 		target string,
-	) int
+	) uint8
 
 	// CopyConfig submits a CopyConfig operation to the underlying driver. The driver populates the
 	// operationID into the uint32 pointer.
@@ -273,7 +284,7 @@ type NetconfMapping struct {
 		cancel *bool,
 		target string,
 		source string,
-	) int
+	) uint8
 
 	// DeleteConfig submits a DeleteConfig operation to the underlying driver. The driver populates
 	// the operationID into the uint32 pointer.
@@ -291,7 +302,7 @@ type NetconfMapping struct {
 		operationID *uint32,
 		cancel *bool,
 		target string,
-	) int
+	) uint8
 
 	// Unlock submits an Unlock operation to the underlying driver. The driver populates the
 	// operationID into the uint32 pointer.
@@ -300,7 +311,7 @@ type NetconfMapping struct {
 		operationID *uint32,
 		cancel *bool,
 		target string,
-	) int
+	) uint8
 
 	// Get submits a Get operation to the underlying driver. The driver populates the operationID
 	// into the uint32 pointer.
@@ -313,7 +324,7 @@ type NetconfMapping struct {
 		filterNamespacePrefix string,
 		filterNamespace string,
 		defaultsType string,
-	) int
+	) uint8
 
 	// CloseSession submits a CloseSession operation to the underlying driver. The driver populates
 	// the operationID into the uint32 pointer.
@@ -321,7 +332,7 @@ type NetconfMapping struct {
 		driverPtr uintptr,
 		operationID *uint32,
 		cancel *bool,
-	) int
+	) uint8
 
 	// KillSession submits a KillSession operation to the underlying driver. The driver populates
 	// the operationID into the uint32 pointer.
@@ -330,29 +341,29 @@ type NetconfMapping struct {
 		operationID *uint32,
 		cancel *bool,
 		sessionID uint64,
-	) int
+	) uint8
 
 	Commit func(
 		driverPtr uintptr,
 		operationID *uint32,
 		cancel *bool,
-	) int
+	) uint8
 	Discard func(
 		driverPtr uintptr,
 		operationID *uint32,
 		cancel *bool,
-	) int
+	) uint8
 	CancelCommit func(
 		driverPtr uintptr,
 		operationID *uint32,
 		cancel *bool,
-	) int
+	) uint8
 	Validate func(
 		driverPtr uintptr,
 		operationID *uint32,
 		cancel *bool,
 		source string,
-	) int
+	) uint8
 
 	GetSchema func(
 		driverPtr uintptr,
@@ -361,7 +372,7 @@ type NetconfMapping struct {
 		identifier string,
 		version string,
 		format string,
-	) int
+	) uint8
 	GetData func(
 		driverPtr uintptr,
 		operationID *uint32,
@@ -376,20 +387,20 @@ type NetconfMapping struct {
 		maxDepth uint32,
 		withOrigin bool,
 		defaultsType string,
-	) int
+	) uint8
 	EditData func(
 		driverPtr uintptr,
 		operationID *uint32,
 		cancel *bool,
 		datastore string,
 		content string,
-	) int
+	) uint8
 	Action func(
 		driverPtr uintptr,
 		operationID *uint32,
 		cancel *bool,
 		action string,
-	) int
+	) uint8
 }
 
 // OptionMapping holds libscrapli mappings for the applying driver options.
@@ -408,33 +419,33 @@ type SessionOptions struct {
 	SetReadSize func(
 		driverPtr uintptr,
 		value uint64,
-	) int
+	) uint8
 
 	// SetReturnChar sets the return char string for the driver at driverPtr.
 	SetReturnChar func(
 		driverPtr uintptr,
 		value string,
-	) int
+	) uint8
 
 	// SetOperationTimeoutNs sets the session operation timeout in nanoseconds for the driver
 	// at driverPtr.
 	SetOperationTimeoutNs func(
 		driverPtr uintptr,
 		value uint64,
-	) int
+	) uint8
 
 	// SetOperationMaxSearchDepth sets the maximum search depth to look backward for prompt
 	// matching for the driver at driverPtr.
 	SetOperationMaxSearchDepth func(
 		driverPtr uintptr,
 		value uint64,
-	) int
+	) uint8
 
 	// SetRecordDestination sets the record destination path for the driver at driverPtr.
 	SetRecordDestination func(
 		driverPtr uintptr,
 		value string,
-	) int
+	) uint8
 }
 
 // AuthOptions holds options setters related to authentication.
@@ -443,25 +454,25 @@ type AuthOptions struct {
 	SetUsername func(
 		driverPtr uintptr,
 		value string,
-	) int
+	) uint8
 
 	// SetPassword sets the username for the driver at driverPtr.
 	SetPassword func(
 		driverPtr uintptr,
 		value string,
-	) int
+	) uint8
 
 	// SetPrivateKeyPath sets the private key path for the driver at driverPtr.
 	SetPrivateKeyPath func(
 		driverPtr uintptr,
 		value string,
-	) int
+	) uint8
 
 	// SetPrivateKeyPassphrase sets the private key passphrase for the driver at driverPtr.
 	SetPrivateKeyPassphrase func(
 		driverPtr uintptr,
 		value string,
-	) int
+	) uint8
 
 	// SetDriverOptionAuthLookupKeyValue sets a k/v pair in the lookup map for the driver at
 	// driverPtr.
@@ -469,30 +480,30 @@ type AuthOptions struct {
 		driverPtr uintptr,
 		key string,
 		value string,
-	) int
+	) uint8
 
 	// SetInSessionAuthBypass sets the in session auth bypass flag for the driver at driverPtr.
 	SetInSessionAuthBypass func(
 		driverPtr uintptr,
-	) int
+	) uint8
 
 	// SetUsernamePattern sets the username pcre2 regex pattern for the driver at driverPtr.
 	SetUsernamePattern func(
 		driverPtr uintptr,
 		value string,
-	) int
+	) uint8
 
 	// SetPasswordPattern sets the password pcre2 regex pattern for the driver at driverPtr.
 	SetPasswordPattern func(
 		driverPtr uintptr,
 		value string,
-	) int
+	) uint8
 
 	// SetPassphrasePattern sets the passphrase pcre2 regex pattern for the driver at driverPtr.
 	SetPassphrasePattern func(
 		driverPtr uintptr,
 		value string,
-	) int
+	) uint8
 }
 
 // TransportBinOptions holds options setters for the bin transport.
@@ -502,51 +513,51 @@ type TransportBinOptions struct {
 	SetBin func(
 		driverPtr uintptr,
 		value string,
-	) int
+	) uint8
 
 	// SetExtraOpenArgs sets the extra args to pass when opening the transport for the driver at
 	// driverPtr.
 	SetExtraOpenArgs func(
 		driverPtr uintptr,
 		value string,
-	) int
+	) uint8
 
 	// SetOverrideOpenArgs sets the extra args to pass when opening the transport for the driver at
 	// driverPtr.
 	SetOverrideOpenArgs func(
 		driverPtr uintptr,
 		value string,
-	) int
+	) uint8
 
 	// SetSSHConfigPath sets the ssh config file path for the transport for the driver at driverPtr.
 	SetSSHConfigPath func(
 		driverPtr uintptr,
 		value string,
-	) int
+	) uint8
 
 	// SetKnownHostsPath sets the ssh config file path for the transport for the driver at
 	// driverPtr.
 	SetKnownHostsPath func(
 		driverPtr uintptr,
 		value string,
-	) int
+	) uint8
 
 	// SetEnableStrictKey sets the flag to enable strict key checking for the driver at driverPtr.
 	SetEnableStrictKey func(
 		driverPtr uintptr,
-	) int
+	) uint8
 
 	// SetTermHeight sets the pty term height for the driver at driverPtr.
 	SetTermHeight func(
 		driverPtr uintptr,
 		value uint16,
-	) int
+	) uint8
 
 	// SetTermWidth sets the pty term width for the driver at driverPtr.
 	SetTermWidth func(
 		driverPtr uintptr,
 		value uint16,
-	) int
+	) uint8
 }
 
 // TransportSSH2Options holds options setters for the ssh2 transport.
@@ -555,12 +566,12 @@ type TransportSSH2Options struct {
 	SetKnownHostsPath func(
 		driverPtr uintptr,
 		value string,
-	) int
+	) uint8
 
 	// SetLibSSH2Trace enables libssh2 trace for the driver at driverPtr.
 	SetLibSSH2Trace func(
 		driverPtr uintptr,
-	) int
+	) uint8
 }
 
 // TransportTestOptions holds options setters for the test transport.
@@ -569,7 +580,7 @@ type TransportTestOptions struct {
 	SetF func(
 		driverPtr uintptr,
 		value string,
-	) int
+	) uint8
 }
 
 // NetconfOptions holds options setters for netconf objects.
@@ -578,17 +589,17 @@ type NetconfOptions struct {
 	SetErrorTag func(
 		driverPtr uintptr,
 		value string,
-	) int
+	) uint8
 
 	// SetPreferredVersion sets the preferred netconf version for the driver at driverPtr.
 	SetPreferredVersion func(
 		driverPtr uintptr,
 		value string,
-	) int
+	) uint8
 
 	// SetMessagePollIntervalNS sets the message poll interval in ns for the driver at driverPtr.
 	SetMessagePollIntervalNS func(
 		driverPtr uintptr,
 		value uint64,
-	) int
+	) uint8
 }

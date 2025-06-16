@@ -217,6 +217,54 @@ func (c *Cli) Close(ctx context.Context) (*Result, error) {
 	return c.getResult(ctx, &cancel, operationID)
 }
 
+// Write writes the input to the session -- this bypasses the driver operation loop in zig, use
+// with caution.
+func (c *Cli) Write(input string) error {
+	if c.ptr == 0 {
+		return scrapligoerrors.NewFfiError("driver pointer nil", nil)
+	}
+
+	status := c.ffiMap.Session.Write(c.ptr, input, false)
+	if status != 0 {
+		return scrapligoerrors.NewFfiError("failed executing write", nil)
+	}
+
+	return nil
+}
+
+// WriteAndReturn writes the given input and then sends a return character -- this bypasses the
+// driver operation loop in zig, use with caution.
+func (c *Cli) WriteAndReturn(input string) error {
+	if c.ptr == 0 {
+		return scrapligoerrors.NewFfiError("driver pointer nil", nil)
+	}
+
+	status := c.ffiMap.Session.WriteAndReturn(c.ptr, input, false)
+	if status != 0 {
+		return scrapligoerrors.NewFfiError("failed executing writeAndReturn", nil)
+	}
+
+	return nil
+}
+
+// Read reads from the session -- this bypasses the driver operation loop in zig, use with caution.
+func (c *Cli) Read() ([]byte, error) {
+	if c.ptr == 0 {
+		return nil, scrapligoerrors.NewFfiError("driver pointer nil", nil)
+	}
+
+	var buf []byte
+
+	var readSize uint64
+
+	status := c.ffiMap.Session.Read(c.ptr, &buf, &readSize)
+	if status != 0 {
+		return nil, scrapligoerrors.NewFfiError("failed executing read", nil)
+	}
+
+	return buf[0:readSize], nil
+}
+
 func (c *Cli) getResult(
 	ctx context.Context,
 	cancel *bool,

@@ -21,21 +21,21 @@ func TestSendInput(t *testing.T) {
 		transports  []string
 		postOpenF   func(t *testing.T, d *scrapligocli.Cli)
 		input       string
-		options     []scrapligocli.OperationOption
+		options     []scrapligocli.Option
 	}{
 		"simple-eos": {
 			description: "simple input that requires no pagination",
 			platform:    scrapligocli.AristaEos.String(),
 			transports:  []string{"bin", "ssh2", "telnet"},
 			input:       "show version | i Ker",
-			options:     []scrapligocli.OperationOption{},
+			options:     []scrapligocli.Option{},
 		},
 		"simple-eos-pagination": {
 			description: "simple input that requires pagination",
 			platform:    scrapligocli.AristaEos.String(),
 			transports:  []string{"bin", "ssh2", "telnet"},
 			input:       "show run",
-			options:     []scrapligocli.OperationOption{},
+			options:     []scrapligocli.Option{},
 		},
 		"simple-eos-change-mode-and-pagination": {
 			description: "simple input that requires a mode change and requires pagination",
@@ -53,7 +53,7 @@ func TestSendInput(t *testing.T) {
 					t.Fatal(err)
 				}
 			},
-			options: []scrapligocli.OperationOption{
+			options: []scrapligocli.Option{
 				scrapligocli.WithRequestedMode("privileged_exec"),
 			},
 		},
@@ -62,7 +62,7 @@ func TestSendInput(t *testing.T) {
 			platform:    scrapligocli.AristaEos.String(),
 			transports:  []string{"bin", "ssh2", "telnet"},
 			input:       "show version | i Ker",
-			options: []scrapligocli.OperationOption{
+			options: []scrapligocli.Option{
 				scrapligocli.WithRetainInput(),
 			},
 		},
@@ -71,7 +71,7 @@ func TestSendInput(t *testing.T) {
 			platform:    scrapligocli.AristaEos.String(),
 			transports:  []string{"bin", "ssh2", "telnet"},
 			input:       "show version | i Ker",
-			options: []scrapligocli.OperationOption{
+			options: []scrapligocli.Option{
 				scrapligocli.WithRetainTrailingPrompt(),
 			},
 		},
@@ -80,7 +80,7 @@ func TestSendInput(t *testing.T) {
 			platform:    scrapligocli.AristaEos.String(),
 			transports:  []string{"bin", "ssh2", "telnet"},
 			input:       "show version | i Ker",
-			options: []scrapligocli.OperationOption{
+			options: []scrapligocli.Option{
 				scrapligocli.WithRetainInput(),
 				scrapligocli.WithRetainTrailingPrompt(),
 			},
@@ -90,20 +90,20 @@ func TestSendInput(t *testing.T) {
 			platform:    scrapligocli.NokiaSrl.String(),
 			transports:  []string{"bin", "ssh2"},
 			input:       "info interface mgmt0",
-			options:     []scrapligocli.OperationOption{},
+			options:     []scrapligocli.Option{},
 		},
 		"big-srl": {
 			description: "simple input with a big output",
 			platform:    scrapligocli.NokiaSrl.String(),
 			transports:  []string{"bin", "ssh2"},
 			input:       "info",
-			options:     []scrapligocli.OperationOption{},
+			options:     []scrapligocli.Option{},
 		},
 		"enormous-srl": {
 			description: "simple input with an enormous output",
 			platform:    scrapligocli.NokiaSrl.String(),
 			input:       "info from state",
-			options:     []scrapligocli.OperationOption{},
+			options:     []scrapligocli.Option{},
 		},
 	}
 

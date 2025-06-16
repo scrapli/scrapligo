@@ -351,6 +351,7 @@ func GetMapping() (*Mapping, error) {
 		}
 
 		mappingInst = &Mapping{
+			Session: SessionMapping{},
 			Cli:     CliMapping{},
 			Netconf: NetconfMapping{},
 			Options: OptionMapping{
@@ -364,6 +365,7 @@ func GetMapping() (*Mapping, error) {
 		purego.RegisterLibFunc(&mappingInst.AssertNoLeaks, libScrapliFfi, "ls_assert_no_leaks")
 
 		registerShared(mappingInst, libScrapliFfi)
+		registerSession(mappingInst, libScrapliFfi)
 		registerCli(mappingInst, libScrapliFfi)
 		registerNetconf(mappingInst, libScrapliFfi)
 		registerOptions(mappingInst, libScrapliFfi)

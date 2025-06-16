@@ -6,6 +6,27 @@ import (
 	scrapligoerrors "github.com/scrapli/scrapligo/errors"
 )
 
+func newSendPromptedInputOptions(options ...Option) *sendPromptedInputOptions {
+	o := &sendPromptedInputOptions{
+		inputHandling: InputHandlingFuzzy,
+	}
+
+	for _, opt := range options {
+		opt(o)
+	}
+
+	return o
+}
+
+type sendPromptedInputOptions struct {
+	requestedMode        string
+	inputHandling        InputHandling
+	retainTrailingPrompt bool
+	promptPattern        string
+	abortInput           string
+	hiddenInput          bool
+}
+
 // SendPromptedInput sends an `input` to the device expecting the given `prompt`, finally sending
 // the `response`.
 func (c *Cli) SendPromptedInput(
@@ -13,7 +34,7 @@ func (c *Cli) SendPromptedInput(
 	input,
 	prompt,
 	response string,
-	options ...OperationOption,
+	options ...Option,
 ) (*Result, error) {
 	if c.ptr == 0 {
 		return nil, scrapligoerrors.NewFfiError("driver pointer nil", nil)
@@ -21,7 +42,7 @@ func (c *Cli) SendPromptedInput(
 
 	cancel := false
 
-	loadedOptions := newOperationOptions(options...)
+	loadedOptions := newSendPromptedInputOptions(options...)
 
 	var operationID uint32
 

@@ -60,6 +60,10 @@ linters:
         text: 'exported: exported const'
       - linters:
           - gocritic
+        path: cli/options
+        text: singleCaseSwitch
+      - linters:
+          - gocritic
         path: netconf/options
         text: singleCaseSwitch
       - linters:
