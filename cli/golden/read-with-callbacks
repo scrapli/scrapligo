@@ -1,1 +1,41 @@
-showversionAristacEOSLabHardwareversion:Serialnumber:EA9417C84E40631CB8B1DD4177E5D1A5HardwareMACaddress:001c.73f9.1f89SystemMACaddress:001c.73f9.1f89Softwareimageversion:4.33.1F-39879738.4331F(engineeringbuild)Architecture:x86_64Internalbuildversion:4.33.1F-39879738.4331FInternalbuildID:798d1a3d-9815-49ba-91a2-9043a969f565Imageformatversion:1.0Imageoptimization:NoneKernelversion:6.10.14-linuxkitUptime:1week,4days,1hourand15minutesTotalmemory:24572172kBFreememory:11704772kBeos1#showversionAristacEOSLabHardwareversion:Serialnumber:EA9417C84E40631CB8B1DD4177E5D1A5HardwareMACaddress:001c.73f9.1f89SystemMACaddress:001c.73f9.1f89Softwareimageversion:4.33.1F-39879738.4331F(engineeringbuild)Architecture:x86_64Internalbuildversion:4.33.1F-39879738.4331FInternalbuildID:798d1a3d-9815-49ba-91a2-9043a969f565Imageformatversion:1.0Imageoptimization:NoneKernelversion:6.10.14-linuxkitUptime:1week,4days,1hourand15minutesTotalmemory:24572172kBFreememory:11704772kBeos1#
+show version
+Arista cEOSLab
+Hardware version: 
+Serial number: F1AD2F90A0F631B047D92017FDB03C66
+Hardware MAC address: 001c.73ec.025e
+System MAC address: 001c.73ec.025e
+
+Software image version: 4.33.1F-39879738.4331F (engineering build)
+Architecture: x86_64
+Internal build version: 4.33.1F-39879738.4331F
+Internal build ID: 798d1a3d-9815-49ba-91a2-9043a969f565
+Image format version: 1.0
+Image optimization: None
+
+Kernel version: 6.10.14-linuxkit
+
+Uptime: 13 hours and 53 minutes
+Total memory: 24572172 kB
+Free memory: 13182676 kB
+
+eos1#show version
+Arista cEOSLab
+Hardware version: 
+Serial number: F1AD2F90A0F631B047D92017FDB03C66
+Hardware MAC address: 001c.73ec.025e
+System MAC address: 001c.73ec.025e
+
+Software image version: 4.33.1F-39879738.4331F (engineering build)
+Architecture: x86_64
+Internal build version: 4.33.1F-39879738.4331F
+Internal build ID: 798d1a3d-9815-49ba-91a2-9043a969f565
+Image format version: 1.0
+Image optimization: None
+
+Kernel version: 6.10.14-linuxkit
+
+Uptime: 13 hours and 53 minutes
+Total memory: 24572172 kB
+Free memory: 13182676 kB
+
+eos1#
