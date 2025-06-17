@@ -24,12 +24,12 @@ func TestReadWithCallbacks(t *testing.T) {
 			description:  "simple read with callbacks",
 			platform:     scrapligocli.NokiaSrl.String(),
 			transports:   []string{"bin", "ssh2"},
-			initialInput: "show version | grep Arch",
+			initialInput: "show version | grep OS",
 			callbacks: []*scrapligocli.ReadCallback{
 				scrapligocli.NewReadCallback(
 					"cb1",
 					func(c *scrapligocli.Cli) error {
-						return c.WriteAndReturn("show version | grep Arch")
+						return c.WriteAndReturn("show version | grep OS")
 					},
 					scrapligocli.WithContains("A:srl#"),
 					scrapligocli.WithOnce(),
