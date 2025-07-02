@@ -482,8 +482,13 @@ type AuthOptions struct {
 		value string,
 	) uint8
 
-	// SetInSessionAuthBypass sets the in session auth bypass flag for the driver at driverPtr.
-	SetInSessionAuthBypass func(
+	// SetForceInSessionAuth sets the in session auth bypass flag for the driver at driverPtr.
+	SetForceInSessionAuth func(
+		driverPtr uintptr,
+	) uint8
+
+	// SetBypassInSessionAuth sets the in session auth bypass flag for the driver at driverPtr.
+	SetBypassInSessionAuth func(
 		driverPtr uintptr,
 	) uint8
 
