@@ -102,6 +102,7 @@ func TestEnterMode(t *testing.T) {
 				defer cancel()
 
 				c := getCli(t, caseData.platform, transportName)
+
 				defer func() {
 					_, _ = c.Close(ctx)
 				}()

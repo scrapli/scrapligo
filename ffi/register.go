@@ -110,7 +110,7 @@ func registerNetconf(m *Mapping, libScrapliFfi uintptr) {
 	purego.RegisterLibFunc(&m.Netconf.Action, libScrapliFfi, "ls_netconf_action")
 }
 
-func registerOptions(m *Mapping, libScrapliFfi uintptr) {
+func registerOptions(m *Mapping, libScrapliFfi uintptr) { //nolint: funlen
 	// session
 	purego.RegisterLibFunc(
 		&m.Options.Session.SetReadSize,
@@ -165,9 +165,14 @@ func registerOptions(m *Mapping, libScrapliFfi uintptr) {
 		"ls_option_auth_set_lookup_key_value",
 	)
 	purego.RegisterLibFunc(
-		&m.Options.Auth.SetInSessionAuthBypass,
+		&m.Options.Auth.SetForceInSessionAuth,
 		libScrapliFfi,
-		"ls_option_auth_in_session_auth_bypass",
+		"ls_option_auth_force_in_session_auth",
+	)
+	purego.RegisterLibFunc(
+		&m.Options.Auth.SetBypassInSessionAuth,
+		libScrapliFfi,
+		"ls_option_auth_bypass_in_session_auth",
 	)
 	purego.RegisterLibFunc(
 		&m.Options.Auth.SetUsernamePattern,

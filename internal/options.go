@@ -209,7 +209,8 @@ type AuthOptions struct {
 
 	LookupMap map[string]string
 
-	InSessionAuthBypass bool
+	ForceInSessionAuth  bool
+	BypassInSessionAuth bool
 
 	UsernamePattern   string
 	PasswordPattern   string
@@ -258,11 +259,21 @@ func (o *AuthOptions) apply(driverPtr uintptr, m *scrapligoffi.Mapping) error { 
 		}
 	}
 
-	if o.InSessionAuthBypass {
-		rc := m.Options.Auth.SetInSessionAuthBypass(driverPtr)
+	if o.ForceInSessionAuth {
+		rc := m.Options.Auth.SetForceInSessionAuth(driverPtr)
 		if rc != 0 {
 			return scrapligoerrors.NewOptionsError(
-				"failed setting in session auth bypass option",
+				"failed setting force in session auth",
+				nil,
+			)
+		}
+	}
+
+	if o.BypassInSessionAuth {
+		rc := m.Options.Auth.SetBypassInSessionAuth(driverPtr)
+		if rc != 0 {
+			return scrapligoerrors.NewOptionsError(
+				"failed setting bypass in session auth",
 				nil,
 			)
 		}

@@ -29,11 +29,20 @@ func WithLookupKeyValue(key, value string) Option {
 	}
 }
 
-// WithAuthBypass bypasses/disables the "in session" authentication process where applicable (which
-// means in the bin/telnet transports basically).
-func WithAuthBypass() Option {
+// WithForceInSessionAuth unconditionally forces the in session auth to run.
+func WithForceInSessionAuth() Option {
 	return func(o *scrapligointernal.Options) error {
-		o.Auth.InSessionAuthBypass = true
+		o.Auth.ForceInSessionAuth = true
+
+		return nil
+	}
+}
+
+// WithBypassInSessionAuth bypasses/disables the "in session" authentication process where
+// applicable (which means in the bin/telnet transports basically).
+func WithBypassInSessionAuth() Option {
+	return func(o *scrapligointernal.Options) error {
+		o.Auth.BypassInSessionAuth = true
 
 		return nil
 	}
