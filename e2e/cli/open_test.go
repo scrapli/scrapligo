@@ -43,7 +43,9 @@ func TestOpenWithKey(t *testing.T) {
 			options: []scrapligooptions.Option{
 				scrapligooptions.WithTransportBin(),
 				scrapligooptions.WithUsername("admin-sshkey-passphrase"),
-				scrapligooptions.WithPrivateKeyPath("./fixtures/libscrapli_test_ssh_key_passphrase"),
+				scrapligooptions.WithPrivateKeyPath(
+					"./fixtures/libscrapli_test_ssh_key_passphrase",
+				),
 				scrapligooptions.WithPrivateKeyPassphrase("libscrapli"),
 				scrapligooptions.WithLookupKeyValue("enable", "libscrapli"),
 			},
@@ -53,7 +55,9 @@ func TestOpenWithKey(t *testing.T) {
 			options: []scrapligooptions.Option{
 				scrapligooptions.WithTransportSSH2(),
 				scrapligooptions.WithUsername("admin-sshkey-passphrase"),
-				scrapligooptions.WithPrivateKeyPath("./fixtures/libscrapli_test_ssh_key_passphrase"),
+				scrapligooptions.WithPrivateKeyPath(
+					"./fixtures/libscrapli_test_ssh_key_passphrase",
+				),
 				scrapligooptions.WithPrivateKeyPassphrase("libscrapli"),
 				scrapligooptions.WithLookupKeyValue("enable", "libscrapli"),
 			},
