@@ -74,6 +74,7 @@ linters:
       - linters:
           - dupl
           - lll
+          - goconst
         path: _test\.go
     paths:
       - private
