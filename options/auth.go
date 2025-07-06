@@ -3,18 +3,37 @@ package options
 import scrapligointernal "github.com/scrapli/scrapligo/internal"
 
 // WithUsername sets the username to use for authentication to the target device.
-func WithUsername(username string) Option {
+func WithUsername(s string) Option {
 	return func(o *scrapligointernal.Options) error {
-		o.Auth.Username = username
+		o.Auth.Username = s
 
 		return nil
 	}
 }
 
 // WithPassword sets the password to use for authentication to the target device.
-func WithPassword(password string) Option {
+func WithPassword(s string) Option {
 	return func(o *scrapligointernal.Options) error {
-		o.Auth.Password = password
+		o.Auth.Password = s
+
+		return nil
+	}
+}
+
+// WithPrivateKeyPath sets the private key to use for authentication to the target device.
+func WithPrivateKeyPath(s string) Option {
+	return func(o *scrapligointernal.Options) error {
+		o.Auth.PrivateKeyPath = s
+
+		return nil
+	}
+}
+
+// WithPrivateKeyPassphrase sets the private key passhrase to use for authentication to the target
+// device.
+func WithPrivateKeyPassphrase(s string) Option {
+	return func(o *scrapligointernal.Options) error {
+		o.Auth.PrivateKeyPassphrase = s
 
 		return nil
 	}
