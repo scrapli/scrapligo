@@ -12,6 +12,7 @@ linters:
     - perfsprint
     - varnamelen
     - wrapcheck
+    - wsl # deprecated, wsl_v5 included in all ofc
   settings:
     funlen:
       lines: 150
