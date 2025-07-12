@@ -31,7 +31,7 @@ func TestBinTransportProxyJump(t *testing.T) {
 		},
 		"srl": {
 			description: "simple",
-			platform:    scrapligocli.NokiaSrl.String(),
+			platform:    scrapligocli.NokiaSrlinux.String(),
 			input:       "show version | grep OS",
 		},
 	}

@@ -20,7 +20,7 @@ func TestGetPrompt(t *testing.T) {
 	}{
 		"simple-srl": {
 			description: "simple get prompt",
-			platform:    scrapligocli.NokiaSrl.String(),
+			platform:    scrapligocli.NokiaSrlinux.String(),
 			transports:  []string{"bin", "ssh2"},
 		},
 		"simple-eos": {

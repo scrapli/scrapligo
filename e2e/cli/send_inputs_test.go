@@ -37,7 +37,7 @@ func TestSendInputs(t *testing.T) {
 		},
 		"srl-multi-input": {
 			description: "simple input that requires a mode change and requires pagination",
-			platform:    scrapligocli.NokiaSrl.String(),
+			platform:    scrapligocli.NokiaSrlinux.String(),
 			transports:  []string{"bin", "ssh2"},
 			inputs:      []string{"info system", "info"},
 			options:     []scrapligocli.Option{},

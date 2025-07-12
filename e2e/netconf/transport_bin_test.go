@@ -32,7 +32,7 @@ func TestBinTransportProxyJumpNetconf(t *testing.T) {
 		},
 		"srl": {
 			description: "simple",
-			platform:    scrapligocli.NokiaSrl.String(),
+			platform:    scrapligocli.NokiaSrlinux.String(),
 			filter:      "<system xmlns=\"urn:nokia.com:srlinux:general:system\"><ssh-server xmlns=\"urn:nokia.com:srlinux:linux:ssh\"><name>mgmt</name></ssh-server></system>",
 		},
 	}

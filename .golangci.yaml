@@ -68,6 +68,10 @@ linters:
         path: netconf/options
         text: singleCaseSwitch
       - linters:
+          - revive
+        path: util/
+        text: meaningless package names
+      - linters:
           - gocognit
           - nestif
         path: e2e/

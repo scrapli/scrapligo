@@ -10,23 +10,44 @@ func (p PlatformName) String() string {
 }
 
 const (
-	AristaEos        PlatformName = "arista_eos"
-	ArubaWlc         PlatformName = "aruba_wlc"
-	CiscoIosxe       PlatformName = "cisco_iosxe"
-	CiscoIosxr       PlatformName = "cisco_iosxr"
-	CiscoNxos        PlatformName = "cisco_nxos"
-	CumulusLinux     PlatformName = "cumulus_linux"
-	CumulusVtysh     PlatformName = "cumulus_vtysh"
-	HpComware        PlatformName = "hp_comware"
-	HuaweiVrp        PlatformName = "huawei_vrp"
-	IpInfusionOcnos  PlatformName = "ip_infusion_ocnos"
-	JuniperJunos     PlatformName = "juniper_junos"
-	NokiaSrl         PlatformName = "nokia_srlinux"
-	NokiaSros        PlatformName = "nokia_sros"
-	NokiaSrosClassic PlatformName = "nokia_sros_classic"
-	PaloAltoPanos    PlatformName = "paloalto_panos"
-	RuijieRgos       PlatformName = "rujie_rgos"
-	VyattaVyos       PlatformName = "vyatta_vyos"
+	AethraAtosnt         PlatformName = "aethra_atosnt"
+	AlcatelAos           PlatformName = "alcatel_aos"
+	AristaEos            PlatformName = "arista_eos"
+	ArubaAoscx           PlatformName = "aruba_aoscx"
+	CiscoAireos          PlatformName = "cisco_aireos"
+	CiscoAsa             PlatformName = "cisco_asa"
+	CiscoCbs             PlatformName = "cisco_cbs"
+	CiscoFtd             PlatformName = "cisco_ftd"
+	CiscoIosxe           PlatformName = "cisco_iosxe"
+	CiscoIosxr           PlatformName = "cisco_iosxr"
+	CiscoNxos            PlatformName = "cisco_nxos"
+	CumulusLinux         PlatformName = "cumulus_linux"
+	CumulusVtysh         PlatformName = "cumulus_vtysh"
+	DatacomDmos          PlatformName = "datacom_dmos"
+	DatacomDmswitch      PlatformName = "datacom_dmswitch"
+	Default              PlatformName = "default"
+	DellEmc              PlatformName = "dell_emc"
+	DellEnterprisesonic  PlatformName = "dell_enterprisesonic"
+	DlinkOs              PlatformName = "dlink_os"
+	EdgecoreEcs          PlatformName = "edgecore_ecs"
+	EltexEsr             PlatformName = "eltex_esr"
+	FortinetFortios      PlatformName = "fortinet_fortios"
+	FortinetWlc          PlatformName = "fortinet_wlc"
+	HpComware            PlatformName = "hp_comware"
+	HuaweiSmartax        PlatformName = "huawei_smartax"
+	HuaweiVrp            PlatformName = "huawei_vrp"
+	JuniperJunos         PlatformName = "juniper_junos"
+	NokiaSrlinux         PlatformName = "nokia_srlinux"
+	NokiaSros            PlatformName = "nokia_sros"
+	NokiaSrosClassic     PlatformName = "nokia_sros_classic"
+	NokiaSrosClassicAram PlatformName = "nokia_sros_classic_aram"
+	PaloAltoPanos        PlatformName = "paloalto_panos"
+	RaisecomRos          PlatformName = "raisecom_ros"
+	RuckusFastiron       PlatformName = "ruckus_fastiron"
+	RuckusUnleashed      PlatformName = "ruckus_unleashed"
+	SiemensRoxii         PlatformName = "siemens_roxii"
+	VersaFlexvnf         PlatformName = "versa_flexvnf"
+	VyosVyos             PlatformName = "vyos_vyos"
 )
 
 // GetPlatformNames is used to get the "core" (as in embedded in assets and used in testing)
@@ -35,22 +56,43 @@ const (
 // creation.
 func GetPlatformNames() []string {
 	return []string{
+		string(AethraAtosnt),
+		string(AlcatelAos),
 		string(AristaEos),
-		string(ArubaWlc),
+		string(ArubaAoscx),
+		string(CiscoAireos),
+		string(CiscoAsa),
+		string(CiscoCbs),
+		string(CiscoFtd),
 		string(CiscoIosxe),
 		string(CiscoIosxr),
 		string(CiscoNxos),
 		string(CumulusLinux),
 		string(CumulusVtysh),
+		string(DatacomDmos),
+		string(DatacomDmswitch),
+		string(Default),
+		string(DellEmc),
+		string(DellEnterprisesonic),
+		string(DlinkOs),
+		string(EdgecoreEcs),
+		string(EltexEsr),
+		string(FortinetFortios),
+		string(FortinetWlc),
 		string(HpComware),
+		string(HuaweiSmartax),
 		string(HuaweiVrp),
-		string(IpInfusionOcnos),
 		string(JuniperJunos),
-		string(NokiaSrl),
+		string(NokiaSrlinux),
 		string(NokiaSros),
 		string(NokiaSrosClassic),
+		string(NokiaSrosClassicAram),
 		string(PaloAltoPanos),
-		string(RuijieRgos),
-		string(VyattaVyos),
+		string(RaisecomRos),
+		string(RuckusFastiron),
+		string(RuckusUnleashed),
+		string(SiemensRoxii),
+		string(VersaFlexvnf),
+		string(VyosVyos),
 	}
 }
