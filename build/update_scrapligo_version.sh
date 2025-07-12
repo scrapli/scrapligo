@@ -8,4 +8,4 @@ if [[ -z "$SCRAPLIGO_VERSION" ]]; then
     exit 1
 fi
 
-sed -i.bak -E "s|(var Version = )(.*)|\1${SCRAPLIGO_VERSION}\2|g" constants/versions.go
+sed -i.bak -E "s|(var Version = )(.*)|\1\"${SCRAPLIGO_VERSION}\"|g" constants/versions.go

@@ -74,13 +74,13 @@ func TestEnterMode(t *testing.T) {
 		},
 		"no-change-srl": {
 			description:   "enter mode with no change required",
-			platform:      scrapligocli.NokiaSrl.String(),
+			platform:      scrapligocli.NokiaSrlinux.String(),
 			transports:    []string{"bin", "ssh2"},
 			requestedMode: "exec",
 		},
 		"escalate-srl": {
 			description:   "enter mode with single stage change 'escalating' the mode",
-			platform:      scrapligocli.NokiaSrl.String(),
+			platform:      scrapligocli.NokiaSrlinux.String(),
 			transports:    []string{"bin", "ssh2"},
 			requestedMode: "configuration",
 		},

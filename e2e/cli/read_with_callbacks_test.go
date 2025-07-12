@@ -22,7 +22,7 @@ func TestReadWithCallbacks(t *testing.T) {
 	}{
 		"simple-srl": {
 			description:  "simple read with callbacks",
-			platform:     scrapligocli.NokiaSrl.String(),
+			platform:     scrapligocli.NokiaSrlinux.String(),
 			transports:   []string{"bin", "ssh2"},
 			initialInput: "show version | grep OS",
 			callbacks: []*scrapligocli.ReadCallback{

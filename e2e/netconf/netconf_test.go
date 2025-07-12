@@ -109,7 +109,7 @@ func getNetconf(t *testing.T, platform, transportName string) *scrapligonetconf.
 		} else {
 			host = "172.20.20.17"
 		}
-	case scrapligocli.NokiaSrl.String():
+	case scrapligocli.NokiaSrlinux.String():
 		opts = append(
 			opts,
 			scrapligooptions.WithUsername("admin"),
