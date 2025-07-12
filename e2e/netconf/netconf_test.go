@@ -5,6 +5,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"os"
+	"path/filepath"
 	"runtime"
 	"slices"
 	"strings"
@@ -24,6 +25,30 @@ func netconfTransports() []string {
 
 func TestMain(m *testing.M) {
 	scrapligotesthelper.Flags()
+
+	// ensure keys are chmod'd
+	err := filepath.Walk(
+		"./fixtures",
+		func(path string, info os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+
+			if !info.IsDir() && strings.Contains(filepath.Base(path), "key") {
+				err = os.Chmod(path, 0o600)
+				if err != nil {
+					return fmt.Errorf("failed to chmod %s: %w", path, err)
+				}
+			}
+
+			return nil
+		},
+	)
+	if err != nil {
+		_, _ = fmt.Fprintln(os.Stderr, "failed ensuring key permissions")
+
+		os.Exit(127)
+	}
 
 	exitCode := m.Run()
 

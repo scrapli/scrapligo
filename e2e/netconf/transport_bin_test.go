@@ -1,4 +1,4 @@
-package cli_test
+package netconf_test
 
 import (
 	"context"
@@ -10,29 +10,30 @@ import (
 
 	scrapligocli "github.com/scrapli/scrapligo/cli"
 	scrapligoconstants "github.com/scrapli/scrapligo/constants"
+	scrapligonetconf "github.com/scrapli/scrapligo/netconf"
 	scrapligooptions "github.com/scrapli/scrapligo/options"
 	scrapligotesthelper "github.com/scrapli/scrapligo/testhelper"
 )
 
 const localhost = "localhost"
 
-func TestBinTransportProxyJump(t *testing.T) {
-	parentName := "bin-transport-proxy-jump"
+func TestBinTransportProxyJumpNetconf(t *testing.T) {
+	parentName := "bin-transport-proxy-jump-netconf"
 
 	cases := map[string]struct {
 		description string
 		platform    string
-		input       string
+		filter      string
 	}{
 		"eos": {
 			description: "simple",
 			platform:    scrapligocli.AristaEos.String(),
-			input:       "show version | i Kern",
+			filter:      "<system><config><hostname></hostname></config></system>",
 		},
 		"srl": {
 			description: "simple",
 			platform:    scrapligocli.NokiaSrl.String(),
-			input:       "show version | grep OS",
+			filter:      "<system xmlns=\"urn:nokia.com:srlinux:general:system\"><ssh-server xmlns=\"urn:nokia.com:srlinux:linux:ssh\"><name>mgmt</name></ssh-server></system>",
 		},
 	}
 
@@ -71,7 +72,7 @@ func TestBinTransportProxyJump(t *testing.T) {
 
 				if runtime.GOOS == scrapligoconstants.Darwin {
 					host = localhost
-					port = 22022
+					port = 22830
 				} else {
 					host = "172.20.20.17"
 				}
@@ -91,7 +92,7 @@ func TestBinTransportProxyJump(t *testing.T) {
 
 					opts = append(
 						opts,
-						scrapligooptions.WithPort(21022),
+						scrapligooptions.WithPort(21830),
 					)
 				} else {
 					host = "172.20.20.16"
@@ -111,8 +112,7 @@ func TestBinTransportProxyJump(t *testing.T) {
 				scrapligooptions.WithBinTransportSSHConfigFile(sshConfigFilePath),
 			)
 
-			c, err := scrapligocli.NewCli(
-				caseData.platform,
+			n, err := scrapligonetconf.NewNetconf(
 				host,
 				opts...,
 			)
@@ -120,16 +120,16 @@ func TestBinTransportProxyJump(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			_, err = c.Open(ctx)
+			_, err = n.Open(ctx)
 			if err != nil {
 				t.Fatal(err)
 			}
 
 			defer func() {
-				_, _ = c.Close(ctx)
+				_, _ = n.Close(ctx)
 			}()
 
-			r, err := c.SendInput(ctx, caseData.input)
+			r, err := n.Get(ctx, scrapligonetconf.WithFilter(caseData.filter))
 			if err != nil {
 				t.Fatal(err)
 			}

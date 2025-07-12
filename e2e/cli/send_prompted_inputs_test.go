@@ -52,14 +52,14 @@ func TestSendPromptedInput(t *testing.T) {
 
 				c := getCli(t, caseData.platform, transportName)
 
-				defer func() {
-					_, _ = c.Close(ctx)
-				}()
-
 				_, err = c.Open(ctx)
 				if err != nil {
 					t.Fatal(err)
 				}
+
+				defer func() {
+					_, _ = c.Close(ctx)
+				}()
 
 				r, err := c.SendPromptedInput(
 					ctx,
