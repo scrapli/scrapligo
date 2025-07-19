@@ -27,7 +27,19 @@ func TestGet(t *testing.T) {
 			platform:    "netopeer",
 			options: []scrapligonetconf.Option{
 				scrapligonetconf.WithFilter(
-					"<interfaces><interface><name>Management0</name><state></state></interface></interfaces>",
+					"<system xmlns=\"urn:some:data\"><interfaces><name>eth0</name><name/></interfaces></system>",
+				),
+			},
+		},
+		"simple-filtered-xpath": {
+			description: "simple - get some data, but (xpath) filtered",
+			platform:    "netopeer",
+			options: []scrapligonetconf.Option{
+				scrapligonetconf.WithFilter(
+					"//interfaces[name='eth0']/name",
+				),
+				scrapligonetconf.WithFilterType(
+					scrapligonetconf.FilterTypeXpath,
 				),
 			},
 		},
