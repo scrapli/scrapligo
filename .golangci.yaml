@@ -80,6 +80,10 @@ linters:
           - lll
           - goconst
         path: _test\.go
+      - linters:
+          - forbidigo
+        path: examples/
+        text: fmt.Println
     paths:
       - private
       - .private
