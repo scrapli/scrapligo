@@ -89,6 +89,7 @@ func main() {
 	}
 
 	defer func() {
+		// once opened always make sure to defer closing! if you dont you will leak memory :)
 		_, _ = c.Close(ctx)
 	}()
 
