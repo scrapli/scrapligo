@@ -59,15 +59,15 @@ func LoggerToLoggerCallback(logger any, logLevel uint8) uintptr { //nolint: gocy
 
 			switch level {
 			case uint8(DebugAsInt):
-				l.Debug(*message)
+				l.Debug(*message) //nolint: noctx
 			case uint8(InfoAsInt):
-				l.Info(*message)
+				l.Info(*message) //nolint: noctx
 			case uint8(WarnAsInt):
-				l.Warn(*message)
+				l.Warn(*message) //nolint: noctx
 			case uint8(CriticalAsInt):
-				l.Error(*message)
+				l.Error(*message) //nolint: noctx
 			case uint8(FatalAsInt):
-				l.Error(*message)
+				l.Error(*message) //nolint: noctx
 			case uint8(DisabledAsInt):
 			}
 		})
@@ -88,6 +88,7 @@ func LoggerToLoggerCallback(logger any, logLevel uint8) uintptr { //nolint: gocy
 // normally i *really* dislike inits but... meh?
 func init() { //nolint: gochecknoinits
 	v := os.Getenv(scrapligoconstants.ScrapligoDebug)
+
 	if v != "" {
 		switch v {
 		case Debug.String():

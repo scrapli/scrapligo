@@ -2,6 +2,7 @@ package testhelper
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"os/exec"
@@ -21,7 +22,7 @@ func EosAvailable() bool {
 	isEosAvailableOnce.Do(func() {
 		isAvailable := false
 
-		o, err := exec.Command("docker", "ps").CombinedOutput()
+		o, err := exec.CommandContext(context.Background(), "docker", "ps").CombinedOutput()
 		if err == nil {
 			if bytes.Contains(o, []byte("ceos")) {
 				isAvailable = true
