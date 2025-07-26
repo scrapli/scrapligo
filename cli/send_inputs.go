@@ -4,6 +4,7 @@ import (
 	"context"
 
 	scrapligoerrors "github.com/scrapli/scrapligo/errors"
+	scrapligoutil "github.com/scrapli/scrapligo/util"
 )
 
 func newSendInputsOptions(options ...Option) *sendInputsOptions {
@@ -79,4 +80,19 @@ func (c *Cli) SendInputs(
 	}
 
 	return results, nil
+}
+
+// SendInputsFromFile is a conveince wrapper to load inputs from a file then pass those to
+// SendInputs.
+func (c *Cli) SendInputsFromFile(
+	ctx context.Context,
+	f string,
+	options ...Option,
+) (*Result, error) {
+	inputs, err := scrapligoutil.LoadFileLines(f)
+	if err != nil {
+		return nil, err
+	}
+
+	return c.SendInputs(ctx, inputs, options...)
 }

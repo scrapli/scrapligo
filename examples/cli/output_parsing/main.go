@@ -18,6 +18,8 @@ const (
 
 	defaultTimeout = 30 * time.Second
 
+	defaultPlatform = scrapligocli.NokiaSrlinux
+
 	defaultHostLinux  = "172.20.20.16"
 	defaultHostDarwin = "localhost"
 
@@ -41,7 +43,17 @@ func defaultPort() int {
 	return defaultPortLinux
 }
 
-func getOptions() (string, []scrapligooptions.Option) {
+func getOptions() (string, string, []scrapligooptions.Option) { //nolint: gocritic
+	platform := scrapligoutil.GetEnvStrOrDefault(
+		"SCRAPLI_PLATFORM",
+		defaultPlatform.String(),
+	)
+
+	host := scrapligoutil.GetEnvStrOrDefault(
+		"SCRAPLI_HOST",
+		defaultHost(),
+	)
+
 	opts := []scrapligooptions.Option{
 		scrapligooptions.WithPort(
 			uint16(scrapligoutil.GetEnvIntOrDefault("SCRAPLI_PORT", defaultPort())), //nolint:gosec
@@ -54,7 +66,7 @@ func getOptions() (string, []scrapligooptions.Option) {
 		),
 	}
 
-	return scrapligoutil.GetEnvStrOrDefault("SCRAPLI_HOST", defaultHost()), opts
+	return platform, host, opts
 }
 
 func main() {
@@ -67,25 +79,22 @@ func main() {
 		}
 	}()
 
-	// being lazy and just using one big context for the whole example
-	ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
-	defer cancel()
-
 	_, thisFileName, _, ok := runtime.Caller(0)
 	if !ok {
 		panic("failed getting path to this example file")
 	}
 
 	dir := filepath.Dir(thisFileName)
-	definitionPath := filepath.Join(dir, "foo_bar.yaml")
+	textfsmTemplatePath := filepath.Join(dir, "nokia_srlinux_show_version.tpl")
 
-	host, opts := getOptions()
+	// being lazy and just using one big context for the whole example
+	ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
+	defer cancel()
+
+	platform, host, opts := getOptions()
 
 	c, err := scrapligocli.NewCli(
-		// this is exactly the same as the upstream definition but just doing this to show that
-		// you can load up any yaml definition and dont necessarily need to rely on the upstream
-		// stuff in scrapli_definitions
-		definitionPath,
+		platform,
 		host,
 		opts...,
 	)
@@ -103,10 +112,13 @@ func main() {
 		_, _ = c.Close(ctx)
 	}()
 
-	result, err := c.SendInput(ctx, "show version")
+	// we can also retain the input
+	result, err := c.SendInput(ctx, "show version", scrapligocli.WithRetainInput())
 	if err != nil {
 		panic(fmt.Sprintf("failed sending input, error: %v", err))
 	}
 
-	fmt.Println(result.Result())
+	// unlike python we have no ntctemplates, so you need to pass the template path or template
+	// url to use to parse the result.
+	fmt.Println(result.TextFsmParse(textfsmTemplatePath))
 }

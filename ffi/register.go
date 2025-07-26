@@ -244,6 +244,48 @@ func registerOptions(m *Mapping, libScrapliFfi uintptr) { //nolint: funlen
 		"ls_option_transport_ssh2_libssh2trace",
 	)
 
+	purego.RegisterLibFunc(
+		&m.Options.TransportSSH2.SetProxyJumpHost,
+		libScrapliFfi,
+		"ls_option_transport_ssh2_proxy_jump_host",
+	)
+
+	purego.RegisterLibFunc(
+		&m.Options.TransportSSH2.SetProxyJumpPort,
+		libScrapliFfi,
+		"ls_option_transport_ssh2_proxy_jump_port",
+	)
+
+	purego.RegisterLibFunc(
+		&m.Options.TransportSSH2.SetProxyJumpUsername,
+		libScrapliFfi,
+		"ls_option_transport_ssh2_proxy_jump_username",
+	)
+
+	purego.RegisterLibFunc(
+		&m.Options.TransportSSH2.SetProxyJumpPassword,
+		libScrapliFfi,
+		"ls_option_transport_ssh2_proxy_jump_password",
+	)
+
+	purego.RegisterLibFunc(
+		&m.Options.TransportSSH2.SetProxyJumpPrivateKeyPath,
+		libScrapliFfi,
+		"ls_option_transport_ssh2_proxy_jump_private_key_path",
+	)
+
+	purego.RegisterLibFunc(
+		&m.Options.TransportSSH2.SetProxyJumpPrivateKeyPassphrase,
+		libScrapliFfi,
+		"ls_option_transport_ssh2_proxy_jump_private_key_passphrase",
+	)
+
+	purego.RegisterLibFunc(
+		&m.Options.TransportSSH2.SetProxyJumpLibSSH2Trace,
+		libScrapliFfi,
+		"ls_option_transport_ssh2_proxy_jump_libssh2trace",
+	)
+
 	// transport test
 	purego.RegisterLibFunc(
 		&m.Options.TransportTest.SetF,

@@ -18,6 +18,8 @@ const (
 
 	defaultTimeout = 30 * time.Second
 
+	defaultPlatform = scrapligocli.NokiaSrlinux
+
 	defaultHostLinux  = "172.20.20.16"
 	defaultHostDarwin = "localhost"
 
@@ -41,7 +43,17 @@ func defaultPort() int {
 	return defaultPortLinux
 }
 
-func getOptions() (string, []scrapligooptions.Option) {
+func getOptions() (string, string, []scrapligooptions.Option) { //nolint: gocritic
+	platform := scrapligoutil.GetEnvStrOrDefault(
+		"SCRAPLI_PLATFORM",
+		defaultPlatform.String(),
+	)
+
+	host := scrapligoutil.GetEnvStrOrDefault(
+		"SCRAPLI_HOST",
+		defaultHost(),
+	)
+
 	opts := []scrapligooptions.Option{
 		scrapligooptions.WithPort(
 			uint16(scrapligoutil.GetEnvIntOrDefault("SCRAPLI_PORT", defaultPort())), //nolint:gosec
@@ -54,7 +66,7 @@ func getOptions() (string, []scrapligooptions.Option) {
 		),
 	}
 
-	return scrapligoutil.GetEnvStrOrDefault("SCRAPLI_HOST", defaultHost()), opts
+	return platform, host, opts
 }
 
 func main() {
@@ -67,25 +79,23 @@ func main() {
 		}
 	}()
 
-	// being lazy and just using one big context for the whole example
-	ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
-	defer cancel()
-
 	_, thisFileName, _, ok := runtime.Caller(0)
 	if !ok {
 		panic("failed getting path to this example file")
 	}
 
 	dir := filepath.Dir(thisFileName)
-	definitionPath := filepath.Join(dir, "foo_bar.yaml")
 
-	host, opts := getOptions()
+	inputsFromFile := filepath.Join(dir, "inputs_to_send")
+
+	// being lazy and just using one big context for the whole example
+	ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
+	defer cancel()
+
+	platform, host, opts := getOptions()
 
 	c, err := scrapligocli.NewCli(
-		// this is exactly the same as the upstream definition but just doing this to show that
-		// you can load up any yaml definition and dont necessarily need to rely on the upstream
-		// stuff in scrapli_definitions
-		definitionPath,
+		platform,
 		host,
 		opts...,
 	)
@@ -103,10 +113,35 @@ func main() {
 		_, _ = c.Close(ctx)
 	}()
 
+	// send a single "input" at the "default mode" (normally privileged exec or similar)
 	result, err := c.SendInput(ctx, "show version")
 	if err != nil {
 		panic(fmt.Sprintf("failed sending input, error: %v", err))
 	}
 
+	// the result object returned holds info about the operation -- start/end/duration, the
+	// input(s) sent, the result, the raw result (as in before ascii/ansii cleaning), and a few
+	// other things. it has a reasonable __str__ method, so printing it should give you some
+	// something to look at
+	fmt.Println(result)
+
+	// but if you want to just see the result itself you can do like so:
 	fmt.Println(result.Result())
+
+	// theres a plural method for... sending multiple inputs, shock!
+	results, err := c.SendInputs(ctx, []string{"show version", "show version"})
+	if err != nil {
+		panic(fmt.Sprintf("failed sending inputs, error: %v", err))
+	}
+
+	// result will print a joined result
+	fmt.Println(results.Result())
+
+	// there is also a from_file method to send inputs from a file if you want
+	results, err = c.SendInputsFromFile(ctx, inputsFromFile)
+	if err != nil {
+		panic(fmt.Sprintf("failed sending inputs, error: %v", err))
+	}
+
+	fmt.Println(results.Result())
 }

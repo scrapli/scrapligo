@@ -364,7 +364,9 @@ func (c *Cli) getResult(
 	}
 
 	if errSize != 0 {
-		return nil, scrapligoerrors.NewFfiError(string(errString), nil)
+		// always wrap the context error (even if nil) so we catch cancels/deadline exceeded and
+		// users can errors.Is with that
+		return nil, scrapligoerrors.NewFfiError(string(errString), ctx.Err())
 	}
 
 	return NewResult(
