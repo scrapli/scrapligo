@@ -577,6 +577,48 @@ type TransportSSH2Options struct {
 	SetLibSSH2Trace func(
 		driverPtr uintptr,
 	) uint8
+
+	// SetProxyJumpHost sets the proxy jump host for the driver at driverPtr.
+	SetProxyJumpHost func(
+		driverPtr uintptr,
+		value string,
+	) uint8
+
+	// SetProxyJumpPort sets the proxy jump port for the driver at driverPtr.
+	SetProxyJumpPort func(
+		driverPtr uintptr,
+		value uint16,
+	) uint8
+
+	// SetProxyJumpUsername sets the proxy jump username for the driver at driverPtr.
+	SetProxyJumpUsername func(
+		driverPtr uintptr,
+		value string,
+	) uint8
+
+	// SetProxyJumpPassword sets the proxy jump password for the driver at driverPtr.
+	SetProxyJumpPassword func(
+		driverPtr uintptr,
+		value string,
+	) uint8
+
+	// SetProxyJumpPrivateKeyPath sets the proxy jump private key path for the driver at driverPtr.
+	SetProxyJumpPrivateKeyPath func(
+		driverPtr uintptr,
+		value string,
+	) uint8
+
+	// SetProxyJumpPrivateKeyPassphrase sets the proxy jump private key passhrase for the driver at
+	// driverPtr.
+	SetProxyJumpPrivateKeyPassphrase func(
+		driverPtr uintptr,
+		value string,
+	) uint8
+
+	// SetProxyJumpLibSSH2Trace enables libssh2 trace for the proxy jump driver at driverPtr.
+	SetProxyJumpLibSSH2Trace func(
+		driverPtr uintptr,
+	) uint8
 }
 
 // TransportTestOptions holds options setters for the test transport.

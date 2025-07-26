@@ -57,6 +57,8 @@ func LoggerToLoggerCallback(logger any, logLevel uint8) uintptr { //nolint: gocy
 				return
 			}
 
+			// ignoring context things since we (currently?) expose no means to actually pass
+			// a context with things here anyway
 			switch level {
 			case uint8(DebugAsInt):
 				l.Debug(*message) //nolint: noctx

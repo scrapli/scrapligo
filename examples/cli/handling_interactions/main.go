@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"path/filepath"
 	"runtime"
 	"time"
 
@@ -17,6 +16,8 @@ const (
 	isDarwin = runtime.GOOS == "darwin"
 
 	defaultTimeout = 30 * time.Second
+
+	defaultPlatform = scrapligocli.NokiaSrlinux
 
 	defaultHostLinux  = "172.20.20.16"
 	defaultHostDarwin = "localhost"
@@ -41,7 +42,17 @@ func defaultPort() int {
 	return defaultPortLinux
 }
 
-func getOptions() (string, []scrapligooptions.Option) {
+func getOptions() (string, string, []scrapligooptions.Option) { //nolint: gocritic
+	platform := scrapligoutil.GetEnvStrOrDefault(
+		"SCRAPLI_PLATFORM",
+		defaultPlatform.String(),
+	)
+
+	host := scrapligoutil.GetEnvStrOrDefault(
+		"SCRAPLI_HOST",
+		defaultHost(),
+	)
+
 	opts := []scrapligooptions.Option{
 		scrapligooptions.WithPort(
 			uint16(scrapligoutil.GetEnvIntOrDefault("SCRAPLI_PORT", defaultPort())), //nolint:gosec
@@ -54,7 +65,7 @@ func getOptions() (string, []scrapligooptions.Option) {
 		),
 	}
 
-	return scrapligoutil.GetEnvStrOrDefault("SCRAPLI_HOST", defaultHost()), opts
+	return platform, host, opts
 }
 
 func main() {
@@ -71,21 +82,10 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
 	defer cancel()
 
-	_, thisFileName, _, ok := runtime.Caller(0)
-	if !ok {
-		panic("failed getting path to this example file")
-	}
-
-	dir := filepath.Dir(thisFileName)
-	definitionPath := filepath.Join(dir, "foo_bar.yaml")
-
-	host, opts := getOptions()
+	platform, host, opts := getOptions()
 
 	c, err := scrapligocli.NewCli(
-		// this is exactly the same as the upstream definition but just doing this to show that
-		// you can load up any yaml definition and dont necessarily need to rely on the upstream
-		// stuff in scrapli_definitions
-		definitionPath,
+		platform,
 		host,
 		opts...,
 	)
@@ -103,10 +103,18 @@ func main() {
 		_, _ = c.Close(ctx)
 	}()
 
-	result, err := c.SendInput(ctx, "show version")
+	// just using read to force an interactive-like prompt on our srlinux test box
+	result, err := c.SendPromptedInput(
+		ctx,
+		"read -p 'interactwithme: '",
+		"interactwithme",
+		"foo",
+		scrapligocli.WithRequestedMode("bash"),
+	)
 	if err != nil {
 		panic(fmt.Sprintf("failed sending input, error: %v", err))
 	}
 
+	// just printing the full result so we can see the whole thing to see it worked
 	fmt.Println(result.Result())
 }

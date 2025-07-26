@@ -410,9 +410,21 @@ func (o *TransportBinOptions) apply( //nolint: gocyclo
 type TransportSSH2Options struct {
 	KnownHostsPath string
 	LibSSH2Trace   bool
+
+	// proxy jump related
+	ProxyJumpHost                 string
+	ProxyJumpPort                 uint16
+	ProxyJumpUsername             string
+	ProxyJumpPassword             string
+	ProxyJumpPrivateKeyPath       string
+	ProxyJumpPrivateKeyPassphrase string
+	ProxyJumpLibSSH2Trace         bool
 }
 
-func (o *TransportSSH2Options) apply(driverPtr uintptr, m *scrapligoffi.Mapping) error {
+func (o *TransportSSH2Options) apply( //nolint: gocyclo
+	driverPtr uintptr,
+	m *scrapligoffi.Mapping,
+) error {
 	if o.KnownHostsPath != "" {
 		rc := m.Options.TransportSSH2.SetKnownHostsPath(driverPtr, o.KnownHostsPath)
 		if rc != 0 {
@@ -427,6 +439,82 @@ func (o *TransportSSH2Options) apply(driverPtr uintptr, m *scrapligoffi.Mapping)
 		rc := m.Options.TransportSSH2.SetLibSSH2Trace(driverPtr)
 		if rc != 0 {
 			return scrapligoerrors.NewOptionsError("failed setting libssh2 trace option", nil)
+		}
+	}
+
+	if o.ProxyJumpHost != "" {
+		rc := m.Options.TransportSSH2.SetProxyJumpHost(driverPtr, o.ProxyJumpHost)
+		if rc != 0 {
+			return scrapligoerrors.NewOptionsError(
+				"failed setting libssh2 proxy jump host option",
+				nil,
+			)
+		}
+	}
+
+	if o.ProxyJumpPort != 0 {
+		rc := m.Options.TransportSSH2.SetProxyJumpPort(driverPtr, o.ProxyJumpPort)
+		if rc != 0 {
+			return scrapligoerrors.NewOptionsError(
+				"failed setting libssh2 proxy jump port option",
+				nil,
+			)
+		}
+	}
+
+	if o.ProxyJumpUsername != "" {
+		rc := m.Options.TransportSSH2.SetProxyJumpUsername(driverPtr, o.ProxyJumpUsername)
+		if rc != 0 {
+			return scrapligoerrors.NewOptionsError(
+				"failed setting libssh2 proxy jump username option",
+				nil,
+			)
+		}
+	}
+
+	if o.ProxyJumpPassword != "" {
+		rc := m.Options.TransportSSH2.SetProxyJumpPassword(driverPtr, o.ProxyJumpPassword)
+		if rc != 0 {
+			return scrapligoerrors.NewOptionsError(
+				"failed setting libssh2 proxy jump password option",
+				nil,
+			)
+		}
+	}
+
+	if o.ProxyJumpPrivateKeyPath != "" {
+		rc := m.Options.TransportSSH2.SetProxyJumpPrivateKeyPath(
+			driverPtr,
+			o.ProxyJumpPrivateKeyPath,
+		)
+		if rc != 0 {
+			return scrapligoerrors.NewOptionsError(
+				"failed setting libssh2 proxy jump private key path option",
+				nil,
+			)
+		}
+	}
+
+	if o.ProxyJumpPrivateKeyPassphrase != "" {
+		rc := m.Options.TransportSSH2.SetProxyJumpPrivateKeyPassphrase(
+			driverPtr,
+			o.ProxyJumpPrivateKeyPassphrase,
+		)
+		if rc != 0 {
+			return scrapligoerrors.NewOptionsError(
+				"failed setting libssh2 proxy jump private key passphrase option",
+				nil,
+			)
+		}
+	}
+
+	if o.LibSSH2Trace {
+		rc := m.Options.TransportSSH2.SetProxyJumpLibSSH2Trace(driverPtr)
+		if rc != 0 {
+			return scrapligoerrors.NewOptionsError(
+				"failed setting libssh2 proxy jump trace option",
+				nil,
+			)
 		}
 	}
 
