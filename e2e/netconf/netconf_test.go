@@ -19,6 +19,8 @@ import (
 	scrapligotesthelper "github.com/scrapli/scrapligo/testhelper"
 )
 
+const localhost = "localhost"
+
 func netconfTransports() []string {
 	return []string{"bin", "ssh2"}
 }

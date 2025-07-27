@@ -14,8 +14,8 @@ import (
 	scrapligotesthelper "github.com/scrapli/scrapligo/testhelper"
 )
 
-func TestBinTransportProxyJump(t *testing.T) {
-	parentName := "bin-transport-proxy-jump"
+func TestSSH2TransportProxyJump(t *testing.T) {
+	parentName := "ssh2-transport-proxy-jump"
 
 	cases := map[string]struct {
 		description string
@@ -48,20 +48,24 @@ func TestBinTransportProxyJump(t *testing.T) {
 			ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 			defer cancel()
 
-			sshConfigFilePath := "./fixtures/ssh_config"
-			if runtime.GOOS == scrapligoconstants.Darwin {
-				sshConfigFilePath += "_darwin"
-			} else {
-				sshConfigFilePath += "_linux"
-			}
+			var host string
 
 			opts := []scrapligooptions.Option{
-				scrapligooptions.WithUsername("admin"),
-				scrapligooptions.WithTransportBin(),
-				scrapligooptions.WithBinTransportSSHConfigFile(sshConfigFilePath),
+				scrapligooptions.WithUsername("scrapli-pw"),
+				scrapligooptions.WithPassword("scrapli-123-pw"),
+				scrapligooptions.WithTransportSSH2(),
 			}
 
-			var host string
+			if runtime.GOOS == scrapligoconstants.Darwin {
+				host = localhost
+
+				opts = append(
+					opts,
+					scrapligooptions.WithPort(24022),
+				)
+			} else {
+				host = "172.20.20.19"
+			}
 
 			if caseData.platform == scrapligocli.AristaEos.String() {
 				if !scrapligotesthelper.EosAvailable() {
@@ -70,39 +74,18 @@ func TestBinTransportProxyJump(t *testing.T) {
 
 				opts = append(
 					opts,
-					scrapligooptions.WithPassword("admin"),
+					scrapligooptions.WithSSH2ProxyJumpHost("172.20.20.17"),
+					scrapligooptions.WithSSH2ProxyJumpUsername("admin"),
+					scrapligooptions.WithSSH2ProxyJumpPassword("admin"),
 					scrapligooptions.WithLookupKeyValue("enable", "libscrapli"),
-				)
-
-				var port uint16
-
-				if runtime.GOOS == scrapligoconstants.Darwin {
-					host = localhost
-					port = 22022
-				} else {
-					host = "172.20.20.17"
-				}
-
-				opts = append(
-					opts,
-					scrapligooptions.WithPort(port),
 				)
 			} else {
 				opts = append(
 					opts,
-					scrapligooptions.WithPassword("NokiaSrl1!"),
+					scrapligooptions.WithSSH2ProxyJumpHost("172.20.20.16"),
+					scrapligooptions.WithSSH2ProxyJumpUsername("admin"),
+					scrapligooptions.WithSSH2ProxyJumpPassword("NokiaSrl1!"),
 				)
-
-				if runtime.GOOS == scrapligoconstants.Darwin {
-					host = localhost
-
-					opts = append(
-						opts,
-						scrapligooptions.WithPort(21022),
-					)
-				} else {
-					host = "172.20.20.16"
-				}
 			}
 
 			c, err := scrapligocli.NewCli(
