@@ -34,9 +34,9 @@ func TestCliExamples(t *testing.T) {
 			)
 			c.Dir = "../../"
 
-			err := c.Run()
+			b, err := c.CombinedOutput()
 			if err != nil {
-				t.Fatal(err)
+				t.Fatalf("test %s failed with error %v; output: %s", testName, err, string(b))
 			}
 		})
 	}
