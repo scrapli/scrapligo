@@ -17,6 +17,8 @@ import (
 	scrapligotesthelper "github.com/scrapli/scrapligo/testhelper"
 )
 
+const localhost = "localhost"
+
 func slowTests() []string {
 	return []string{
 		"send-input-enormous-srl-bin",
