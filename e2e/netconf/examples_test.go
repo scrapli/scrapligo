@@ -30,7 +30,7 @@ func TestNetconfExamples(t *testing.T) {
 				ctx,
 				"go",
 				"run",
-				filepath.Join("examples", "cli", filepath.Base(example), "main.go"),
+				filepath.Join("examples", "netconf", filepath.Base(example), "main.go"),
 			)
 			c.Dir = "../../"
 
