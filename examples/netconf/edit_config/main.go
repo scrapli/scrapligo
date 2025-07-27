@@ -157,4 +157,9 @@ func main() {
 	if err != nil {
 		panic(fmt.Sprintf("failed editing config, error: %v", err))
 	}
+
+	_, err = n.Commit(ctx)
+	if err != nil {
+		panic(fmt.Sprintf("failed committing config, error: %v", err))
+	}
 }
