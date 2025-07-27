@@ -34,6 +34,8 @@ func WithExtraNamespaces(e [][2]string) Option {
 func WithDatastore(t DatastoreType) Option {
 	return func(o any) {
 		switch to := o.(type) {
+		case *editConfigOptions:
+			to.target = t
 		case *getDataOptions:
 			to.datastore = t
 		case *lockOptions:
