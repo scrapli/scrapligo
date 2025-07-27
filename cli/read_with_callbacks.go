@@ -18,13 +18,13 @@ type ReadCallback struct {
 	notContains     string
 	once            bool
 	completes       bool
-	callback        func(c *Cli) error
+	callback        func(ctx context.Context, c *Cli) error
 }
 
 // NewReadCallback returns a new ReadCallback with the given options set.
 func NewReadCallback(
 	name string,
-	callback func(c *Cli) error,
+	callback func(ctx context.Context, c *Cli) error,
 	options ...Option,
 ) *ReadCallback {
 	cb := &ReadCallback{
@@ -138,7 +138,7 @@ func (c *Cli) ReadWithCallbacks( //nolint: gocyclo
 
 			pos = len(results)
 
-			err = cb.callback(c)
+			err = cb.callback(ctx, c)
 			if err != nil {
 				return nil, err
 			}

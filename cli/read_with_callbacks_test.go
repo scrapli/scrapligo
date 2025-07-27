@@ -42,7 +42,7 @@ func TestReadWithCallbacks(t *testing.T) {
 		"show version",
 		scrapligocli.NewReadCallback(
 			"cb1",
-			func(c *scrapligocli.Cli) error {
+			func(_ context.Context, c *scrapligocli.Cli) error {
 				return c.WriteAndReturn("show version")
 			},
 			scrapligocli.WithContains("eos1#"),
@@ -50,7 +50,7 @@ func TestReadWithCallbacks(t *testing.T) {
 		),
 		scrapligocli.NewReadCallback(
 			"cb2",
-			func(_ *scrapligocli.Cli) error {
+			func(_ context.Context, _ *scrapligocli.Cli) error {
 				return nil
 			},
 			scrapligocli.WithContains("eos1#"),
