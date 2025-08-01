@@ -22,7 +22,7 @@ const (
 	defaultHostLinux  = "172.20.20.19"
 	defaultHostDarwin = "localhost"
 
-	defaultPortLinux  = 830
+	defaultPortLinux  = 22
 	defaultPortDarwin = 24022
 )
 
