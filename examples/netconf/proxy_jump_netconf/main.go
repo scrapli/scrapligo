@@ -24,6 +24,8 @@ const (
 
 	defaultPortLinux  = 22
 	defaultPortDarwin = 24022
+
+	netconfPort = 830
 )
 
 func defaultHost() string {
@@ -145,9 +147,11 @@ func viaSSH2Transport() {
 		scrapligooptions.WithPort(
 			uint16(scrapligoutil.GetEnvIntOrDefault("SCRAPLI_PORT", defaultPort())), //nolint: gosec
 		),
-		// now the bits for connecting to the final host
+		// now the bits for connecting to the final host, this is always (in this example) to port
+		// 830 and to the "real" address (docker address) of the srl box since its from the
+		// perspective of the jump host
 		scrapligooptions.WithSSH2ProxyJumpHost("172.20.20.16"),
-		scrapligooptions.WithSSH2ProxyJumpPort(defaultPortLinux),
+		scrapligooptions.WithSSH2ProxyJumpPort(netconfPort),
 		scrapligooptions.WithSSH2ProxyJumpUsername("admin"),
 		scrapligooptions.WithSSH2ProxyJumpPassword("NokiaSrl1!"),
 	}

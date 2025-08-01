@@ -1,10 +1,13 @@
 package main
 
 import (
+	"context"
+	"fmt"
 	"runtime"
 	"time"
 
 	scrapligoffi "github.com/scrapli/scrapligo/ffi"
+	scrapligonetconf "github.com/scrapli/scrapligo/netconf"
 	scrapligooptions "github.com/scrapli/scrapligo/options"
 	scrapligoutil "github.com/scrapli/scrapligo/util"
 )
@@ -68,95 +71,95 @@ func main() {
 		}
 	}()
 
-	// // being lazy and just using one big context for the whole example
-	// ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
-	// defer cancel()
+	// being lazy and just using one big context for the whole example
+	ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
+	defer cancel()
 
-	// host, opts := getOptions()
+	host, opts := getOptions()
 
-	// n, err := scrapligonetconf.NewNetconf(
-	// 	host,
-	// 	opts...,
-	// )
-	// if err != nil {
-	// 	panic(fmt.Sprintf("failed creating netconf object, error: %v", err))
-	// }
+	n, err := scrapligonetconf.NewNetconf(
+		host,
+		opts...,
+	)
+	if err != nil {
+		panic(fmt.Sprintf("failed creating netconf object, error: %v", err))
+	}
 
-	// _, err = n.Open(ctx)
-	// if err != nil {
-	// 	panic(fmt.Sprintf("failed opening netconf object, error: %v", err))
-	// }
+	_, err = n.Open(ctx)
+	if err != nil {
+		panic(fmt.Sprintf("failed opening netconf object, error: %v", err))
+	}
 
-	// defer func() {
-	// 	// once opened always make sure to defer closing! if you dont you will leak memory :)
-	// 	_, _ = n.Close(ctx)
-	// }()
+	defer func() {
+		// once opened always make sure to defer closing! if you dont you will leak memory :)
+		_, _ = n.Close(ctx)
+	}()
 
-	// // we can lock the config before doing things if we want
-	// result, err := n.Lock(
-	// 	ctx,
-	// 	scrapligonetconf.WithDatastore(scrapligonetconf.DatastoreTypeCandidate),
-	// )
-	// if err != nil {
-	// 	panic(fmt.Sprintf("failed locking datastore, error: %v", err))
-	// }
+	// we can lock the config before doing things if we want
+	result, err := n.Lock(
+		ctx,
+		scrapligonetconf.WithDatastore(scrapligonetconf.DatastoreTypeCandidate),
+	)
+	if err != nil {
+		panic(fmt.Sprintf("failed locking datastore, error: %v", err))
+	}
 
-	// fmt.Println(result.Result)
+	fmt.Println(result.Result)
 
-	// // and push a valid config of course
-	// result, err = n.EditConfig(
-	// 	ctx,
-	// 	`
-	//  		<system xmlns="urn:nokia.com:srlinux:general:system">
-	//            <name xmlns="urn:nokia.com:srlinux:chassis:system-name">
-	//                <host-name>foozzzBaaaaAR</host-name>
-	//            </name>
-	//        </system>
-	// 	`,
-	// 	scrapligonetconf.WithDatastore(scrapligonetconf.DatastoreTypeCandidate),
-	// )
-	// if err != nil {
-	// 	panic(fmt.Sprintf("failed editing config, error: %v", err))
-	// }
+	// and push a valid config of course
+	result, err = n.EditConfig(
+		ctx,
+		`
+  		<system xmlns="urn:nokia.com:srlinux:general:system">
+            <name xmlns="urn:nokia.com:srlinux:chassis:system-name">
+                <host-name>foozzzBaaaaAR</host-name>
+            </name>
+        </system>
+		`,
+		scrapligonetconf.WithDatastore(scrapligonetconf.DatastoreTypeCandidate),
+	)
+	if err != nil {
+		panic(fmt.Sprintf("failed editing config, error: %v", err))
+	}
 
-	// fmt.Println(result.Result)
+	fmt.Println(result.Result)
 
-	// result, err = n.Commit(ctx)
-	// if err != nil {
-	// 	panic(fmt.Sprintf("failed committing config, error: %v", err))
-	// }
+	result, err = n.Commit(ctx)
+	if err != nil {
+		panic(fmt.Sprintf("failed committing config, error: %v", err))
+	}
 
-	// fmt.Println(result.Result)
+	fmt.Println(result.Result)
 
-	// // annnnd unlock
-	// result, err = n.Unlock(
-	// 	ctx,
-	// 	scrapligonetconf.WithDatastore(scrapligonetconf.DatastoreTypeCandidate),
-	// )
-	// if err != nil {
-	// 	panic(fmt.Sprintf("failed unlocking datastore, error: %v", err))
-	// }
+	// annnnd unlock
+	result, err = n.Unlock(
+		ctx,
+		scrapligonetconf.WithDatastore(scrapligonetconf.DatastoreTypeCandidate),
+	)
+	if err != nil {
+		panic(fmt.Sprintf("failed unlocking datastore, error: %v", err))
+	}
 
-	// fmt.Println(result.Result)
+	fmt.Println(result.Result)
 
-	// // well put it back just in case using this w/ testing so we didnt make any change
-	// _, err = n.EditConfig(
-	// 	ctx,
-	// 	`
-	//  		<system xmlns="urn:nokia.com:srlinux:general:system">
-	//            <name xmlns="urn:nokia.com:srlinux:chassis:system-name">
-	//                <host-name>srl</host-name>
-	//            </name>
-	//        </system>
-	// 	`,
-	// 	scrapligonetconf.WithDatastore(scrapligonetconf.DatastoreTypeCandidate),
-	// )
-	// if err != nil {
-	// 	panic(fmt.Sprintf("failed editing config, error: %v", err))
-	// }
+	// well put it back just in case using this w/ testing so we didnt make any change
+	_, err = n.EditConfig(
+		ctx,
+		`
+  		<system xmlns="urn:nokia.com:srlinux:general:system">
+            <name xmlns="urn:nokia.com:srlinux:chassis:system-name">
+                <host-name>srl</host-name>
+            </name>
+        </system>
+		`,
+		scrapligonetconf.WithDatastore(scrapligonetconf.DatastoreTypeCandidate),
+	)
+	if err != nil {
+		panic(fmt.Sprintf("failed editing config, error: %v", err))
+	}
 
-	// _, err = n.Commit(ctx)
-	// if err != nil {
-	// 	panic(fmt.Sprintf("failed committing config, error: %v", err))
-	// }
+	_, err = n.Commit(ctx)
+	if err != nil {
+		panic(fmt.Sprintf("failed committing config, error: %v", err))
+	}
 }

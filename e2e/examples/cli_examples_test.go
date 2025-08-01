@@ -1,4 +1,4 @@
-package netconf_test
+package examples_test
 
 import (
 	"context"
@@ -9,10 +9,10 @@ import (
 	"time"
 )
 
-func TestNetconfExamples(t *testing.T) {
-	parentName := "examples-netconf"
+func TestCliExamples(t *testing.T) {
+	parentName := "examples-cli"
 
-	examples, err := filepath.Glob("../../examples/netconf/*")
+	examples, err := filepath.Glob("../../examples/cli/*")
 	if err != nil {
 		t.Fatalf("failed globbing cli examples, error: %v", err)
 	}
@@ -30,7 +30,7 @@ func TestNetconfExamples(t *testing.T) {
 				ctx,
 				"go",
 				"run",
-				filepath.Join("examples", "netconf", filepath.Base(example), "main.go"),
+				filepath.Join("examples", "cli", filepath.Base(example), "main.go"),
 			)
 			c.Dir = "../../"
 
