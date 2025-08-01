@@ -146,6 +146,8 @@ func TestSendInput(t *testing.T) {
 					t.Fatal(err)
 				}
 
+				fmt.Println(r.Result())
+
 				assertResult(t, r, testGoldenPath)
 			})
 		}
