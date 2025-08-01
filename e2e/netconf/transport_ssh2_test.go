@@ -66,6 +66,12 @@ func TestSSH2TransportProxyJumpNetconf(t *testing.T) {
 				)
 			} else {
 				host = "172.20.20.19"
+
+				// wants to default to 830, but we are jumping through the jumper host on 22
+				opts = append(
+					opts,
+					scrapligooptions.WithPort(22),
+				)
 			}
 
 			if caseData.platform == scrapligocli.AristaEos.String() {
