@@ -137,17 +137,18 @@ func (o *NetconfOptions) apply(
 
 // SessionOptions holds options specific to the zig "Session" that lives in a driver.
 type SessionOptions struct {
-	ReadSize   *uint64
-	ReturnChar string
+	ReadSize     *uint64
+	ReadMinDelay *uint64
+	ReadMaxDelay *uint64
+	ReturnChar   string
 
 	OperationTimeoutNs      *uint64
 	OperationMaxSearchDepth *uint64
 
-	// do not use outside of tests, will leak/is unsafe!
 	RecorderPath string
 }
 
-func (o *SessionOptions) apply(
+func (o *SessionOptions) apply( //nolint: gocyclo
 	driverPtr uintptr,
 	m *scrapligoffi.Mapping,
 ) error {
@@ -155,6 +156,20 @@ func (o *SessionOptions) apply(
 		rc := m.Options.Session.SetReadSize(driverPtr, *o.ReadSize)
 		if rc != 0 {
 			return scrapligoerrors.NewOptionsError("failed setting read size option", nil)
+		}
+	}
+
+	if o.ReadMinDelay != nil {
+		rc := m.Options.Session.SetReadMinDelayNs(driverPtr, *o.ReadMinDelay)
+		if rc != 0 {
+			return scrapligoerrors.NewOptionsError("failed setting read min delay option", nil)
+		}
+	}
+
+	if o.ReadMaxDelay != nil {
+		rc := m.Options.Session.SetReadMaxDelayNs(driverPtr, *o.ReadMaxDelay)
+		if rc != 0 {
+			return scrapligoerrors.NewOptionsError("failed setting read max delay option", nil)
 		}
 	}
 

@@ -8,9 +8,27 @@ import (
 )
 
 // WithReadSize sets the size of each individual read from the transport.
-func WithReadSize(s uint64) Option {
+func WithReadSize(i uint64) Option {
 	return func(o *scrapligointernal.Options) error {
-		o.Session.ReadSize = &s
+		o.Session.ReadSize = &i
+
+		return nil
+	}
+}
+
+// WithReadMinDelay sets the minimum delay in ns between session reads.
+func WithReadMinDelay(i uint64) Option {
+	return func(o *scrapligointernal.Options) error {
+		o.Session.ReadMinDelay = &i
+
+		return nil
+	}
+}
+
+// WithReadMaxDelay sets the maximum delay in ns between session reads.
+func WithReadMaxDelay(i uint64) Option {
+	return func(o *scrapligointernal.Options) error {
+		o.Session.ReadMaxDelay = &i
 
 		return nil
 	}
