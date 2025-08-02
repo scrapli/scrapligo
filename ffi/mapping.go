@@ -421,6 +421,18 @@ type SessionOptions struct {
 		value uint64,
 	) uint8
 
+	// SetReadMinDelayNs sets the session minimum read delay in ns.
+	SetReadMinDelayNs func(
+		driverPtr uintptr,
+		value uint64,
+	) uint8
+
+	// SetReadMaxDelayNs sets the session maximum read delay in ns.
+	SetReadMaxDelayNs func(
+		driverPtr uintptr,
+		value uint64,
+	) uint8
+
 	// SetReturnChar sets the return char string for the driver at driverPtr.
 	SetReturnChar func(
 		driverPtr uintptr,

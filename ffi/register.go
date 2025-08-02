@@ -118,6 +118,21 @@ func registerOptions(m *Mapping, libScrapliFfi uintptr) { //nolint: funlen
 		"ls_option_session_read_size",
 	)
 	purego.RegisterLibFunc(
+		&m.Options.Session.SetReadMinDelayNs,
+		libScrapliFfi,
+		"ls_option_session_read_min_delay_ns",
+	)
+	purego.RegisterLibFunc(
+		&m.Options.Session.SetReadMaxDelayNs,
+		libScrapliFfi,
+		"ls_option_session_read_max_delay_ns",
+	)
+	purego.RegisterLibFunc(
+		&m.Options.Session.SetReadSize,
+		libScrapliFfi,
+		"ls_option_session_read_size",
+	)
+	purego.RegisterLibFunc(
 		&m.Options.Session.SetReturnChar,
 		libScrapliFfi,
 		"ls_option_session_return_char",
