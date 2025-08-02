@@ -56,6 +56,7 @@ func TestBinTransportProxyJump(t *testing.T) {
 			}
 
 			opts := []scrapligooptions.Option{
+				scrapligooptions.WithDefintionFileOrName(caseData.platform),
 				scrapligooptions.WithUsername("admin"),
 				scrapligooptions.WithTransportBin(),
 				scrapligooptions.WithBinTransportSSHConfigFile(sshConfigFilePath),
@@ -106,7 +107,6 @@ func TestBinTransportProxyJump(t *testing.T) {
 			}
 
 			c, err := scrapligocli.NewCli(
-				caseData.platform,
 				host,
 				opts...,
 			)

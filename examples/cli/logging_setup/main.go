@@ -46,18 +46,19 @@ func defaultPort() int {
 	return defaultPortLinux
 }
 
-func getOptions() (string, string, []scrapligooptions.Option) { //nolint: gocritic
-	platform := scrapligoutil.GetEnvStrOrDefault(
-		"SCRAPLI_PLATFORM",
-		defaultPlatform.String(),
-	)
-
+func getOptions() (string, []scrapligooptions.Option) {
 	host := scrapligoutil.GetEnvStrOrDefault(
 		"SCRAPLI_HOST",
 		defaultHost(),
 	)
 
 	opts := []scrapligooptions.Option{
+		scrapligooptions.WithDefintionFileOrName(
+			scrapligoutil.GetEnvStrOrDefault(
+				"SCRAPLI_PLATFORM",
+				defaultPlatform.String(),
+			),
+		),
 		scrapligooptions.WithPort(
 			uint16(scrapligoutil.GetEnvIntOrDefault("SCRAPLI_PORT", defaultPort())), //nolint:gosec
 		),
@@ -69,7 +70,7 @@ func getOptions() (string, string, []scrapligooptions.Option) { //nolint: gocrit
 		),
 	}
 
-	return platform, host, opts
+	return host, opts
 }
 
 func stdLogger() {
@@ -77,7 +78,7 @@ func stdLogger() {
 	ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
 	defer cancel()
 
-	platform, host, opts := getOptions()
+	host, opts := getOptions()
 
 	opts = append(
 		opts,
@@ -88,7 +89,6 @@ func stdLogger() {
 	)
 
 	c, err := scrapligocli.NewCli(
-		platform,
 		host,
 		opts...,
 	)
@@ -119,7 +119,7 @@ func slogLogger() {
 	ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
 	defer cancel()
 
-	platform, host, opts := getOptions()
+	host, opts := getOptions()
 
 	opts = append(
 		opts,
@@ -140,7 +140,6 @@ func slogLogger() {
 	)
 
 	c, err := scrapligocli.NewCli(
-		platform,
 		host,
 		opts...,
 	)
@@ -171,7 +170,7 @@ func callbackLogger() {
 	ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
 	defer cancel()
 
-	platform, host, opts := getOptions()
+	host, opts := getOptions()
 
 	opts = append(
 		opts,
@@ -185,7 +184,6 @@ func callbackLogger() {
 	)
 
 	c, err := scrapligocli.NewCli(
-		platform,
 		host,
 		opts...,
 	)

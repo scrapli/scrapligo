@@ -45,17 +45,14 @@ func NewOptions() *Options {
 		LoggerLevel:   scrapligologging.Warn,
 		TransportKind: TransportKindBin,
 		Port:          0,
-		Driver:        DriverOptions{},
-		Netconf:       NetconfOptions{},
+		Driver: DriverOptions{
+			DefinitionFileOrName: "default",
+		},
+		Netconf: NetconfOptions{},
 		Auth: AuthOptions{
 			LookupMap: make(map[string]string),
 		},
 	}
-}
-
-// DriverOptions holds driver specific options.
-type DriverOptions struct {
-	DefinitionString string
 }
 
 // Apply applies the Options to the given driver at driverPtr.
@@ -95,6 +92,12 @@ func (o *Options) Apply(driverPtr uintptr, m *scrapligoffi.Mapping) error {
 	}
 
 	return nil
+}
+
+// DriverOptions holds driver specific options.
+type DriverOptions struct {
+	DefinitionFileOrName string
+	DefinitionString     string
 }
 
 // NetconfOptions holds netconf specific options.
