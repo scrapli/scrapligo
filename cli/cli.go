@@ -112,7 +112,7 @@ func NewCli[T PlatformNameOrString](
 		}
 	}
 
-	if c.options.Port == nil {
+	if c.options.Port == 0 {
 		var p uint16
 
 		switch c.options.TransportKind { //nolint: exhaustive
@@ -122,7 +122,7 @@ func NewCli[T PlatformNameOrString](
 			p = scrapligoconstants.DefaultSSHPort
 		}
 
-		c.options.Port = &p
+		c.options.Port = p
 	}
 
 	return c, nil
@@ -157,7 +157,7 @@ func (c *Cli) Open(ctx context.Context) (*Result, error) {
 			uint8(scrapligologging.IntFromLevel(c.options.LoggerLevel)),
 		),
 		c.host,
-		*c.options.Port,
+		c.options.Port,
 		string(c.options.TransportKind),
 	)
 
@@ -371,7 +371,7 @@ func (c *Cli) getResult(
 
 	return NewResult(
 		c.host,
-		*c.options.Port,
+		c.options.Port,
 		inputs,
 		resultStartTime,
 		splits,

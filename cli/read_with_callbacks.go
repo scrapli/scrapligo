@@ -146,7 +146,7 @@ func (c *Cli) ReadWithCallbacks( //nolint: gocyclo
 			if cb.completes {
 				return NewResult(
 					c.host,
-					*c.options.Port,
+					c.options.Port,
 					[]byte(initialInput),
 					scrapligoutil.SafeInt64ToUint64(startTime),
 					[]uint64{scrapligoutil.SafeInt64ToUint64(time.Now().UnixNano())},

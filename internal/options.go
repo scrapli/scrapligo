@@ -29,7 +29,7 @@ type Options struct {
 	Logger      any
 	LoggerLevel scrapligologging.LogLevel
 
-	Port *uint16
+	Port uint16
 
 	TransportKind TransportKind
 
@@ -44,7 +44,7 @@ func NewOptions() *Options {
 		Logger:        nil,
 		LoggerLevel:   scrapligologging.Warn,
 		TransportKind: TransportKindBin,
-		Port:          nil,
+		Port:          0,
 		Driver:        DriverOptions{},
 		Netconf:       NetconfOptions{},
 		Auth: AuthOptions{
