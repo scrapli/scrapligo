@@ -16,13 +16,7 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-// PlatformNameOrString is a string-like interface so you can pass a PlatformName or "normal" string
-// to the driver constructor.
-type PlatformNameOrString interface {
-	~string
-}
-
-func getDefinitionBytes[T PlatformNameOrString](definitionFileOrName T) ([]byte, error) {
+func getDefinitionBytes(definitionFileOrName string) ([]byte, error) {
 	var definitionBytes []byte
 
 	var definitionFileOrNameString string
@@ -79,11 +73,8 @@ type Cli struct {
 	options *scrapligointernal.Options
 }
 
-// NewCli returns a new instance of Cli setup with the given options. The definitionFileOrName
-// should be the name of one of the platforms that has a definition embedded in this package's
-// assets, or a file path to a valid yaml definition.
-func NewCli[T PlatformNameOrString](
-	definitionFileOrName T,
+// NewCli returns a new instance of Cli setup with the given options.
+func NewCli(
 	host string,
 	opts ...scrapligooptions.Option,
 ) (*Cli, error) {
@@ -98,19 +89,19 @@ func NewCli[T PlatformNameOrString](
 		options: scrapligointernal.NewOptions(),
 	}
 
-	definitionBytes, err := getDefinitionBytes(definitionFileOrName)
-	if err != nil {
-		return nil, err
-	}
-
-	c.options.Driver.DefinitionString = string(definitionBytes)
-
 	for _, opt := range opts {
 		err = opt(c.options)
 		if err != nil {
 			return nil, scrapligoerrors.NewOptionsError("failed applying option", err)
 		}
 	}
+
+	definitionBytes, err := getDefinitionBytes(c.options.Driver.DefinitionFileOrName)
+	if err != nil {
+		return nil, err
+	}
+
+	c.options.Driver.DefinitionString = string(definitionBytes)
 
 	if c.options.Port == 0 {
 		var p uint16

@@ -108,7 +108,7 @@ func libscrapliVersionIsHash() bool {
 
 // EnsureLibscrapli ensures libscrapli is present at the cache path. It returns the final path
 // or an error.
-func EnsureLibscrapli() (string, error) {
+func EnsureLibscrapli(ctx context.Context) (string, error) {
 	overridePath := os.Getenv(scrapligoconstants.LibScrapliPathOverrideEnv)
 	if overridePath != "" {
 		scrapligologging.Logger(
@@ -158,7 +158,7 @@ func EnsureLibscrapli() (string, error) {
 		cachedLibFilename,
 	)
 
-	err = writeLibScrapliToCache(cachedLibFilename)
+	err = writeLibScrapliToCache(ctx, cachedLibFilename)
 	if err != nil {
 		return "", err
 	}
@@ -204,7 +204,10 @@ func writeHTTPContentsFromPath(
 	return nil
 }
 
-func writeLibScrapliToCache(cachedLibFilename string) (err error) { //nolint: nonamedreturns
+func writeLibScrapliToCache( //nolint: nonamedreturns
+	ctx context.Context,
+	cachedLibFilename string,
+) (err error) {
 	err = os.MkdirAll(
 		filepath.Dir(cachedLibFilename),
 		scrapligoconstants.PermissionsOwnerReadWriteExecute,
@@ -272,9 +275,6 @@ func writeLibScrapliToCache(cachedLibFilename string) (err error) { //nolint: no
 			return scrapligoerrors.NewFfiError("docker unavailable and version is a hash", err)
 		}
 
-		ctx, cancel := context.WithTimeout(context.Background(), maxBuildMinutes*time.Minute)
-		defer cancel()
-
 		buildCmd := exec.CommandContext( //nolint: gosec
 			ctx,
 			"docker",
@@ -299,9 +299,6 @@ func writeLibScrapliToCache(cachedLibFilename string) (err error) { //nolint: no
 			scrapligologging.Debug,
 			"libscrapli target version is tag, attempting to fetch from github...",
 		)
-
-		ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
-		defer cancel()
 
 		err = writeHTTPContentsFromPath(
 			ctx,
@@ -329,7 +326,10 @@ func GetMapping() (*Mapping, error) {
 	mappingInstOnce.Do(func() {
 		start := time.Now()
 
-		libscrapliPath, err := EnsureLibscrapli()
+		ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+		defer cancel()
+
+		libscrapliPath, err := EnsureLibscrapli(ctx)
 		if err != nil {
 			onceErrorString = err.Error()
 

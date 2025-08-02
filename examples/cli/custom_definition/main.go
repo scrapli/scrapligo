@@ -81,11 +81,15 @@ func main() {
 
 	host, opts := getOptions()
 
+	// this is exactly the same as the upstream definition but just doing this to show that
+	// you can load up any yaml definition and dont necessarily need to rely on the upstream
+	// stuff in scrapli_definitions
+	opts = append(
+		opts,
+		scrapligooptions.WithDefintionFileOrName(definitionPath),
+	)
+
 	c, err := scrapligocli.NewCli(
-		// this is exactly the same as the upstream definition but just doing this to show that
-		// you can load up any yaml definition and dont necessarily need to rely on the upstream
-		// stuff in scrapli_definitions
-		definitionPath,
 		host,
 		opts...,
 	)

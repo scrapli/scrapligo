@@ -78,6 +78,12 @@ func viaBinTransport() {
 	defer cancel()
 
 	opts := []scrapligooptions.Option{
+		scrapligooptions.WithDefintionFileOrName(
+			scrapligoutil.GetEnvStrOrDefault(
+				"SCRAPLI_PLATFORM",
+				defaultPlatform.String(),
+			),
+		),
 		// we dont pass port here like other examples since its via the jumper host and we dont
 		// need to faff w/ the docker mac nat stuff
 		scrapligooptions.WithUsername(
@@ -90,10 +96,6 @@ func viaBinTransport() {
 	}
 
 	c, err := scrapligocli.NewCli(
-		scrapligoutil.GetEnvStrOrDefault(
-			"SCRAPLI_PLATFORM",
-			defaultPlatform.String(),
-		),
 		// unlike other examples going by name since we have the config file here
 		"srl",
 		opts...,
@@ -138,6 +140,12 @@ func viaSSH2Transport() {
 	// normally setup the connection, then under the transport options you can specify how to
 	// connect to the final host
 	opts := []scrapligooptions.Option{
+		scrapligooptions.WithDefintionFileOrName(
+			scrapligoutil.GetEnvStrOrDefault(
+				"SCRAPLI_PLATFORM",
+				defaultPlatform.String(),
+			),
+		),
 		// this is to the *bastion host* in the libssh2 case (jumper)
 		scrapligooptions.WithUsername(
 			scrapligoutil.GetEnvStrOrDefault("SCRAPLI_USERNAME", "scrapli-pw"),
@@ -156,10 +164,6 @@ func viaSSH2Transport() {
 	}
 
 	c, err := scrapligocli.NewCli(
-		scrapligoutil.GetEnvStrOrDefault(
-			"SCRAPLI_PLATFORM",
-			defaultPlatform.String(),
-		),
 		defaultHost(),
 		opts...,
 	)

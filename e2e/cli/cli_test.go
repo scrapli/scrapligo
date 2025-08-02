@@ -80,6 +80,7 @@ func getCli(t *testing.T, platform, transportName string) *scrapligocli.Cli {
 	var host string
 
 	opts := []scrapligooptions.Option{
+		scrapligooptions.WithDefintionFileOrName(platform),
 		scrapligooptions.WithUsername("admin"),
 	}
 
@@ -150,7 +151,6 @@ func getCli(t *testing.T, platform, transportName string) *scrapligocli.Cli {
 	}
 
 	d, err := scrapligocli.NewCli(
-		platform,
 		host,
 		opts...,
 	)
