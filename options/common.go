@@ -66,7 +66,7 @@ func WithLoggerLevel(
 // WithPort sets the port for the driver to connect to.
 func WithPort(port uint16) Option {
 	return func(o *scrapligointernal.Options) error {
-		o.Port = &port
+		o.Port = port
 
 		return nil
 	}

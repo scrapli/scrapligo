@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 
-	scrapligoconstants "github.com/scrapli/scrapligo/constants"
 	scrapligoerrors "github.com/scrapli/scrapligo/errors"
 	scrapligoffi "github.com/scrapli/scrapligo/ffi"
 	scrapligointernal "github.com/scrapli/scrapligo/internal"
@@ -60,10 +59,8 @@ func NewNetconf(
 		}
 	}
 
-	if n.options.Port == nil {
-		p := scrapligoconstants.DefaultNetconfPort
-
-		n.options.Port = &p
+	if n.options.Port == 0 {
+		n.options.Port = 830
 	}
 
 	return n, nil
@@ -97,7 +94,7 @@ func (n *Netconf) Open(ctx context.Context) (*Result, error) {
 			uint8(scrapligologging.IntFromLevel(n.options.LoggerLevel)),
 		),
 		n.host,
-		*n.options.Port,
+		n.options.Port,
 		string(n.options.TransportKind),
 	)
 
@@ -350,7 +347,7 @@ func (n *Netconf) getResult(
 	return NewResult(
 		string(input),
 		n.host,
-		*n.options.Port,
+		n.options.Port,
 		resultStartTime,
 		resultEndTime,
 		resultRaw,
