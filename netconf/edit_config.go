@@ -19,7 +19,34 @@ func newEditConfigOptions(options ...Option) *editConfigOptions {
 }
 
 type editConfigOptions struct {
-	target DatastoreType
+	target           DatastoreType
+	defaultOperation *DefaultOperation
+	testOption       *TestOption
+	errorOption      *ErrorOption
+}
+
+func (o *editConfigOptions) getDefaultOperation() string {
+	if o.defaultOperation == nil {
+		return ""
+	}
+
+	return o.defaultOperation.String()
+}
+
+func (o *editConfigOptions) getTestOption() string {
+	if o.testOption == nil {
+		return ""
+	}
+
+	return o.testOption.String()
+}
+
+func (o *editConfigOptions) getErrorOption() string {
+	if o.errorOption == nil {
+		return ""
+	}
+
+	return o.errorOption.String()
 }
 
 // EditConfig executes a netconf edit config rpc. Supported options:
@@ -45,6 +72,9 @@ func (n *Netconf) EditConfig(
 		&cancel,
 		config,
 		loadedOptions.target.String(),
+		loadedOptions.getDefaultOperation(),
+		loadedOptions.getTestOption(),
+		loadedOptions.getErrorOption(),
 	)
 	if status != 0 {
 		return nil, scrapligoerrors.NewFfiError("failed to submit editConfig operation", nil)

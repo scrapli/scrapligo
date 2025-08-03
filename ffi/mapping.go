@@ -274,6 +274,9 @@ type NetconfMapping struct {
 		cancel *bool,
 		config string,
 		target string,
+		defaultOperation string,
+		testOption string,
+		errorOption string,
 	) uint8
 
 	// CopyConfig submits a CopyConfig operation to the underlying driver. The driver populates the
@@ -357,6 +360,7 @@ type NetconfMapping struct {
 		driverPtr uintptr,
 		operationID *uint32,
 		cancel *bool,
+		persistId string,
 	) uint8
 	Validate func(
 		driverPtr uintptr,
@@ -394,6 +398,7 @@ type NetconfMapping struct {
 		cancel *bool,
 		datastore string,
 		content string,
+		defaultOperation string,
 	) uint8
 	Action func(
 		driverPtr uintptr,

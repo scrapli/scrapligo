@@ -197,3 +197,45 @@ func WithForceClose() Option {
 		}
 	}
 }
+
+// WithDefaultOperation apply the default operation type for the rpc.
+func WithDefaultOperation(t DefaultOperation) Option {
+	return func(o any) {
+		switch to := o.(type) {
+		case *editConfigOptions:
+			to.defaultOperation = &t
+		case *editDataOptions:
+			to.defaultOperation = &t
+		}
+	}
+}
+
+// WithTestOption apply the test option field for the rpc.
+func WithTestOption(t TestOption) Option {
+	return func(o any) {
+		switch to := o.(type) {
+		case *editConfigOptions:
+			to.testOption = &t
+		}
+	}
+}
+
+// WithErrorOption apply the error option field for the rpc.
+func WithErrorOption(t ErrorOption) Option {
+	return func(o any) {
+		switch to := o.(type) {
+		case *editConfigOptions:
+			to.errorOption = &t
+		}
+	}
+}
+
+// WithPersistID apply the persist-id field for the rpc.
+func WithPersistID(s string) Option {
+	return func(o any) {
+		switch to := o.(type) {
+		case *cancelCommitOptions:
+			to.persistID = s
+		}
+	}
+}
