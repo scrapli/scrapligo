@@ -19,7 +19,16 @@ func newEditDataOptions(options ...Option) *editDataOptions {
 }
 
 type editDataOptions struct {
-	datastore DatastoreType
+	datastore        DatastoreType
+	defaultOperation *DefaultOperation
+}
+
+func (o *editDataOptions) getDefaultOperation() string {
+	if o.defaultOperation == nil {
+		return ""
+	}
+
+	return o.defaultOperation.String()
 }
 
 // EditData executes a netconf edit-data rpc. Supported options:
@@ -45,6 +54,7 @@ func (n *Netconf) EditData(
 		&cancel,
 		loadedOptions.datastore.String(),
 		content,
+		loadedOptions.getDefaultOperation(),
 	)
 	if status != 0 {
 		return nil, scrapligoerrors.NewFfiError("failed to submit edit-data operation", nil)

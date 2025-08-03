@@ -6,6 +6,20 @@ import (
 	scrapligoerrors "github.com/scrapli/scrapligo/errors"
 )
 
+func newCancelCommitOptions(options ...Option) *cancelCommitOptions {
+	o := &cancelCommitOptions{}
+
+	for _, opt := range options {
+		opt(o)
+	}
+
+	return o
+}
+
+type cancelCommitOptions struct {
+	persistID string
+}
+
 // CancelCommit executes a netconf cancel-commit rpc.
 func (n *Netconf) CancelCommit(
 	ctx context.Context,
@@ -21,10 +35,13 @@ func (n *Netconf) CancelCommit(
 
 	var operationID uint32
 
+	loadedOptions := newCancelCommitOptions(options...)
+
 	status := n.ffiMap.Netconf.CancelCommit(
 		n.ptr,
 		&operationID,
 		&cancel,
+		loadedOptions.persistID,
 	)
 	if status != 0 {
 		return nil, scrapligoerrors.NewFfiError("failed to submit cancel-commit operation", nil)

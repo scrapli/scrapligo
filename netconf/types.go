@@ -78,3 +78,44 @@ const (
 	ConfigFilterFalse = "false"
 	ConfigFilterUnset = "unset"
 )
+
+// DefaultOperation is an enum(ish) representing the name of a default operation field.
+type DefaultOperation string
+
+// String (stringer) method for DefaultOperation.
+func (t DefaultOperation) String() string {
+	return string(t)
+}
+
+const (
+	DefaultOperationMerge   DefaultOperation = "merge"
+	DefaultOperationReplace DefaultOperation = "replace"
+	DefaultOperationNone    DefaultOperation = "none"
+)
+
+// TestOption is an enum(ish) representing the name of a default operation field.
+type TestOption string
+
+// String (stringer) method for TestOption.
+func (t TestOption) String() string {
+	return string(t)
+}
+
+const (
+	TestOptionTestThenSet TestOption = "test-then-set"
+	TestOptionSet         TestOption = "set"
+)
+
+// ErrorOption is an enum(ish) representing the name of a default operation field.
+type ErrorOption string
+
+// String (stringer) method for DefaultOperation.
+func (t ErrorOption) String() string {
+	return string(t)
+}
+
+const (
+	ErrorOptionStopOnError     ErrorOption = "stop-on-error"
+	ErrorOptionContinueOnError ErrorOption = "continue-on-error"
+	ErrorOptionRollbackOnError ErrorOption = "rollback-on-error"
+)
