@@ -147,6 +147,7 @@ func (c *Cli) Open(ctx context.Context) (*Result, error) {
 			c.options.Logger,
 			uint8(scrapligologging.IntFromLevel(c.options.LoggerLevel)),
 		),
+		string(c.options.LoggerLevel),
 		c.host,
 		c.options.Port,
 		string(c.options.TransportKind),

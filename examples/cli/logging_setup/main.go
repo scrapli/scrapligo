@@ -127,12 +127,12 @@ func slogLogger() {
 		// too otherwise its just warn so you wont see much (or hopefully anything)
 		scrapligooptions.WithLogger(
 			slog.New(
-				slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
-					// weirdly(? or developer error?) if the minimum level of this is default (INFO)
-					// when we call slog.Debug() it still prints INFO messages. so, i guess just be
-					// sure to set this in unison with what you tell scrapli to do
-					Level: slog.LevelDebug,
-				},
+				slog.NewTextHandler(
+					os.Stdout,
+					// w/ slog you need to tell scrapli *and* the slog the level you want
+					&slog.HandlerOptions{
+						Level: slog.LevelDebug,
+					},
 				),
 			),
 		),

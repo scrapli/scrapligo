@@ -93,6 +93,7 @@ func (n *Netconf) Open(ctx context.Context) (*Result, error) {
 			n.options.Logger,
 			uint8(scrapligologging.IntFromLevel(n.options.LoggerLevel)),
 		),
+		string(n.options.LoggerLevel),
 		n.host,
 		n.options.Port,
 		string(n.options.TransportKind),
