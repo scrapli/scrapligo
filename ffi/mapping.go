@@ -46,6 +46,7 @@ type CliMapping struct {
 	Alloc func(
 		definitionString string,
 		loggerCallback uintptr,
+		loggerLevel string,
 		host string,
 		port uint16,
 		transportKind string,
@@ -156,6 +157,7 @@ type NetconfMapping struct {
 	// Alloc allocates the driver. See CliMapping.Alloc for details.
 	Alloc func(
 		loggerCallback uintptr,
+		loggerLevel string,
 		host string,
 		port uint16,
 		transportKind string,

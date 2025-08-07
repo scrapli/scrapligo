@@ -9,6 +9,8 @@ func (l LogLevel) String() string {
 }
 
 const (
+	// Trace is the trace log level.
+	Trace LogLevel = "trace"
 	// Debug is the debug log level.
 	Debug LogLevel = "debug"
 	// Info is the info(rmational) log level.
@@ -29,6 +31,8 @@ type LogLeveLAsInt uint8
 // IntFromLevel returns the uint8 value of the given log level.
 func IntFromLevel(level LogLevel) LogLeveLAsInt {
 	switch level {
+	case Trace:
+		return TraceAsInt
 	case Debug:
 		return DebugAsInt
 	case Info:
@@ -49,6 +53,8 @@ func IntFromLevel(level LogLevel) LogLeveLAsInt {
 // LevelFromInt returns the LogLevel value of the given uint8 level.
 func LevelFromInt(level uint8) LogLevel {
 	switch level {
+	case uint8(TraceAsInt):
+		return Trace
 	case uint8(DebugAsInt):
 		return Debug
 	case uint8(InfoAsInt):
@@ -67,16 +73,18 @@ func LevelFromInt(level uint8) LogLevel {
 }
 
 const (
+	// TraceAsInt is the debug log level.
+	TraceAsInt LogLeveLAsInt = 0
 	// DebugAsInt is the debug log level.
-	DebugAsInt LogLeveLAsInt = 0
+	DebugAsInt LogLeveLAsInt = 1
 	// InfoAsInt is the info(rmational) log level.
-	InfoAsInt LogLeveLAsInt = 1
+	InfoAsInt LogLeveLAsInt = 2
 	// WarnAsInt is the warning log level.
-	WarnAsInt LogLeveLAsInt = 2
+	WarnAsInt LogLeveLAsInt = 3
 	// CriticalAsInt is the critical log level.
-	CriticalAsInt LogLeveLAsInt = 3
+	CriticalAsInt LogLeveLAsInt = 4
 	// FatalAsInt is the fatal log level.
-	FatalAsInt LogLeveLAsInt = 4
+	FatalAsInt LogLeveLAsInt = 5
 	// DisabledAsInt is the disabled (no logging) log level.
-	DisabledAsInt LogLeveLAsInt = 5
+	DisabledAsInt LogLeveLAsInt = 6
 )

@@ -38,6 +38,8 @@ func LoggerToLoggerCallback(logger any, logLevel uint8) uintptr { //nolint: gocy
 			}
 
 			switch level {
+			case uint8(TraceAsInt):
+				l.Printf("trace :: %s", *message)
 			case uint8(DebugAsInt):
 				l.Printf("debug :: %s", *message)
 			case uint8(InfoAsInt):
@@ -60,16 +62,19 @@ func LoggerToLoggerCallback(logger any, logLevel uint8) uintptr { //nolint: gocy
 			// ignoring context things since we (currently?) expose no means to actually pass
 			// a context with things here anyway
 			switch level {
+			case uint8(TraceAsInt):
+				// no "trace" level, so... just debug it and add the trace prefix for clarity
+				l.Debug(fmt.Sprintf("trace: %s", *message))
 			case uint8(DebugAsInt):
-				l.Debug(*message) //nolint: noctx
+				l.Debug(*message)
 			case uint8(InfoAsInt):
-				l.Info(*message) //nolint: noctx
+				l.Info(*message)
 			case uint8(WarnAsInt):
-				l.Warn(*message) //nolint: noctx
+				l.Warn(*message)
 			case uint8(CriticalAsInt):
-				l.Error(*message) //nolint: noctx
+				l.Error(*message)
 			case uint8(FatalAsInt):
-				l.Error(*message) //nolint: noctx
+				l.Error(*message)
 			case uint8(DisabledAsInt):
 			}
 		})
@@ -93,6 +98,8 @@ func init() { //nolint: gochecknoinits
 
 	if v != "" {
 		switch v {
+		case Trace.String():
+			Level = Trace
 		case Debug.String():
 			Level = Debug
 		case Info.String():
