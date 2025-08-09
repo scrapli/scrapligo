@@ -1,4 +1,4 @@
-interface mgmt0 {
+    interface mgmt0 {
         admin-state enable
         subinterface 0 {
             admin-state enable
