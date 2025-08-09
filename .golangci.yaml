@@ -56,6 +56,14 @@ linters:
         path: cli/platforms.go
         text: var-naming
       - linters:
+          - misspell
+        path: cli/platforms.go
+        text: misspelling
+      - linters:
+          - misspell
+        path: cli/definitionoptions
+        text: misspelling
+      - linters:
           - revive
         path: netconf/types.go
         text: 'exported: exported const'
