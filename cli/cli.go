@@ -5,8 +5,11 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
+	"strings"
 
 	scrapligoassets "github.com/scrapli/scrapligo/assets"
+	scrapligoclidefinitionoptions "github.com/scrapli/scrapligo/cli/definitionoptions"
 	scrapligoconstants "github.com/scrapli/scrapligo/constants"
 	scrapligoerrors "github.com/scrapli/scrapligo/errors"
 	scrapligoffi "github.com/scrapli/scrapligo/ffi"
@@ -16,8 +19,13 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-func getDefinitionBytes(definitionFileOrName string) ([]byte, error) {
-	var definitionBytes []byte
+type loadedDefinition struct {
+	content      []byte
+	platformName string
+}
+
+func getDefinitionBytes(definitionFileOrName string) (*loadedDefinition, error) {
+	d := &loadedDefinition{}
 
 	var definitionFileOrNameString string
 
@@ -34,7 +42,7 @@ func getDefinitionBytes(definitionFileOrName string) ([]byte, error) {
 
 	for _, platformName := range assetPlatformNames {
 		if platformName == definitionFileOrNameString {
-			definitionBytes, err = scrapligoassets.Assets.ReadFile(
+			d.content, err = scrapligoassets.Assets.ReadFile(
 				fmt.Sprintf("definitions/%s.yaml", platformName),
 			)
 			if err != nil {
@@ -46,21 +54,28 @@ func getDefinitionBytes(definitionFileOrName string) ([]byte, error) {
 					err,
 				)
 			}
+
+			d.platformName = platformName
 		}
 	}
 
-	if len(definitionBytes) == 0 {
+	if len(d.content) == 0 {
 		// didn't load from assets, so we'll try to load the file
-		definitionBytes, err = os.ReadFile(definitionFileOrNameString) //nolint: gosec
+		d.content, err = os.ReadFile(definitionFileOrNameString) //nolint: gosec
 		if err != nil {
 			return nil, scrapligoerrors.NewUtilError(
 				fmt.Sprintf("failed loading definition file at path %q", definitionFileOrName),
 				err,
 			)
 		}
+
+		d.platformName = strings.TrimSuffix(
+			filepath.Base(definitionFileOrNameString),
+			filepath.Ext(definitionFileOrNameString),
+		)
 	}
 
-	return definitionBytes, nil
+	return d, nil
 }
 
 // Cli is an object representing a connection to a device of some sort -- this object wraps the
@@ -96,12 +111,12 @@ func NewCli(
 		}
 	}
 
-	definitionBytes, err := getDefinitionBytes(c.options.Driver.DefinitionFileOrName)
+	loadedDef, err := getDefinitionBytes(c.options.Cli.DefinitionFileOrName)
 	if err != nil {
 		return nil, err
 	}
 
-	c.options.Driver.DefinitionString = string(definitionBytes)
+	c.options.Cli.DefinitionString = string(loadedDef.content)
 
 	if c.options.Port == 0 {
 		var p uint16
@@ -114,6 +129,22 @@ func NewCli(
 		}
 
 		c.options.Port = p
+	}
+
+	if !c.options.Cli.SkipStaticOptions {
+		// for platforms that have... quirks, its difficult to fully encapsulate setting up a
+		// connection in purely yaml... so... there are py/go "extensions" in the
+		// scrapli_definitions project that are pulled into scrapli/scrapligo in order to facilitate
+		// these quirks -- this includes options, things like mikrotik that *really* wants you to
+		// modify a username with some extra chars to change how the device behaves, here is where
+		// we apply those options. obviously this can be skipped with the appropriate option.
+		for _, opt := range scrapligoclidefinitionoptions.GetPlatformOptions().
+			GetOptionsForPlatform(loadedDef.platformName) {
+			err = opt(c.options)
+			if err != nil {
+				return nil, scrapligoerrors.NewOptionsError("failed applying (static) option", err)
+			}
+		}
 	}
 
 	return c, nil
@@ -142,7 +173,7 @@ func (c *Cli) Open(ctx context.Context) (*Result, error) {
 	}()
 
 	c.ptr = c.ffiMap.Cli.Alloc(
-		c.options.Driver.DefinitionString,
+		c.options.Cli.DefinitionString,
 		scrapligologging.LoggerToLoggerCallback(
 			c.options.Logger,
 			uint8(scrapligologging.IntFromLevel(c.options.LoggerLevel)),

@@ -21,9 +21,9 @@ const (
 	TransportKindTest TransportKind = "test_"
 )
 
-// Options holds options for all driver kinds ("normal" and netconf).
+// Options holds options for all driver kinds (cli and netconf).
 type Options struct {
-	Driver  DriverOptions
+	Cli     CliOptions
 	Netconf NetconfOptions
 
 	Logger      any
@@ -45,7 +45,7 @@ func NewOptions() *Options {
 		LoggerLevel:   scrapligologging.Warn,
 		TransportKind: TransportKindBin,
 		Port:          0,
-		Driver: DriverOptions{
+		Cli: CliOptions{
 			DefinitionFileOrName: "default",
 		},
 		Netconf: NetconfOptions{},
@@ -94,10 +94,11 @@ func (o *Options) Apply(driverPtr uintptr, m *scrapligoffi.Mapping) error {
 	return nil
 }
 
-// DriverOptions holds driver specific options.
-type DriverOptions struct {
+// CliOptions holds cli specific options.
+type CliOptions struct {
 	DefinitionFileOrName string
 	DefinitionString     string
+	SkipStaticOptions    bool
 }
 
 // NetconfOptions holds netconf specific options.

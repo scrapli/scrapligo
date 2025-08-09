@@ -23,6 +23,16 @@ rm -f assets/definitions/*.yaml
 echo "updating definitions..."
 cp "$TMP_DIR"/definitions/*.yaml assets/definitions/
 
+echo "removing old definition options..."
+rm -f cli/definitionoptions/*.go
+
+echo "updating definition options..."
+cp "$TMP_DIR"/options/*.go cli/definitionoptions/
+
+echo "rendering platforms and definition options..."
+go run build/write_scrapli_platforms_and_options/main.go
+gofumpt -w cli/platforms.go
+
 rm -rf "$TMP_DIR"
 
 sed -i.bak -E "s|(var ScrapliDefinitionsVersion = )(.*)|\1\"${TARGET_DEFINITIONS_TAG#v}\"|g" constants/versions.go
