@@ -9,4 +9,4 @@ var LibScrapliVersion = "0.0.1-beta.10"
 
 // ScrapliDefinitionsVersion is the version of scrapli definitions embedded in assets in this build.
 // This should be set prior to a release via build/update_all.sh.
-var ScrapliDefinitionsVersion = "1a3d771"
+var ScrapliDefinitionsVersion = "509b912"
