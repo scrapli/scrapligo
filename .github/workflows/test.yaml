@@ -39,7 +39,7 @@ jobs:
 
       - name: ensure libscrapli is available
         run: |
-          go run build/write_libscrapli_to_cache.go
+          go run build/write_libscrapli_to_cache/main.go
 
       - name: install go test tools
         run: |
@@ -82,7 +82,7 @@ jobs:
 
       - name: ensure libscrapli is available
         run: |
-          go run build/write_libscrapli_to_cache.go
+          go run build/write_libscrapli_to_cache/main.go
 
       - name: install go test tools
         run: |
