@@ -37,7 +37,7 @@ var (
 
 func getPromptPattern() *regexp.Regexp {
 	promptPatternOnce.Do(func() {
-		promptPattern = regexp.MustCompile(`(?im)^[a-z\d.\-@()/:]{1,48}[#>$]\s*$`)
+		promptPattern = regexp.MustCompile(`(?im)^[a-z\d.\-@()/:_]{1,48}[#>$]\s*$`)
 	})
 
 	return promptPattern
