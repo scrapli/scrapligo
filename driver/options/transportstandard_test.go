@@ -2,8 +2,9 @@ package options_test
 
 import (
 	"errors"
-	"golang.org/x/crypto/ssh"
 	"testing"
+
+	"golang.org/x/crypto/ssh"
 
 	"github.com/scrapli/scrapligo/driver/generic"
 	"github.com/scrapli/scrapligo/driver/options"

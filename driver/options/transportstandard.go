@@ -45,7 +45,9 @@ func WithStandardTransportHostKeyAlgorithms(algorithms []string) util.Option {
 		if !ok {
 			return util.ErrIgnoredOption
 		}
+
 		t.HostKeyAlgorithms = algorithms
+
 		return nil
 	}
 }
