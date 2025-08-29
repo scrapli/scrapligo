@@ -210,7 +210,10 @@ func (d *Driver) handleCallbacks(
 	select {
 	case r := <-c:
 		if r == nil {
-			return nil, fmt.Errorf("%w: reading from closed channel during callbacks", util.ErrTimeoutError)
+			return nil, fmt.Errorf(
+				"%w: reading from closed channel during callbacks",
+				util.ErrTimeoutError,
+			)
 		}
 
 		if r.err != nil {

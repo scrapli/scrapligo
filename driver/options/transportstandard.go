@@ -36,3 +36,18 @@ func WithStandardTransportExtraKexs(l []string) util.Option {
 		return nil
 	}
 }
+
+// WithStandardTransportHostKeyAlgorithms sets the allowed SSH host key algorithms supported by
+// the standard transport.
+func WithStandardTransportHostKeyAlgorithms(algorithms []string) util.Option {
+	return func(o interface{}) error {
+		t, ok := o.(*transport.Standard)
+		if !ok {
+			return util.ErrIgnoredOption
+		}
+
+		t.HostKeyAlgorithms = algorithms
+
+		return nil
+	}
+}

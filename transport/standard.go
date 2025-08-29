@@ -24,13 +24,14 @@ const (
 // NewStandardTransport returns an instance of Standard transport.
 func NewStandardTransport(s *SSHArgs) (*Standard, error) {
 	t := &Standard{
-		SSHArgs:      s,
-		client:       nil,
-		session:      nil,
-		writer:       nil,
-		reader:       nil,
-		ExtraCiphers: make([]string, 0),
-		ExtraKexs:    make([]string, 0),
+		SSHArgs:           s,
+		client:            nil,
+		session:           nil,
+		writer:            nil,
+		reader:            nil,
+		ExtraCiphers:      make([]string, 0),
+		ExtraKexs:         make([]string, 0),
+		HostKeyAlgorithms: make([]string, 0),
 	}
 
 	return t, nil
@@ -38,13 +39,14 @@ func NewStandardTransport(s *SSHArgs) (*Standard, error) {
 
 // Standard is the standard (crypto/ssh) transport object.
 type Standard struct {
-	SSHArgs      *SSHArgs
-	client       *ssh.Client
-	session      *ssh.Session
-	writer       io.WriteCloser
-	reader       io.Reader
-	ExtraCiphers []string
-	ExtraKexs    []string
+	SSHArgs           *SSHArgs
+	client            *ssh.Client
+	session           *ssh.Session
+	writer            io.WriteCloser
+	reader            io.Reader
+	ExtraCiphers      []string
+	ExtraKexs         []string
+	HostKeyAlgorithms []string
 }
 
 func (t *Standard) openSession(a *Args, cfg *ssh.ClientConfig) error {
@@ -155,6 +157,12 @@ func (t *Standard) openBase(a *Args) error {
 	if len(t.ExtraKexs) > 0 {
 		cfg.Config.KeyExchanges = append(cfg.Config.KeyExchanges, t.ExtraKexs...)
 	}
+
+	if len(t.HostKeyAlgorithms) > 0 {
+		cfg.HostKeyAlgorithms = t.HostKeyAlgorithms
+	}
+
+	a.l.Debugf("connecting to %s:%d", a.Host, a.Port)
 
 	return t.openSession(a, cfg)
 }
