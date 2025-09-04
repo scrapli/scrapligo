@@ -93,7 +93,7 @@ func getNetconf(t *testing.T, platform, transportName string) *scrapligonetconf.
 		t.Fatal("unsupported transport name")
 	}
 
-	host := "localhost"
+	host := localhost
 
 	switch platform {
 	case scrapligocli.AristaEos.String():

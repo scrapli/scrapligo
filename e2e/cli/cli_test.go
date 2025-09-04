@@ -118,7 +118,7 @@ func getCli(t *testing.T, platform, transportName string) *scrapligocli.Cli {
 		var port uint16
 
 		if runtime.GOOS == scrapligoconstants.Darwin {
-			host = "localhost"
+			host = localhost
 			port = 22022
 		} else {
 			host = "172.20.20.17"
@@ -139,7 +139,7 @@ func getCli(t *testing.T, platform, transportName string) *scrapligocli.Cli {
 		)
 
 		if runtime.GOOS == scrapligoconstants.Darwin {
-			host = "localhost"
+			host = localhost
 
 			opts = append(
 				opts,
