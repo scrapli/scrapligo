@@ -35,4 +35,4 @@ gofumpt -w cli/platforms.go
 
 rm -rf "$TMP_DIR"
 
-sed -i.bak -E "s|(var ScrapliDefinitionsVersion = )(.*)|\1\"${TARGET_DEFINITIONS_TAG#v}\"|g" constants/versions.go
+sed -i -E "s|(var ScrapliDefinitionsVersion = )(.*)|\1\"${TARGET_DEFINITIONS_TAG#v}\"|g" constants/versions.go

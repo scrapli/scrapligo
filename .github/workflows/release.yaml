@@ -24,5 +24,4 @@ jobs:
 
       - name: set version information
         run: |
-          sed -i.bak -E "s|^(var Version = ).*|\1\"${{ env.RELEASE_VERSION }}\"|" constants/versions.go
-          rm constants/versions.go.bak
+          sed -i -E "s|^(var Version = ).*|\1\"${{ env.RELEASE_VERSION }}\"|" constants/versions.go
