@@ -1,3 +1,4 @@
+// Package cli
 // DO NOT EDIT, GENERATED FILE
 package cli
 

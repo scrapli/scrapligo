@@ -2,7 +2,7 @@ github.com/carlmontanari/difflibgo v0.0.0-20240227210139-93685b1c22ae h1:h4sxL/A
 github.com/carlmontanari/difflibgo v0.0.0-20240227210139-93685b1c22ae/go.mod h1:+3MuSIeC3qmdSesR12cTLeb47R/Vvo+bHdB6hC5HShk=
 github.com/ebitengine/purego v0.9.0 h1:mh0zpKBIXDceC63hpvPuGLiJ8ZAa3DfrFTudmfi8A4k=
 github.com/ebitengine/purego v0.9.0/go.mod h1:iIjxzd6CiRiOG0UyXP+V1+jWqUXVjPKLAI0mRfJZTmQ=
-github.com/sirikothe/gotextfsm v1.0.1-0.20200816110946-6aa2cfd355e4 h1:FHUL2HofYJuslFOQdy/JjjP36zxqIpd/dcoiwLMIs7k=
-github.com/sirikothe/gotextfsm v1.0.1-0.20200816110946-6aa2cfd355e4/go.mod h1:CJYqpTg9u5VPCoD0VEl9E68prCIiWQD8m457k098DdQ=
-golang.org/x/sys v0.33.0 h1:q3i8TbbEz+JRD9ywIRlyRAQbM0qF7hu24q3teo2hbuw=
-golang.org/x/sys v0.33.0/go.mod h1:BJP2sWEmIv4KK5OTEluFJCKSidICx8ciO85XgH3Ak8k=
+github.com/sirikothe/gotextfsm v1.1.0 h1:Hd6S3g4383e8b0awZQEPr+d1QPVxxnR/3NU1Kw4dI/Y=
+github.com/sirikothe/gotextfsm v1.1.0/go.mod h1:CJYqpTg9u5VPCoD0VEl9E68prCIiWQD8m457k098DdQ=
+golang.org/x/sys v0.36.0 h1:KVRy2GtZBrk1cBYA7MKu5bEZFxQk4NIDV6RLVcC8o0k=
+golang.org/x/sys v0.36.0/go.mod h1:OgkHotnGiDImocRcuBABYBEXf8A9a87e/uXjp9XT3ks=
