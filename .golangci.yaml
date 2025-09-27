@@ -1,7 +1,7 @@
 ---
 version: "2"
 run:
-  go: "1.24"
+  go: "1.25"
 linters:
   default: all
   disable:
@@ -52,10 +52,6 @@ linters:
         path: cli/platforms.go
         text: exported
       - linters:
-          - revive
-        path: cli/platforms.go
-        text: var-naming
-      - linters:
           - misspell
         path: cli/platforms.go
         text: misspelling
@@ -92,12 +88,7 @@ linters:
           - forbidigo
         path: examples/
         text: fmt.Println
-    paths:
-      - private
-      - .private
-      - third_party$
-      - builtin$
-      - examples$
+    warn-unused: true
 issues:
   max-issues-per-linter: 0
   max-same-issues: 0
