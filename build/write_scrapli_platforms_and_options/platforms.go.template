@@ -1,0 +1,30 @@
+// Package cli
+// DO NOT EDIT, GENERATED FILE
+package cli
+
+// PlatformName is an enum(ish) representing the name of a Platform.
+type PlatformName string
+
+// String (stringer) method for PlatformName for formatting and/or just to NokiaSrl.String() when
+// passing to.
+func (p PlatformName) String() string {
+	return string(p)
+}
+
+const (
+    {{- range $platformFileBaseName, $platformGoName := .PlatformMap }}
+	{{ $platformGoName }} PlatformName = "{{ $platformFileBaseName }}"
+	{{- end }}
+)
+
+// GetPlatformNames is used to get the "core" (as in embedded in assets and used in testing)
+// platform names. If your platform isn't listed here, or you need to have a tweaked platform
+// definition you can always pass a definition filename instead of a platform name on Cli
+// creation.
+func GetPlatformNames() []string {
+	return []string{
+	    {{- range $platformGoName := .PlatformMap }}
+    	string({{ $platformGoName }}),
+    	{{- end }}
+ 	}
+}

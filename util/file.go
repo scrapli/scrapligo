@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	scrapligoerrors "github.com/scrapli/scrapligo/errors"
 )
 
 // ResolveFilePath resolves the qualified path to file string f.
@@ -24,11 +26,12 @@ func ResolveFilePath(f string) (string, error) {
 
 	f = fmt.Sprintf("%s/%s", homeDir, f)
 
-	if _, err = os.Stat(f); err == nil {
+	_, err = os.Stat(f)
+	if err == nil {
 		return f, nil
 	}
 
-	return "", ErrFileNotFoundError
+	return "", scrapligoerrors.NewUtilError(fmt.Sprintf("file %q not found", f), nil)
 }
 
 // LoadFileLines convenience function to load a file and return slice of strings of lines in that

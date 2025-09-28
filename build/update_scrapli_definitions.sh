@@ -1,0 +1,38 @@
+#!/bin/bash
+set -euo pipefail
+
+TARGET_DEFINITIONS_TAG="${1:-}"
+
+ORIG_DIR=$(pwd)
+TMP_DIR=$(mktemp -d)
+
+if [[ "$TARGET_DEFINITIONS_TAG" =~ ^[0-9a-f]{7,40}$ ]]; then
+    git clone --depth 1 https://github.com/scrapli/scrapli_definitions.git "$TMP_DIR"
+    cd "$TMP_DIR"
+    git checkout "$TARGET_DEFINITIONS_TAG"
+    cd "$ORIG_DIR"
+else
+    git clone --depth 1 --branch "$TARGET_DEFINITIONS_TAG" https://github.com/scrapli/scrapli_definitions.git "$TMP_DIR"
+fi
+
+echo "cloned scrapli-definitions@$TARGET_DEFINITIONS_TAG into $TMP_DIR"
+
+echo "removing old definitions..."
+rm -f assets/definitions/*.yaml
+
+echo "updating definitions..."
+cp "$TMP_DIR"/definitions/*.yaml assets/definitions/
+
+echo "removing old definition options..."
+rm -f cli/definitionoptions/*.go
+
+echo "updating definition options..."
+cp "$TMP_DIR"/options/*.go cli/definitionoptions/
+
+echo "rendering platforms and definition options..."
+go run build/write_scrapli_platforms_and_options/main.go
+gofumpt -w cli/platforms.go
+
+rm -rf "$TMP_DIR"
+
+sed -i -E "s|(var ScrapliDefinitionsVersion = )(.*)|\1\"${TARGET_DEFINITIONS_TAG#v}\"|g" constants/versions.go

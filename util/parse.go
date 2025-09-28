@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 
+	scrapligoerrors "github.com/scrapli/scrapligo/errors"
 	"github.com/sirikothe/gotextfsm"
 )
 
@@ -18,22 +19,20 @@ func ResolveAtFileOrURL(path string) ([]byte, error) {
 	case strings.HasPrefix(path, "http://") || strings.HasPrefix(path, "https://"):
 		resp, err := http.Get(path) //nolint:gosec,noctx
 		if err != nil {
-			return nil, fmt.Errorf(
-				"%w: failed downloading file at path '%s', error: %s",
-				ErrParseError,
-				path,
+			return nil, scrapligoerrors.NewUtilError(
+				fmt.Sprintf("failed downloading file at path %q", path),
 				err,
 			)
 		}
 
-		defer resp.Body.Close() //nolint
+		defer func() {
+			_ = resp.Body.Close()
+		}()
 
 		b, err = io.ReadAll(resp.Body)
 		if err != nil {
-			return nil, fmt.Errorf(
-				"%w: failed reading downloaded file at path '%s', error: %s",
-				ErrParseError,
-				path,
+			return nil, scrapligoerrors.NewUtilError(
+				fmt.Sprintf("failed reading downloaded file at path %q", path),
 				err,
 			)
 		}
@@ -43,10 +42,8 @@ func ResolveAtFileOrURL(path string) ([]byte, error) {
 
 		b, err = os.ReadFile(path) //nolint:gosec
 		if err != nil {
-			return nil, fmt.Errorf(
-				"%w: failed opening provided file at path '%s', error: %s",
-				ErrParseError,
-				path,
+			return nil, scrapligoerrors.NewUtilError(
+				fmt.Sprintf("failed opening provided file at path %q", path),
 				err,
 			)
 		}
@@ -69,22 +66,14 @@ func TextFsmParse(s, path string) ([]map[string]interface{}, error) {
 
 	err = fsm.ParseString(string(t))
 	if err != nil {
-		return []map[string]interface{}{}, fmt.Errorf(
-			"%w: failed parsing provided template, gotextfsm error: %s",
-			ErrParseError,
-			err,
-		)
+		return nil, scrapligoerrors.NewUtilError("failed parsing provided template", err)
 	}
 
 	parser := gotextfsm.ParserOutput{}
 
 	err = parser.ParseTextString(s, fsm, true)
 	if err != nil {
-		return []map[string]interface{}{}, fmt.Errorf(
-			"%w: failed parsing device output, gotextfsm error: %s",
-			ErrParseError,
-			err,
-		)
+		return nil, scrapligoerrors.NewUtilError("failed parsing device output", err)
 	}
 
 	return parser.Dict, nil

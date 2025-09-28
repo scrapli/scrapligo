@@ -2,138 +2,120 @@ package logging
 
 import (
 	"fmt"
-	"sync"
+	"log"
+	"log/slog"
+	"os"
 
-	"github.com/scrapli/scrapligo/util"
+	"github.com/ebitengine/purego"
+	scrapligoconstants "github.com/scrapli/scrapligo/constants"
 )
 
-const (
-	// Debug is the debug log level.
-	Debug = "debug"
-	// Info is the info(rmational) log level.
-	Info = "info"
-	// Critical is the critical log level.
-	Critical = "critical"
-)
+var (
+	// Level is the level at which to emit log messages. When the ScrapligoDebug env var is set
+	// we use that value (if it == one of the log levels, otherwise it defaults to debug), for all
+	// other cases this defaults to warn.
+	Level LogLevel //nolint: gochecknoglobals
 
-// NewInstance returns a new logging Instance.
-func NewInstance(opts ...util.Option) (*Instance, error) {
-	i := &Instance{
-		Level:     Info,
-		Formatter: DefaultFormatter,
-		Loggers:   nil,
-	}
-
-	for _, o := range opts {
-		err := o(i)
-		if err != nil {
-			return nil, err
+	// Logger is the main logging function, used mostly for "global" non connection/device related
+	// things like the ffi layer.
+	Logger = func(level LogLevel, m string, a ...any) { //nolint: gochecknoglobals
+		if IntFromLevel(Level) <= IntFromLevel(level) {
+			_, _ = fmt.Fprintln(os.Stderr, level, "::", fmt.Sprintf(m, a...))
 		}
 	}
+)
 
-	return i, nil
-}
+// LoggerToLoggerCallback wraps a given supported logger type in a callback to be passed to the
+// underlying libscrapli bits.
+func LoggerToLoggerCallback(logger any, logLevel uint8) uintptr { //nolint: gocyclo
+	var loggerCallback uintptr
 
-// Instance is a simple logging object.
-type Instance struct {
-	Level     string
-	Formatter func(string, string) string
-	Loggers   []func(...interface{})
-}
+	switch l := logger.(type) {
+	case *log.Logger:
+		loggerCallback = purego.NewCallback(func(level uint8, message *string) {
+			if logLevel > level {
+				return
+			}
 
-// Emit "emits" a logging message m to all the loggers in the Instance.
-func (i *Instance) Emit(m interface{}) {
-	wg := sync.WaitGroup{}
+			switch level {
+			case uint8(TraceAsInt):
+				l.Printf("trace :: %s", *message)
+			case uint8(DebugAsInt):
+				l.Printf("debug :: %s", *message)
+			case uint8(InfoAsInt):
+				l.Printf(" info :: %s", *message)
+			case uint8(WarnAsInt):
+				l.Printf(" warn :: %s", *message)
+			case uint8(CriticalAsInt):
+				l.Printf(" crit :: %s", *message)
+			case uint8(FatalAsInt):
+				l.Printf("fatal :: %s", *message)
+			case uint8(DisabledAsInt):
+			}
+		})
+	case *slog.Logger:
+		loggerCallback = purego.NewCallback(func(level uint8, message *string) {
+			if logLevel > level {
+				return
+			}
 
-	for _, f := range i.Loggers {
-		wg.Add(1)
+			// ignoring context things since we (currently?) expose no means to actually pass
+			// a context with things here anyway
+			switch level {
+			case uint8(TraceAsInt):
+				// no "trace" level, so... just debug it and add the trace prefix for clarity
+				l.Debug(fmt.Sprintf("trace: %s", *message))
+			case uint8(DebugAsInt):
+				l.Debug(*message)
+			case uint8(InfoAsInt):
+				l.Info(*message)
+			case uint8(WarnAsInt):
+				l.Warn(*message)
+			case uint8(CriticalAsInt):
+				l.Error(*message)
+			case uint8(FatalAsInt):
+				l.Error(*message)
+			case uint8(DisabledAsInt):
+			}
+		})
+	case func(LogLevel, string):
+		loggerCallback = purego.NewCallback(func(level uint8, message *string) {
+			if logLevel > level {
+				return
+			}
 
-		lf := f
-
-		go func() {
-			lf(m)
-
-			wg.Done()
-		}()
+			l(LevelFromInt(level), *message)
+		})
+	default:
 	}
 
-	wg.Wait()
+	return loggerCallback
 }
 
-func (i *Instance) shouldLog(l string) bool {
-	if len(i.Loggers) == 0 {
-		return false
-	}
+// normally i *really* dislike inits but... meh?
+func init() { //nolint: gochecknoinits
+	v := os.Getenv(scrapligoconstants.ScrapligoDebug)
 
-	switch i.Level {
-	case Debug:
-		return true
-	case Info:
-		switch l {
-		case Info, Critical:
-			return true
+	if v != "" {
+		switch v {
+		case Trace.String():
+			Level = Trace
+		case Debug.String():
+			Level = Debug
+		case Info.String():
+			Level = Info
+		case Warn.String():
+			Level = Warn
+		case Critical.String():
+			Level = Critical
+		case Fatal.String():
+			Level = Fatal
+		case Disabled.String():
+			Level = Disabled
 		default:
-			return false
+			Level = Debug
 		}
-	case Critical:
-		if l == Critical {
-			return true
-		}
+	} else {
+		Level = Warn
 	}
-
-	return false
-}
-
-// Debug accepts a Debug level log message with no formatting.
-func (i *Instance) Debug(f string) {
-	if !i.shouldLog(Debug) {
-		return
-	}
-
-	i.Emit(i.Formatter(Debug, f))
-}
-
-// Debugf accepts a Debug level log message normal fmt.Sprintf type formatting.
-func (i *Instance) Debugf(f string, a ...interface{}) {
-	if !i.shouldLog(Debug) {
-		return
-	}
-
-	i.Emit(i.Formatter(Debug, fmt.Sprintf(f, a...)))
-}
-
-// Info accepts an Info level log message with no formatting.
-func (i *Instance) Info(f string) {
-	if !i.shouldLog(Info) {
-		return
-	}
-
-	i.Emit(i.Formatter(Info, f))
-}
-
-// Infof accepts an Info level log message normal fmt.Sprintf type formatting.
-func (i *Instance) Infof(f string, a ...interface{}) {
-	if !i.shouldLog(Info) {
-		return
-	}
-
-	i.Emit(i.Formatter(Info, fmt.Sprintf(f, a...)))
-}
-
-// Critical accepts a Critical level log message with no formatting.
-func (i *Instance) Critical(f string) {
-	if !i.shouldLog(Critical) {
-		return
-	}
-
-	i.Emit(i.Formatter(Critical, f))
-}
-
-// Criticalf accepts a Critical level log message normal fmt.Sprintf type formatting.
-func (i *Instance) Criticalf(f string, a ...interface{}) {
-	if !i.shouldLog(Critical) {
-		return
-	}
-
-	i.Emit(i.Formatter(Critical, fmt.Sprintf(f, a...)))
 }
