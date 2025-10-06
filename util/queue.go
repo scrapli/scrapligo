@@ -61,6 +61,11 @@ func (q *Queue) Dequeue() []byte {
 	q.lock.Lock()
 	defer q.lock.Unlock()
 
+	// Double-check after acquiring lock to prevent race condition
+	if len(q.queue) == 0 {
+		return nil
+	}
+
 	b := q.queue[0]
 
 	q.queue = q.queue[1:]
