@@ -107,6 +107,7 @@ func NewSSHArgs(options ...util.Option) (*SSHArgs, error) {
 type SSHArgs struct {
 	StrictKey            bool
 	PrivateKeyPath       string
+	PrivateKey           []byte
 	PrivateKeyPassPhrase string
 	ConfigFile           string
 	KnownHostsFile       string

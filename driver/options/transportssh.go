@@ -23,6 +23,23 @@ func WithAuthPrivateKey(ks, ps string) util.Option {
 	}
 }
 
+// WithAuthPrivateKeyBytes sets the SSH private key and passphrase to use for SSH key based auth.
+// This does not work with the system SSH client.
+func WithAuthPrivateKeyBytes(ks []byte, ps string) util.Option {
+	return func(o interface{}) error {
+		a, ok := o.(*transport.SSHArgs)
+
+		if !ok {
+			return util.ErrIgnoredOption
+		}
+
+		a.PrivateKey = ks
+		a.PrivateKeyPassPhrase = ps
+
+		return nil
+	}
+}
+
 // WithAuthNoStrictKey disables strict SSH key checking.
 func WithAuthNoStrictKey() util.Option {
 	return func(o interface{}) error {

@@ -129,6 +129,17 @@ func (t *Standard) openBase(a *Args) error {
 		authMethods = append(authMethods, ssh.PublicKeys(signer))
 	}
 
+	if len(t.SSHArgs.PrivateKey) > 0 {
+		signer, err := ssh.ParsePrivateKey(t.SSHArgs.PrivateKey)
+		if err != nil {
+			a.l.Criticalf("error parsing ssh key: %s", err)
+
+			return err
+		}
+
+		authMethods = append(authMethods, ssh.PublicKeys(signer))
+	}
+
 	if a.Password != "" {
 		authMethods = append(authMethods, ssh.Password(a.Password),
 			ssh.KeyboardInteractive(
