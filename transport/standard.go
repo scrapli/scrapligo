@@ -47,6 +47,7 @@ type Standard struct {
 	ExtraCiphers      []string
 	ExtraKexs         []string
 	HostKeyAlgorithms []string
+	PrivateKey        []byte
 }
 
 func (t *Standard) openSession(a *Args, cfg *ssh.ClientConfig) error {
@@ -129,8 +130,8 @@ func (t *Standard) openBase(a *Args) error {
 		authMethods = append(authMethods, ssh.PublicKeys(signer))
 	}
 
-	if len(t.SSHArgs.PrivateKey) > 0 {
-		signer, err := ssh.ParsePrivateKey(t.SSHArgs.PrivateKey)
+	if len(t.PrivateKey) > 0 {
+		signer, err := ssh.ParsePrivateKey(t.PrivateKey)
 		if err != nil {
 			a.l.Criticalf("error parsing ssh key: %s", err)
 

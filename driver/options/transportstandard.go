@@ -5,6 +5,22 @@ import (
 	"github.com/scrapli/scrapligo/util"
 )
 
+// WithStandardTransportPrivateKeyBytes sets the SSH private key and passphrase to use for SSH key based auth.
+func WithStandardTransportPrivateKeyBytes(ks []byte, ps string) util.Option {
+	return func(o interface{}) error {
+		a, ok := o.(*transport.Standard)
+
+		if !ok {
+			return util.ErrIgnoredOption
+		}
+
+		a.PrivateKey = ks
+		a.SSHArgs.PrivateKeyPassPhrase = ps
+
+		return nil
+	}
+}
+
 // WithStandardTransportExtraCiphers extends the list of ciphers supported by the standard
 // transport.
 func WithStandardTransportExtraCiphers(l []string) util.Option {
