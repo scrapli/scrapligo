@@ -15,5 +15,5 @@ func main() {
 		panic(err)
 	}
 
-	fmt.Println(fmt.Sprintf("libscrapli is available at path %q", p)) //nolint: forbidigo
+	fmt.Printf("libscrapli is available at path %q\n", p) //nolint: forbidigo
 }
