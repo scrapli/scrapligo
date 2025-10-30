@@ -44,6 +44,7 @@ default:
     - '% Incomplete command'
     - '% Invalid input detected'
     - '% Unknown command'
+    - '% Invalid command'
     - 'ERROR:'
   textfsm-platform: 'cisco_nxos' # ignored in go because no ntc-templates
   network-on-open:
