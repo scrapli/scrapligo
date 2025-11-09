@@ -2,6 +2,7 @@ package cli
 
 import (
 	"bytes"
+	"context"
 	"math"
 	"strings"
 	"time"
@@ -116,8 +117,8 @@ func (r *Result) Failed() bool {
 // contained in this Result object will be passed. If you have a Result object with multiple inputs
 // and would like to only parse one of the results, simply invoke scrapligoutil.TextFsmParse
 // directly with the content you wish to parse.
-func (r *Result) TextFsmParse(path string) ([]map[string]any, error) {
-	return scrapligoutil.TextFsmParse(r.Result(), path)
+func (r *Result) TextFsmParse(ctx context.Context, path string) ([]map[string]any, error) {
+	return scrapligoutil.TextFsmParse(ctx, r.Result(), path)
 }
 
 func (r *Result) extend(res *Result) {

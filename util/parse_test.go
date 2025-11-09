@@ -40,6 +40,7 @@ func TestTextFsmParse(t *testing.T) {
 			}
 
 			actualOut, err := scrapligoutil.TextFsmParse(
+				t.Context(),
 				string(scrapligotesthelper.ReadFile(t, testFixturePath)),
 				testTemplateFixturePath,
 			)

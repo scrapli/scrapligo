@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os/exec"
+	"slices"
 	"sync"
 	"testing"
 
@@ -78,10 +79,8 @@ func AssertEqual[T comparable](t *testing.T, a, b T) {
 func AssertIn[T comparable](t *testing.T, a T, b []T) {
 	t.Helper()
 
-	for _, bb := range b {
-		if a == bb {
-			return
-		}
+	if slices.Contains(b, a) {
+		return
 	}
 
 	t.Fatalf("expected '%v', got '%v'", a, b)

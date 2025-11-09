@@ -120,5 +120,5 @@ func main() {
 
 	// unlike python we have no ntctemplates, so you need to pass the template path or template
 	// url to use to parse the result.
-	fmt.Println(result.TextFsmParse(textfsmTemplatePath))
+	fmt.Println(result.TextFsmParse(ctx, textfsmTemplatePath))
 }

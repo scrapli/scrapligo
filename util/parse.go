@@ -1,6 +1,7 @@
 package util
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -12,12 +13,22 @@ import (
 )
 
 // ResolveAtFileOrURL returns the bytes from `path` where path is either a filepath or URL.
-func ResolveAtFileOrURL(path string) ([]byte, error) {
+func ResolveAtFileOrURL(ctx context.Context, path string) ([]byte, error) {
 	var b []byte
 
 	switch {
 	case strings.HasPrefix(path, "http://") || strings.HasPrefix(path, "https://"):
-		resp, err := http.Get(path) //nolint:gosec,noctx
+		req, err := http.NewRequestWithContext(
+			ctx,
+			http.MethodGet,
+			path,
+			http.NoBody,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		resp, err := http.DefaultClient.Do(req)
 		if err != nil {
 			return nil, scrapligoerrors.NewUtilError(
 				fmt.Sprintf("failed downloading file at path %q", path),
@@ -56,10 +67,10 @@ func ResolveAtFileOrURL(path string) ([]byte, error) {
 // the argument is interpreted as URL or filesystem path, for example:
 // response.TextFsmParse("http://example.com/textfsm.template") or
 // response.TextFsmParse("./local/textfsm.template").
-func TextFsmParse(s, path string) ([]map[string]interface{}, error) {
-	t, err := ResolveAtFileOrURL(path)
+func TextFsmParse(ctx context.Context, s, path string) ([]map[string]any, error) {
+	t, err := ResolveAtFileOrURL(ctx, path)
 	if err != nil {
-		return []map[string]interface{}{}, err
+		return []map[string]any{}, err
 	}
 
 	fsm := gotextfsm.TextFSM{}
