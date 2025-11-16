@@ -9,8 +9,12 @@
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
 
-# jetbrains goodies
+# editor goodies
 .idea
+Zig.iml
+.zed
+.vscode
+.devcontainer
 
 # macos stuff
 .DS_Store
@@ -22,10 +26,6 @@ private/
 
 # log output
 *.log
-
-# vscode
-.vscode
-.devcontainer
 
 # coverage
 cover.out
