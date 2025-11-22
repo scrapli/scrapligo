@@ -14,7 +14,6 @@ import (
 	scrapligoerrors "github.com/scrapli/scrapligo/errors"
 	scrapligoffi "github.com/scrapli/scrapligo/ffi"
 	scrapligointernal "github.com/scrapli/scrapligo/internal"
-	scrapligologging "github.com/scrapli/scrapligo/logging"
 	scrapligooptions "github.com/scrapli/scrapligo/options"
 	"golang.org/x/sys/unix"
 )
@@ -172,16 +171,14 @@ func (c *Cli) Open(ctx context.Context) (*Result, error) {
 		c.ffiMap.Shared.Free(c.ptr)
 	}()
 
+	optionsPtr := c.ffiMap.Shared.AllocDriverOptions()
+	defer c.ffiMap.Shared.FreeDriverOptions(optionsPtr)
+
+	c.options.Apply(optionsPtr)
+
 	c.ptr = c.ffiMap.Cli.Alloc(
-		c.options.Cli.DefinitionString,
-		scrapligologging.LoggerToLoggerCallback(
-			c.options.Logger,
-			uint8(scrapligologging.IntFromLevel(c.options.LoggerLevel)),
-		),
-		string(c.options.LoggerLevel),
 		c.host,
-		c.options.Port,
-		string(c.options.TransportKind),
+		optionsPtr,
 	)
 
 	if c.ptr == 0 {
@@ -191,11 +188,6 @@ func (c *Cli) Open(ctx context.Context) (*Result, error) {
 	c.pollFd = int(c.ffiMap.Shared.GetPollFd(c.ptr))
 	if c.pollFd == 0 {
 		return nil, scrapligoerrors.NewFfiError("failed to allocate cli", nil)
-	}
-
-	err := c.options.Apply(c.ptr, c.ffiMap)
-	if err != nil {
-		return nil, scrapligoerrors.NewFfiError("failed to applying cli options", err)
 	}
 
 	cancel := false

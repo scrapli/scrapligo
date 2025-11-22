@@ -7,7 +7,6 @@ import (
 	scrapligoerrors "github.com/scrapli/scrapligo/errors"
 	scrapligoffi "github.com/scrapli/scrapligo/ffi"
 	scrapligointernal "github.com/scrapli/scrapligo/internal"
-	scrapligologging "github.com/scrapli/scrapligo/logging"
 	scrapligooptions "github.com/scrapli/scrapligo/options"
 	"golang.org/x/sys/unix"
 )
@@ -88,15 +87,14 @@ func (n *Netconf) Open(ctx context.Context) (*Result, error) {
 		n.ffiMap.Shared.Free(n.ptr)
 	}()
 
+	optionsPtr := n.ffiMap.Shared.AllocDriverOptions()
+	defer n.ffiMap.Shared.FreeDriverOptions(optionsPtr)
+
+	n.options.Apply(optionsPtr)
+
 	n.ptr = n.ffiMap.Netconf.Alloc(
-		scrapligologging.LoggerToLoggerCallback(
-			n.options.Logger,
-			uint8(scrapligologging.IntFromLevel(n.options.LoggerLevel)),
-		),
-		string(n.options.LoggerLevel),
 		n.host,
-		n.options.Port,
-		string(n.options.TransportKind),
+		optionsPtr,
 	)
 
 	if n.ptr == 0 {
@@ -106,11 +104,6 @@ func (n *Netconf) Open(ctx context.Context) (*Result, error) {
 	n.pollFd = int(n.ffiMap.Shared.GetPollFd(n.ptr))
 	if n.pollFd == 0 {
 		return nil, scrapligoerrors.NewFfiError("failed to allocate netconf", nil)
-	}
-
-	err := n.options.Apply(n.ptr, n.ffiMap)
-	if err != nil {
-		return nil, scrapligoerrors.NewFfiError("failed to applying netconf options", err)
 	}
 
 	cancel := false

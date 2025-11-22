@@ -72,6 +72,10 @@ linters:
         path: netconf/options
         text: singleCaseSwitch
       - linters:
+          - gosec
+        path: internal/options.go
+        text: unsafe calls should be audited
+      - linters:
           - revive
         path: util/
         text: meaningless package names

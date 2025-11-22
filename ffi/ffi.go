@@ -351,15 +351,10 @@ func GetMapping() (*Mapping, error) {
 		}
 
 		mappingInst = &Mapping{
+			Shared:  SharedMapping{},
 			Session: SessionMapping{},
 			Cli:     CliMapping{},
 			Netconf: NetconfMapping{},
-			Options: OptionMapping{
-				Session:       SessionOptions{},
-				Auth:          AuthOptions{},
-				TransportBin:  TransportBinOptions{},
-				TransportSSH2: TransportSSH2Options{},
-			},
 		}
 
 		purego.RegisterLibFunc(&mappingInst.AssertNoLeaks, libScrapliFfi, "ls_assert_no_leaks")
@@ -368,7 +363,6 @@ func GetMapping() (*Mapping, error) {
 		registerSession(mappingInst, libScrapliFfi)
 		registerCli(mappingInst, libScrapliFfi)
 		registerNetconf(mappingInst, libScrapliFfi)
-		registerOptions(mappingInst, libScrapliFfi)
 
 		scrapligologging.Logger(
 			scrapligologging.Debug,

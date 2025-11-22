@@ -277,6 +277,10 @@ func TestGetNextSubscription(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	defer func() {
+		_, _ = n.Close(ctx)
+	}()
+
 	r, err := n.RawRPC(
 		ctx,
 		`<establish-subscription xmlns="urn:ietf:params:xml:ns:yang:ietf-event-notifications" xmlns:yp="urn:ietf:params:xml:ns:yang:ietf-yang-push">

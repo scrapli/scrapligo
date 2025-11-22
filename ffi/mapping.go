@@ -9,7 +9,6 @@ type Mapping struct {
 	Session SessionMapping
 	Cli     CliMapping
 	Netconf NetconfMapping
-	Options OptionMapping
 }
 
 // SharedMapping holds common mappings for both cli and netconf drivers.
@@ -19,6 +18,9 @@ type SharedMapping struct {
 	// Free releases the memory of the driver object at driverPtr -- this should be called *after*
 	// Close where possible.
 	Free func(driverPtr uintptr)
+
+	AllocDriverOptions func() uintptr
+	FreeDriverOptions  func(p uintptr)
 }
 
 // SessionMapping holds session specific mappings.
@@ -42,14 +44,10 @@ type SessionMapping struct {
 
 // CliMapping holds libscrapli mappings specifically for cli drivers.
 type CliMapping struct {
-	// Alloc allocates a driver object in zig -- it expects *all* the possible options.
+	// Alloc allocates a driver object in zig.
 	Alloc func(
-		definitionString string,
-		loggerCallback uintptr,
-		loggerLevel string,
 		host string,
-		port uint16,
-		transportKind string,
+		optionsPtr uintptr,
 	) (driverPtr uintptr)
 
 	// Open opens the driver connection of the driver at driverPtr.
@@ -156,11 +154,8 @@ type CliMapping struct {
 type NetconfMapping struct {
 	// Alloc allocates the driver. See CliMapping.Alloc for details.
 	Alloc func(
-		loggerCallback uintptr,
-		loggerLevel string,
 		host string,
-		port uint16,
-		transportKind string,
+		optionsPtr uintptr,
 	) (driverPtr uintptr)
 
 	// Open opens the driver connection of the driver at driverPtr.
@@ -407,265 +402,5 @@ type NetconfMapping struct {
 		operationID *uint32,
 		cancel *bool,
 		action string,
-	) uint8
-}
-
-// OptionMapping holds libscrapli mappings for the applying driver options.
-type OptionMapping struct {
-	Session       SessionOptions
-	Auth          AuthOptions
-	TransportBin  TransportBinOptions
-	TransportSSH2 TransportSSH2Options
-	TransportTest TransportTestOptions
-	Netconf       NetconfOptions
-}
-
-// SessionOptions holds options setters for session related things.
-type SessionOptions struct {
-	// SetReadSize sets the session read size for the driver at driverPtr.
-	SetReadSize func(
-		driverPtr uintptr,
-		value uint64,
-	) uint8
-
-	// SetReadMinDelayNs sets the session minimum read delay in ns.
-	SetReadMinDelayNs func(
-		driverPtr uintptr,
-		value uint64,
-	) uint8
-
-	// SetReadMaxDelayNs sets the session maximum read delay in ns.
-	SetReadMaxDelayNs func(
-		driverPtr uintptr,
-		value uint64,
-	) uint8
-
-	// SetReturnChar sets the return char string for the driver at driverPtr.
-	SetReturnChar func(
-		driverPtr uintptr,
-		value string,
-	) uint8
-
-	// SetOperationTimeoutNs sets the session operation timeout in nanoseconds for the driver
-	// at driverPtr.
-	SetOperationTimeoutNs func(
-		driverPtr uintptr,
-		value uint64,
-	) uint8
-
-	// SetOperationMaxSearchDepth sets the maximum search depth to look backward for prompt
-	// matching for the driver at driverPtr.
-	SetOperationMaxSearchDepth func(
-		driverPtr uintptr,
-		value uint64,
-	) uint8
-
-	// SetRecordDestination sets the record destination path for the driver at driverPtr.
-	SetRecordDestination func(
-		driverPtr uintptr,
-		value string,
-	) uint8
-}
-
-// AuthOptions holds options setters related to authentication.
-type AuthOptions struct {
-	// SetUsername sets the username for the driver at driverPtr.
-	SetUsername func(
-		driverPtr uintptr,
-		value string,
-	) uint8
-
-	// SetPassword sets the username for the driver at driverPtr.
-	SetPassword func(
-		driverPtr uintptr,
-		value string,
-	) uint8
-
-	// SetPrivateKeyPath sets the private key path for the driver at driverPtr.
-	SetPrivateKeyPath func(
-		driverPtr uintptr,
-		value string,
-	) uint8
-
-	// SetPrivateKeyPassphrase sets the private key passphrase for the driver at driverPtr.
-	SetPrivateKeyPassphrase func(
-		driverPtr uintptr,
-		value string,
-	) uint8
-
-	// SetDriverOptionAuthLookupKeyValue sets a k/v pair in the lookup map for the driver at
-	// driverPtr.
-	SetDriverOptionAuthLookupKeyValue func(
-		driverPtr uintptr,
-		key string,
-		value string,
-	) uint8
-
-	// SetForceInSessionAuth sets the in session auth bypass flag for the driver at driverPtr.
-	SetForceInSessionAuth func(
-		driverPtr uintptr,
-	) uint8
-
-	// SetBypassInSessionAuth sets the in session auth bypass flag for the driver at driverPtr.
-	SetBypassInSessionAuth func(
-		driverPtr uintptr,
-	) uint8
-
-	// SetUsernamePattern sets the username pcre2 regex pattern for the driver at driverPtr.
-	SetUsernamePattern func(
-		driverPtr uintptr,
-		value string,
-	) uint8
-
-	// SetPasswordPattern sets the password pcre2 regex pattern for the driver at driverPtr.
-	SetPasswordPattern func(
-		driverPtr uintptr,
-		value string,
-	) uint8
-
-	// SetPassphrasePattern sets the passphrase pcre2 regex pattern for the driver at driverPtr.
-	SetPassphrasePattern func(
-		driverPtr uintptr,
-		value string,
-	) uint8
-}
-
-// TransportBinOptions holds options setters for the bin transport.
-type TransportBinOptions struct {
-	// SetBin sets the path to the binary to use when opening the transport for the driver at
-	// driverPtr.
-	SetBin func(
-		driverPtr uintptr,
-		value string,
-	) uint8
-
-	// SetExtraOpenArgs sets the extra args to pass when opening the transport for the driver at
-	// driverPtr.
-	SetExtraOpenArgs func(
-		driverPtr uintptr,
-		value string,
-	) uint8
-
-	// SetOverrideOpenArgs sets the extra args to pass when opening the transport for the driver at
-	// driverPtr.
-	SetOverrideOpenArgs func(
-		driverPtr uintptr,
-		value string,
-	) uint8
-
-	// SetSSHConfigPath sets the ssh config file path for the transport for the driver at driverPtr.
-	SetSSHConfigPath func(
-		driverPtr uintptr,
-		value string,
-	) uint8
-
-	// SetKnownHostsPath sets the ssh config file path for the transport for the driver at
-	// driverPtr.
-	SetKnownHostsPath func(
-		driverPtr uintptr,
-		value string,
-	) uint8
-
-	// SetEnableStrictKey sets the flag to enable strict key checking for the driver at driverPtr.
-	SetEnableStrictKey func(
-		driverPtr uintptr,
-	) uint8
-
-	// SetTermHeight sets the pty term height for the driver at driverPtr.
-	SetTermHeight func(
-		driverPtr uintptr,
-		value uint16,
-	) uint8
-
-	// SetTermWidth sets the pty term width for the driver at driverPtr.
-	SetTermWidth func(
-		driverPtr uintptr,
-		value uint16,
-	) uint8
-}
-
-// TransportSSH2Options holds options setters for the ssh2 transport.
-type TransportSSH2Options struct {
-	// SetKnownHostsPath sets the known hosts path for the driver at driverPtr.
-	SetKnownHostsPath func(
-		driverPtr uintptr,
-		value string,
-	) uint8
-
-	// SetLibSSH2Trace enables libssh2 trace for the driver at driverPtr.
-	SetLibSSH2Trace func(
-		driverPtr uintptr,
-	) uint8
-
-	// SetProxyJumpHost sets the proxy jump host for the driver at driverPtr.
-	SetProxyJumpHost func(
-		driverPtr uintptr,
-		value string,
-	) uint8
-
-	// SetProxyJumpPort sets the proxy jump port for the driver at driverPtr.
-	SetProxyJumpPort func(
-		driverPtr uintptr,
-		value uint16,
-	) uint8
-
-	// SetProxyJumpUsername sets the proxy jump username for the driver at driverPtr.
-	SetProxyJumpUsername func(
-		driverPtr uintptr,
-		value string,
-	) uint8
-
-	// SetProxyJumpPassword sets the proxy jump password for the driver at driverPtr.
-	SetProxyJumpPassword func(
-		driverPtr uintptr,
-		value string,
-	) uint8
-
-	// SetProxyJumpPrivateKeyPath sets the proxy jump private key path for the driver at driverPtr.
-	SetProxyJumpPrivateKeyPath func(
-		driverPtr uintptr,
-		value string,
-	) uint8
-
-	// SetProxyJumpPrivateKeyPassphrase sets the proxy jump private key passhrase for the driver at
-	// driverPtr.
-	SetProxyJumpPrivateKeyPassphrase func(
-		driverPtr uintptr,
-		value string,
-	) uint8
-
-	// SetProxyJumpLibSSH2Trace enables libssh2 trace for the proxy jump driver at driverPtr.
-	SetProxyJumpLibSSH2Trace func(
-		driverPtr uintptr,
-	) uint8
-}
-
-// TransportTestOptions holds options setters for the test transport.
-type TransportTestOptions struct {
-	// SetF sets the "f" (source file) option for the driver at driverPtr.
-	SetF func(
-		driverPtr uintptr,
-		value string,
-	) uint8
-}
-
-// NetconfOptions holds options setters for netconf objects.
-type NetconfOptions struct {
-	// SetErrorTag sets the error tag option for the driver at driverPtr. Default is "rpc-error>".
-	SetErrorTag func(
-		driverPtr uintptr,
-		value string,
-	) uint8
-
-	// SetPreferredVersion sets the preferred netconf version for the driver at driverPtr.
-	SetPreferredVersion func(
-		driverPtr uintptr,
-		value string,
-	) uint8
-
-	// SetMessagePollIntervalNS sets the message poll interval in ns for the driver at driverPtr.
-	SetMessagePollIntervalNS func(
-		driverPtr uintptr,
-		value uint64,
 	) uint8
 }

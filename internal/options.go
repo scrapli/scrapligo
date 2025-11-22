@@ -1,8 +1,8 @@
 package internal
 
 import (
-	scrapligoerrors "github.com/scrapli/scrapligo/errors"
-	scrapligoffi "github.com/scrapli/scrapligo/ffi"
+	"unsafe"
+
 	scrapligologging "github.com/scrapli/scrapligo/logging"
 )
 
@@ -20,6 +20,8 @@ const (
 	// TransportKindTest represents the "Test" transport that is used for integration testing.
 	TransportKindTest TransportKind = "test_"
 )
+
+var zero uint64 //nolint: gochecknoglobals
 
 // Options holds options for all driver kinds (cli and netconf).
 type Options struct {
@@ -55,43 +57,32 @@ func NewOptions() *Options {
 	}
 }
 
-// Apply applies the Options to the given driver at driverPtr.
-func (o *Options) Apply(driverPtr uintptr, m *scrapligoffi.Mapping) error {
-	err := o.Netconf.apply(driverPtr, m)
-	if err != nil {
-		return err
-	}
+// Apply applies the Options to the given driver options struct at optionsPtr.
+func (o *Options) Apply(optionsPtr uintptr) {
+	opts := (*driverOptions)(unsafe.Pointer(optionsPtr)) //nolint: govet
 
-	err = o.Session.apply(driverPtr, m)
-	if err != nil {
-		return err
-	}
+	opts.loggerLevel = uintptr(unsafe.Pointer(&[]byte(o.LoggerLevel)[0]))
+	opts.loggerLevelLen = uintptr(len(o.LoggerLevel))
 
-	err = o.Auth.apply(driverPtr, m)
-	if err != nil {
-		return err
-	}
+	opts.port = &o.Port
+
+	o.Cli.apply(opts)
+	o.Netconf.apply(opts)
+	o.Session.apply(opts)
+	o.Auth.apply(opts)
+
+	opts.transportKind = uintptr(unsafe.Pointer(&[]byte(o.TransportKind)[0]))
+	opts.transportKindLen = uintptr(len(o.TransportKind))
 
 	switch o.TransportKind {
 	case TransportKindBin:
-		err = o.Transport.Bin.apply(driverPtr, m)
-		if err != nil {
-			return err
-		}
+		o.Transport.Bin.apply(opts)
 	case TransportKindSSH2:
-		err = o.Transport.SSH2.apply(driverPtr, m)
-		if err != nil {
-			return err
-		}
+		o.Transport.SSH2.apply(opts)
 	case TransportKindTelnet:
 	case TransportKindTest:
-		err = o.Transport.Test.apply(driverPtr, m)
-		if err != nil {
-			return err
-		}
+		o.Transport.Test.apply(opts)
 	}
-
-	return nil
 }
 
 // CliOptions holds cli specific options.
@@ -101,6 +92,15 @@ type CliOptions struct {
 	SkipStaticOptions    bool
 }
 
+func (o *CliOptions) apply(opts *driverOptions) {
+	if o.DefinitionString == "" {
+		return
+	}
+
+	opts.cli.definitionStr = uintptr(unsafe.Pointer(&[]byte(o.DefinitionString)[0]))
+	opts.cli.definitionStrLen = uintptr(len(o.DefinitionString))
+}
+
 // NetconfOptions holds netconf specific options.
 type NetconfOptions struct {
 	ErrorTag              string
@@ -108,35 +108,20 @@ type NetconfOptions struct {
 	MessagePollIntervalNS uint64
 }
 
-func (o *NetconfOptions) apply(
-	driverPtr uintptr,
-	m *scrapligoffi.Mapping,
-) error {
+func (o *NetconfOptions) apply(opts *driverOptions) {
 	if o.ErrorTag != "" {
-		rc := m.Options.Netconf.SetErrorTag(driverPtr, o.ErrorTag)
-		if rc != 0 {
-			return scrapligoerrors.NewOptionsError("failed setting error tag option", nil)
-		}
+		opts.netconf.errorTag = uintptr(unsafe.Pointer(&[]byte(o.ErrorTag)[0]))
+		opts.netconf.errorTagLen = uintptr(len(o.ErrorTag))
 	}
 
 	if o.PreferredVersion != "" {
-		rc := m.Options.Netconf.SetPreferredVersion(driverPtr, o.PreferredVersion)
-		if rc != 0 {
-			return scrapligoerrors.NewOptionsError("failed setting preferred version option", nil)
-		}
+		opts.netconf.preferredVersion = uintptr(unsafe.Pointer(&[]byte(o.PreferredVersion)[0]))
+		opts.netconf.preferredVersionLen = uintptr(len(o.PreferredVersion))
 	}
 
 	if o.MessagePollIntervalNS != 0 {
-		rc := m.Options.Netconf.SetMessagePollIntervalNS(driverPtr, o.MessagePollIntervalNS)
-		if rc != 0 {
-			return scrapligoerrors.NewOptionsError(
-				"failed setting message poll interval option",
-				nil,
-			)
-		}
+		opts.netconf.messagePollInterval = &o.MessagePollIntervalNS
 	}
-
-	return nil
 }
 
 // SessionOptions holds options specific to the zig "Session" that lives in a driver.
@@ -152,70 +137,40 @@ type SessionOptions struct {
 	RecorderPath string
 }
 
-func (o *SessionOptions) apply( //nolint: gocyclo
-	driverPtr uintptr,
-	m *scrapligoffi.Mapping,
-) error {
+func (o *SessionOptions) apply(opts *driverOptions) {
 	if o.ReadSize != nil {
-		rc := m.Options.Session.SetReadSize(driverPtr, *o.ReadSize)
-		if rc != 0 {
-			return scrapligoerrors.NewOptionsError("failed setting read size option", nil)
-		}
+		opts.session.readSize = o.ReadSize
 	}
 
 	if o.ReadMinDelay != nil {
-		rc := m.Options.Session.SetReadMinDelayNs(driverPtr, *o.ReadMinDelay)
-		if rc != 0 {
-			return scrapligoerrors.NewOptionsError("failed setting read min delay option", nil)
-		}
+		opts.session.readMinDelayNs = o.ReadMinDelay
 	}
 
 	if o.ReadMaxDelay != nil {
-		rc := m.Options.Session.SetReadMaxDelayNs(driverPtr, *o.ReadMaxDelay)
-		if rc != 0 {
-			return scrapligoerrors.NewOptionsError("failed setting read max delay option", nil)
-		}
+		opts.session.readMaxDelayNs = o.ReadMaxDelay
 	}
 
 	if o.ReturnChar != "" {
-		rc := m.Options.Session.SetReturnChar(driverPtr, o.ReturnChar)
-		if rc != 0 {
-			return scrapligoerrors.NewOptionsError("failed setting return char option", nil)
-		}
+		opts.session.returnChar = uintptr(unsafe.Pointer(&[]byte(o.ReturnChar)[0]))
+		opts.session.returnCharLen = uintptr(len(o.ReturnChar))
 	}
 
 	if o.OperationTimeoutNs != nil {
-		rc := m.Options.Session.SetOperationTimeoutNs(driverPtr, *o.OperationTimeoutNs)
-		if rc != 0 {
-			return scrapligoerrors.NewOptionsError("failed setting operation timeout option", nil)
-		}
+		opts.session.operationTimeoutNs = o.OperationTimeoutNs
 	} else {
 		// if user does not provide a timeout we assume they want to govern all timeouts via context
 		// cancellation
-		rc := m.Options.Session.SetOperationTimeoutNs(driverPtr, 0)
-		if rc != 0 {
-			return scrapligoerrors.NewOptionsError("failed setting operation timeout option", nil)
-		}
+		opts.session.operationTimeoutNs = &zero
 	}
 
 	if o.OperationMaxSearchDepth != nil {
-		rc := m.Options.Session.SetOperationMaxSearchDepth(driverPtr, *o.OperationMaxSearchDepth)
-		if rc != 0 {
-			return scrapligoerrors.NewOptionsError(
-				"failed setting operation search depth option",
-				nil,
-			)
-		}
+		opts.session.operationMaxSearchDepth = o.OperationMaxSearchDepth
 	}
 
 	if o.RecorderPath != "" {
-		rc := m.Options.Session.SetRecordDestination(driverPtr, o.RecorderPath)
-		if rc != 0 {
-			return scrapligoerrors.NewOptionsError("failed setting recorder path option", nil)
-		}
+		opts.session.returnChar = uintptr(unsafe.Pointer(&[]byte(o.RecorderPath)[0]))
+		opts.session.returnCharLen = uintptr(len(o.RecorderPath))
 	}
-
-	return nil
 }
 
 // AuthOptions holds auth related options for driveres.
@@ -226,7 +181,11 @@ type AuthOptions struct {
 	PrivateKeyPath       string
 	PrivateKeyPassphrase string
 
-	LookupMap map[string]string
+	LookupMap        map[string]string
+	lookupMapKeys    []string
+	lookupMapKeyLens []uint16
+	lookupMapVals    []string
+	lookupMapValLens []uint16
 
 	ForceInSessionAuth  bool
 	BypassInSessionAuth bool
@@ -236,90 +195,80 @@ type AuthOptions struct {
 	PassphrasePattern string
 }
 
-func (o *AuthOptions) apply(driverPtr uintptr, m *scrapligoffi.Mapping) error { //nolint: gocyclo
+func (o *AuthOptions) apply(opts *driverOptions) {
 	if o.Username != "" {
-		rc := m.Options.Auth.SetUsername(driverPtr, o.Username)
-		if rc != 0 {
-			return scrapligoerrors.NewOptionsError("failed setting username option", nil)
-		}
+		opts.auth.username = uintptr(unsafe.Pointer(&[]byte(o.Username)[0]))
+		opts.auth.usernameLen = uintptr(len(o.Username))
 	}
 
 	if o.Password != "" {
-		rc := m.Options.Auth.SetPassword(driverPtr, o.Password)
-		if rc != 0 {
-			return scrapligoerrors.NewOptionsError("failed setting password option", nil)
-		}
+		opts.auth.password = uintptr(unsafe.Pointer(&[]byte(o.Password)[0]))
+		opts.auth.passwordLen = uintptr(len(o.Password))
 	}
 
 	if o.PrivateKeyPath != "" {
-		rc := m.Options.Auth.SetPrivateKeyPath(driverPtr, o.PrivateKeyPath)
-		if rc != 0 {
-			return scrapligoerrors.NewOptionsError("failed setting private key path option", nil)
-		}
+		opts.auth.privateKeyPath = uintptr(unsafe.Pointer(&[]byte(o.PrivateKeyPath)[0]))
+		opts.auth.privateKeyPathLen = uintptr(len(o.PrivateKeyPath))
 	}
 
 	if o.PrivateKeyPassphrase != "" {
-		rc := m.Options.Auth.SetPrivateKeyPassphrase(driverPtr, o.PrivateKeyPassphrase)
-		if rc != 0 {
-			return scrapligoerrors.NewOptionsError(
-				"failed setting private key passphrase option",
-				nil,
-			)
-		}
+		opts.auth.privateKeyPassphrase = uintptr(unsafe.Pointer(&[]byte(o.PrivateKeyPassphrase)[0]))
+		opts.auth.privateKeyPassphraseLen = uintptr(len(o.PrivateKeyPassphrase))
 	}
 
-	for k, v := range o.LookupMap {
-		rc := m.Options.Auth.SetDriverOptionAuthLookupKeyValue(driverPtr, k, v)
-		if rc != 0 {
-			return scrapligoerrors.NewOptionsError(
-				"failed setting lookup map option",
-				nil,
-			)
+	if len(o.LookupMap) > 0 {
+		// this ensures that the string/uint16 slices have a lifetime that lasts as long as
+		// `o` which we know will last as long as the option apply process in zig
+		o.lookupMapKeys = make([]string, len(o.LookupMap))
+		o.lookupMapKeyLens = make([]uint16, len(o.LookupMap))
+		o.lookupMapVals = make([]string, len(o.LookupMap))
+		o.lookupMapValLens = make([]uint16, len(o.LookupMap))
+
+		var count uint16
+
+		for k, v := range o.LookupMap {
+			o.lookupMapKeys[count] = k
+			o.lookupMapKeyLens[count] = uint16(len(k)) //nolint: gosec
+
+			o.lookupMapVals[count] = v
+			o.lookupMapValLens[count] = uint16(len(v)) //nolint: gosec
+
+			count++
 		}
+
+		opts.auth.lookups.keys = uintptr(unsafe.Pointer(&o.lookupMapKeys[0]))
+		opts.auth.lookups.keysLens = uintptr(unsafe.Pointer(&o.lookupMapKeyLens[0]))
+
+		opts.auth.lookups.vals = uintptr(unsafe.Pointer(&o.lookupMapVals[0]))
+		opts.auth.lookups.valsLens = uintptr(unsafe.Pointer(&o.lookupMapValLens[0]))
+
+		opts.auth.lookups.count = count
 	}
 
 	if o.ForceInSessionAuth {
-		rc := m.Options.Auth.SetForceInSessionAuth(driverPtr)
-		if rc != 0 {
-			return scrapligoerrors.NewOptionsError(
-				"failed setting force in session auth",
-				nil,
-			)
-		}
+		opts.auth.forceInSessionAuth = &o.ForceInSessionAuth
 	}
 
 	if o.BypassInSessionAuth {
-		rc := m.Options.Auth.SetBypassInSessionAuth(driverPtr)
-		if rc != 0 {
-			return scrapligoerrors.NewOptionsError(
-				"failed setting bypass in session auth",
-				nil,
-			)
-		}
+		opts.auth.bypassInSessionAuth = &o.BypassInSessionAuth
 	}
 
 	if o.UsernamePattern != "" {
-		rc := m.Options.Auth.SetUsernamePattern(driverPtr, o.UsernamePattern)
-		if rc != 0 {
-			return scrapligoerrors.NewOptionsError("failed setting username pattern option", nil)
-		}
+		opts.auth.usernamePattern = uintptr(unsafe.Pointer(&[]byte(o.UsernamePattern)[0]))
+		opts.auth.usernamePatternLen = uintptr(len(o.UsernamePattern))
 	}
 
 	if o.PasswordPattern != "" {
-		rc := m.Options.Auth.SetPasswordPattern(driverPtr, o.PasswordPattern)
-		if rc != 0 {
-			return scrapligoerrors.NewOptionsError("failed setting password pattern option", nil)
-		}
+		opts.auth.passwordPattern = uintptr(unsafe.Pointer(&[]byte(o.PasswordPattern)[0]))
+		opts.auth.passwordPatternLen = uintptr(len(o.PasswordPattern))
 	}
 
 	if o.PassphrasePattern != "" {
-		rc := m.Options.Auth.SetPassphrasePattern(driverPtr, o.PassphrasePattern)
-		if rc != 0 {
-			return scrapligoerrors.NewOptionsError("failed setting passphrase pattern option", nil)
-		}
+		opts.auth.privateKeyPassphrasePattern = uintptr(
+			unsafe.Pointer(&[]byte(o.PassphrasePattern)[0]),
+		)
+		opts.auth.privateKeyPassphrasePatternLen = uintptr(len(o.PassphrasePattern))
 	}
-
-	return nil
 }
 
 // TransportOptions holds transport specific options.
@@ -341,88 +290,45 @@ type TransportBinOptions struct {
 	TermWidth        *uint16
 }
 
-func (o *TransportBinOptions) apply( //nolint: gocyclo
-	driverPtr uintptr,
-	m *scrapligoffi.Mapping,
-) error {
+func (o *TransportBinOptions) apply(opts *driverOptions) {
 	if o.Bin != "" {
-		rc := m.Options.TransportBin.SetBin(driverPtr, o.Bin)
-		if rc != 0 {
-			return scrapligoerrors.NewOptionsError("failed setting bin transport bin option", nil)
-		}
+		opts.transport.bin.bin = uintptr(unsafe.Pointer(&[]byte(o.Bin)[0]))
+		opts.transport.bin.binLen = uintptr(len(o.Bin))
 	}
 
 	if o.ExtraOpenArgs != "" {
-		rc := m.Options.TransportBin.SetExtraOpenArgs(driverPtr, o.ExtraOpenArgs)
-		if rc != 0 {
-			return scrapligoerrors.NewOptionsError(
-				"failed setting bin transport extra args option",
-				nil,
-			)
-		}
+		opts.transport.bin.extraOpenArgs = uintptr(unsafe.Pointer(&[]byte(o.ExtraOpenArgs)[0]))
+		opts.transport.bin.extraOpenArgsLen = uintptr(len(o.ExtraOpenArgs))
 	}
 
 	if o.OverrideOpenArgs != "" {
-		rc := m.Options.TransportBin.SetOverrideOpenArgs(driverPtr, o.OverrideOpenArgs)
-		if rc != 0 {
-			return scrapligoerrors.NewOptionsError(
-				"failed setting bin transport override args option",
-				nil,
-			)
-		}
+		opts.transport.bin.overrideOpenArgs = uintptr(
+			unsafe.Pointer(&[]byte(o.OverrideOpenArgs)[0]),
+		)
+		opts.transport.bin.overrideOpenArgsLen = uintptr(len(o.OverrideOpenArgs))
 	}
 
 	if o.SSHConfigPath != "" {
-		rc := m.Options.TransportBin.SetSSHConfigPath(driverPtr, o.SSHConfigPath)
-		if rc != 0 {
-			return scrapligoerrors.NewOptionsError(
-				"failed setting bin transport ssh config path option",
-				nil,
-			)
-		}
+		opts.transport.bin.sshConfigPath = uintptr(unsafe.Pointer(&[]byte(o.SSHConfigPath)[0]))
+		opts.transport.bin.sshConfigPathLen = uintptr(len(o.SSHConfigPath))
 	}
 
 	if o.KnownHostsPath != "" {
-		rc := m.Options.TransportBin.SetKnownHostsPath(driverPtr, o.KnownHostsPath)
-		if rc != 0 {
-			return scrapligoerrors.NewOptionsError(
-				"failed setting bin transport known hosts path option",
-				nil,
-			)
-		}
+		opts.transport.bin.knownHostsPath = uintptr(unsafe.Pointer(&[]byte(o.KnownHostsPath)[0]))
+		opts.transport.bin.knownHostsPathLen = uintptr(len(o.KnownHostsPath))
 	}
 
 	if o.EnableStrictKey {
-		rc := m.Options.TransportBin.SetEnableStrictKey(driverPtr)
-		if rc != 0 {
-			return scrapligoerrors.NewOptionsError(
-				"failed setting bin transport strict key option",
-				nil,
-			)
-		}
+		opts.transport.bin.enableStrictKey = &o.EnableStrictKey
 	}
 
 	if o.TermHeight != nil {
-		rc := m.Options.TransportBin.SetTermHeight(driverPtr, *o.TermHeight)
-		if rc != 0 {
-			return scrapligoerrors.NewOptionsError(
-				"failed setting bin transport term height option",
-				nil,
-			)
-		}
+		opts.transport.bin.termHeight = o.TermHeight
 	}
 
 	if o.TermWidth != nil {
-		rc := m.Options.TransportBin.SetTermWidth(driverPtr, *o.TermWidth)
-		if rc != 0 {
-			return scrapligoerrors.NewOptionsError(
-				"failed setting bin transport term width option",
-				nil,
-			)
-		}
+		opts.transport.bin.termWidth = o.TermWidth
 	}
-
-	return nil
 }
 
 // TransportSSH2Options holds (lib)"ssh2" transport specific options.
@@ -440,104 +346,58 @@ type TransportSSH2Options struct {
 	ProxyJumpLibSSH2Trace         bool
 }
 
-func (o *TransportSSH2Options) apply( //nolint: gocyclo
-	driverPtr uintptr,
-	m *scrapligoffi.Mapping,
-) error {
+func (o *TransportSSH2Options) apply(opts *driverOptions) {
 	if o.KnownHostsPath != "" {
-		rc := m.Options.TransportSSH2.SetKnownHostsPath(driverPtr, o.KnownHostsPath)
-		if rc != 0 {
-			return scrapligoerrors.NewOptionsError(
-				"failed setting libssh2 known hosts path option",
-				nil,
-			)
-		}
+		opts.transport.ssh2.knownHostsPath = uintptr(unsafe.Pointer(&[]byte(o.KnownHostsPath)[0]))
+		opts.transport.ssh2.knownHostsPathLen = uintptr(len(o.KnownHostsPath))
 	}
 
 	if o.LibSSH2Trace {
-		rc := m.Options.TransportSSH2.SetLibSSH2Trace(driverPtr)
-		if rc != 0 {
-			return scrapligoerrors.NewOptionsError("failed setting libssh2 trace option", nil)
-		}
+		opts.transport.ssh2.libssh2Trace = &o.LibSSH2Trace
 	}
 
 	if o.ProxyJumpHost != "" {
-		rc := m.Options.TransportSSH2.SetProxyJumpHost(driverPtr, o.ProxyJumpHost)
-		if rc != 0 {
-			return scrapligoerrors.NewOptionsError(
-				"failed setting libssh2 proxy jump host option",
-				nil,
-			)
-		}
+		opts.transport.ssh2.proxyJumpHost = uintptr(unsafe.Pointer(&[]byte(o.ProxyJumpHost)[0]))
+		opts.transport.ssh2.proxyJumpHostLen = uintptr(len(o.ProxyJumpHost))
 	}
 
 	if o.ProxyJumpPort != 0 {
-		rc := m.Options.TransportSSH2.SetProxyJumpPort(driverPtr, o.ProxyJumpPort)
-		if rc != 0 {
-			return scrapligoerrors.NewOptionsError(
-				"failed setting libssh2 proxy jump port option",
-				nil,
-			)
-		}
+		opts.transport.ssh2.proxyJumpPort = &o.ProxyJumpPort
 	}
 
 	if o.ProxyJumpUsername != "" {
-		rc := m.Options.TransportSSH2.SetProxyJumpUsername(driverPtr, o.ProxyJumpUsername)
-		if rc != 0 {
-			return scrapligoerrors.NewOptionsError(
-				"failed setting libssh2 proxy jump username option",
-				nil,
-			)
-		}
+		opts.transport.ssh2.proxyJumpUsername = uintptr(
+			unsafe.Pointer(&[]byte(o.ProxyJumpUsername)[0]),
+		)
+		opts.transport.ssh2.proxyJumpUsernameLen = uintptr(len(o.ProxyJumpUsername))
 	}
 
 	if o.ProxyJumpPassword != "" {
-		rc := m.Options.TransportSSH2.SetProxyJumpPassword(driverPtr, o.ProxyJumpPassword)
-		if rc != 0 {
-			return scrapligoerrors.NewOptionsError(
-				"failed setting libssh2 proxy jump password option",
-				nil,
-			)
-		}
+		opts.transport.ssh2.proxyJumpPassword = uintptr(
+			unsafe.Pointer(&[]byte(o.ProxyJumpPassword)[0]),
+		)
+		opts.transport.ssh2.proxyJumpPasswordLen = uintptr(len(o.ProxyJumpPassword))
 	}
 
 	if o.ProxyJumpPrivateKeyPath != "" {
-		rc := m.Options.TransportSSH2.SetProxyJumpPrivateKeyPath(
-			driverPtr,
-			o.ProxyJumpPrivateKeyPath,
+		opts.transport.ssh2.proxyJumpPrivateKeyPath = uintptr(
+			unsafe.Pointer(&[]byte(o.ProxyJumpPrivateKeyPath)[0]),
 		)
-		if rc != 0 {
-			return scrapligoerrors.NewOptionsError(
-				"failed setting libssh2 proxy jump private key path option",
-				nil,
-			)
-		}
+		opts.transport.ssh2.proxyJumpPrivateKeyPathLen = uintptr(len(o.ProxyJumpPrivateKeyPath))
 	}
 
 	if o.ProxyJumpPrivateKeyPassphrase != "" {
-		rc := m.Options.TransportSSH2.SetProxyJumpPrivateKeyPassphrase(
-			driverPtr,
-			o.ProxyJumpPrivateKeyPassphrase,
+		opts.transport.ssh2.proxyJumpPrivateKeyPassphrase = uintptr(
+			unsafe.Pointer(&[]byte(o.ProxyJumpPrivateKeyPassphrase)[0]),
 		)
-		if rc != 0 {
-			return scrapligoerrors.NewOptionsError(
-				"failed setting libssh2 proxy jump private key passphrase option",
-				nil,
-			)
-		}
+		opts.transport.ssh2.proxyJumpPrivateKeyPassphraseLen = uintptr(
+			len(o.ProxyJumpPrivateKeyPassphrase),
+		)
 	}
 
-	if o.LibSSH2Trace {
-		rc := m.Options.TransportSSH2.SetProxyJumpLibSSH2Trace(driverPtr)
-		if rc != 0 {
-			return scrapligoerrors.NewOptionsError(
-				"failed setting libssh2 proxy jump trace option",
-				nil,
-			)
-		}
+	if o.ProxyJumpLibSSH2Trace {
+		opts.transport.ssh2.proxyJumpLibssh2Trace = &o.ProxyJumpLibSSH2Trace
 	}
-
-	return nil
 }
 
 // TransportTestOptions holds test/file transport specific options.
@@ -545,13 +405,9 @@ type TransportTestOptions struct {
 	F string
 }
 
-func (o *TransportTestOptions) apply(driverPtr uintptr, m *scrapligoffi.Mapping) error {
+func (o *TransportTestOptions) apply(opts *driverOptions) {
 	if o.F != "" {
-		rc := m.Options.TransportTest.SetF(driverPtr, o.F)
-		if rc != 0 {
-			return scrapligoerrors.NewOptionsError("failed setting test transport f option", nil)
-		}
+		opts.transport.test.f = uintptr(unsafe.Pointer(&[]byte(o.F)[0]))
+		opts.transport.test.fLen = uintptr(len(o.F))
 	}
-
-	return nil
 }
