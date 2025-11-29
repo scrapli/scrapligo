@@ -155,6 +155,17 @@ func WithNotContains(s string) Option {
 	}
 }
 
+// WithSearchDepth sets the "search depth" value of a read callback -- this is only applicable to
+// ReadWithCallbacks callbacks (NewReadCallback).
+func WithSearchDepth(i uint64) Option {
+	return func(o any) {
+		switch to := o.(type) {
+		case *ReadCallback:
+			to.searchDepth = i
+		}
+	}
+}
+
 // WithOnce sets the "once" value of a read callback -- this is only applicable to
 // ReadWithCallbacks callbacks (NewReadCallback).
 func WithOnce() Option {

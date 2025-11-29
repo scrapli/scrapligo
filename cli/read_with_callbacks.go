@@ -16,6 +16,7 @@ type ReadCallback struct {
 	contains        string
 	containsPattern string
 	notContains     string
+	searchDepth     uint64
 	once            bool
 	completes       bool
 	callback        func(ctx context.Context, c *Cli) error
@@ -116,8 +117,13 @@ func (c *Cli) ReadWithCallbacks( //nolint: gocyclo
 
 			shouldExecute := false
 
+			// do the should execute search on the largest window into the slice
+			// that we can -- obviously if we tried to go back to negative we use
+			// max to start our search from 0
+			cbSearchStartIdx := max(min(pos, len(results)-int(cb.searchDepth)), 0) //nolint: gosec
+
 			status = c.ffiMap.Cli.ReadCallbackShouldExecute(
-				results[pos:],
+				results[cbSearchStartIdx:],
 				cb.name,
 				cb.contains,
 				cb.containsPattern,
