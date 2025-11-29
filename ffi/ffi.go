@@ -26,10 +26,9 @@ var (
 )
 
 const (
-	darwin          = "darwin"
-	linux           = "linux"
-	libscrapliRepo  = "https://github.com/scrapli/libscrapli"
-	maxBuildMinutes = 5
+	darwin         = "darwin"
+	linux          = "linux"
+	libscrapliRepo = "https://github.com/scrapli/libscrapli"
 )
 
 // AssertNoLeaks is a dev/test type function that asserts (using the general purpose allocator used
