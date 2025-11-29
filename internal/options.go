@@ -63,6 +63,10 @@ func (o *Options) Apply(optionsPtr uintptr) {
 
 	opts.loggerLevel = uintptr(unsafe.Pointer(&[]byte(o.LoggerLevel)[0]))
 	opts.loggerLevelLen = uintptr(len(o.LoggerLevel))
+	opts.loggerCallback = scrapligologging.LoggerToLoggerCallback(
+		o.Logger,
+		uint8(scrapligologging.IntFromLevel(o.LoggerLevel)),
+	)
 
 	opts.port = &o.Port
 
