@@ -179,8 +179,8 @@ func (o *SessionOptions) apply(opts *driverOptions) {
 	}
 
 	if o.RecorderPath != "" {
-		opts.session.returnChar = uintptr(unsafe.Pointer(&[]byte(o.RecorderPath)[0]))
-		opts.session.returnCharLen = uintptr(len(o.RecorderPath))
+		opts.session.recordDestination = uintptr(unsafe.Pointer(&[]byte(o.RecorderPath)[0]))
+		opts.session.recordDestinationLen = uintptr(len(o.RecorderPath))
 	} else if o.RecorderCallback != nil {
 		opts.session.recorderCallback = purego.NewCallback(o.RecorderCallback)
 	}
