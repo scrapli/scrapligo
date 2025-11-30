@@ -32,6 +32,7 @@ type driverOptions struct {
 		operationMaxSearchDepth *uint64
 		recordDestination       uintptr
 		recordDestinationLen    uintptr
+		recorderCallback        uintptr
 	}
 
 	auth struct {

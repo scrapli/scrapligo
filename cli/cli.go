@@ -14,6 +14,7 @@ import (
 	scrapligoerrors "github.com/scrapli/scrapligo/errors"
 	scrapligoffi "github.com/scrapli/scrapligo/ffi"
 	scrapligointernal "github.com/scrapli/scrapligo/internal"
+	scrapligologging "github.com/scrapli/scrapligo/logging"
 	scrapligooptions "github.com/scrapli/scrapligo/options"
 	"golang.org/x/sys/unix"
 )
@@ -85,6 +86,7 @@ type Cli struct {
 	ffiMap  *scrapligoffi.Mapping
 	host    string
 	options *scrapligointernal.Options
+	l       *scrapligologging.AnyLogger
 }
 
 // NewCli returns a new instance of Cli setup with the given options.
@@ -109,6 +111,8 @@ func NewCli(
 			return nil, scrapligoerrors.NewOptionsError("failed applying option", err)
 		}
 	}
+
+	c.l = c.options.GetLogger()
 
 	loadedDef, err := getDefinitionBytes(c.options.Cli.DefinitionFileOrName)
 	if err != nil {

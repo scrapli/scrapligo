@@ -70,11 +70,19 @@ func WithOperationMaxSearchDepth(i uint64) Option {
 	}
 }
 
-// WithSessionRecorderPath sets the output path for a recorder/writer for the session. DO NOT USE
-// OTHER THAN FOR TESTING -- THIS IS UNSAFE AND WILL LEAK :).
+// WithSessionRecorderPath sets the output path for a recorder/writer for the session.
 func WithSessionRecorderPath(s string) Option {
 	return func(o *scrapligointernal.Options) error {
 		o.Session.RecorderPath = s
+
+		return nil
+	}
+}
+
+// WithSessionRecorderCallback sets the callback for a recorder/writer for the session.
+func WithSessionRecorderCallback(f func(s *[]byte)) Option {
+	return func(o *scrapligointernal.Options) error {
+		o.Session.RecorderCallback = f
 
 		return nil
 	}

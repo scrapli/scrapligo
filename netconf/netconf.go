@@ -7,6 +7,7 @@ import (
 	scrapligoerrors "github.com/scrapli/scrapligo/errors"
 	scrapligoffi "github.com/scrapli/scrapligo/ffi"
 	scrapligointernal "github.com/scrapli/scrapligo/internal"
+	scrapligologging "github.com/scrapli/scrapligo/logging"
 	scrapligooptions "github.com/scrapli/scrapligo/options"
 	"golang.org/x/sys/unix"
 )
@@ -33,6 +34,7 @@ type Netconf struct {
 	ffiMap  *scrapligoffi.Mapping
 	host    string
 	options *scrapligointernal.Options
+	l       *scrapligologging.AnyLogger
 }
 
 // NewNetconf returns a new instance of Netconf setup with the given options.
@@ -57,6 +59,8 @@ func NewNetconf(
 			return nil, scrapligoerrors.NewOptionsError("failed applying option", err)
 		}
 	}
+
+	n.l = n.options.GetLogger()
 
 	if n.options.Port == 0 {
 		n.options.Port = 830

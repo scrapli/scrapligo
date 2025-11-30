@@ -122,6 +122,14 @@ func (c *Cli) ReadWithCallbacks( //nolint: gocyclo
 			// max to start our search from 0
 			cbSearchStartIdx := max(min(pos, len(results)-int(cb.searchDepth)), 0) //nolint: gosec
 
+			c.l.Debug(
+				fmt.Sprintf(
+					"checking if callback %q should execute based on content %q",
+					cb.name,
+					results[cbSearchStartIdx:],
+				),
+			)
+
 			status = c.ffiMap.Cli.ReadCallbackShouldExecute(
 				results[cbSearchStartIdx:],
 				cb.name,
@@ -137,8 +145,12 @@ func (c *Cli) ReadWithCallbacks( //nolint: gocyclo
 			}
 
 			if !shouldExecute {
+				c.l.Debug(fmt.Sprintf("skipping callback %q", cb.name))
+
 				continue
 			}
+
+			c.l.Info(fmt.Sprintf("executing callback %q", cb.name))
 
 			executedCallbacks[cb.name] = nil
 

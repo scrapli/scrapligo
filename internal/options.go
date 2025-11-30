@@ -3,6 +3,7 @@ package internal
 import (
 	"unsafe"
 
+	"github.com/ebitengine/purego"
 	scrapligologging "github.com/scrapli/scrapligo/logging"
 )
 
@@ -55,6 +56,11 @@ func NewOptions() *Options {
 			LookupMap: make(map[string]string),
 		},
 	}
+}
+
+// GetLogger returns the AnyLogger wrapped around the configured logger options.
+func (o *Options) GetLogger() *scrapligologging.AnyLogger {
+	return scrapligologging.LoggerToAnyLogger(o.Logger, o.LoggerLevel)
 }
 
 // Apply applies the Options to the given driver options struct at optionsPtr.
@@ -138,7 +144,8 @@ type SessionOptions struct {
 	OperationTimeoutNs      *uint64
 	OperationMaxSearchDepth *uint64
 
-	RecorderPath string
+	RecorderPath     string
+	RecorderCallback func(buf *[]byte)
 }
 
 func (o *SessionOptions) apply(opts *driverOptions) {
@@ -174,6 +181,8 @@ func (o *SessionOptions) apply(opts *driverOptions) {
 	if o.RecorderPath != "" {
 		opts.session.returnChar = uintptr(unsafe.Pointer(&[]byte(o.RecorderPath)[0]))
 		opts.session.returnCharLen = uintptr(len(o.RecorderPath))
+	} else if o.RecorderCallback != nil {
+		opts.session.recorderCallback = purego.NewCallback(o.RecorderCallback)
 	}
 }
 
