@@ -1,0 +1,3 @@
+show version | i Kern
+Kernel version: 6.12.54-linuxkit
+eos1#

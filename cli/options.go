@@ -187,3 +187,14 @@ func WithCompletes() Option {
 		}
 	}
 }
+
+// WithReadSize sets the read size for a Read call -- this is only applicable to the plain Read
+// method.
+func WithReadSize(i uint64) Option {
+	return func(o any) {
+		switch to := o.(type) {
+		case *readOptions:
+			to.size = i
+		}
+	}
+}
