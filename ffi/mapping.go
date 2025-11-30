@@ -40,6 +40,9 @@ type SessionMapping struct {
 		buf string,
 		redacted bool,
 	) uint8
+	WriteReturn func(
+		driverPtr uintptr,
+	) uint8
 }
 
 // CliMapping holds libscrapli mappings specifically for cli drivers.

@@ -14,6 +14,7 @@ func registerSession(m *Mapping, libScrapliFfi uintptr) {
 	purego.RegisterLibFunc(&m.Session.Read, libScrapliFfi, "ls_session_read")
 	purego.RegisterLibFunc(&m.Session.Write, libScrapliFfi, "ls_session_write")
 	purego.RegisterLibFunc(&m.Session.WriteAndReturn, libScrapliFfi, "ls_session_write_and_return")
+	purego.RegisterLibFunc(&m.Session.WriteReturn, libScrapliFfi, "ls_session_write_return")
 }
 
 func registerCli(m *Mapping, libScrapliFfi uintptr) {

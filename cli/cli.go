@@ -262,6 +262,21 @@ func (c *Cli) WriteAndReturn(input string) error {
 	return nil
 }
 
+// WriteReturn writes a return character -- this bypasses the driver operation loop in zig, use
+// with caution.
+func (c *Cli) WriteReturn() error {
+	if c.ptr == 0 {
+		return scrapligoerrors.NewFfiError("driver pointer nil", nil)
+	}
+
+	status := c.ffiMap.Session.WriteReturn(c.ptr)
+	if status != 0 {
+		return scrapligoerrors.NewFfiError("failed executing writeReturn", nil)
+	}
+
+	return nil
+}
+
 // Read reads from the session -- this bypasses the driver operation loop in zig, use with caution.
 func (c *Cli) Read() ([]byte, error) {
 	if c.ptr == 0 {
