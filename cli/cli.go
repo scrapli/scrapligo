@@ -19,19 +19,12 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-type loadedDefinition struct {
-	content      []byte
-	platformName string
-}
-
-func getDefinitionBytes(definitionFileOrName string) (*loadedDefinition, error) {
-	d := &loadedDefinition{}
-
+func loadDefinition(o *scrapligointernal.Options) error {
 	var definitionFileOrNameString string
 
 	var err error
 
-	switch v := any(definitionFileOrName).(type) {
+	switch v := any(o.Cli.DefinitionFileOrName).(type) {
 	case PlatformName:
 		definitionFileOrNameString = v.String()
 	case string:
@@ -41,41 +34,45 @@ func getDefinitionBytes(definitionFileOrName string) (*loadedDefinition, error) 
 	assetPlatformNames := GetPlatformNames()
 
 	for _, platformName := range assetPlatformNames {
-		if platformName == definitionFileOrNameString {
-			d.content, err = scrapligoassets.Assets.ReadFile(
-				fmt.Sprintf("definitions/%s.yaml", platformName),
-			)
-			if err != nil {
-				return nil, scrapligoerrors.NewUtilError(
-					fmt.Sprintf(
-						"failed loading definition asset for platform %q",
-						definitionFileOrName,
-					),
-					err,
-				)
-			}
-
-			d.platformName = platformName
+		if platformName != definitionFileOrNameString {
+			continue
 		}
-	}
 
-	if len(d.content) == 0 {
-		// didn't load from assets, so we'll try to load the file
-		d.content, err = os.ReadFile(definitionFileOrNameString) //nolint: gosec
+		b, err := scrapligoassets.Assets.ReadFile(
+			fmt.Sprintf("definitions/%s.yaml", platformName),
+		)
 		if err != nil {
-			return nil, scrapligoerrors.NewUtilError(
-				fmt.Sprintf("failed loading definition file at path %q", definitionFileOrName),
+			return scrapligoerrors.NewUtilError(
+				fmt.Sprintf(
+					"failed loading definition asset for platform %q",
+					o.Cli.DefinitionFileOrName,
+				),
 				err,
 			)
 		}
 
-		d.platformName = strings.TrimSuffix(
-			filepath.Base(definitionFileOrNameString),
-			filepath.Ext(definitionFileOrNameString),
+		o.Cli.DefinitionPlatform = platformName
+		o.Cli.DefinitionString = string(b)
+
+		return nil
+	}
+
+	// didn't load from assets, so we'll try to load the file
+	b, err := os.ReadFile(definitionFileOrNameString) //nolint: gosec
+	if err != nil {
+		return scrapligoerrors.NewUtilError(
+			fmt.Sprintf("failed loading definition file at path %q", o.Cli.DefinitionFileOrName),
+			err,
 		)
 	}
 
-	return d, nil
+	o.Cli.DefinitionPlatform = strings.TrimSuffix(
+		filepath.Base(definitionFileOrNameString),
+		filepath.Ext(definitionFileOrNameString),
+	)
+	o.Cli.DefinitionString = string(b)
+
+	return nil
 }
 
 // Cli is an object representing a connection to a device of some sort -- this object wraps the
@@ -114,12 +111,12 @@ func NewCli(
 
 	c.l = c.options.GetLogger()
 
-	loadedDef, err := getDefinitionBytes(c.options.Cli.DefinitionFileOrName)
-	if err != nil {
-		return nil, err
+	if c.options.Cli.DefinitionPlatform == "" {
+		err := loadDefinition(c.options)
+		if err != nil {
+			return nil, err
+		}
 	}
-
-	c.options.Cli.DefinitionString = string(loadedDef.content)
 
 	if c.options.Port == 0 {
 		var p uint16
@@ -142,7 +139,7 @@ func NewCli(
 		// modify a username with some extra chars to change how the device behaves, here is where
 		// we apply those options. obviously this can be skipped with the appropriate option.
 		for _, opt := range scrapligoclidefinitionoptions.GetPlatformOptions().
-			GetOptionsForPlatform(loadedDef.platformName) {
+			GetOptionsForPlatform(c.options.Cli.DefinitionPlatform) {
 			err = opt(c.options)
 			if err != nil {
 				return nil, scrapligoerrors.NewOptionsError("failed applying (static) option", err)

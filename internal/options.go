@@ -98,8 +98,11 @@ func (o *Options) Apply(optionsPtr uintptr) {
 // CliOptions holds cli specific options.
 type CliOptions struct {
 	DefinitionFileOrName string
-	DefinitionString     string
-	SkipStaticOptions    bool
+
+	DefinitionPlatform string
+	DefinitionString   string
+
+	SkipStaticOptions bool
 }
 
 func (o *CliOptions) apply(opts *driverOptions) {
