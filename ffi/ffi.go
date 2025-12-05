@@ -18,6 +18,7 @@ import (
 	scrapligoconstants "github.com/scrapli/scrapligo/constants"
 	scrapligoerrors "github.com/scrapli/scrapligo/errors"
 	scrapligologging "github.com/scrapli/scrapligo/logging"
+	scrapligoutil "github.com/scrapli/scrapligo/util"
 )
 
 var (
@@ -125,12 +126,18 @@ func EnsureLibscrapli(ctx context.Context) (string, error) {
 	case darwin:
 		libFilename = fmt.Sprintf(
 			"libscrapli.%s.dylib",
-			scrapligoconstants.LibScrapliVersion,
+			scrapligoutil.GetEnvStrOrDefault(
+				scrapligoconstants.LibScrapliVersionOverrideEnv,
+				scrapligoconstants.LibScrapliVersion,
+			),
 		)
 	case linux:
 		libFilename = fmt.Sprintf(
 			"libscrapli.so.%s",
-			scrapligoconstants.LibScrapliVersion,
+			scrapligoutil.GetEnvStrOrDefault(
+				scrapligoconstants.LibScrapliVersionOverrideEnv,
+				scrapligoconstants.LibScrapliVersion,
+			),
 		)
 	default:
 		panic("unsupported platform")

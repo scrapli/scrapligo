@@ -9,6 +9,12 @@ const (
 	// override where we store/look for the libscrapli dynamic library file on disk.
 	LibScrapliCacheOverrideEnv = "LIBSCRAPLI_CACHE_PATH"
 
+	// LibScrapliVersionOverrideEnv overrides the value of constants.LibscrapliVersion -- you can
+	// set this to have the auto ffi installer install a specific commit or tag. Note that to use a
+	// hash you will need docker available the machine running the program (not required for setting
+	// a tagged release version).
+	LibScrapliVersionOverrideEnv = "LIBSCRAPLI_VERSION"
+
 	// XdgCacheHomeEnv is the key for env var for XDG_CAHCE_HOME -- we use this to try to see where
 	// a user would want us to cache the libscrapli dynamic library file.
 	XdgCacheHomeEnv = "XDG_CACHE_HOME"
