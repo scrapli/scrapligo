@@ -80,6 +80,10 @@ linters:
         path: util/
         text: meaningless package names
       - linters:
+          - revive
+        path: errors/
+        text: avoid package names that conflict
+      - linters:
           - gocognit
           - nestif
         path: e2e/
