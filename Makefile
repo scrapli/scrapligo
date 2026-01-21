@@ -12,16 +12,16 @@ lint: fmt ## Run linters
 	golangci-lint run
 
 test: ## Run unit tests
-	gotestsum --format testname --hide-summary=skipped -- -coverprofile=cover.out `go list ./... | grep -v e2e`
+	go test -coverprofile=cover.out `go list ./... | grep -v e2e`
 
 test-race: ## Run unit tests with race flag
-	gotestsum --format testname --hide-summary=skipped -- -coverprofile=cover.out -race `go list ./... | grep -v e2e`
+	go test -coverprofile=cover.out -race `go list ./... | grep -v e2e`
 
 test-e2e: ## Run e2e tests against "full" test topology (count to never cache e2e tests)
-	gotestsum --format testname --hide-summary=skipped -- ./e2e/... -count=1
+	go test ./e2e/... -count=1
 
 test-e2e-ci: ## Run e2e tests against "ci" test topology with race flag (count to never cache e2e tests)
-	gotestsum --format testname --hide-summary=skipped -- ./e2e/... -platforms nokia_srl -race -count=1 -skip-slow
+	go test ./e2e/... -platforms nokia_srl -race -count=1 -skip-slow
 
 cov:  ## Produce html coverage report
 	go tool cover -html=cover.out

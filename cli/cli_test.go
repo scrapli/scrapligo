@@ -39,7 +39,7 @@ func getCli(t *testing.T, f string) *scrapligocli.Cli {
 		scrapligooptions.WithUsername("admin"),
 		scrapligooptions.WithPassword("admin"),
 		scrapligooptions.WithLookupKeyValue("enable", "libscrapli"),
-		scrapligooptions.WithDefintionFileOrName(scrapligocli.AristaEos),
+		scrapligooptions.WithDefinitionFileOrName(scrapligocli.AristaEos),
 	}
 
 	if *scrapligotesthelper.Record {

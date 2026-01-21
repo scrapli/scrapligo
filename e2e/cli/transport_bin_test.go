@@ -56,7 +56,7 @@ func TestBinTransportProxyJump(t *testing.T) {
 			}
 
 			opts := []scrapligooptions.Option{
-				scrapligooptions.WithDefintionFileOrName(caseData.platform),
+				scrapligooptions.WithDefinitionFileOrName(caseData.platform),
 				scrapligooptions.WithUsername("admin"),
 				scrapligooptions.WithTransportBin(),
 				scrapligooptions.WithBinTransportSSHConfigFile(sshConfigFilePath),

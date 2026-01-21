@@ -78,7 +78,7 @@ func viaBinTransport() {
 	defer cancel()
 
 	opts := []scrapligooptions.Option{
-		scrapligooptions.WithDefintionFileOrName(
+		scrapligooptions.WithDefinitionFileOrName(
 			scrapligoutil.GetEnvStrOrDefault(
 				"SCRAPLI_PLATFORM",
 				defaultPlatform.String(),
@@ -140,7 +140,7 @@ func viaSSH2Transport() {
 	// normally setup the connection, then under the transport options you can specify how to
 	// connect to the final host
 	opts := []scrapligooptions.Option{
-		scrapligooptions.WithDefintionFileOrName(
+		scrapligooptions.WithDefinitionFileOrName(
 			scrapligoutil.GetEnvStrOrDefault(
 				"SCRAPLI_PLATFORM",
 				defaultPlatform.String(),

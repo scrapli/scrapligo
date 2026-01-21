@@ -19,8 +19,8 @@ func WithSkipStaticOptions() Option {
 	}
 }
 
-// WithDefintionFileOrName sets the Cli definition/platform for the Cli object.
-func WithDefintionFileOrName[T PlatformNameOrString](s T) Option {
+// WithDefinitionFileOrName sets the Cli definition/platform for the Cli object.
+func WithDefinitionFileOrName[T PlatformNameOrString](s T) Option {
 	return func(o *scrapligointernal.Options) error {
 		o.Cli.DefinitionFileOrName = string(s)
 

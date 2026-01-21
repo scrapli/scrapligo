@@ -51,7 +51,7 @@ func TestSSH2TransportProxyJump(t *testing.T) {
 			var host string
 
 			opts := []scrapligooptions.Option{
-				scrapligooptions.WithDefintionFileOrName(caseData.platform),
+				scrapligooptions.WithDefinitionFileOrName(caseData.platform),
 				scrapligooptions.WithUsername("scrapli-pw"),
 				scrapligooptions.WithPassword("scrapli-123-pw"),
 				scrapligooptions.WithTransportSSH2(),

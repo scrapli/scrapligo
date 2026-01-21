@@ -27,11 +27,7 @@ locations=(
     "constants/versions.go     ^var\\sScrapliDefinitionsVersion\\s=     definitions"
     "go.mod                    ^go\\s                                   go"
     ".github/vars.env          GO_VERSION=                              ci go"
-    ".github/vars.env          GCI_VERSION=                             ci gci"
-    ".github/vars.env          GOFUMPT_VERSION=                         ci gofumpt"
     ".github/vars.env          GOLANGCI_LINT_VERSION=                   ci golangci-lint"
-    ".github/vars.env          GOLINES_VERSION=                         ci golines"
-    ".github/vars.env          GOTESTSUM_VERSION=                       ci gotestsum"
     "Makefile                  ghcr.io/scrapli/                         local/ci clab setup"
 )
 

@@ -86,7 +86,7 @@ func main() {
 	// stuff in scrapli_definitions
 	opts = append(
 		opts,
-		scrapligooptions.WithDefintionFileOrName(definitionPath),
+		scrapligooptions.WithDefinitionFileOrName(definitionPath),
 	)
 
 	c, err := scrapligocli.NewCli(

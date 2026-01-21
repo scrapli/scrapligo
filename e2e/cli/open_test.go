@@ -23,7 +23,7 @@ func TestOpenWithKey(t *testing.T) {
 		"bin": {
 			description: "simple-bin",
 			options: []scrapligooptions.Option{
-				scrapligooptions.WithDefintionFileOrName(scrapligocli.AristaEos),
+				scrapligooptions.WithDefinitionFileOrName(scrapligocli.AristaEos),
 				scrapligooptions.WithTransportBin(),
 				scrapligooptions.WithUsername("admin-sshkey"),
 				scrapligooptions.WithPrivateKeyPath("./fixtures/libscrapli_test_ssh_key"),
@@ -33,7 +33,7 @@ func TestOpenWithKey(t *testing.T) {
 		"ssh2": {
 			description: "simple-ssh2",
 			options: []scrapligooptions.Option{
-				scrapligooptions.WithDefintionFileOrName(scrapligocli.AristaEos),
+				scrapligooptions.WithDefinitionFileOrName(scrapligocli.AristaEos),
 				scrapligooptions.WithTransportSSH2(),
 				scrapligooptions.WithUsername("admin-sshkey"),
 				scrapligooptions.WithPrivateKeyPath("./fixtures/libscrapli_test_ssh_key"),
@@ -43,7 +43,7 @@ func TestOpenWithKey(t *testing.T) {
 		"bin-passhprase": {
 			description: "bin-with-passhrase",
 			options: []scrapligooptions.Option{
-				scrapligooptions.WithDefintionFileOrName(scrapligocli.AristaEos),
+				scrapligooptions.WithDefinitionFileOrName(scrapligocli.AristaEos),
 				scrapligooptions.WithTransportBin(),
 				scrapligooptions.WithUsername("admin-sshkey-passphrase"),
 				scrapligooptions.WithPrivateKeyPath(
@@ -56,7 +56,7 @@ func TestOpenWithKey(t *testing.T) {
 		"ssh2-passhrase": {
 			description: "ssh2-with-passhrase",
 			options: []scrapligooptions.Option{
-				scrapligooptions.WithDefintionFileOrName(scrapligocli.AristaEos),
+				scrapligooptions.WithDefinitionFileOrName(scrapligocli.AristaEos),
 				scrapligooptions.WithTransportSSH2(),
 				scrapligooptions.WithUsername("admin-sshkey-passphrase"),
 				scrapligooptions.WithPrivateKeyPath(

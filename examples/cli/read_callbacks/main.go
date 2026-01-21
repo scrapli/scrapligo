@@ -51,7 +51,7 @@ func getOptions() (string, []scrapligooptions.Option) {
 	)
 
 	opts := []scrapligooptions.Option{
-		scrapligooptions.WithDefintionFileOrName(
+		scrapligooptions.WithDefinitionFileOrName(
 			scrapligoutil.GetEnvStrOrDefault(
 				"SCRAPLI_PLATFORM",
 				defaultPlatform.String(),
