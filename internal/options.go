@@ -119,6 +119,7 @@ type NetconfOptions struct {
 	ErrorTag              string
 	PreferredVersion      string
 	MessagePollIntervalNS uint64
+	CapabilitiesCallback  func(serverCapabilities *string) *string
 }
 
 func (o *NetconfOptions) apply(opts *driverOptions) {
@@ -134,6 +135,10 @@ func (o *NetconfOptions) apply(opts *driverOptions) {
 
 	if o.MessagePollIntervalNS != 0 {
 		opts.netconf.messagePollInterval = &o.MessagePollIntervalNS
+	}
+
+	if o.CapabilitiesCallback != nil {
+		opts.netconf.capabilitiesCallback = purego.NewCallback(o.CapabilitiesCallback)
 	}
 }
 

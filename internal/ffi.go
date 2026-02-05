@@ -15,11 +15,12 @@ type driverOptions struct {
 	}
 
 	netconf struct {
-		errorTag            uintptr
-		errorTagLen         uintptr
-		preferredVersion    uintptr
-		preferredVersionLen uintptr
-		messagePollInterval *uint64
+		errorTag             uintptr
+		errorTagLen          uintptr
+		preferredVersion     uintptr
+		preferredVersionLen  uintptr
+		messagePollInterval  *uint64
+		capabilitiesCallback uintptr
 	}
 
 	session struct {
