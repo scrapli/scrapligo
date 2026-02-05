@@ -1,8 +1,3 @@
-# Binaries for programs and plugins
-*.exe
-*.exe~
-*.dll
-
 # Test binary, built with `go test -c`
 *.test
 
@@ -14,7 +9,6 @@
 Zig.iml
 .zed
 .vscode
-.devcontainer
 
 # macos stuff
 .DS_Store
@@ -29,9 +23,6 @@ private/
 
 # coverage
 cover.out
-
-# clab build dir
-.clab/clab-scrapligo
 
 # where we mount stuff when running clab bits
 .clab

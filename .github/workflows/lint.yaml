@@ -18,10 +18,7 @@ jobs:
         run: |
           source .github/vars.env
           echo "GO_VERSION=$GO_VERSION" >> "$GITHUB_ENV"
-          echo "GCI_VERSION=$GCI_VERSION" >> "$GITHUB_ENV"
-          echo "GOFUMPT_VERSION=$GOFUMPT_VERSION" >> "$GITHUB_ENV"
           echo "GOLANGCI_LINT_VERSION=$GOLANGCI_LINT_VERSION" >> "$GITHUB_ENV"
-          echo "GOLINES_VERSION=$GOLINES_VERSION" >> "$GITHUB_ENV"
 
       - name: set up go
         uses: actions/setup-go@v5
