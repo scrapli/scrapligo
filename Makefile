@@ -4,9 +4,9 @@ help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
 fmt: ## Run formatters
-	gofumpt -w .
-	gci write .
-	golines --base-formatter="gofmt" -w .
+	go run mvdan.cc/gofumpt -w .
+	go run github.com/daixiang0/gci write .
+	go run github.com/golangci/golines --base-formatter="gofmt" -w .
 
 lint: fmt ## Run linters
 	golangci-lint run
