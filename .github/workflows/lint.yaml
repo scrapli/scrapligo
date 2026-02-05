@@ -21,7 +21,7 @@ jobs:
           echo "GOLANGCI_LINT_VERSION=$GOLANGCI_LINT_VERSION" >> "$GITHUB_ENV"
 
       - name: set up go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version: ${{ env.GO_VERSION }}
 
