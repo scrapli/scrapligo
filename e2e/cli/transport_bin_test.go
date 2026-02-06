@@ -77,12 +77,8 @@ func TestBinTransportProxyJump(t *testing.T) {
 
 				var port uint16
 
-				if runtime.GOOS == scrapligoconstants.Darwin {
-					host = localhost
-					port = 22022
-				} else {
-					host = "172.20.20.17"
-				}
+				// because proxy-jumping, use the name of the entry in the ssh config
+				host = "ceos"
 
 				opts = append(
 					opts,
@@ -94,16 +90,7 @@ func TestBinTransportProxyJump(t *testing.T) {
 					scrapligooptions.WithPassword("NokiaSrl1!"),
 				)
 
-				if runtime.GOOS == scrapligoconstants.Darwin {
-					host = localhost
-
-					opts = append(
-						opts,
-						scrapligooptions.WithPort(21022),
-					)
-				} else {
-					host = "172.20.20.16"
-				}
+				host = "srl"
 			}
 
 			c, err := scrapligocli.NewCli(

@@ -8,7 +8,7 @@ Host *
 Host jumper
   HostName 172.20.20.19
   User scrapli-key
-  IdentityFile tests/functional/fixtures/scrapli-jumper-key
+  IdentityFile ./fixtures/scrapli-jumper-key
 
 Host srl
   HostName 172.20.20.16
@@ -17,10 +17,5 @@ Host srl
 
 Host ceos
   HostName 172.20.20.17
-  User admin
-  ProxyJump jumper
-
-Host ceos
-  HostName 172.20.20.18
   User admin
   ProxyJump jumper
