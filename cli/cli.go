@@ -286,7 +286,7 @@ func (c *Cli) getResult(
 
 	_, _ = unix.Read(c.pollFd, out)
 
-	var inputsSize, resultsRawSize, resultsSize, resultsFailedIndicatorSize, errSize uint64
+	var inputsSize, resultsRawSize, resultsSize, resultsFailedIndicatorSize, errSize uintptr
 
 	rc := c.ffiMap.Cli.FetchOperationSizes(
 		c.ptr,

@@ -28,7 +28,7 @@ type SessionMapping struct {
 	Read func(
 		driverPtr uintptr,
 		buf *[]byte,
-		readSize *uint64,
+		readSize *uintptr,
 	) uint8
 	Write func(
 		driverPtr uintptr,
@@ -73,7 +73,7 @@ type CliMapping struct {
 		resultsRawSize,
 		resultsSize,
 		resultsFailedIndicatorSize,
-		errSize *uint64,
+		errSize *uintptr,
 	) uint8
 	// FetchOperation gets the result of the given operationID -- before calling this you must have
 	// already understood what the result sizes are such that those pointers can be appropriately
@@ -183,7 +183,7 @@ type NetconfMapping struct {
 		resultSize,
 		rpcWarningsSize,
 		rpcErrorsSize,
-		errSize *uint64,
+		errSize *uintptr,
 	) uint8
 	// FetchOperation polls the given operationID. See CliMapping.FetchOperation for details.
 	FetchOperation func(

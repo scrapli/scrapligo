@@ -36,7 +36,7 @@ func (c *Cli) Read(options ...Option) ([]byte, error) {
 
 	buf := make([]byte, loadedOptions.size)
 
-	var readSize uint64
+	var readSize uintptr
 
 	status := c.ffiMap.Session.Read(c.ptr, &buf, &readSize)
 	if status != 0 {

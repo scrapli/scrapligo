@@ -292,7 +292,7 @@ func (n *Netconf) getResult(
 
 	_, _ = unix.Read(n.pollFd, out)
 
-	var inputSize, resultRawSize, resultSize, rpcWarningsSize, rpcErrorsSize, errSize uint64
+	var inputSize, resultRawSize, resultSize, rpcWarningsSize, rpcErrorsSize, errSize uintptr
 
 	rc := n.ffiMap.Netconf.FetchOperationSizes(
 		n.ptr,
