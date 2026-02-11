@@ -3,7 +3,6 @@ package cli_test
 import (
 	"bytes"
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -14,7 +13,6 @@ import (
 	scrapligocli "github.com/scrapli/scrapligo/cli"
 	scrapligoconstants "github.com/scrapli/scrapligo/constants"
 	scrapligoffi "github.com/scrapli/scrapligo/ffi"
-	scrapligologging "github.com/scrapli/scrapligo/logging"
 	scrapligooptions "github.com/scrapli/scrapligo/options"
 	scrapligotesthelper "github.com/scrapli/scrapligo/testhelper"
 )
@@ -71,11 +69,13 @@ func TestMain(m *testing.M) {
 func getCli(t *testing.T, platform, transportName string) *scrapligocli.Cli {
 	t.Helper()
 
-	if !strings.Contains(*scrapligotesthelper.Platforms, platform) {
+	if *scrapligotesthelper.Platforms != "all" &&
+		!strings.Contains(*scrapligotesthelper.Platforms, platform) {
 		t.Skipf("skipping platform %q, due to cli flag...", platform)
 	}
 
-	if !strings.Contains(*scrapligotesthelper.Transports, transportName) {
+	if *scrapligotesthelper.Transports != "all" &&
+		!strings.Contains(*scrapligotesthelper.Transports, transportName) {
 		t.Skipf("skipping transport %q, due to cli flag...", transportName)
 	}
 
@@ -84,9 +84,6 @@ func getCli(t *testing.T, platform, transportName string) *scrapligocli.Cli {
 	opts := []scrapligooptions.Option{
 		scrapligooptions.WithDefinitionFileOrName(platform),
 		scrapligooptions.WithUsername("admin"),
-		scrapligooptions.WithLogger(log.Default()),
-		scrapligooptions.WithLoggerLevel(scrapligologging.Debug),
-		scrapligooptions.WithSSH2LibSSH2Trace(),
 	}
 
 	switch transportName {

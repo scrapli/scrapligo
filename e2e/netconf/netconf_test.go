@@ -68,11 +68,13 @@ func TestMain(m *testing.M) {
 func getNetconf(t *testing.T, platform, transportName string) *scrapligonetconf.Netconf {
 	t.Helper()
 
-	if !strings.Contains(*scrapligotesthelper.Platforms, platform) {
+	if *scrapligotesthelper.Platforms != "all" &&
+		!strings.Contains(*scrapligotesthelper.Platforms, platform) {
 		t.Skipf("skipping platform %q, due to cli flag...", platform)
 	}
 
-	if !strings.Contains(*scrapligotesthelper.Transports, transportName) {
+	if *scrapligotesthelper.Platforms != "all" &&
+		!strings.Contains(*scrapligotesthelper.Transports, transportName) {
 		t.Skipf("skipping transport %q, due to cli flag...", transportName)
 	}
 
