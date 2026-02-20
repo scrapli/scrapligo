@@ -28,7 +28,7 @@ func ResolveAtFileOrURL(ctx context.Context, path string) ([]byte, error) {
 			return nil, err
 		}
 
-		resp, err := http.DefaultClient.Do(req)
+		resp, err := http.DefaultClient.Do(req) //nolint: gosec
 		if err != nil {
 			return nil, scrapligoerrors.NewUtilError(
 				fmt.Sprintf("failed downloading file at path %q", path),

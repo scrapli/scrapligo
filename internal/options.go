@@ -197,7 +197,7 @@ func (o *SessionOptions) apply(opts *driverOptions) {
 // AuthOptions holds auth related options for driveres.
 type AuthOptions struct {
 	Username string
-	Password string
+	Password string //nolint: gosec
 
 	PrivateKeyPath       string
 	PrivateKeyPassphrase string

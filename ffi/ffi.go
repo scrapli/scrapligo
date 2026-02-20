@@ -184,12 +184,12 @@ func writeHTTPContentsFromPath(
 
 	client := http.Client{}
 
-	resp, err := client.Do(req)
+	resp, err := client.Do(req) //nolint: gosec
 	if err != nil {
 		return err
 	}
 
-	defer resp.Body.Close() //nolint
+	defer resp.Body.Close() //nolint: errcheck
 
 	if resp.StatusCode != http.StatusOK {
 		return scrapligoerrors.NewFfiError(
