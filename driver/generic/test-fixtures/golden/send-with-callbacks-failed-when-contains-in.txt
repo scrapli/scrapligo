@@ -1,5 +1,0 @@
-configure terminal
-
-
-show version
-

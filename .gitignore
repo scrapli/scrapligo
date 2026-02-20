@@ -1,18 +1,14 @@
-# Binaries for programs and plugins
-*.exe
-*.exe~
-*.dll
-*.so
-*.dylib
-
 # Test binary, built with `go test -c`
 *.test
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
 
-# jetbrains goodies
+# editor goodies
 .idea
+Zig.iml
+.zed
+.vscode
 
 # macos stuff
 .DS_Store
@@ -25,12 +21,8 @@ private/
 # log output
 *.log
 
-# vscode
-.vscode
-.devcontainer
-
 # coverage
 cover.out
 
-# clab build dir
-.clab/clab-scrapligo
+# where we mount stuff when running clab bits
+.clab

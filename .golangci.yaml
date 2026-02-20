@@ -1,126 +1,103 @@
-linters-settings:
-  funlen:
-    lines: 150
-    statements: 50
-  gocritic:
-    enabled-tags:
-      - diagnostic
-      - experimental
-      - opinionated
-      - performance
-      - style
-    disabled-checks:
-      - whyNoLint
-  goconst:
-    ignore-tests: true
-  gocyclo:
-    min-complexity: 15
-  lll:
-    line-length: 100
-    tab-width: 4
-  stylecheck:
-    checks:
-      - "-ST1000"
-
+---
+version: "2"
+run:
+  go: "1.25"
 linters:
-  enable:
-    - asciicheck
-    - bodyclose
-    - copyloopvar
-    - decorder
-    - dogsled
-    - dupl
-    - dupword
-    - durationcheck
-    - err113
-    - errcheck
-    - errchkjson
-    - errname
-    - exhaustive
-    - forbidigo
-    - forcetypeassert
-    - funlen
-    - gocheckcompilerdirectives
-    - gochecknoglobals
-    - gochecknoinits
-    - gocognit
-    - goconst
-    - gocritic
-    - gocyclo
-    - godot
-    - godox
-    - gofmt
-    - gofumpt
-    - goimports
-    - goprintffuncname
-    - gosec
-    - gosimple
-    - govet
-    - grouper
-    - importas
-    - ineffassign
-    - lll
-    - maintidx
-    - makezero
-    - misspell
-    - mnd
-    - nakedret
-    - nestif
-    - nilerr
-    - nlreturn
-    - noctx
-    - nolintlint
-    - nolintlint
-    - prealloc
-    - predeclared
-    - reassign
-    - revive
-    - staticcheck
-    - stylecheck
-    - tenv
-    - testpackage
-    - tparallel
-    - typecheck
-    - unconvert
-    - unparam
-    - unused
-    - usestdlibvars
-    - wastedassign
-    - whitespace
-    - wsl
-
+  default: all
+  disable:
+    - cyclop # already using gocyclo, and its good enough!
+    - depguard
+    - exhaustruct
+    - paralleltest
+    - perfsprint
+    - varnamelen
+    - wrapcheck
+    - wsl # deprecated, wsl_v5 included in all ofc
+  settings:
+    funlen:
+      lines: 150
+      statements: 50
+    gocritic:
+      disabled-checks:
+        - whyNoLint
+      enabled-tags:
+        - diagnostic
+        - experimental
+        - opinionated
+        - performance
+        - style
+    gocyclo:
+      min-complexity: 15
+    importas:
+      alias:
+        - pkg: github.com/scrapli/scrapligo/(\w+)
+          alias: scrapligo$1
+      no-unaliased: true
+    lll:
+      line-length: 100
+      tab-width: 4
+    staticcheck:
+      checks:
+        - -ST1000
+  exclusions:
+    rules:
+      - linters:
+          - revive
+        text: package-comments
+      - linters:
+          - gochecknoglobals
+        path: constants/versions.go
+      - linters:
+          - revive
+        path: cli/platforms.go
+        text: exported
+      - linters:
+          - misspell
+        path: cli/platforms.go
+        text: misspelling
+      - linters:
+          - misspell
+        path: cli/definitionoptions
+        text: misspelling
+      - linters:
+          - revive
+        path: netconf/types.go
+        text: 'exported: exported const'
+      - linters:
+          - gocritic
+        path: cli/options
+        text: singleCaseSwitch
+      - linters:
+          - gocritic
+        path: netconf/options
+        text: singleCaseSwitch
+      - linters:
+          - gosec
+        path: internal/options.go
+        text: unsafe calls should be audited
+      - linters:
+          - revive
+        path: util/
+        text: meaningless package names
+      - linters:
+          - revive
+        path: errors/
+        text: avoid package names that conflict
+      - linters:
+          - gocognit
+          - nestif
+        path: e2e/
+      - linters:
+          - dupl
+          - lll
+          - goconst
+        path: _test\.go
+      - linters:
+          - forbidigo
+        path: examples/
+        text: fmt.Println
+    warn-unused: true
 issues:
   max-issues-per-linter: 0
   max-same-issues: 0
-  # https://github.com/golangci/golangci-lint/issues/2439#issuecomment-1002912465
-  exclude-use-default: false
-  exclude-dirs:
-    - private
-    - .private
-  exclude-rules:
-    - path: _test\.go
-      linters:
-        - gomnd
-        - dupl
-        - structcheck
-        - unused
-        - unparam
-
-    # ignoring long lines due to json/yaml tags in platform
-    - path: platform/definition.go
-      linters:
-        - lll
-
-    # ignore package comments complaints in revive
-    - linters:
-        - revive
-      text: "package-comments"
-
-run:
-  go: '1.22'
-
-output:
   uniq-by-line: false
-
-service:
-  golangci-lint-version: 1.61.x

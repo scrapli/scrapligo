@@ -1,9 +1,0 @@
-Building configuration...
-
-Current configuration : 38 bytes
-!
-interface Vlan1
- no ip address
-end
-
-C3560CX#

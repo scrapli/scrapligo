@@ -1,0 +1,37 @@
+---
+name: lint
+
+on:
+  workflow_call: {}
+  workflow_dispatch: {}
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: load env vars for workflow run
+        run: |
+          source .github/vars.env
+          echo "GO_VERSION=$GO_VERSION" >> "$GITHUB_ENV"
+          echo "GOLANGCI_LINT_VERSION=$GOLANGCI_LINT_VERSION" >> "$GITHUB_ENV"
+
+      - name: set up go
+        uses: actions/setup-go@v6
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: ensure go deps
+        run: |
+          go mod tidy
+          curl -sSfL \
+            https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh |
+            sh -s -- -b $(go env GOPATH)/bin ${{ env.GOLANGCI_LINT_VERSION }}
+
+      - name: run the linters
+        run: |
+          make lint
