@@ -8,11 +8,11 @@ import (
 	"testing"
 	"time"
 
-	scrapligocli "github.com/scrapli/scrapligo/cli"
-	scrapligoconstants "github.com/scrapli/scrapligo/constants"
-	scrapligonetconf "github.com/scrapli/scrapligo/netconf"
-	scrapligooptions "github.com/scrapli/scrapligo/options"
-	scrapligotesthelper "github.com/scrapli/scrapligo/testhelper"
+	scrapligocli "github.com/scrapli/scrapligo/v2/cli"
+	scrapligoconstants "github.com/scrapli/scrapligo/v2/constants"
+	scrapligonetconf "github.com/scrapli/scrapligo/v2/netconf"
+	scrapligooptions "github.com/scrapli/scrapligo/v2/options"
+	scrapligotesthelper "github.com/scrapli/scrapligo/v2/testhelper"
 )
 
 func TestBinTransportProxyJumpNetconf(t *testing.T) {

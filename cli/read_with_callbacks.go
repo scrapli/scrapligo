@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"time"
 
-	scrapligoerrors "github.com/scrapli/scrapligo/errors"
-	scrapligoutil "github.com/scrapli/scrapligo/util"
+	scrapligoerrors "github.com/scrapli/scrapligo/v2/errors"
+	scrapligoutil "github.com/scrapli/scrapligo/v2/util"
 )
 
 // ReadCallback represents a callback and how it is triggered, for use with ReadWithCallbacks.

@@ -7,11 +7,11 @@ import (
 	"runtime"
 	"time"
 
-	scrapligocli "github.com/scrapli/scrapligo/cli"
-	scrapligoconstants "github.com/scrapli/scrapligo/constants"
-	scrapligoffi "github.com/scrapli/scrapligo/ffi"
-	scrapligooptions "github.com/scrapli/scrapligo/options"
-	scrapligoutil "github.com/scrapli/scrapligo/util"
+	scrapligocli "github.com/scrapli/scrapligo/v2/cli"
+	scrapligoconstants "github.com/scrapli/scrapligo/v2/constants"
+	scrapligoffi "github.com/scrapli/scrapligo/v2/ffi"
+	scrapligooptions "github.com/scrapli/scrapligo/v2/options"
+	scrapligoutil "github.com/scrapli/scrapligo/v2/util"
 )
 
 const (

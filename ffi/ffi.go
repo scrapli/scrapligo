@@ -15,10 +15,10 @@ import (
 	"time"
 
 	"github.com/ebitengine/purego"
-	scrapligoconstants "github.com/scrapli/scrapligo/constants"
-	scrapligoerrors "github.com/scrapli/scrapligo/errors"
-	scrapligologging "github.com/scrapli/scrapligo/logging"
-	scrapligoutil "github.com/scrapli/scrapligo/util"
+	scrapligoconstants "github.com/scrapli/scrapligo/v2/constants"
+	scrapligoerrors "github.com/scrapli/scrapligo/v2/errors"
+	scrapligologging "github.com/scrapli/scrapligo/v2/logging"
+	scrapligoutil "github.com/scrapli/scrapligo/v2/util"
 )
 
 var (

@@ -5,7 +5,7 @@ package definitionoptions
 import (
 	"sync"
 
-	scrapligooptions "github.com/scrapli/scrapligo/options"
+	scrapligooptions "github.com/scrapli/scrapligo/v2/options"
 )
 
 var (

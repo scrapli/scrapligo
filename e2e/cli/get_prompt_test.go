@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	scrapligocli "github.com/scrapli/scrapligo/cli"
+	scrapligocli "github.com/scrapli/scrapligo/v2/cli"
 )
 
 func TestGetPrompt(t *testing.T) {

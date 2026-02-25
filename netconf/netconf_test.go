@@ -9,10 +9,10 @@ import (
 	"testing"
 	"time"
 
-	scrapligoffi "github.com/scrapli/scrapligo/ffi"
-	scrapligonetconf "github.com/scrapli/scrapligo/netconf"
-	scrapligooptions "github.com/scrapli/scrapligo/options"
-	scrapligotesthelper "github.com/scrapli/scrapligo/testhelper"
+	scrapligoffi "github.com/scrapli/scrapligo/v2/ffi"
+	scrapligonetconf "github.com/scrapli/scrapligo/v2/netconf"
+	scrapligooptions "github.com/scrapli/scrapligo/v2/options"
+	scrapligotesthelper "github.com/scrapli/scrapligo/v2/testhelper"
 )
 
 const (

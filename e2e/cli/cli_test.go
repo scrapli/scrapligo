@@ -10,11 +10,11 @@ import (
 	"strings"
 	"testing"
 
-	scrapligocli "github.com/scrapli/scrapligo/cli"
-	scrapligoconstants "github.com/scrapli/scrapligo/constants"
-	scrapligoffi "github.com/scrapli/scrapligo/ffi"
-	scrapligooptions "github.com/scrapli/scrapligo/options"
-	scrapligotesthelper "github.com/scrapli/scrapligo/testhelper"
+	scrapligocli "github.com/scrapli/scrapligo/v2/cli"
+	scrapligoconstants "github.com/scrapli/scrapligo/v2/constants"
+	scrapligoffi "github.com/scrapli/scrapligo/v2/ffi"
+	scrapligooptions "github.com/scrapli/scrapligo/v2/options"
+	scrapligotesthelper "github.com/scrapli/scrapligo/v2/testhelper"
 )
 
 const localhost = "localhost"

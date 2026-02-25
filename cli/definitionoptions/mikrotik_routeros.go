@@ -3,8 +3,8 @@ package definitionoptions
 import (
 	"fmt"
 
-	scrapligointernal "github.com/scrapli/scrapligo/internal"
-	scrapligooptions "github.com/scrapli/scrapligo/options"
+	scrapligointernal "github.com/scrapli/scrapligo/v2/internal"
+	scrapligooptions "github.com/scrapli/scrapligo/v2/options"
 )
 
 const mikrotikRouterOS = "mikrotik_routeros"

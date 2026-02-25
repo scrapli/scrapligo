@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	scrapligotesthelper "github.com/scrapli/scrapligo/testhelper"
-	scrapligoutil "github.com/scrapli/scrapligo/util"
+	scrapligotesthelper "github.com/scrapli/scrapligo/v2/testhelper"
+	scrapligoutil "github.com/scrapli/scrapligo/v2/util"
 )
 
 func TestTextFsmParse(t *testing.T) {

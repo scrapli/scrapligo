@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	scrapligoerrors "github.com/scrapli/scrapligo/errors"
+	scrapligoerrors "github.com/scrapli/scrapligo/v2/errors"
 )
 
 // ResolveFilePath resolves the qualified path to file string f.

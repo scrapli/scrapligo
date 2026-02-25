@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	scrapligoffi "github.com/scrapli/scrapligo/ffi"
+	scrapligoffi "github.com/scrapli/scrapligo/v2/ffi"
 )
 
 // just a simple program to easily expose the EnsureLibscrapli function for devs. obv just

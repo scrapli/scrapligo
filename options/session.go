@@ -3,8 +3,8 @@ package options
 import (
 	"time"
 
-	scrapligointernal "github.com/scrapli/scrapligo/internal"
-	scrapligoutil "github.com/scrapli/scrapligo/util"
+	scrapligointernal "github.com/scrapli/scrapligo/v2/internal"
+	scrapligoutil "github.com/scrapli/scrapligo/v2/util"
 )
 
 // WithReadSize sets the size of each individual read from the transport.

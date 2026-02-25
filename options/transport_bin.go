@@ -1,6 +1,6 @@
 package options
 
-import scrapligointernal "github.com/scrapli/scrapligo/internal"
+import scrapligointernal "github.com/scrapli/scrapligo/v2/internal"
 
 // WithBinTransportBinOverride overrides the default binary (/bin/ssh) used for the "bin" transport.
 func WithBinTransportBinOverride(s string) Option {

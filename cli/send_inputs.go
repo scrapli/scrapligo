@@ -3,8 +3,8 @@ package cli
 import (
 	"context"
 
-	scrapligoerrors "github.com/scrapli/scrapligo/errors"
-	scrapligoutil "github.com/scrapli/scrapligo/util"
+	scrapligoerrors "github.com/scrapli/scrapligo/v2/errors"
+	scrapligoutil "github.com/scrapli/scrapligo/v2/util"
 )
 
 func newSendInputsOptions(options ...Option) *sendInputsOptions {

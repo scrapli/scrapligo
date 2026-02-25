@@ -6,10 +6,10 @@ import (
 	"os"
 	"testing"
 
-	scrapligocli "github.com/scrapli/scrapligo/cli"
-	scrapligoffi "github.com/scrapli/scrapligo/ffi"
-	scrapligooptions "github.com/scrapli/scrapligo/options"
-	scrapligotesthelper "github.com/scrapli/scrapligo/testhelper"
+	scrapligocli "github.com/scrapli/scrapligo/v2/cli"
+	scrapligoffi "github.com/scrapli/scrapligo/v2/ffi"
+	scrapligooptions "github.com/scrapli/scrapligo/v2/options"
+	scrapligotesthelper "github.com/scrapli/scrapligo/v2/testhelper"
 )
 
 const (

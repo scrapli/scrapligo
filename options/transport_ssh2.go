@@ -1,6 +1,6 @@
 package options
 
-import scrapligointernal "github.com/scrapli/scrapligo/internal"
+import scrapligointernal "github.com/scrapli/scrapligo/v2/internal"
 
 // WithSSH2KnownHostsPath sets the known hosts file to use with libssh2 connections.
 func WithSSH2KnownHostsPath(s string) Option {

@@ -8,7 +8,7 @@ import (
 	"os"
 	"strings"
 
-	scrapligoerrors "github.com/scrapli/scrapligo/errors"
+	scrapligoerrors "github.com/scrapli/scrapligo/v2/errors"
 	"github.com/sirikothe/gotextfsm"
 )
 

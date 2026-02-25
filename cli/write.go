@@ -1,7 +1,7 @@
 package cli
 
 import (
-	scrapligoerrors "github.com/scrapli/scrapligo/errors"
+	scrapligoerrors "github.com/scrapli/scrapligo/v2/errors"
 )
 
 // Write writes the input to the session -- this bypasses the driver operation loop in zig, use

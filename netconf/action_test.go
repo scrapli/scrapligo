@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	scrapligonetconf "github.com/scrapli/scrapligo/netconf"
+	scrapligonetconf "github.com/scrapli/scrapligo/v2/netconf"
 )
 
 func TestAction(t *testing.T) {

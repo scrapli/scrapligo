@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/xml"
 
-	scrapligointernal "github.com/scrapli/scrapligo/internal"
+	scrapligointernal "github.com/scrapli/scrapligo/v2/internal"
 )
 
 // NetconfVersion is an enumish type representing a netconf version (1.0 or 1.1).

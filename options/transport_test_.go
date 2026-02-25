@@ -1,6 +1,6 @@
 package options
 
-import scrapligointernal "github.com/scrapli/scrapligo/internal"
+import scrapligointernal "github.com/scrapli/scrapligo/v2/internal"
 
 // WithTestTransportF sets the file to use for the test transport.
 func WithTestTransportF(s string) Option {

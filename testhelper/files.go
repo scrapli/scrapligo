@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	scrapligoconstants "github.com/scrapli/scrapligo/constants"
+	scrapligoconstants "github.com/scrapli/scrapligo/v2/constants"
 )
 
 // ReadFile reads the file or fatals.

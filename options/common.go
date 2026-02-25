@@ -4,9 +4,9 @@ import (
 	"log"
 	"log/slog"
 
-	scrapligoerrors "github.com/scrapli/scrapligo/errors"
-	scrapligointernal "github.com/scrapli/scrapligo/internal"
-	scrapligologging "github.com/scrapli/scrapligo/logging"
+	scrapligoerrors "github.com/scrapli/scrapligo/v2/errors"
+	scrapligointernal "github.com/scrapli/scrapligo/v2/internal"
+	scrapligologging "github.com/scrapli/scrapligo/v2/logging"
 )
 
 // Option is a type used for functional options for the Cli object's options.

@@ -4,11 +4,11 @@ import (
 	"context"
 	"errors"
 
-	scrapligoerrors "github.com/scrapli/scrapligo/errors"
-	scrapligoffi "github.com/scrapli/scrapligo/ffi"
-	scrapligointernal "github.com/scrapli/scrapligo/internal"
-	scrapligologging "github.com/scrapli/scrapligo/logging"
-	scrapligooptions "github.com/scrapli/scrapligo/options"
+	scrapligoerrors "github.com/scrapli/scrapligo/v2/errors"
+	scrapligoffi "github.com/scrapli/scrapligo/v2/ffi"
+	scrapligointernal "github.com/scrapli/scrapligo/v2/internal"
+	scrapligologging "github.com/scrapli/scrapligo/v2/logging"
+	scrapligooptions "github.com/scrapli/scrapligo/v2/options"
 	"golang.org/x/sys/unix"
 )
 

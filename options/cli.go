@@ -1,6 +1,6 @@
 package options
 
-import scrapligointernal "github.com/scrapli/scrapligo/internal"
+import scrapligointernal "github.com/scrapli/scrapligo/v2/internal"
 
 // PlatformNameOrString is a string-like interface so you can pass a PlatformName or "normal" string
 // to the driver constructor.

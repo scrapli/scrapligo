@@ -7,10 +7,10 @@ import (
 	"testing"
 	"time"
 
-	scrapligocli "github.com/scrapli/scrapligo/cli"
-	scrapligoconstants "github.com/scrapli/scrapligo/constants"
-	scrapligooptions "github.com/scrapli/scrapligo/options"
-	scrapligotesthelper "github.com/scrapli/scrapligo/testhelper"
+	scrapligocli "github.com/scrapli/scrapligo/v2/cli"
+	scrapligoconstants "github.com/scrapli/scrapligo/v2/constants"
+	scrapligooptions "github.com/scrapli/scrapligo/v2/options"
+	scrapligotesthelper "github.com/scrapli/scrapligo/v2/testhelper"
 )
 
 func TestOpenWithKey(t *testing.T) {

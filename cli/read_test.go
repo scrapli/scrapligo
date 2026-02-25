@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	scrapligocli "github.com/scrapli/scrapligo/cli"
-	scrapligotesthelper "github.com/scrapli/scrapligo/testhelper"
+	scrapligocli "github.com/scrapli/scrapligo/v2/cli"
+	scrapligotesthelper "github.com/scrapli/scrapligo/v2/testhelper"
 )
 
 func TestRead(t *testing.T) {

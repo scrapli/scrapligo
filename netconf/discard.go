@@ -3,7 +3,7 @@ package netconf
 import (
 	"context"
 
-	scrapligoerrors "github.com/scrapli/scrapligo/errors"
+	scrapligoerrors "github.com/scrapli/scrapligo/v2/errors"
 )
 
 // Discard executes a netconf discard rpc.
