@@ -10,6 +10,11 @@ import (
 	scrapligoutil "github.com/scrapli/scrapligo/v2/util"
 )
 
+// ReadCallbackF is the actual callback function signature for use with the ReadWithCallbacks
+// method. `searchBuf` is the "view" into the buf that was used to check if the callback should be
+// executed, `buf` is the current buffer in its entirety.
+type ReadCallbackF func(ctx context.Context, c *Cli, searchBuf, buf string) error
+
 // ReadCallback represents a callback and how it is triggered, for use with ReadWithCallbacks.
 type ReadCallback struct {
 	name            string
@@ -19,13 +24,13 @@ type ReadCallback struct {
 	searchDepth     uint64
 	once            bool
 	completes       bool
-	callback        func(ctx context.Context, c *Cli) error
+	callback        ReadCallbackF
 }
 
 // NewReadCallback returns a new ReadCallback with the given options set.
 func NewReadCallback(
 	name string,
-	callback func(ctx context.Context, c *Cli) error,
+	callback ReadCallbackF,
 	options ...Option,
 ) *ReadCallback {
 	cb := &ReadCallback{
@@ -156,7 +161,7 @@ func (c *Cli) ReadWithCallbacks( //nolint: gocyclo
 
 			pos = len(results)
 
-			err = cb.callback(ctx, c)
+			err = cb.callback(ctx, c, results[cbSearchStartIdx:], results)
 			if err != nil {
 				return nil, err
 			}

@@ -71,13 +71,13 @@ func getOptions() (string, []scrapligooptions.Option) {
 	return host, opts
 }
 
-func loggedInCallback(_ context.Context, _ *scrapligocli.Cli) error {
+func loggedInCallback(_ context.Context, _ *scrapligocli.Cli, _, _ string) error {
 	fmt.Println("a user has logged in!")
 
 	return nil
 }
 
-func loggedOutCallback(ctx context.Context, c *scrapligocli.Cli) error {
+func loggedOutCallback(ctx context.Context, c *scrapligocli.Cli, _, _ string) error {
 	fmt.Println("a user has logged out!")
 
 	_, err := c.SendInput(
