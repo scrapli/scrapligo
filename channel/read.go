@@ -42,9 +42,7 @@ func processReadBuf(rb []byte, searchDepth int) []byte {
 }
 
 func (c *Channel) read() {
-	defer func() {
-		c.readLoopExited = true
-	}()
+	defer close(c.readDone)
 
 	for {
 		select {
@@ -77,7 +75,11 @@ func (c *Channel) read() {
 				"encountered error reading from transport during channel read loop. error: %s", err,
 			)
 
-			c.Errs <- err
+			select {
+			case c.Errs <- err:
+			case <-c.done:
+				return
+			}
 
 			time.Sleep(c.ReadDelay)
 
@@ -122,8 +124,10 @@ func (c *Channel) Read() ([]byte, error) {
 	default:
 	}
 
-	if c.readLoopExited {
+	select {
+	case <-c.readDone:
 		return nil, util.ErrConnectionError
+	default:
 	}
 
 	b := c.Q.Dequeue()

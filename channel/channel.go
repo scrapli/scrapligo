@@ -68,8 +68,9 @@ func NewChannel(
 
 		done: make(chan struct{}),
 
-		Q:    util.NewQueue(),
-		Errs: make(chan error),
+		Q:        util.NewQueue(),
+		Errs:     make(chan error),
+		readDone: make(chan struct{}),
 
 		ChannelLog: nil,
 	}
@@ -108,9 +109,9 @@ type Channel struct {
 
 	done chan struct{}
 
-	Q              *util.Queue
-	Errs           chan error
-	readLoopExited bool
+	Q        *util.Queue
+	Errs     chan error
+	readDone chan struct{}
 
 	ChannelLog io.Writer
 }
@@ -183,22 +184,16 @@ func (c *Channel) Open() (reterr error) {
 func (c *Channel) Close() error {
 	c.l.Info("channel closing...")
 
-	close(c.Errs)
+	// Signal the read loop to stop first -- close is safe for multiple receivers and ensures
+	// the read goroutine sees the signal regardless of which select branch it's in.
+	close(c.done)
 
-	ch := make(chan struct{})
-
-	if !c.readLoopExited {
-		go func() {
-			defer close(ch)
-
-			c.done <- struct{}{}
-		}()
-	} else {
-		close(ch)
-	}
-
+	// Wait for the read loop to actually exit before closing Errs -- this eliminates the race
+	// where read() tries to send on a closed Errs channel.
 	select {
-	case <-ch:
+	case <-c.readDone:
+		close(c.Errs)
+
 		c.l.Debug("closing underlying transport...")
 
 		return c.t.Close(false)
