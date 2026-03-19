@@ -6,6 +6,7 @@ import (
 	"io"
 	"regexp"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/scrapli/scrapligo/logging"
@@ -107,7 +108,8 @@ type Channel struct {
 	PromptPattern     *regexp.Regexp
 	ReturnChar        []byte
 
-	done chan struct{}
+	done   chan struct{}
+	closed atomic.Bool
 
 	Q        *util.Queue
 	Errs     chan error
@@ -181,30 +183,54 @@ func (c *Channel) Open() (reterr error) {
 }
 
 // Close signals to stop the channel read loop and closes the underlying Transport object.
+// Close is safe to call multiple times; only the first call performs the shutdown.
 func (c *Channel) Close() error {
+	if !c.closed.CompareAndSwap(false, true) {
+		c.l.Debug("channel already closed")
+
+		return nil
+	}
+
 	c.l.Info("channel closing...")
 
-	// Signal the read loop to stop first -- close is safe for multiple receivers and ensures
-	// the read goroutine sees the signal regardless of which select branch it's in.
+	// Signal the read loop to stop. We close rather than send so the signal is
+	// visible to all select cases in the read goroutine simultaneously.
 	close(c.done)
 
-	// Wait for the read loop to actually exit before closing Errs -- this eliminates the race
-	// where read() tries to send on a closed Errs channel.
-	select {
-	case <-c.readDone:
-		close(c.Errs)
+	// Wait for the read loop to exit so we can safely close Errs. If it doesn't exit in time,
+	// force-close the transport to unblock it, then give it one more chance.
+	gracePeriod := c.ReadDelay * (c.ReadDelay / readDelayDivisor) //nolint:durationcheck
 
-		c.l.Debug("closing underlying transport...")
+	waitForReadDone := func() bool {
+		select {
+		case <-c.readDone:
+			return true
+		case <-time.After(gracePeriod):
+			return false
+		}
+	}
 
-		return c.t.Close(false)
-	case <-time.After(c.ReadDelay * (c.ReadDelay / readDelayDivisor)): //nolint:durationcheck
-		// channel is stuck in a blocking read (almost always the case for netconf!), force close
-		// transport to finish closing connection, so give it c.ReadDelay*(c.ReadDelay/1000) to
-		// "nicely" exit -- with defaults this ends up being 62.5ms.
+	if !waitForReadDone() {
 		c.l.Debug("force closing underlying transport...")
 
-		return c.t.Close(true)
+		err := c.t.Close(true)
+
+		// Only close Errs if the read goroutine actually exited -- if it's still
+		// stuck (e.g. file transport's blocking Read), closing Errs could race
+		// with a future send. In that case both Errs and readDone stay open, so
+		// consumers fall through to default in their selects and get nil, nil.
+		if waitForReadDone() {
+			close(c.Errs)
+		}
+
+		return err
 	}
+
+	close(c.Errs)
+
+	c.l.Debug("closing underlying transport...")
+
+	return c.t.Close(false)
 }
 
 type result struct {

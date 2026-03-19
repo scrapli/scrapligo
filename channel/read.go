@@ -55,9 +55,8 @@ func (c *Channel) read() {
 		if err != nil {
 			select {
 			case <-c.done:
-				// this prevents us from ever writing to, what would in this case be, a closed
-				// errs channel. also if we are "done" we probably only got an error about transport
-				// dying so we can safely ignore that
+				// if the channel is shutting down, exit immediately -- there is no point
+				// in reporting transport errors that are a side-effect of the close
 				return
 			default:
 			}
@@ -78,6 +77,8 @@ func (c *Channel) read() {
 			select {
 			case c.Errs <- err:
 			case <-c.done:
+				c.l.Debugf("discarding transport error during shutdown: %s", err)
+
 				return
 			}
 
@@ -150,6 +151,12 @@ func (c *Channel) ReadAll() ([]byte, error) {
 	select {
 	case err := <-c.Errs:
 		return nil, err
+	default:
+	}
+
+	select {
+	case <-c.readDone:
+		return nil, util.ErrConnectionError
 	default:
 	}
 
