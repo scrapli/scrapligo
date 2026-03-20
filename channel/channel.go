@@ -221,6 +221,10 @@ func (c *Channel) Close() error {
 		// consumers fall through to default in their selects and get nil, nil.
 		if waitForReadDone() {
 			close(c.Errs)
+		} else {
+			c.l.Debug(
+				"read goroutine did not exit after force-closing transport",
+			)
 		}
 
 		return err

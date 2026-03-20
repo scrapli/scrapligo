@@ -57,6 +57,7 @@ func (c *Channel) read() {
 			case <-c.done:
 				// if the channel is shutting down, exit immediately -- there is no point
 				// in reporting transport errors that are a side-effect of the close
+				c.l.Debugf("discarding transport read error during shutdown: %s", err)
 				return
 			default:
 			}
@@ -120,14 +121,14 @@ func (c *Channel) read() {
 // returned with nil for the byte slice.
 func (c *Channel) Read() ([]byte, error) {
 	select {
-	case err := <-c.Errs:
-		return nil, err
-	default:
-	}
-
-	select {
 	case <-c.readDone:
 		return nil, util.ErrConnectionError
+	case err, ok := <-c.Errs:
+		if !ok {
+			return nil, util.ErrConnectionError
+		}
+
+		return nil, err
 	default:
 	}
 
@@ -149,14 +150,14 @@ func (c *Channel) Read() ([]byte, error) {
 // operations. In general, this should probably only be used when connecting to consoles/files.
 func (c *Channel) ReadAll() ([]byte, error) {
 	select {
-	case err := <-c.Errs:
-		return nil, err
-	default:
-	}
-
-	select {
 	case <-c.readDone:
 		return nil, util.ErrConnectionError
+	case err, ok := <-c.Errs:
+		if !ok {
+			return nil, util.ErrConnectionError
+		}
+
+		return nil, err
 	default:
 	}
 
