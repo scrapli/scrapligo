@@ -197,44 +197,21 @@ func (c *Channel) Close() error {
 	// visible to all select cases in the read goroutine simultaneously.
 	close(c.done)
 
-	// Wait for the read loop to exit so we can safely close Errs. If it doesn't exit in time,
-	// force-close the transport to unblock it, then give it one more chance.
-	gracePeriod := c.ReadDelay * (c.ReadDelay / readDelayDivisor) //nolint:durationcheck
+	select {
+	case <-c.readDone:
+		close(c.Errs)
 
-	waitForReadDone := func() bool {
-		select {
-		case <-c.readDone:
-			return true
-		case <-time.After(gracePeriod):
-			return false
-		}
-	}
+		c.l.Debug("closing underlying transport...")
 
-	if !waitForReadDone() {
+		return c.t.Close(false)
+	case <-time.After(c.ReadDelay * (c.ReadDelay / readDelayDivisor)): //nolint:durationcheck
+		// channel is stuck in a blocking read (almost always the case for netconf!), force close
+		// transport to finish closing connection, so give it c.ReadDelay*(c.ReadDelay/1000) to
+		// "nicely" exit -- with defaults this ends up being 62.5ms.
 		c.l.Debug("force closing underlying transport...")
 
-		err := c.t.Close(true)
-
-		// Only close Errs if the read goroutine actually exited -- if it's still
-		// stuck (e.g. file transport's blocking Read), closing Errs could race
-		// with a future send. In that case both Errs and readDone stay open, so
-		// consumers fall through to default in their selects and get nil, nil.
-		if waitForReadDone() {
-			close(c.Errs)
-		} else {
-			c.l.Debug(
-				"read goroutine did not exit after force-closing transport",
-			)
-		}
-
-		return err
+		return c.t.Close(true)
 	}
-
-	close(c.Errs)
-
-	c.l.Debug("closing underlying transport...")
-
-	return c.t.Close(false)
 }
 
 type result struct {
