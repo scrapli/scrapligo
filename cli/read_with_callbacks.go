@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	scrapligoerrors "github.com/scrapli/scrapligo/v2/errors"
@@ -89,7 +90,8 @@ func (c *Cli) ReadWithCallbacks( //nolint: gocyclo
 
 	pos := 0
 
-	results := ""
+	var results strings.Builder
+
 	resultsRaw := bytes.NewBuffer(nil)
 
 	executedCallbacks := make(map[string]any)
@@ -111,7 +113,7 @@ func (c *Cli) ReadWithCallbacks( //nolint: gocyclo
 			return nil, err
 		}
 
-		results += r.Result()
+		results.WriteString(r.Result())
 		resultsRaw.Write(r.ResultRaw())
 
 		for _, cb := range callbacks {
@@ -122,21 +124,26 @@ func (c *Cli) ReadWithCallbacks( //nolint: gocyclo
 
 			shouldExecute := false
 
+			curResults := results.String()
+
 			// do the should execute search on the largest window into the slice
 			// that we can -- obviously if we tried to go back to negative we use
 			// max to start our search from 0
-			cbSearchStartIdx := max(min(pos, len(results)-int(cb.searchDepth)), 0) //nolint: gosec
+			cbSearchStartIdx := max(
+				min(pos, len(curResults)-int(cb.searchDepth)), //nolint: gosec
+				0,
+			)
 
 			c.l.Debug(
 				fmt.Sprintf(
 					"checking if callback %q should execute based on content %q",
 					cb.name,
-					results[cbSearchStartIdx:],
+					curResults[cbSearchStartIdx:],
 				),
 			)
 
 			status = c.ffiMap.Cli.ReadCallbackShouldExecute(
-				results[cbSearchStartIdx:],
+				curResults[cbSearchStartIdx:],
 				cb.name,
 				cb.contains,
 				cb.containsPattern,
@@ -159,9 +166,9 @@ func (c *Cli) ReadWithCallbacks( //nolint: gocyclo
 
 			executedCallbacks[cb.name] = nil
 
-			pos = len(results)
+			pos = len(curResults)
 
-			err = cb.callback(ctx, c, results[cbSearchStartIdx:], results)
+			err = cb.callback(ctx, c, curResults[cbSearchStartIdx:], curResults)
 			if err != nil {
 				return nil, err
 			}
@@ -174,7 +181,7 @@ func (c *Cli) ReadWithCallbacks( //nolint: gocyclo
 					scrapligoutil.SafeInt64ToUint64(startTime),
 					[]uint64{scrapligoutil.SafeInt64ToUint64(time.Now().UnixNano())},
 					resultsRaw.Bytes(),
-					[]byte(results),
+					[]byte(curResults),
 					nil,
 				), nil
 			}

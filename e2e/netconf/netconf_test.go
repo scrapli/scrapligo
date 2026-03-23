@@ -37,7 +37,7 @@ func TestMain(m *testing.M) {
 			}
 
 			if !info.IsDir() && strings.Contains(filepath.Base(path), "key") {
-				err = os.Chmod(path, 0o600)
+				err = os.Chmod(path, 0o600) //nolint: gosec
 				if err != nil {
 					return fmt.Errorf("failed to chmod %s: %w", path, err)
 				}
