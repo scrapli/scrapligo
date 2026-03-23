@@ -1,5 +1,5 @@
 ---
-prompt_pattern: '^.*[>#$]\s?+$'
+prompt_pattern: '^\S{1,63}[>#$]\s?+$'
 default_mode: 'privileged_exec'
 modes:
   - name: 'exec'
