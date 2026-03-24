@@ -42,9 +42,7 @@ func processReadBuf(rb []byte, searchDepth int) []byte {
 }
 
 func (c *Channel) read() {
-	defer func() {
-		c.readLoopExited = true
-	}()
+	defer close(c.readDone)
 
 	for {
 		select {
@@ -57,9 +55,9 @@ func (c *Channel) read() {
 		if err != nil {
 			select {
 			case <-c.done:
-				// this prevents us from ever writing to, what would in this case be, a closed
-				// errs channel. also if we are "done" we probably only got an error about transport
-				// dying so we can safely ignore that
+				// if the channel is shutting down, exit immediately -- there is no point
+				// in reporting transport errors that are a side-effect of the close
+				c.l.Debugf("discarding transport read error during shutdown: %s", err)
 				return
 			default:
 			}
@@ -77,7 +75,13 @@ func (c *Channel) read() {
 				"encountered error reading from transport during channel read loop. error: %s", err,
 			)
 
-			c.Errs <- err
+			select {
+			case c.Errs <- err:
+			case <-c.done:
+				c.l.Debugf("discarding transport error during shutdown: %s", err)
+
+				return
+			}
 
 			time.Sleep(c.ReadDelay)
 
@@ -117,13 +121,15 @@ func (c *Channel) read() {
 // returned with nil for the byte slice.
 func (c *Channel) Read() ([]byte, error) {
 	select {
-	case err := <-c.Errs:
+	case <-c.readDone:
+		return nil, util.ErrConnectionError
+	case err, ok := <-c.Errs:
+		if !ok {
+			return nil, util.ErrConnectionError
+		}
+
 		return nil, err
 	default:
-	}
-
-	if c.readLoopExited {
-		return nil, util.ErrConnectionError
 	}
 
 	b := c.Q.Dequeue()
@@ -144,7 +150,13 @@ func (c *Channel) Read() ([]byte, error) {
 // operations. In general, this should probably only be used when connecting to consoles/files.
 func (c *Channel) ReadAll() ([]byte, error) {
 	select {
-	case err := <-c.Errs:
+	case <-c.readDone:
+		return nil, util.ErrConnectionError
+	case err, ok := <-c.Errs:
+		if !ok {
+			return nil, util.ErrConnectionError
+		}
+
 		return nil, err
 	default:
 	}
