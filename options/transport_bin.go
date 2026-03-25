@@ -42,8 +42,14 @@ func WithBinTransportSSHConfigFile(s string) Option {
 	}
 }
 
-// WithBinTransportKnownHostsFile sets the known hosts file to use (via -o UserKnownHostsFile)
-// for the command.
+func WithBinTransportKnownHosts(s string) Option {
+	return func(o *scrapligointernal.Options) error {
+		o.Transport.Bin.KnownHosts = s
+
+		return nil
+	}
+}
+
 func WithBinTransportKnownHostsFile(s string) Option {
 	return func(o *scrapligointernal.Options) error {
 		o.Transport.Bin.KnownHostsPath = s

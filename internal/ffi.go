@@ -41,6 +41,8 @@ type driverOptions struct {
 		usernameLen             uintptr
 		password                uintptr
 		passwordLen             uintptr
+		privateKey              uintptr
+		privateKeyLen           uintptr
 		privateKeyPath          uintptr
 		privateKeyPathLen       uintptr
 		privateKeyPassphrase    uintptr
@@ -72,6 +74,8 @@ type driverOptions struct {
 			overrideOpenArgsLen uintptr
 			sshConfigPath       uintptr
 			sshConfigPathLen    uintptr
+			knownHosts          uintptr
+			knownHostsLen       uintptr
 			knownHostsPath      uintptr
 			knownHostsPathLen   uintptr
 			enableStrictKey     *bool
@@ -80,6 +84,8 @@ type driverOptions struct {
 		}
 
 		ssh2 struct {
+			knownHosts                       uintptr
+			knownHostsLen                    uintptr
 			knownHostsPath                   uintptr
 			knownHostsPathLen                uintptr
 			libssh2Trace                     *bool

@@ -20,6 +20,14 @@ func WithPassword(s string) Option {
 	}
 }
 
+func WithPrivateKey(s string) Option {
+	return func(o *scrapligointernal.Options) error {
+		o.Auth.PrivateKey = s
+
+		return nil
+	}
+}
+
 // WithPrivateKeyPath sets the private key to use for authentication to the target device.
 func WithPrivateKeyPath(s string) Option {
 	return func(o *scrapligointernal.Options) error {
