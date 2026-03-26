@@ -24,5 +24,9 @@ private/
 # coverage
 cover.out
 
+# direnv
+.envrc
+.envrc.local
+
 # where we mount stuff when running clab bits
 .clab

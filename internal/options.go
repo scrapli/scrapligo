@@ -199,6 +199,7 @@ type AuthOptions struct {
 	Username string
 	Password string
 
+	PrivateKey           string
 	PrivateKeyPath       string
 	PrivateKeyPassphrase string
 
@@ -225,6 +226,11 @@ func (o *AuthOptions) apply(opts *driverOptions) {
 	if o.Password != "" {
 		opts.auth.password = uintptr(unsafe.Pointer(&[]byte(o.Password)[0]))
 		opts.auth.passwordLen = uintptr(len(o.Password))
+	}
+
+	if o.PrivateKey != "" {
+		opts.auth.privateKey = uintptr(unsafe.Pointer(&[]byte(o.PrivateKey)[0]))
+		opts.auth.privateKeyLen = uintptr(len(o.PrivateKey))
 	}
 
 	if o.PrivateKeyPath != "" {
@@ -305,6 +311,7 @@ type TransportBinOptions struct {
 	ExtraOpenArgs    string
 	OverrideOpenArgs string
 	SSHConfigPath    string
+	KnownHosts       string
 	KnownHostsPath   string
 	EnableStrictKey  bool
 	TermHeight       *uint16
@@ -334,6 +341,11 @@ func (o *TransportBinOptions) apply(opts *driverOptions) {
 		opts.transport.bin.sshConfigPathLen = uintptr(len(o.SSHConfigPath))
 	}
 
+	if o.KnownHosts != "" {
+		opts.transport.bin.knownHosts = uintptr(unsafe.Pointer(&[]byte(o.KnownHosts)[0]))
+		opts.transport.bin.knownHostsLen = uintptr(len(o.KnownHosts))
+	}
+
 	if o.KnownHostsPath != "" {
 		opts.transport.bin.knownHostsPath = uintptr(unsafe.Pointer(&[]byte(o.KnownHostsPath)[0]))
 		opts.transport.bin.knownHostsPathLen = uintptr(len(o.KnownHostsPath))
@@ -354,6 +366,7 @@ func (o *TransportBinOptions) apply(opts *driverOptions) {
 
 // TransportSSH2Options holds (lib)"ssh2" transport specific options.
 type TransportSSH2Options struct {
+	KnownHosts     string
 	KnownHostsPath string
 	LibSSH2Trace   bool
 
@@ -368,6 +381,11 @@ type TransportSSH2Options struct {
 }
 
 func (o *TransportSSH2Options) apply(opts *driverOptions) {
+	if o.KnownHosts != "" {
+		opts.transport.ssh2.knownHosts = uintptr(unsafe.Pointer(&[]byte(o.KnownHosts)[0]))
+		opts.transport.ssh2.knownHostsLen = uintptr(len(o.KnownHosts))
+	}
+
 	if o.KnownHostsPath != "" {
 		opts.transport.ssh2.knownHostsPath = uintptr(unsafe.Pointer(&[]byte(o.KnownHostsPath)[0]))
 		opts.transport.ssh2.knownHostsPathLen = uintptr(len(o.KnownHostsPath))
