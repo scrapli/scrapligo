@@ -6,6 +6,7 @@ import (
 	"io"
 	"regexp"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/scrapli/scrapligo/logging"
@@ -68,8 +69,9 @@ func NewChannel(
 
 		done: make(chan struct{}),
 
-		Q:    util.NewQueue(),
-		Errs: make(chan error),
+		Q:        util.NewQueue(),
+		Errs:     make(chan error),
+		readDone: make(chan struct{}),
 
 		ChannelLog: nil,
 	}
@@ -106,11 +108,12 @@ type Channel struct {
 	PromptPattern     *regexp.Regexp
 	ReturnChar        []byte
 
-	done chan struct{}
+	done   chan struct{}
+	closed atomic.Bool
 
-	Q              *util.Queue
-	Errs           chan error
-	readLoopExited bool
+	Q        *util.Queue
+	Errs     chan error
+	readDone chan struct{}
 
 	ChannelLog io.Writer
 }
@@ -180,25 +183,24 @@ func (c *Channel) Open() (reterr error) {
 }
 
 // Close signals to stop the channel read loop and closes the underlying Transport object.
+// Close is safe to call multiple times; only the first call performs the shutdown.
 func (c *Channel) Close() error {
-	c.l.Info("channel closing...")
+	if !c.closed.CompareAndSwap(false, true) {
+		c.l.Debug("channel already closed")
 
-	close(c.Errs)
-
-	ch := make(chan struct{})
-
-	if !c.readLoopExited {
-		go func() {
-			defer close(ch)
-
-			c.done <- struct{}{}
-		}()
-	} else {
-		close(ch)
+		return nil
 	}
 
+	c.l.Info("channel closing...")
+
+	// Signal the read loop to stop. We close rather than send so the signal is
+	// visible to all select cases in the read goroutine simultaneously.
+	close(c.done)
+
 	select {
-	case <-ch:
+	case <-c.readDone:
+		close(c.Errs)
+
 		c.l.Debug("closing underlying transport...")
 
 		return c.t.Close(false)
