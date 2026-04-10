@@ -47,6 +47,7 @@ failure_indicators:
   - '% Incomplete command'
   - '% Invalid input detected'
   - '% Unknown command'
+  - 'Command authorization failed'
 on_open_instructions:
   - enter_mode:
       requested_mode: 'privileged_exec'
