@@ -75,6 +75,35 @@ func (n *Netconf) GetPtr() (uintptr, *scrapligoffi.Mapping) {
 	return n.ptr, n.ffiMap
 }
 
+// GetOptions returns the options as supplied in a json-ish string -- should only really be used
+// for testing as it doesnt really serve any purpose otherwise and costs some allocations and calls
+// across the ffi boundary. Exposed for testing reasons.
+func (n *Netconf) GetOptions() (string, error) {
+	optionsPtr := n.ffiMap.Shared.AllocDriverOptions()
+	defer n.ffiMap.Shared.FreeDriverOptions(optionsPtr)
+
+	n.options.Apply(optionsPtr)
+
+	var optionsSize uintptr
+
+	rc := n.ffiMap.Shared.FetchOptionsSize(
+		optionsPtr,
+		&optionsSize,
+	)
+	if rc != 0 {
+		return "", scrapligoerrors.NewFfiError("fetch options size failed", nil)
+	}
+
+	optionsStr := make([]byte, optionsSize)
+
+	n.ffiMap.Shared.FetchOptions(
+		optionsPtr,
+		&optionsStr,
+	)
+
+	return string(optionsStr), nil
+}
+
 // Open opens the driver object. This method spawns the underlying zig driver which the Netconf
 // object then holds a pointer to. All Netconf operations operate against this pointer (though
 // this is transparent to the user).

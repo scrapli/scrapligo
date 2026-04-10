@@ -20,7 +20,16 @@ type SharedMapping struct {
 	Free func(driverPtr uintptr)
 
 	AllocDriverOptions func() uintptr
-	FreeDriverOptions  func(p uintptr)
+	FreeDriverOptions  func(optionsPtr uintptr)
+
+	FetchOptionsSize func(
+		optionsPtr uintptr,
+		optionsSize *uintptr,
+	) uintptr
+	FetchOptions func(
+		optionsPtr uintptr,
+		options *[]byte,
+	)
 }
 
 // SessionMapping holds session specific mappings.

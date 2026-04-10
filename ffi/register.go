@@ -8,6 +8,9 @@ func registerShared(m *Mapping, libScrapliFfi uintptr) {
 
 	purego.RegisterLibFunc(&m.Shared.AllocDriverOptions, libScrapliFfi, "ls_alloc_driver_options")
 	purego.RegisterLibFunc(&m.Shared.FreeDriverOptions, libScrapliFfi, "ls_free_driver_options")
+
+	purego.RegisterLibFunc(&m.Shared.FetchOptionsSize, libScrapliFfi, "ls_fetch_options_size")
+	purego.RegisterLibFunc(&m.Shared.FetchOptions, libScrapliFfi, "ls_fetch_options")
 }
 
 func registerSession(m *Mapping, libScrapliFfi uintptr) {

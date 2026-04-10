@@ -52,6 +52,7 @@ const (
 	RuckusUnleashed      PlatformName = "ruckus_unleashed"
 	RuijieRgos           PlatformName = "ruijie_rgos"
 	SiemensRoxii         PlatformName = "siemens_roxii"
+	UbiquitiEdgeswitch   PlatformName = "ubiquiti_edgeswitch"
 	VersaFlexvnf         PlatformName = "versa_flexvnf"
 	VyosVyos             PlatformName = "vyos_vyos"
 	ZyxelDslam           PlatformName = "zyxel_dslam"
@@ -103,6 +104,7 @@ func GetPlatformNames() []string {
 		string(RuckusUnleashed),
 		string(RuijieRgos),
 		string(SiemensRoxii),
+		string(UbiquitiEdgeswitch),
 		string(VersaFlexvnf),
 		string(VyosVyos),
 		string(ZyxelDslam),
