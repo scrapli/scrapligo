@@ -6,6 +6,7 @@ import (
 	"errors"
 	"io"
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/scrapli/scrapligo/util"
@@ -66,6 +67,14 @@ func (c *Channel) read() {
 				// the underlying transport was closed so just return, we *probably* will have
 				// already bailed out by reading from the (maybe/probably) closed done channel, but
 				// if we hit EOF we know we are done anyway
+				return
+			}
+
+			if strings.Contains(err.Error(), "input/output error") {
+				// on Linux (including containerized environments) closing a PTY master fd
+				// returns EIO ("input/output error") rather than io.EOF -- this is a known
+				// kernel behavior documented in the system transport tests. treat it the same
+				// as EOF: the underlying transport is gone and we are done
 				return
 			}
 
