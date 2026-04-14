@@ -39,6 +39,16 @@ func WithPrivateKeyPassphrase(s string) Option {
 	}
 }
 
+// WithPrivateKeyContent sets the PEM-encoded private key content to use for authentication to the
+// target device. When set, this takes priority over WithPrivateKeyPath.
+func WithPrivateKeyContent(s string) Option {
+	return func(o *scrapligointernal.Options) error {
+		o.Auth.PrivateKeyContent = s
+
+		return nil
+	}
+}
+
 // WithLookupKeyValue adds an entry to the lookup map for the driver instance.
 func WithLookupKeyValue(key, value string) Option {
 	return func(o *scrapligointernal.Options) error {
