@@ -45,6 +45,8 @@ type driverOptions struct {
 		privateKeyPathLen       uintptr
 		privateKeyPassphrase    uintptr
 		privateKeyPassphraseLen uintptr
+		privateKeyContent       uintptr
+		privateKeyContentLen    uintptr
 		lookups                 struct {
 			keys     uintptr
 			keysLens uintptr
