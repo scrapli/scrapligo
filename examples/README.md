@@ -14,11 +14,11 @@ containerlab sort of natively even on darwin hosts.
 The "ci" variant of the topology includes a srlinux device, a netopeer netconf server, as well as a
 dummy linux container that can be used to test proxy-jump ssh behavior.
 
-You can check out the "scrapli_clab" bits [here](https://github.com/scrapli/scrapli_clab).
+You can check out the "scrapli_clab" bits [here](https://github.com/kentik/scrapli_clab).
 
 Specifically the amd64 or arm "ci" variants live
-[here](https://github.com/scrapli/scrapli_clab/blob/main/launcher/topos/topo.ci.amd64.yaml) and
-[here](https://github.com/scrapli/scrapli_clab/blob/main/launcher/topos/topo.ci.arm64.yaml)
+[here](https://github.com/kentik/scrapli_clab/blob/main/launcher/topos/topo.ci.amd64.yaml) and
+[here](https://github.com/kentik/scrapli_clab/blob/main/launcher/topos/topo.ci.arm64.yaml)
 respectively.
 
 The srlinux device exposes (among others) SSH, Telnet and Netconf ports normally (22, 23, 830) and

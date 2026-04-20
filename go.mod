@@ -1,4 +1,4 @@
-module github.com/scrapli/scrapligo/v2
+module github.com/kentik/scrapligo/v2
 
 go 1.25.0
 

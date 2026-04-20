@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	scrapligocli "github.com/scrapli/scrapligo/v2/cli"
+	scrapligocli "github.com/kentik/scrapligo/v2/cli"
 )
 
 func TestSendInputs(t *testing.T) {

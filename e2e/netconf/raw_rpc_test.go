@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	scrapligonetconf "github.com/scrapli/scrapligo/v2/netconf"
-	scrapligotesthelper "github.com/scrapli/scrapligo/v2/testhelper"
+	scrapligonetconf "github.com/kentik/scrapligo/v2/netconf"
+	scrapligotesthelper "github.com/kentik/scrapligo/v2/testhelper"
 )
 
 func TestRawRPC(t *testing.T) {

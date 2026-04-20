@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	scrapligoerrors "github.com/scrapli/scrapligo/v2/errors"
-	scrapligoutil "github.com/scrapli/scrapligo/v2/util"
+	scrapligoerrors "github.com/kentik/scrapligo/v2/errors"
+	scrapligoutil "github.com/kentik/scrapligo/v2/util"
 )
 
 // ReadCallbackF is the actual callback function signature for use with the ReadWithCallbacks

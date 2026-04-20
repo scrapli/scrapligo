@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	scrapligocli "github.com/scrapli/scrapligo/v2/cli"
-	scrapligotesthelper "github.com/scrapli/scrapligo/v2/testhelper"
+	scrapligocli "github.com/kentik/scrapligo/v2/cli"
+	scrapligotesthelper "github.com/kentik/scrapligo/v2/testhelper"
 )
 
 func TestCLIOptions(t *testing.T) {

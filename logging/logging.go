@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"github.com/ebitengine/purego"
-	scrapligoconstants "github.com/scrapli/scrapligo/v2/constants"
+	scrapligoconstants "github.com/kentik/scrapligo/v2/constants"
 )
 
 var (

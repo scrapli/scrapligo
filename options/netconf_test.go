@@ -6,9 +6,9 @@ import (
 	"strings"
 	"testing"
 
-	scrapligonetconf "github.com/scrapli/scrapligo/v2/netconf"
-	scrapligooptions "github.com/scrapli/scrapligo/v2/options"
-	scrapligotesthelper "github.com/scrapli/scrapligo/v2/testhelper"
+	scrapligonetconf "github.com/kentik/scrapligo/v2/netconf"
+	scrapligooptions "github.com/kentik/scrapligo/v2/options"
+	scrapligotesthelper "github.com/kentik/scrapligo/v2/testhelper"
 )
 
 func TestNETCONFOptions(t *testing.T) {

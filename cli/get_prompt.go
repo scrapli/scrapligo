@@ -3,7 +3,7 @@ package cli
 import (
 	"context"
 
-	scrapligoerrors "github.com/scrapli/scrapligo/v2/errors"
+	scrapligoerrors "github.com/kentik/scrapligo/v2/errors"
 )
 
 // GetPrompt returns a Result object containing the current "prompt" of the target device.

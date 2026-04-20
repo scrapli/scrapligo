@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	scrapligonetconf "github.com/scrapli/scrapligo/v2/netconf"
+	scrapligonetconf "github.com/kentik/scrapligo/v2/netconf"
 )
 
 func TestKillSession(t *testing.T) {

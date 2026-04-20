@@ -28,7 +28,7 @@ locations=(
     "go.mod                    ^go\\s                                   go"
     ".github/vars.env          GO_VERSION=                              ci go"
     ".github/vars.env          GOLANGCI_LINT_VERSION=                   ci golangci-lint"
-    "Makefile                  ghcr.io/scrapli/                         local/ci clab setup"
+    "Makefile                  ghcr.io/kentik/                         local/ci clab setup"
 )
 
 for entry in "${locations[@]}"; do

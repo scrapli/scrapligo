@@ -12,7 +12,7 @@ LATEST_LIBSCRAPLI_TAGS=(
     $(
         {
             curl -sf \
-                "https://api.github.com/repos/scrapli/libscrapli/tags" 2>/dev/null ||
+                "https://api.github.com/repos/kentik/libscrapli/tags" 2>/dev/null ||
                 echo '[]'
         } |
             jq -r '.[].name' |
@@ -28,7 +28,7 @@ LATEST_DEFINITION_TAGS=(
     $(
         {
             curl -sf \
-                "https://api.github.com/repos/scrapli/scrapli_definitions/tags" 2>/dev/null ||
+                "https://api.github.com/repos/kentik/scrapli_definitions/tags" 2>/dev/null ||
                 echo '[]'
         } |
             jq -r '.[].name' |

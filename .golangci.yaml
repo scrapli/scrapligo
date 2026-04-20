@@ -30,7 +30,7 @@ linters:
       min-complexity: 15
     importas:
       alias:
-        - pkg: github.com/scrapli/scrapligo/(\w+)
+        - pkg: github.com/kentik/scrapligo/(\w+)
           alias: scrapligo$1
       no-unaliased: true
     lll:
@@ -62,7 +62,7 @@ linters:
       - linters:
           - revive
         path: netconf/types.go
-        text: 'exported: exported const'
+        text: "exported: exported const"
       - linters:
           - gocritic
         path: cli/options

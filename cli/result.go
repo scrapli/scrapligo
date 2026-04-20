@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	scrapligoconstants "github.com/scrapli/scrapligo/v2/constants"
-	scrapligoutil "github.com/scrapli/scrapligo/v2/util"
+	scrapligoconstants "github.com/kentik/scrapligo/v2/constants"
+	scrapligoutil "github.com/kentik/scrapligo/v2/util"
 )
 
 const (

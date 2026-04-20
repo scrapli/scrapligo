@@ -9,11 +9,11 @@ import (
 	"runtime"
 	"time"
 
-	scrapligocli "github.com/scrapli/scrapligo/v2/cli"
-	scrapligoffi "github.com/scrapli/scrapligo/v2/ffi"
-	scrapligologging "github.com/scrapli/scrapligo/v2/logging"
-	scrapligooptions "github.com/scrapli/scrapligo/v2/options"
-	scrapligoutil "github.com/scrapli/scrapligo/v2/util"
+	scrapligocli "github.com/kentik/scrapligo/v2/cli"
+	scrapligoffi "github.com/kentik/scrapligo/v2/ffi"
+	scrapligologging "github.com/kentik/scrapligo/v2/logging"
+	scrapligooptions "github.com/kentik/scrapligo/v2/options"
+	scrapligoutil "github.com/kentik/scrapligo/v2/util"
 )
 
 const (

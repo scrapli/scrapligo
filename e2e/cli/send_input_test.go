@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	scrapligocli "github.com/scrapli/scrapligo/v2/cli"
-	scrapligotesthelper "github.com/scrapli/scrapligo/v2/testhelper"
+	scrapligocli "github.com/kentik/scrapligo/v2/cli"
+	scrapligotesthelper "github.com/kentik/scrapligo/v2/testhelper"
 )
 
 func TestSendInput(t *testing.T) {

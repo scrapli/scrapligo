@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strings"
 
-	scrapligoconstants "github.com/scrapli/scrapligo/v2/constants"
-	scrapligoerrors "github.com/scrapli/scrapligo/v2/errors"
+	scrapligoconstants "github.com/kentik/scrapligo/v2/constants"
+	scrapligoerrors "github.com/kentik/scrapligo/v2/errors"
 )
 
 func newRawRPCOptions(options ...Option) *rawRPCOptions {

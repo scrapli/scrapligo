@@ -3,7 +3,7 @@ package cli
 import (
 	"context"
 
-	scrapligoerrors "github.com/scrapli/scrapligo/v2/errors"
+	scrapligoerrors "github.com/kentik/scrapligo/v2/errors"
 )
 
 // EnterMode is used to explicitly enter a mode (i.e. enter "config mode" or "shell" or some other

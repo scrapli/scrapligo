@@ -3,7 +3,7 @@ package util_test
 import (
 	"testing"
 
-	scrapligoutil "github.com/scrapli/scrapligo/v2/util"
+	scrapligoutil "github.com/kentik/scrapligo/v2/util"
 )
 
 func TestGetEnvStrOrDefault(t *testing.T) {
