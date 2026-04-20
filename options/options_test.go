@@ -5,8 +5,8 @@ import (
 	"os"
 	"testing"
 
-	scrapligoffi "github.com/scrapli/scrapligo/v2/ffi"
-	scrapligotesthelper "github.com/scrapli/scrapligo/v2/testhelper"
+	scrapligoffi "github.com/kentik/scrapligo/v2/ffi"
+	scrapligotesthelper "github.com/kentik/scrapligo/v2/testhelper"
 )
 
 func TestMain(m *testing.M) {

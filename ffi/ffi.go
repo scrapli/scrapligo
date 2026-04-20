@@ -15,10 +15,10 @@ import (
 	"time"
 
 	"github.com/ebitengine/purego"
-	scrapligoconstants "github.com/scrapli/scrapligo/v2/constants"
-	scrapligoerrors "github.com/scrapli/scrapligo/v2/errors"
-	scrapligologging "github.com/scrapli/scrapligo/v2/logging"
-	scrapligoutil "github.com/scrapli/scrapligo/v2/util"
+	scrapligoconstants "github.com/kentik/scrapligo/v2/constants"
+	scrapligoerrors "github.com/kentik/scrapligo/v2/errors"
+	scrapligologging "github.com/kentik/scrapligo/v2/logging"
+	scrapligoutil "github.com/kentik/scrapligo/v2/util"
 )
 
 var (
@@ -29,7 +29,7 @@ var (
 const (
 	darwin         = "darwin"
 	linux          = "linux"
-	libscrapliRepo = "https://github.com/scrapli/libscrapli"
+	libscrapliRepo = "https://github.com/kentik/libscrapli"
 )
 
 // AssertNoLeaks is a dev/test type function that asserts (using the general purpose allocator used
@@ -293,7 +293,7 @@ func writeLibScrapliToCache( //nolint: nonamedreturns
 			fmt.Sprintf("TARGET=%s", zigTriple),
 			"-e",
 			fmt.Sprintf("OUT_NAME=%s", filepath.Base(f.Name())),
-			"ghcr.io/scrapli/libscrapli/builder:latest",
+			"ghcr.io/kentik/libscrapli/builder:latest",
 		)
 
 		err := buildCmd.Run()

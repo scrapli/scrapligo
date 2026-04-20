@@ -4,7 +4,7 @@ import (
 	"unsafe"
 
 	"github.com/ebitengine/purego"
-	scrapligologging "github.com/scrapli/scrapligo/v2/logging"
+	scrapligologging "github.com/kentik/scrapligo/v2/logging"
 )
 
 // TransportKind is an enum(ish) representing the kind of transport a Cli should use.

@@ -1,7 +1,7 @@
 package cli
 
 import (
-	scrapligoerrors "github.com/scrapli/scrapligo/v2/errors"
+	scrapligoerrors "github.com/kentik/scrapligo/v2/errors"
 )
 
 const (

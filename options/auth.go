@@ -1,6 +1,6 @@
 package options
 
-import scrapligointernal "github.com/scrapli/scrapligo/v2/internal"
+import scrapligointernal "github.com/kentik/scrapligo/v2/internal"
 
 // WithUsername sets the username to use for authentication to the target device.
 func WithUsername(s string) Option {

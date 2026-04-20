@@ -6,9 +6,9 @@ import (
 	"strings"
 	"testing"
 
-	scrapligocli "github.com/scrapli/scrapligo/v2/cli"
-	scrapligooptions "github.com/scrapli/scrapligo/v2/options"
-	scrapligotesthelper "github.com/scrapli/scrapligo/v2/testhelper"
+	scrapligocli "github.com/kentik/scrapligo/v2/cli"
+	scrapligooptions "github.com/kentik/scrapligo/v2/options"
+	scrapligotesthelper "github.com/kentik/scrapligo/v2/testhelper"
 )
 
 func TestTransportBinOptions(t *testing.T) {

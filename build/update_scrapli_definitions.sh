@@ -7,12 +7,12 @@ ORIG_DIR=$(pwd)
 TMP_DIR=$(mktemp -d)
 
 if [[ "$TARGET_DEFINITIONS_TAG" =~ ^[0-9a-f]{7,40}$ ]]; then
-    git clone --depth 1 https://github.com/scrapli/scrapli_definitions.git "$TMP_DIR"
+    git clone --depth 1 https://github.com/kentik/scrapli_definitions.git "$TMP_DIR"
     cd "$TMP_DIR"
     git checkout "$TARGET_DEFINITIONS_TAG"
     cd "$ORIG_DIR"
 else
-    git clone --depth 1 --branch "$TARGET_DEFINITIONS_TAG" https://github.com/scrapli/scrapli_definitions.git "$TMP_DIR"
+    git clone --depth 1 --branch "$TARGET_DEFINITIONS_TAG" https://github.com/kentik/scrapli_definitions.git "$TMP_DIR"
 fi
 
 echo "cloned scrapli-definitions@$TARGET_DEFINITIONS_TAG into $TMP_DIR"
