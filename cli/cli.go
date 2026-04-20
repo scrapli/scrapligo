@@ -156,6 +156,35 @@ func (c *Cli) GetPtr() (uintptr, *scrapligoffi.Mapping) {
 	return c.ptr, c.ffiMap
 }
 
+// GetOptions returns the options as supplied in a json-ish string -- should only really be used
+// for testing as it doesnt really serve any purpose otherwise and costs some allocations and calls
+// across the ffi boundary. Exposed for testing reasons.
+func (c *Cli) GetOptions() (string, error) {
+	optionsPtr := c.ffiMap.Shared.AllocDriverOptions()
+	defer c.ffiMap.Shared.FreeDriverOptions(optionsPtr)
+
+	c.options.Apply(optionsPtr)
+
+	var optionsSize uintptr
+
+	rc := c.ffiMap.Shared.FetchOptionsSize(
+		optionsPtr,
+		&optionsSize,
+	)
+	if rc != 0 {
+		return "", scrapligoerrors.NewFfiError("fetch options size failed", nil)
+	}
+
+	optionsStr := make([]byte, optionsSize)
+
+	c.ffiMap.Shared.FetchOptions(
+		optionsPtr,
+		&optionsStr,
+	)
+
+	return string(optionsStr), nil
+}
+
 // Open opens the driver object. This method spawns the underlying zig driver which the Cli then
 // holds a pointer to. All Cli operations operate against this pointer (though this is
 // transparent to the user).

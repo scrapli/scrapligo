@@ -30,14 +30,14 @@ modes:
       - name: 'privileged_exec'
         instructions:
           - send_input:
-              input: 'quit'
+              input: 'return'
   - name: 'diagnose'
     prompt_pattern: '.*\(diagnose\)\%\%$'
     accessible_modes:
       - name: 'privileged_exec'
         instructions:
           - send_input:
-              input: 'quit'
+              input: 'return'
 failure_indicators:
   - '% Ambiguous command'
   - '% Incomplete command'
