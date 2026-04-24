@@ -214,6 +214,7 @@ type AuthOptions struct {
 
 	PrivateKeyPath       string
 	PrivateKeyPassphrase string
+	PrivateKeyContent    string
 
 	LookupMap        map[string]string
 	lookupMapKeys    []string
@@ -248,6 +249,11 @@ func (o *AuthOptions) apply(opts *driverOptions) {
 	if o.PrivateKeyPassphrase != "" {
 		opts.auth.privateKeyPassphrase = uintptr(unsafe.Pointer(&[]byte(o.PrivateKeyPassphrase)[0]))
 		opts.auth.privateKeyPassphraseLen = uintptr(len(o.PrivateKeyPassphrase))
+	}
+
+	if o.PrivateKeyContent != "" {
+		opts.auth.privateKeyContent = uintptr(unsafe.Pointer(&[]byte(o.PrivateKeyContent)[0]))
+		opts.auth.privateKeyContentLen = uintptr(len(o.PrivateKeyContent))
 	}
 
 	if len(o.LookupMap) > 0 {
