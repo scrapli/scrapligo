@@ -38,3 +38,23 @@ func WithDefintionContent(s string, b []byte) Option {
 		return nil
 	}
 }
+
+// WithNoNormalizeLineFeeds tells libscrapli to *not* normalize \r\n -> \n when fetching the
+// (processed) result from cli operations.
+func WithNoNormalizeLineFeeds() Option {
+	return func(o *scrapligointernal.Options) error {
+		o.Cli.NormalizeLineFeeds = false
+
+		return nil
+	}
+}
+
+// WithNoNormalizeTrailingWhitespace tells libscrapli to *not* clean/normalize (remove) trailing
+// whitespace when fetching the (processed) result from cli operations.
+func WithNoNormalizeTrailingWhitespace() Option {
+	return func(o *scrapligointernal.Options) error {
+		o.Cli.NormalizeTrailingWhitespace = false
+
+		return nil
+	}
+}

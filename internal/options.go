@@ -49,7 +49,9 @@ func NewOptions() *Options {
 		TransportKind: TransportKindBin,
 		Port:          0,
 		Cli: CliOptions{
-			DefinitionFileOrName: "default",
+			DefinitionFileOrName:        "default",
+			NormalizeLineFeeds:          true,
+			NormalizeTrailingWhitespace: true,
 		},
 		Netconf: NetconfOptions{},
 		Auth: AuthOptions{
@@ -103,6 +105,9 @@ type CliOptions struct {
 	DefinitionString   string
 
 	SkipStaticOptions bool
+
+	NormalizeLineFeeds          bool
+	NormalizeTrailingWhitespace bool
 }
 
 func (o *CliOptions) apply(opts *driverOptions) {
@@ -112,6 +117,14 @@ func (o *CliOptions) apply(opts *driverOptions) {
 
 	opts.cli.definitionStr = uintptr(unsafe.Pointer(&[]byte(o.DefinitionString)[0]))
 	opts.cli.definitionStrLen = uintptr(len(o.DefinitionString))
+
+	if o.NormalizeLineFeeds == false {
+		opts.cli.normalizeLineFeeds = &o.NormalizeLineFeeds
+	}
+
+	if o.NormalizeTrailingWhitespace == false {
+		opts.cli.normalizeTrailingWhitespace = &o.NormalizeTrailingWhitespace
+	}
 }
 
 // NetconfOptions holds netconf specific options.
