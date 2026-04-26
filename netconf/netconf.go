@@ -118,6 +118,8 @@ func (n *Netconf) Open(ctx context.Context) (*Result, error) {
 		}
 
 		n.ffiMap.Shared.Free(n.ptr)
+
+		n.ptr = 0
 	}()
 
 	optionsPtr := n.ffiMap.Shared.AllocDriverOptions()
@@ -136,6 +138,8 @@ func (n *Netconf) Open(ctx context.Context) (*Result, error) {
 
 	n.pollFd = int(n.ffiMap.Shared.GetPollFd(n.ptr))
 	if n.pollFd == 0 {
+		cleanup = true
+
 		return nil, scrapligoerrors.NewFfiError("failed to allocate netconf", nil)
 	}
 
@@ -166,6 +170,12 @@ func (n *Netconf) Close(ctx context.Context, options ...Option) (*Result, error)
 		return nil, scrapligoerrors.NewFfiError("driver pointer nil", nil)
 	}
 
+	defer func() {
+		n.ffiMap.Shared.Free(n.ptr)
+
+		n.ptr = 0
+	}()
+
 	cancel := false
 
 	var operationID uint32
@@ -177,11 +187,7 @@ func (n *Netconf) Close(ctx context.Context, options ...Option) (*Result, error)
 		return nil, scrapligoerrors.NewFfiError("failed to submit close operation", nil)
 	}
 
-	result, err := n.getResult(ctx, &cancel, operationID)
-
-	n.ffiMap.Shared.Free(n.ptr)
-
-	return result, err
+	return n.getResult(ctx, &cancel, operationID)
 }
 
 // GetSessionID returns the session-id as parsed during the capabilities exchange -- if we for some

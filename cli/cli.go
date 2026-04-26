@@ -199,6 +199,8 @@ func (c *Cli) Open(ctx context.Context) (*Result, error) {
 		}
 
 		c.ffiMap.Shared.Free(c.ptr)
+
+		c.ptr = 0
 	}()
 
 	optionsPtr := c.ffiMap.Shared.AllocDriverOptions()
@@ -217,6 +219,8 @@ func (c *Cli) Open(ctx context.Context) (*Result, error) {
 
 	c.pollFd = int(c.ffiMap.Shared.GetPollFd(c.ptr))
 	if c.pollFd == 0 {
+		cleanup = true
+
 		return nil, scrapligoerrors.NewFfiError("failed to allocate cli", nil)
 	}
 
@@ -247,8 +251,11 @@ func (c *Cli) Close(ctx context.Context) (*Result, error) {
 		return nil, scrapligoerrors.NewFfiError("driver pointer nil", nil)
 	}
 
-	// as long as driver ptr is not 0 we *always* want to free
-	defer c.ffiMap.Shared.Free(c.ptr)
+	defer func() {
+		c.ffiMap.Shared.Free(c.ptr)
+
+		c.ptr = 0
+	}()
 
 	cancel := false
 

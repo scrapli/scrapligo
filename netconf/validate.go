@@ -23,7 +23,7 @@ type validateOptions struct {
 }
 
 // Validate executes a netconf validate rpc. Supported options:
-//   - WithTargetType
+//   - WithSource
 func (n *Netconf) Validate(
 	ctx context.Context,
 	options ...Option,

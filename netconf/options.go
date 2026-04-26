@@ -46,6 +46,16 @@ func WithDatastore(t DatastoreType) Option {
 	}
 }
 
+// WithSource set the source datastore type for the rpc.
+func WithSource(t DatastoreType) Option {
+	return func(o any) {
+		switch to := o.(type) {
+		case *validateOptions:
+			to.source = t
+		}
+	}
+}
+
 // WithSourceType set the source datastore type for the rpc.
 func WithSourceType(t DatastoreType) Option {
 	return func(o any) {
@@ -53,7 +63,7 @@ func WithSourceType(t DatastoreType) Option {
 		case *getConfigOptions:
 			to.source = t
 		case *copyConfigOptions:
-			to.target = t
+			to.source = t
 		}
 	}
 }
@@ -98,6 +108,8 @@ func WithFilterType(t FilterType) Option {
 			to.filterType = t
 		case *getOptions:
 			to.filterType = t
+		case *getDataOptions:
+			to.filterType = t
 		}
 	}
 }
@@ -109,6 +121,8 @@ func WithFilterNamespacePrefix(s string) Option {
 		case *getConfigOptions:
 			to.filterNamespacePrefix = s
 		case *getOptions:
+			to.filterNamespacePrefix = s
+		case *getDataOptions:
 			to.filterNamespacePrefix = s
 		}
 	}
@@ -122,6 +136,8 @@ func WithFilterNamespace(s string) Option {
 			to.filterNamespace = s
 		case *getOptions:
 			to.filterNamespace = s
+		case *getDataOptions:
+			to.filterNamespace = s
 		}
 	}
 }
@@ -133,6 +149,8 @@ func WithDefaultsType(t DefaultsType) Option {
 		case *getConfigOptions:
 			to.defaultsType = t
 		case *getOptions:
+			to.defaultsType = t
+		case *getDataOptions:
 			to.defaultsType = t
 		}
 	}
