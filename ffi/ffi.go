@@ -248,7 +248,7 @@ func writeLibScrapliToCache( //nolint: nonamedreturns
 	case darwin:
 		zigTriple = fmt.Sprintf("%s-macos", getZigStyleArch())
 		releaseFilename = fmt.Sprintf(
-			"libscrapli-%s-macos.dylib.%s",
+			"libscrapli-%s-macos.%s.dylib",
 			getZigStyleArch(),
 			scrapligoconstants.LibScrapliVersion,
 		)
