@@ -120,18 +120,3 @@ func (r *Result) Failed() bool {
 func (r *Result) TextFsmParse(ctx context.Context, path string) ([]map[string]any, error) {
 	return scrapligoutil.TextFsmParse(ctx, r.Result(), path)
 }
-
-func (r *Result) extend(res *Result) {
-	r.Inputs = append(r.Inputs, res.Inputs...)
-	r.ResultsRaw = append(r.ResultsRaw, res.ResultsRaw...)
-	r.Results = append(r.Results, res.Results...)
-	r.Splits = append(r.Splits, res.Splits...)
-
-	if len(res.Splits) > 0 {
-		r.ElapsedTimeSeconds = elapsedTime(r.StartTime, res.Splits[len(res.Splits)-1])
-	}
-
-	if r.ResultsFailedIndicator == "" && res.ResultsFailedIndicator != "" {
-		r.ResultsFailedIndicator = res.ResultsFailedIndicator
-	}
-}
