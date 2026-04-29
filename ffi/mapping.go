@@ -126,6 +126,18 @@ type CliMapping struct {
 		retainInput bool,
 		retainTrailingPrompt bool,
 	) uint8
+	// SendInputs submits a SendInputs operation to the underlying driver with the given input and
+	// configured options. The driver populates the operationID into the uint32 pointer.
+	SendInputs func(
+		driverPtr uintptr,
+		operationID *uint32,
+		cancel *bool,
+		inputs string,
+		requestedMode string,
+		inputHandling string,
+		retainInput bool,
+		retainTrailingPrompt bool,
+	) uint8
 	// SendPromptedInput submits a SendPromptedInput operation to the underlying driver with the
 	// given input, prompt, response, and configured options. The driver populates the operationID
 	// into the uint32 pointer.

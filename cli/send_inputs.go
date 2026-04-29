@@ -2,7 +2,9 @@ package cli
 
 import (
 	"context"
+	"strings"
 
+	scrapligoconstants "github.com/scrapli/scrapligo/v2/constants"
 	scrapligoerrors "github.com/scrapli/scrapligo/v2/errors"
 	scrapligoutil "github.com/scrapli/scrapligo/v2/util"
 )
@@ -41,45 +43,25 @@ func (c *Cli) SendInputs(
 
 	loadedOptions := newSendInputsOptions(options...)
 
-	var results *Result
+	joinedInputs := strings.Join(inputs, scrapligoconstants.LibScrapliDelimiter)
 
-	for _, input := range inputs {
-		var operationID uint32
+	var operationID uint32
 
-		status := c.ffiMap.Cli.SendInput(
-			c.ptr,
-			&operationID,
-			&cancel,
-			input,
-			loadedOptions.requestedMode,
-			string(loadedOptions.inputHandling),
-			loadedOptions.retainInput,
-			loadedOptions.retainTrailingPrompt,
-		)
-		if status != 0 {
-			return nil, scrapligoerrors.NewFfiError("failed to submit sendInput operation", nil)
-		}
-
-		r, err := c.getResult(ctx, &cancel, operationID)
-		if err != nil {
-			return nil, err
-		}
-
-		if results == nil {
-			results = r
-		} else {
-			results.extend(r)
-		}
-
-		if r.Failed() && loadedOptions.stopOnIndicatedFailure {
-			// note that this returns nil for an error since there was nothing unrecoverable
-			// (probably) that happened, just we saw some stuff in the output saying that we
-			// had a bad input or something
-			return results, nil
-		}
+	status := c.ffiMap.Cli.SendInputs(
+		c.ptr,
+		&operationID,
+		&cancel,
+		joinedInputs,
+		loadedOptions.requestedMode,
+		string(loadedOptions.inputHandling),
+		loadedOptions.retainInput,
+		loadedOptions.retainTrailingPrompt,
+	)
+	if status != 0 {
+		return nil, scrapligoerrors.NewFfiError("failed to submit sendInputs operation", nil)
 	}
 
-	return results, nil
+	return c.getResult(ctx, &cancel, operationID)
 }
 
 // SendInputsFromFile is a conveince wrapper to load inputs from a file then pass those to

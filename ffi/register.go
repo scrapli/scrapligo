@@ -38,6 +38,7 @@ func registerCli(m *Mapping, libScrapliFfi uintptr) {
 	purego.RegisterLibFunc(&m.Cli.EnterMode, libScrapliFfi, "ls_cli_enter_mode")
 	purego.RegisterLibFunc(&m.Cli.GetPrompt, libScrapliFfi, "ls_cli_get_prompt")
 	purego.RegisterLibFunc(&m.Cli.SendInput, libScrapliFfi, "ls_cli_send_input")
+	purego.RegisterLibFunc(&m.Cli.SendInputs, libScrapliFfi, "ls_cli_send_inputs")
 	purego.RegisterLibFunc(&m.Cli.SendPromptedInput, libScrapliFfi, "ls_cli_send_prompted_input")
 
 	purego.RegisterLibFunc(&m.Cli.ReadAny, libScrapliFfi, "ls_cli_read_any")
