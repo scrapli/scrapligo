@@ -286,15 +286,25 @@ func (c *Cli) getResult(
 		}
 	}()
 
-	pollFd := &unix.FdSet{}
-	pollFd.Set(c.pollFd)
-
 	var n int
 
+	readFdSet := &unix.FdSet{}
+
 	for {
+		if ctx.Err() != nil {
+			return nil, ctx.Err()
+		}
+
+		// select can modify both the fd set and the timeout (on some platforms), so we must
+		// re-initialize them both every iteration.
+		tv := unix.NsecToTimeval(scrapligoconstants.ReadyFDPollTimeoutNs)
+
+		readFdSet.Zero()
+		readFdSet.Set(c.pollFd)
+
 		var err error
 
-		n, err = unix.Select(c.pollFd+1, pollFd, &unix.FdSet{}, &unix.FdSet{}, nil)
+		n, err = unix.Select(c.pollFd+1, readFdSet, nil, nil, &tv)
 		if err != nil {
 			if errors.Is(err, unix.EINTR) {
 				// python automagically handles interrupts i guess go doesnt, so just act like
@@ -305,7 +315,9 @@ func (c *Cli) getResult(
 			return nil, scrapligoerrors.NewFfiError("waiting on operation ready signal", err)
 		}
 
-		break
+		if n > 0 {
+			break
+		}
 	}
 
 	out := make([]byte, n)
