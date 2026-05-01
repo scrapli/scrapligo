@@ -15,18 +15,6 @@ const (
 	elapsedTimeMultiplierDivider = 100
 )
 
-func elapsedTime(startTime, endTime uint64) float64 {
-	elapsed := endTime - startTime
-
-	if elapsed >= math.MaxInt64 {
-		return math.MaxInt64
-	}
-
-	return math.Round(
-		time.Duration(elapsed).Seconds()*elapsedTimeMultiplierDivider,
-	) / elapsedTimeMultiplierDivider
-}
-
 // Result is a struct returned from all Cli operations.
 type Result struct {
 	Host                   string
@@ -34,8 +22,8 @@ type Result struct {
 	Inputs                 []string
 	ResultsRaw             [][]byte
 	Results                []string
-	StartTime              uint64
-	Splits                 []uint64
+	StartTime              time.Time
+	Splits                 []time.Time
 	ElapsedTimeSeconds     float64
 	ResultsFailedIndicator string
 }
@@ -55,10 +43,19 @@ func NewResult(
 	inputsS := strings.Split(string(inputs), scrapligoconstants.LibScrapliDelimiter)
 	resultsS := strings.Split(string(results), scrapligoconstants.LibScrapliDelimiter)
 
+	start := time.Unix(0, scrapligoutil.SafeUint64ToInt64(startTime))
+	splitTimes := make([]time.Time, len(splits))
+
+	for i, s := range splits {
+		splitTimes[i] = time.Unix(0, scrapligoutil.SafeUint64ToInt64(s))
+	}
+
 	var elapsed float64
 
-	if len(splits) > 0 {
-		elapsed = elapsedTime(startTime, splits[len(splits)-1])
+	if len(splitTimes) > 0 {
+		elapsed = math.Round(
+			splitTimes[len(splitTimes)-1].Sub(start).Seconds()*elapsedTimeMultiplierDivider,
+		) / elapsedTimeMultiplierDivider
 	}
 
 	return &Result{
@@ -70,17 +67,18 @@ func NewResult(
 			[]byte(scrapligoconstants.LibScrapliDelimiter),
 		),
 		Results:                resultsS,
-		StartTime:              startTime,
-		Splits:                 splits,
+		StartTime:              start,
+		Splits:                 splitTimes,
 		ElapsedTimeSeconds:     elapsed,
 		ResultsFailedIndicator: string(resultsFailedIndicator),
 	}
 }
 
-// EndTime returns the endtime of the Result, if for whatever reason there isnt one it returns 0.
-func (r *Result) EndTime() uint64 {
+// EndTime returns the end time of the Result. If there are no split times, it returns the start
+// time.
+func (r *Result) EndTime() time.Time {
 	if len(r.Splits) == 0 {
-		return r.StartTime + 1
+		return r.StartTime
 	}
 
 	return r.Splits[len(r.Splits)-1]

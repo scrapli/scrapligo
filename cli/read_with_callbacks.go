@@ -77,7 +77,7 @@ func (c *Cli) ReadWithCallbacks( //nolint: gocyclo
 		}
 	}
 
-	startTime := time.Now().UnixNano()
+	startTime := time.Now()
 
 	cancel := false
 
@@ -178,7 +178,7 @@ func (c *Cli) ReadWithCallbacks( //nolint: gocyclo
 					c.host,
 					c.options.Port,
 					[]byte(initialInput),
-					scrapligoutil.SafeInt64ToUint64(startTime),
+					scrapligoutil.SafeInt64ToUint64(startTime.UnixNano()),
 					[]uint64{scrapligoutil.SafeInt64ToUint64(time.Now().UnixNano())},
 					resultsRaw.Bytes(),
 					[]byte(curResults),

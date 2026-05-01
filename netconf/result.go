@@ -1,6 +1,16 @@
 package netconf
 
-import "strings"
+import (
+	"math"
+	"strings"
+	"time"
+
+	scrapligoutil "github.com/scrapli/scrapligo/v2/util"
+)
+
+const (
+	elapsedTimeMultiplierDivider = 100
+)
 
 // Result is a struct returned from all Cli operations.
 type Result struct {
@@ -9,8 +19,8 @@ type Result struct {
 	Input              string
 	ResultRaw          []byte
 	Result             string
-	StartTime          uint64
-	EndTime            uint64
+	StartTime          time.Time
+	EndTime            time.Time
 	ElapsedTimeSeconds float64
 	Failed             bool
 	Warnings           []string
@@ -30,16 +40,24 @@ func NewResult(
 	warnings []byte,
 	errors []byte,
 ) *Result {
+	start := time.Unix(0, scrapligoutil.SafeUint64ToInt64(startTime))
+	end := time.Unix(0, scrapligoutil.SafeUint64ToInt64(endTime))
+
+	elapsed := math.Round(
+		end.Sub(start).Seconds()*elapsedTimeMultiplierDivider,
+	) / elapsedTimeMultiplierDivider
+
 	r := &Result{
-		Host:      host,
-		Port:      port,
-		Input:     input,
-		ResultRaw: resultRaw,
-		Result:    result,
-		StartTime: startTime,
-		EndTime:   endTime,
-		Warnings:  strings.Split(string(warnings), "\n"),
-		Errors:    strings.Split(string(errors), "\n"),
+		Host:               host,
+		Port:               port,
+		Input:              input,
+		ResultRaw:          resultRaw,
+		Result:             result,
+		StartTime:          start,
+		EndTime:            end,
+		ElapsedTimeSeconds: elapsed,
+		Warnings:           strings.Split(string(warnings), "\n"),
+		Errors:             strings.Split(string(errors), "\n"),
 	}
 
 	if len(errors) > 0 {
