@@ -20,16 +20,9 @@ import (
 )
 
 func loadDefinition(o *scrapligointernal.Options) error {
-	var definitionFileOrNameString string
+	definitionFileOrNameString := o.Cli.DefinitionFileOrName
 
 	var err error
-
-	switch v := any(o.Cli.DefinitionFileOrName).(type) {
-	case PlatformName:
-		definitionFileOrNameString = v.String()
-	case string:
-		definitionFileOrNameString = v
-	}
 
 	assetPlatformNames := GetPlatformNames()
 
