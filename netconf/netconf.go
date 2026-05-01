@@ -320,9 +320,6 @@ func (n *Netconf) getResult(
 		break
 	}
 
-	// if the context wasn't cancelled the goroutine will still be running, this will stop it
-	done <- struct{}{}
-
 	out := make([]byte, _n)
 
 	_, _ = unix.Read(n.pollFd, out)
