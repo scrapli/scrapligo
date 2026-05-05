@@ -7,7 +7,7 @@ help:
 ##@ Development
 ## Format all go files
 fmt:
-	go run mvdan.cc/gofumpt -w .
+	go run mvdan.cc/gofumpt -w -extra .
 	go run github.com/daixiang0/gci write .
 	go run github.com/golangci/golines --base-formatter="gofmt" -w .
 
