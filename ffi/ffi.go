@@ -60,9 +60,9 @@ func getZigStyleArch() string {
 }
 
 func isMusl() bool {
-	_, err := os.Stat("/lib/ld-musl-x86_64.so.1")
+	matches, _ := filepath.Glob("/lib/ld-musl-*.so.1")
 
-	return err == nil
+	return len(matches) > 0
 }
 
 func getLibscrapliCachePath() string {
