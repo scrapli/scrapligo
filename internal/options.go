@@ -69,7 +69,7 @@ func (o *Options) GetLogger() *scrapligologging.AnyLogger {
 func (o *Options) Apply(optionsPtr uintptr) {
 	opts := (*driverOptions)(unsafe.Pointer(optionsPtr)) //nolint: govet
 
-	opts.loggerLevel = uintptr(unsafe.Pointer(&[]byte(o.LoggerLevel)[0]))
+	opts.loggerLevel = uintptr(unsafe.Pointer(unsafe.StringData(string(o.LoggerLevel))))
 	opts.loggerLevelLen = uintptr(len(o.LoggerLevel))
 	opts.loggerCallback = scrapligologging.LoggerToLoggerCallback(
 		o.Logger,
@@ -83,7 +83,7 @@ func (o *Options) Apply(optionsPtr uintptr) {
 	o.Session.apply(opts)
 	o.Auth.apply(opts)
 
-	opts.transportKind = uintptr(unsafe.Pointer(&[]byte(o.TransportKind)[0]))
+	opts.transportKind = uintptr(unsafe.Pointer(unsafe.StringData(string(o.TransportKind))))
 	opts.transportKindLen = uintptr(len(o.TransportKind))
 
 	switch o.TransportKind {
@@ -115,7 +115,7 @@ func (o *CliOptions) apply(opts *driverOptions) {
 		return
 	}
 
-	opts.cli.definitionStr = uintptr(unsafe.Pointer(&[]byte(o.DefinitionString)[0]))
+	opts.cli.definitionStr = uintptr(unsafe.Pointer(unsafe.StringData(o.DefinitionString)))
 	opts.cli.definitionStrLen = uintptr(len(o.DefinitionString))
 
 	if o.NormalizeLineFeeds == false {
@@ -137,12 +137,14 @@ type NetconfOptions struct {
 
 func (o *NetconfOptions) apply(opts *driverOptions) {
 	if o.ErrorTag != "" {
-		opts.netconf.errorTag = uintptr(unsafe.Pointer(&[]byte(o.ErrorTag)[0]))
+		opts.netconf.errorTag = uintptr(unsafe.Pointer(unsafe.StringData(o.ErrorTag)))
 		opts.netconf.errorTagLen = uintptr(len(o.ErrorTag))
 	}
 
 	if o.PreferredVersion != "" {
-		opts.netconf.preferredVersion = uintptr(unsafe.Pointer(&[]byte(o.PreferredVersion)[0]))
+		opts.netconf.preferredVersion = uintptr(
+			unsafe.Pointer(unsafe.StringData(o.PreferredVersion)),
+		)
 		opts.netconf.preferredVersionLen = uintptr(len(o.PreferredVersion))
 	}
 
@@ -183,7 +185,7 @@ func (o *SessionOptions) apply(opts *driverOptions) {
 	}
 
 	if o.ReturnChar != "" {
-		opts.session.returnChar = uintptr(unsafe.Pointer(&[]byte(o.ReturnChar)[0]))
+		opts.session.returnChar = uintptr(unsafe.Pointer(unsafe.StringData(o.ReturnChar)))
 		opts.session.returnCharLen = uintptr(len(o.ReturnChar))
 	}
 
@@ -200,7 +202,7 @@ func (o *SessionOptions) apply(opts *driverOptions) {
 	}
 
 	if o.RecorderPath != "" {
-		opts.session.recordDestination = uintptr(unsafe.Pointer(&[]byte(o.RecorderPath)[0]))
+		opts.session.recordDestination = uintptr(unsafe.Pointer(unsafe.StringData(o.RecorderPath)))
 		opts.session.recordDestinationLen = uintptr(len(o.RecorderPath))
 	} else if o.RecorderCallback != nil {
 		opts.session.recorderCallback = purego.NewCallback(o.RecorderCallback)
@@ -232,27 +234,31 @@ type AuthOptions struct {
 
 func (o *AuthOptions) apply(opts *driverOptions) {
 	if o.Username != "" {
-		opts.auth.username = uintptr(unsafe.Pointer(&[]byte(o.Username)[0]))
+		opts.auth.username = uintptr(unsafe.Pointer(unsafe.StringData(o.Username)))
 		opts.auth.usernameLen = uintptr(len(o.Username))
 	}
 
 	if o.Password != "" {
-		opts.auth.password = uintptr(unsafe.Pointer(&[]byte(o.Password)[0]))
+		opts.auth.password = uintptr(unsafe.Pointer(unsafe.StringData(o.Password)))
 		opts.auth.passwordLen = uintptr(len(o.Password))
 	}
 
 	if o.PrivateKeyPath != "" {
-		opts.auth.privateKeyPath = uintptr(unsafe.Pointer(&[]byte(o.PrivateKeyPath)[0]))
+		opts.auth.privateKeyPath = uintptr(unsafe.Pointer(unsafe.StringData(o.PrivateKeyPath)))
 		opts.auth.privateKeyPathLen = uintptr(len(o.PrivateKeyPath))
 	}
 
 	if o.PrivateKeyPassphrase != "" {
-		opts.auth.privateKeyPassphrase = uintptr(unsafe.Pointer(&[]byte(o.PrivateKeyPassphrase)[0]))
+		opts.auth.privateKeyPassphrase = uintptr(
+			unsafe.Pointer(unsafe.StringData(o.PrivateKeyPassphrase)),
+		)
 		opts.auth.privateKeyPassphraseLen = uintptr(len(o.PrivateKeyPassphrase))
 	}
 
 	if o.PrivateKeyContent != "" {
-		opts.auth.privateKeyContent = uintptr(unsafe.Pointer(&[]byte(o.PrivateKeyContent)[0]))
+		opts.auth.privateKeyContent = uintptr(
+			unsafe.Pointer(unsafe.StringData(o.PrivateKeyContent)),
+		)
 		opts.auth.privateKeyContentLen = uintptr(len(o.PrivateKeyContent))
 	}
 
@@ -294,18 +300,18 @@ func (o *AuthOptions) apply(opts *driverOptions) {
 	}
 
 	if o.UsernamePattern != "" {
-		opts.auth.usernamePattern = uintptr(unsafe.Pointer(&[]byte(o.UsernamePattern)[0]))
+		opts.auth.usernamePattern = uintptr(unsafe.Pointer(unsafe.StringData(o.UsernamePattern)))
 		opts.auth.usernamePatternLen = uintptr(len(o.UsernamePattern))
 	}
 
 	if o.PasswordPattern != "" {
-		opts.auth.passwordPattern = uintptr(unsafe.Pointer(&[]byte(o.PasswordPattern)[0]))
+		opts.auth.passwordPattern = uintptr(unsafe.Pointer(unsafe.StringData(o.PasswordPattern)))
 		opts.auth.passwordPatternLen = uintptr(len(o.PasswordPattern))
 	}
 
 	if o.PassphrasePattern != "" {
 		opts.auth.privateKeyPassphrasePattern = uintptr(
-			unsafe.Pointer(&[]byte(o.PassphrasePattern)[0]),
+			unsafe.Pointer(unsafe.StringData(o.PassphrasePattern)),
 		)
 		opts.auth.privateKeyPassphrasePatternLen = uintptr(len(o.PassphrasePattern))
 	}
@@ -332,29 +338,35 @@ type TransportBinOptions struct {
 
 func (o *TransportBinOptions) apply(opts *driverOptions) {
 	if o.Bin != "" {
-		opts.transport.bin.bin = uintptr(unsafe.Pointer(&[]byte(o.Bin)[0]))
+		opts.transport.bin.bin = uintptr(unsafe.Pointer(unsafe.StringData(o.Bin)))
 		opts.transport.bin.binLen = uintptr(len(o.Bin))
 	}
 
 	if o.ExtraOpenArgs != "" {
-		opts.transport.bin.extraOpenArgs = uintptr(unsafe.Pointer(&[]byte(o.ExtraOpenArgs)[0]))
+		opts.transport.bin.extraOpenArgs = uintptr(
+			unsafe.Pointer(unsafe.StringData(o.ExtraOpenArgs)),
+		)
 		opts.transport.bin.extraOpenArgsLen = uintptr(len(o.ExtraOpenArgs))
 	}
 
 	if o.OverrideOpenArgs != "" {
 		opts.transport.bin.overrideOpenArgs = uintptr(
-			unsafe.Pointer(&[]byte(o.OverrideOpenArgs)[0]),
+			unsafe.Pointer(unsafe.StringData(o.OverrideOpenArgs)),
 		)
 		opts.transport.bin.overrideOpenArgsLen = uintptr(len(o.OverrideOpenArgs))
 	}
 
 	if o.SSHConfigPath != "" {
-		opts.transport.bin.sshConfigPath = uintptr(unsafe.Pointer(&[]byte(o.SSHConfigPath)[0]))
+		opts.transport.bin.sshConfigPath = uintptr(
+			unsafe.Pointer(unsafe.StringData(o.SSHConfigPath)),
+		)
 		opts.transport.bin.sshConfigPathLen = uintptr(len(o.SSHConfigPath))
 	}
 
 	if o.KnownHostsPath != "" {
-		opts.transport.bin.knownHostsPath = uintptr(unsafe.Pointer(&[]byte(o.KnownHostsPath)[0]))
+		opts.transport.bin.knownHostsPath = uintptr(
+			unsafe.Pointer(unsafe.StringData(o.KnownHostsPath)),
+		)
 		opts.transport.bin.knownHostsPathLen = uintptr(len(o.KnownHostsPath))
 	}
 
@@ -388,7 +400,9 @@ type TransportSSH2Options struct {
 
 func (o *TransportSSH2Options) apply(opts *driverOptions) {
 	if o.KnownHostsPath != "" {
-		opts.transport.ssh2.knownHostsPath = uintptr(unsafe.Pointer(&[]byte(o.KnownHostsPath)[0]))
+		opts.transport.ssh2.knownHostsPath = uintptr(
+			unsafe.Pointer(unsafe.StringData(o.KnownHostsPath)),
+		)
 		opts.transport.ssh2.knownHostsPathLen = uintptr(len(o.KnownHostsPath))
 	}
 
@@ -397,7 +411,9 @@ func (o *TransportSSH2Options) apply(opts *driverOptions) {
 	}
 
 	if o.ProxyJumpHost != "" {
-		opts.transport.ssh2.proxyJumpHost = uintptr(unsafe.Pointer(&[]byte(o.ProxyJumpHost)[0]))
+		opts.transport.ssh2.proxyJumpHost = uintptr(
+			unsafe.Pointer(unsafe.StringData(o.ProxyJumpHost)),
+		)
 		opts.transport.ssh2.proxyJumpHostLen = uintptr(len(o.ProxyJumpHost))
 	}
 
@@ -407,28 +423,28 @@ func (o *TransportSSH2Options) apply(opts *driverOptions) {
 
 	if o.ProxyJumpUsername != "" {
 		opts.transport.ssh2.proxyJumpUsername = uintptr(
-			unsafe.Pointer(&[]byte(o.ProxyJumpUsername)[0]),
+			unsafe.Pointer(unsafe.StringData(o.ProxyJumpUsername)),
 		)
 		opts.transport.ssh2.proxyJumpUsernameLen = uintptr(len(o.ProxyJumpUsername))
 	}
 
 	if o.ProxyJumpPassword != "" {
 		opts.transport.ssh2.proxyJumpPassword = uintptr(
-			unsafe.Pointer(&[]byte(o.ProxyJumpPassword)[0]),
+			unsafe.Pointer(unsafe.StringData(o.ProxyJumpPassword)),
 		)
 		opts.transport.ssh2.proxyJumpPasswordLen = uintptr(len(o.ProxyJumpPassword))
 	}
 
 	if o.ProxyJumpPrivateKeyPath != "" {
 		opts.transport.ssh2.proxyJumpPrivateKeyPath = uintptr(
-			unsafe.Pointer(&[]byte(o.ProxyJumpPrivateKeyPath)[0]),
+			unsafe.Pointer(unsafe.StringData(o.ProxyJumpPrivateKeyPath)),
 		)
 		opts.transport.ssh2.proxyJumpPrivateKeyPathLen = uintptr(len(o.ProxyJumpPrivateKeyPath))
 	}
 
 	if o.ProxyJumpPrivateKeyPassphrase != "" {
 		opts.transport.ssh2.proxyJumpPrivateKeyPassphrase = uintptr(
-			unsafe.Pointer(&[]byte(o.ProxyJumpPrivateKeyPassphrase)[0]),
+			unsafe.Pointer(unsafe.StringData(o.ProxyJumpPrivateKeyPassphrase)),
 		)
 		opts.transport.ssh2.proxyJumpPrivateKeyPassphraseLen = uintptr(
 			len(o.ProxyJumpPrivateKeyPassphrase),
@@ -447,7 +463,7 @@ type TransportTestOptions struct {
 
 func (o *TransportTestOptions) apply(opts *driverOptions) {
 	if o.F != "" {
-		opts.transport.test.f = uintptr(unsafe.Pointer(&[]byte(o.F)[0]))
+		opts.transport.test.f = uintptr(unsafe.Pointer(unsafe.StringData(o.F)))
 		opts.transport.test.fLen = uintptr(len(o.F))
 	}
 }
