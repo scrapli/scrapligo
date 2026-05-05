@@ -317,7 +317,7 @@ type NetconfMapping struct {
 		operationID *uint32,
 		cancel *bool,
 		target string,
-	) int
+	) uint8
 
 	// Lock submits a Lock operation to the underlying driver. The driver populates the operationID
 	// into the uint32 pointer.
