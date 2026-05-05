@@ -77,19 +77,12 @@ func getLibscrapliCachePath() string {
 		return overridePath
 	}
 
-	var cacheDir string
-
-	switch runtime.GOOS {
-	case darwin:
-		cacheDir = fmt.Sprintf("%s/Library/Caches/scrapli", os.Getenv(scrapligoconstants.HomeEnv))
-	case linux:
-		cacheDir = os.Getenv(scrapligoconstants.XdgCacheHomeEnv)
-		if cacheDir == "" {
-			cacheDir = fmt.Sprintf("%s/.cache/scrapli", os.Getenv(scrapligoconstants.HomeEnv))
-		}
-	default:
-		panic("unsupported platform")
+	cacheDir, err := os.UserCacheDir()
+	if err != nil {
+		cacheDir = ".cache"
 	}
+
+	cacheDir = filepath.Join(cacheDir, "scrapli")
 
 	scrapligologging.Logger(
 		scrapligologging.Debug,
