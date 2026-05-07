@@ -47,7 +47,7 @@ func (c *Cli) SendInputs(
 
 	var operationID uint32
 
-	status := c.ffiMap.Cli.SendInputs(
+	err := c.ffiMap.Cli.SendInputs(
 		c.ptr,
 		&operationID,
 		&cancel,
@@ -57,8 +57,8 @@ func (c *Cli) SendInputs(
 		loadedOptions.retainInput,
 		loadedOptions.retainTrailingPrompt,
 	)
-	if status != 0 {
-		return nil, scrapligoerrors.NewFfiError("failed to submit sendInputs operation", nil)
+	if err != nil {
+		return nil, err
 	}
 
 	return c.getResult(ctx, &cancel, operationID)

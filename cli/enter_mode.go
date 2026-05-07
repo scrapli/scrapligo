@@ -17,9 +17,9 @@ func (c *Cli) EnterMode(ctx context.Context, requestedMode string) (*Result, err
 
 	var operationID uint32
 
-	status := c.ffiMap.Cli.EnterMode(c.ptr, &operationID, &cancel, requestedMode)
-	if status != 0 {
-		return nil, scrapligoerrors.NewFfiError("failed to submit enterMode operation", nil)
+	err := c.ffiMap.Cli.EnterMode(c.ptr, &operationID, &cancel, requestedMode)
+	if err != nil {
+		return nil, err
 	}
 
 	return c.getResult(ctx, &cancel, operationID)

@@ -16,9 +16,9 @@ func (c *Cli) GetPrompt(ctx context.Context) (*Result, error) {
 
 	var operationID uint32
 
-	status := c.ffiMap.Cli.GetPrompt(c.ptr, &operationID, &cancel)
-	if status != 0 {
-		return nil, scrapligoerrors.NewFfiError("failed to submit getPrompt operation", nil)
+	err := c.ffiMap.Cli.GetPrompt(c.ptr, &operationID, &cancel)
+	if err != nil {
+		return nil, err
 	}
 
 	return c.getResult(ctx, &cancel, operationID)

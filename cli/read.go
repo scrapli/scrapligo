@@ -38,9 +38,9 @@ func (c *Cli) Read(options ...Option) ([]byte, error) {
 
 	var readSize uintptr
 
-	status := c.ffiMap.Session.Read(c.ptr, &buf, &readSize)
-	if status != 0 {
-		return nil, scrapligoerrors.NewFfiError("failed executing read", nil)
+	err := c.ffiMap.Session.Read(c.ptr, &buf, &readSize)
+	if err != nil {
+		return nil, err
 	}
 
 	return buf[0:readSize], nil
