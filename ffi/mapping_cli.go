@@ -3,19 +3,17 @@ package ffi
 import "github.com/ebitengine/purego"
 
 func registerCli(m *Mapping, libScrapliFfi uintptr) {
-	// ENHANCEMENT?: is it possible to have my own register funcs that bypass reflection?
-	//  driver creation/destruction
 	purego.RegisterLibFunc(&m.Cli.Alloc, libScrapliFfi, "ls_cli_alloc")
 
-	purego.RegisterLibFunc(&m.Cli.Open, libScrapliFfi, "ls_cli_open")
-	purego.RegisterLibFunc(&m.Cli.Close, libScrapliFfi, "ls_cli_close")
+	purego.RegisterLibFunc(&m.Cli.open, libScrapliFfi, "ls_cli_open")
+	purego.RegisterLibFunc(&m.Cli.close, libScrapliFfi, "ls_cli_close")
 
 	purego.RegisterLibFunc(
-		&m.Cli.FetchOperationSizes,
+		&m.Cli.fetchOperationSizes,
 		libScrapliFfi,
 		"ls_cli_fetch_operation_sizes",
 	)
-	purego.RegisterLibFunc(&m.Cli.FetchOperation, libScrapliFfi, "ls_cli_fetch_operation")
+	purego.RegisterLibFunc(&m.Cli.fetchOperation, libScrapliFfi, "ls_cli_fetch_operation")
 
 	purego.RegisterLibFunc(&m.Cli.enterMode, libScrapliFfi, "ls_cli_enter_mode")
 	purego.RegisterLibFunc(&m.Cli.getPrompt, libScrapliFfi, "ls_cli_get_prompt")
@@ -23,9 +21,10 @@ func registerCli(m *Mapping, libScrapliFfi uintptr) {
 	purego.RegisterLibFunc(&m.Cli.sendInputs, libScrapliFfi, "ls_cli_send_inputs")
 	purego.RegisterLibFunc(&m.Cli.sendPromptedInput, libScrapliFfi, "ls_cli_send_prompted_input")
 
-	purego.RegisterLibFunc(&m.Cli.ReadAny, libScrapliFfi, "ls_cli_read_any")
+	purego.RegisterLibFunc(&m.Cli.readAny, libScrapliFfi, "ls_cli_read_any")
+
 	purego.RegisterLibFunc(
-		&m.Cli.ReadCallbackShouldExecute,
+		&m.Cli.readCallbackShouldExecute,
 		libScrapliFfi,
 		"ls_cli_read_callback_should_execute",
 	)
@@ -39,19 +38,19 @@ type CliMapping struct {
 		optionsPtr uintptr,
 	) (driverPtr uintptr)
 
-	// Open opens the driver connection of the driver at driverPtr.
-	Open func(
-		driverPtr uintptr,
-		operationID *uint32,
-		cancel *bool,
-	) uint8
-	Close func(
+	open func(
 		driverPtr uintptr,
 		operationID *uint32,
 		cancel *bool,
 	) uint8
 
-	FetchOperationSizes func(
+	close func(
+		driverPtr uintptr,
+		operationID *uint32,
+		cancel *bool,
+	) uint8
+
+	fetchOperationSizes func(
 		driverPtr uintptr,
 		operationID uint32,
 		operationCount *uint32,
@@ -61,10 +60,8 @@ type CliMapping struct {
 		resultsFailedIndicatorSize,
 		errSize *uintptr,
 	) uint8
-	// FetchOperation gets the result of the given operationID -- before calling this you must have
-	// already understood what the result sizes are such that those pointers can be appropriately
-	// allocated for zig to write the results into.
-	FetchOperation func(
+
+	fetchOperation func(
 		driverPtr uintptr,
 		operationID uint32,
 		resultStartTime *uint64,
@@ -126,15 +123,13 @@ type CliMapping struct {
 		retainTrailingPrompt bool,
 	) uint8
 
-	// ReadAny submit a ReadAny operaiton to the driver.
-	ReadAny func(
+	readAny func(
 		driverPtr uintptr,
 		operationID *uint32,
 		cancel *bool,
 	) uint8
 
-	// ReadCallbackShouldExecute returns true if a readcallback should be executed otherwise false.
-	ReadCallbackShouldExecute func(
+	readCallbackShouldExecute func(
 		buf string,
 		name string,
 		contains string,
@@ -142,6 +137,98 @@ type CliMapping struct {
 		notContains string,
 		execute *bool,
 	) uint8
+}
+
+// Open opens the driver connection of the driver at driverPtr.
+func (m *CliMapping) Open(
+	driverPtr uintptr,
+	operationID *uint32,
+	cancel *bool,
+) error {
+	return newLibScrapliResult(
+		m.open(
+			driverPtr,
+			operationID,
+			cancel,
+		),
+		"failed to submit open operation",
+		nil,
+	).check()
+}
+
+// Close closes the cli driver. It also handles freeing allocated resources.
+func (m *CliMapping) Close(
+	driverPtr uintptr,
+	operationID *uint32,
+	cancel *bool,
+) error {
+	return newLibScrapliResult(
+		m.close(
+			driverPtr,
+			operationID,
+			cancel,
+		),
+		"failed to submit close operation",
+		nil,
+	).check()
+}
+
+// FetchOperationSizes gets the result *sizes* for the given operation id.
+func (m *CliMapping) FetchOperationSizes(
+	driverPtr uintptr,
+	operationID uint32,
+	operationCount *uint32,
+	inputsSize,
+	resultsRawSize,
+	resultsSize,
+	resultsFailedIndicatorSize,
+	errSize *uintptr,
+) error {
+	return newLibScrapliResult(
+		m.fetchOperationSizes(
+			driverPtr,
+			operationID,
+			operationCount,
+			inputsSize,
+			resultsRawSize,
+			resultsSize,
+			resultsFailedIndicatorSize,
+			errSize,
+		),
+		"fetch operation sizes failed",
+		nil,
+	).check()
+}
+
+// FetchOperation gets the result of the given operationID -- before calling this you must have
+// already understood what the result sizes are such that those pointers can be appropriately
+// allocated for zig to write the results into.
+func (m *CliMapping) FetchOperation(
+	driverPtr uintptr,
+	operationID uint32,
+	resultStartTime *uint64,
+	splits *[]uint64,
+	inputs,
+	resultsRaw,
+	results,
+	resultsFailedIndicator,
+	err *[]byte,
+) error {
+	return newLibScrapliResult(
+		m.fetchOperation(
+			driverPtr,
+			operationID,
+			resultStartTime,
+			splits,
+			inputs,
+			resultsRaw,
+			results,
+			resultsFailedIndicator,
+			err,
+		),
+		"fetch operation failed",
+		nil,
+	).check()
 }
 
 // EnterMode submits an EnterMode operation to the underlying driver with the given mode and the
@@ -271,6 +358,46 @@ func (m *CliMapping) SendPromptedInput(
 			retainTrailingPrompt,
 		),
 		"failed to submit sendPromptedInput operation",
+		nil,
+	).check()
+}
+
+// ReadAny submit a ReadAny operaiton to the driver.
+func (m *CliMapping) ReadAny(
+	driverPtr uintptr,
+	operationID *uint32,
+	cancel *bool,
+) error {
+	return newLibScrapliResult(
+		m.readAny(
+			driverPtr,
+			operationID,
+			cancel,
+		),
+		"failed to submit readAny operation",
+		nil,
+	).check()
+}
+
+// ReadCallbackShouldExecute returns true if a readcallback should be executed otherwise false.
+func (m *CliMapping) ReadCallbackShouldExecute(
+	buf string,
+	name string,
+	contains string,
+	containsPattern string,
+	notContains string,
+	execute *bool,
+) error {
+	return newLibScrapliResult(
+		m.readCallbackShouldExecute(
+			buf,
+			name,
+			contains,
+			containsPattern,
+			notContains,
+			execute,
+		),
+		"failed checking if callback should execute",
 		nil,
 	).check()
 }

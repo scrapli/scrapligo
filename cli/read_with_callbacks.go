@@ -99,13 +99,13 @@ func (c *Cli) ReadWithCallbacks( //nolint: gocyclo
 	for {
 		var operationID uint32
 
-		status := c.ffiMap.Cli.ReadAny(
+		err := c.ffiMap.Cli.ReadAny(
 			c.ptr,
 			&operationID,
 			&cancel,
 		)
-		if status != 0 {
-			return nil, scrapligoerrors.NewFfiError("failed to submit readAny operation", nil)
+		if err != nil {
+			return nil, err
 		}
 
 		r, err := c.getResult(ctx, &cancel, operationID)
@@ -142,7 +142,7 @@ func (c *Cli) ReadWithCallbacks( //nolint: gocyclo
 				),
 			)
 
-			status = c.ffiMap.Cli.ReadCallbackShouldExecute(
+			err = c.ffiMap.Cli.ReadCallbackShouldExecute(
 				curResults[cbSearchStartIdx:],
 				cb.name,
 				cb.contains,
@@ -150,10 +150,8 @@ func (c *Cli) ReadWithCallbacks( //nolint: gocyclo
 				cb.notContains,
 				&shouldExecute,
 			)
-			if status != 0 {
-				return nil, scrapligoerrors.NewFfiError(
-					"failed checking if callback should execute", nil,
-				)
+			if err != nil {
+				return nil, err
 			}
 
 			if !shouldExecute {

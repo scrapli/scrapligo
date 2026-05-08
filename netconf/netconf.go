@@ -87,20 +87,23 @@ func (n *Netconf) GetOptions() (string, error) {
 
 	var optionsSize uintptr
 
-	rc := n.ffiMap.Shared.FetchOptionsSize(
+	err := n.ffiMap.Shared.FetchOptionsSize(
 		optionsPtr,
 		&optionsSize,
 	)
-	if rc != 0 {
-		return "", scrapligoerrors.NewFfiError("fetch options size failed", nil)
+	if err != nil {
+		return "", err
 	}
 
 	optionsStr := make([]byte, optionsSize)
 
-	n.ffiMap.Shared.FetchOptions(
+	err = n.ffiMap.Shared.FetchOptions(
 		optionsPtr,
 		&optionsStr,
 	)
+	if err != nil {
+		return "", err
+	}
 
 	return string(optionsStr), nil
 }
