@@ -21,13 +21,13 @@ func (n *Netconf) Discard(
 
 	var operationID uint32
 
-	status := n.ffiMap.Netconf.Discard(
+	err := n.ffiMap.Netconf.Discard(
 		n.ptr,
 		&operationID,
 		&cancel,
 	)
-	if status != 0 {
-		return nil, scrapligoerrors.NewFfiError("failed to submit discard operation", nil)
+	if err != nil {
+		return nil, err
 	}
 
 	return n.getResult(ctx, &cancel, operationID)

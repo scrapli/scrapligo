@@ -41,15 +41,15 @@ func (n *Netconf) CopyConfig(
 
 	loadedOptions := newCopyConfigOptions(options...)
 
-	status := n.ffiMap.Netconf.CopyConfig(
+	err := n.ffiMap.Netconf.CopyConfig(
 		n.ptr,
 		&operationID,
 		&cancel,
 		loadedOptions.target.String(),
 		loadedOptions.source.String(),
 	)
-	if status != 0 {
-		return nil, scrapligoerrors.NewFfiError("failed to submit copy-config operation", nil)
+	if err != nil {
+		return nil, err
 	}
 
 	return n.getResult(ctx, &cancel, operationID)

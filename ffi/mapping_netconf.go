@@ -50,25 +50,25 @@ func registerNetconf(m *Mapping, libScrapliFfi uintptr) {
 
 	purego.RegisterLibFunc(&m.Netconf.rawRPC, libScrapliFfi, "ls_netconf_raw_rpc")
 
-	purego.RegisterLibFunc(&m.Netconf.GetConfig, libScrapliFfi, "ls_netconf_get_config")
-	purego.RegisterLibFunc(&m.Netconf.EditConfig, libScrapliFfi, "ls_netconf_edit_config")
-	purego.RegisterLibFunc(&m.Netconf.CopyConfig, libScrapliFfi, "ls_netconf_copy_config")
-	purego.RegisterLibFunc(&m.Netconf.DeleteConfig, libScrapliFfi, "ls_netconf_delete_config")
-	purego.RegisterLibFunc(&m.Netconf.Lock, libScrapliFfi, "ls_netconf_lock")
-	purego.RegisterLibFunc(&m.Netconf.Unlock, libScrapliFfi, "ls_netconf_unlock")
-	purego.RegisterLibFunc(&m.Netconf.Get, libScrapliFfi, "ls_netconf_get")
-	purego.RegisterLibFunc(&m.Netconf.CloseSession, libScrapliFfi, "ls_netconf_close_session")
-	purego.RegisterLibFunc(&m.Netconf.KillSession, libScrapliFfi, "ls_netconf_kill_session")
+	purego.RegisterLibFunc(&m.Netconf.getConfig, libScrapliFfi, "ls_netconf_get_config")
+	purego.RegisterLibFunc(&m.Netconf.editConfig, libScrapliFfi, "ls_netconf_edit_config")
+	purego.RegisterLibFunc(&m.Netconf.copyConfig, libScrapliFfi, "ls_netconf_copy_config")
+	purego.RegisterLibFunc(&m.Netconf.deleteConfig, libScrapliFfi, "ls_netconf_delete_config")
+	purego.RegisterLibFunc(&m.Netconf.lock, libScrapliFfi, "ls_netconf_lock")
+	purego.RegisterLibFunc(&m.Netconf.unlock, libScrapliFfi, "ls_netconf_unlock")
+	purego.RegisterLibFunc(&m.Netconf.get, libScrapliFfi, "ls_netconf_get")
+	purego.RegisterLibFunc(&m.Netconf.closeSession, libScrapliFfi, "ls_netconf_close_session")
+	purego.RegisterLibFunc(&m.Netconf.killSession, libScrapliFfi, "ls_netconf_kill_session")
 
-	purego.RegisterLibFunc(&m.Netconf.Commit, libScrapliFfi, "ls_netconf_commit")
-	purego.RegisterLibFunc(&m.Netconf.Discard, libScrapliFfi, "ls_netconf_discard")
-	purego.RegisterLibFunc(&m.Netconf.CancelCommit, libScrapliFfi, "ls_netconf_cancel_commit")
-	purego.RegisterLibFunc(&m.Netconf.Validate, libScrapliFfi, "ls_netconf_validate")
+	purego.RegisterLibFunc(&m.Netconf.commit, libScrapliFfi, "ls_netconf_commit")
+	purego.RegisterLibFunc(&m.Netconf.discard, libScrapliFfi, "ls_netconf_discard")
+	purego.RegisterLibFunc(&m.Netconf.cancelCommit, libScrapliFfi, "ls_netconf_cancel_commit")
+	purego.RegisterLibFunc(&m.Netconf.validate, libScrapliFfi, "ls_netconf_validate")
 
-	purego.RegisterLibFunc(&m.Netconf.GetSchema, libScrapliFfi, "ls_netconf_get_schema")
-	purego.RegisterLibFunc(&m.Netconf.GetData, libScrapliFfi, "ls_netconf_get_data")
-	purego.RegisterLibFunc(&m.Netconf.EditData, libScrapliFfi, "ls_netconf_edit_data")
-	purego.RegisterLibFunc(&m.Netconf.Action, libScrapliFfi, "ls_netconf_action")
+	purego.RegisterLibFunc(&m.Netconf.getSchema, libScrapliFfi, "ls_netconf_get_schema")
+	purego.RegisterLibFunc(&m.Netconf.getData, libScrapliFfi, "ls_netconf_get_data")
+	purego.RegisterLibFunc(&m.Netconf.editData, libScrapliFfi, "ls_netconf_edit_data")
+	purego.RegisterLibFunc(&m.Netconf.action, libScrapliFfi, "ls_netconf_action")
 }
 
 // NetconfMapping holds libscrapli mappings specifically for the netconf driver.
@@ -157,9 +157,7 @@ type NetconfMapping struct {
 		extraNamespaces string,
 	) uint8
 
-	// GetConfig submits a GetConfig operation to the underlying driver. The driver populates the
-	// operationID into the uint32 pointer.
-	GetConfig func(
+	getConfig func(
 		driverPtr uintptr,
 		operationID *uint32,
 		cancel *bool,
@@ -171,9 +169,7 @@ type NetconfMapping struct {
 		defaultsType string,
 	) uint8
 
-	// EditConfig submits an EditConfig operation to the underlying driver. The driver populates the
-	// operationID into the uint32 pointer.
-	EditConfig func(
+	editConfig func(
 		driverPtr uintptr,
 		operationID *uint32,
 		cancel *bool,
@@ -184,9 +180,7 @@ type NetconfMapping struct {
 		errorOption string,
 	) uint8
 
-	// CopyConfig submits a CopyConfig operation to the underlying driver. The driver populates the
-	// operationID into the uint32 pointer.
-	CopyConfig func(
+	copyConfig func(
 		driverPtr uintptr,
 		operationID *uint32,
 		cancel *bool,
@@ -194,36 +188,28 @@ type NetconfMapping struct {
 		source string,
 	) uint8
 
-	// DeleteConfig submits a DeleteConfig operation to the underlying driver. The driver populates
-	// the operationID into the uint32 pointer.
-	DeleteConfig func(
+	deleteConfig func(
 		driverPtr uintptr,
 		operationID *uint32,
 		cancel *bool,
 		target string,
 	) uint8
 
-	// Lock submits a Lock operation to the underlying driver. The driver populates the operationID
-	// into the uint32 pointer.
-	Lock func(
+	lock func(
 		driverPtr uintptr,
 		operationID *uint32,
 		cancel *bool,
 		target string,
 	) uint8
 
-	// Unlock submits an Unlock operation to the underlying driver. The driver populates the
-	// operationID into the uint32 pointer.
-	Unlock func(
+	unlock func(
 		driverPtr uintptr,
 		operationID *uint32,
 		cancel *bool,
 		target string,
 	) uint8
 
-	// Get submits a Get operation to the underlying driver. The driver populates the operationID
-	// into the uint32 pointer.
-	Get func(
+	get func(
 		driverPtr uintptr,
 		operationID *uint32,
 		cancel *bool,
@@ -234,47 +220,43 @@ type NetconfMapping struct {
 		defaultsType string,
 	) uint8
 
-	// CloseSession submits a CloseSession operation to the underlying driver. The driver populates
-	// the operationID into the uint32 pointer.
-	CloseSession func(
+	closeSession func(
 		driverPtr uintptr,
 		operationID *uint32,
 		cancel *bool,
 	) uint8
 
-	// KillSession submits a KillSession operation to the underlying driver. The driver populates
-	// the operationID into the uint32 pointer.
-	KillSession func(
+	killSession func(
 		driverPtr uintptr,
 		operationID *uint32,
 		cancel *bool,
 		sessionID uint64,
 	) uint8
 
-	Commit func(
+	commit func(
 		driverPtr uintptr,
 		operationID *uint32,
 		cancel *bool,
 	) uint8
-	Discard func(
+	discard func(
 		driverPtr uintptr,
 		operationID *uint32,
 		cancel *bool,
 	) uint8
-	CancelCommit func(
+	cancelCommit func(
 		driverPtr uintptr,
 		operationID *uint32,
 		cancel *bool,
-		persistId string,
+		persistID string,
 	) uint8
-	Validate func(
+	validate func(
 		driverPtr uintptr,
 		operationID *uint32,
 		cancel *bool,
 		source string,
 	) uint8
 
-	GetSchema func(
+	getSchema func(
 		driverPtr uintptr,
 		operationID *uint32,
 		cancel *bool,
@@ -282,7 +264,7 @@ type NetconfMapping struct {
 		version string,
 		format string,
 	) uint8
-	GetData func(
+	getData func(
 		driverPtr uintptr,
 		operationID *uint32,
 		cancel *bool,
@@ -297,7 +279,7 @@ type NetconfMapping struct {
 		withOrigin bool,
 		defaultsType string,
 	) uint8
-	EditData func(
+	editData func(
 		driverPtr uintptr,
 		operationID *uint32,
 		cancel *bool,
@@ -305,7 +287,7 @@ type NetconfMapping struct {
 		content string,
 		defaultOperation string,
 	) uint8
-	Action func(
+	action func(
 		driverPtr uintptr,
 		operationID *uint32,
 		cancel *bool,
@@ -517,5 +499,376 @@ func (m *NetconfMapping) RawRPC(
 			extraNamespaces,
 		),
 		"failed to submit raw rpc operation",
+	).check()
+}
+
+// GetConfig submits a GetConfig operation to the underlying driver. The driver populates the
+// operationID into the uint32 pointer.
+func (m *NetconfMapping) GetConfig(
+	driverPtr uintptr,
+	operationID *uint32,
+	cancel *bool,
+	source string,
+	filter string,
+	filterType string,
+	filterNamespacePrefix string,
+	filterNamespace string,
+	defaultsType string,
+) error {
+	return newLibScrapliResult(
+		m.getConfig(
+			driverPtr,
+			operationID,
+			cancel,
+			source,
+			filter,
+			filterType,
+			filterNamespacePrefix,
+			filterNamespace,
+			defaultsType,
+		),
+		"failed to submit getConfig operation",
+	).check()
+}
+
+// EditConfig submits an EditConfig operation to the underlying driver. The driver populates the
+// operationID into the uint32 pointer.
+func (m *NetconfMapping) EditConfig(
+	driverPtr uintptr,
+	operationID *uint32,
+	cancel *bool,
+	config string,
+	target string,
+	defaultOperation string,
+	testOption string,
+	errorOption string,
+) error {
+	return newLibScrapliResult(
+		m.editConfig(
+			driverPtr,
+			operationID,
+			cancel,
+			config,
+			target,
+			defaultOperation,
+			testOption,
+			errorOption,
+		),
+		"failed to submit editConfig operation",
+	).check()
+}
+
+// CopyConfig submits a CopyConfig operation to the underlying driver. The driver populates the
+// operationID into the uint32 pointer.
+func (m *NetconfMapping) CopyConfig(
+	driverPtr uintptr,
+	operationID *uint32,
+	cancel *bool,
+	target string,
+	source string,
+) error {
+	return newLibScrapliResult(
+		m.copyConfig(
+			driverPtr,
+			operationID,
+			cancel,
+			target,
+			source,
+		),
+		"failed to submit copyConfig operation",
+	).check()
+}
+
+// DeleteConfig submits a DeleteConfig operation to the underlying driver. The driver populates
+// the operationID into the uint32 pointer.
+func (m *NetconfMapping) DeleteConfig(
+	driverPtr uintptr,
+	operationID *uint32,
+	cancel *bool,
+	target string,
+) error {
+	return newLibScrapliResult(
+		m.deleteConfig(
+			driverPtr,
+			operationID,
+			cancel,
+			target,
+		),
+		"failed to submit deleteConfig operation",
+	).check()
+}
+
+// Lock submits a Lock operation to the underlying driver. The driver populates the operationID
+// into the uint32 pointer.
+func (m *NetconfMapping) Lock(
+	driverPtr uintptr,
+	operationID *uint32,
+	cancel *bool,
+	target string,
+) error {
+	return newLibScrapliResult(
+		m.lock(
+			driverPtr,
+			operationID,
+			cancel,
+			target,
+		),
+		"failed to submit lock operation",
+	).check()
+}
+
+// Unlock submits an Unlock operation to the underlying driver. The driver populates the
+// operationID into the uint32 pointer.
+func (m *NetconfMapping) Unlock(
+	driverPtr uintptr,
+	operationID *uint32,
+	cancel *bool,
+	target string,
+) error {
+	return newLibScrapliResult(
+		m.unlock(
+			driverPtr,
+			operationID,
+			cancel,
+			target,
+		),
+		"failed to submit unlock operation",
+	).check()
+}
+
+// Get submits a Get operation to the underlying driver. The driver populates the operationID
+// into the uint32 pointer.
+func (m *NetconfMapping) Get(
+	driverPtr uintptr,
+	operationID *uint32,
+	cancel *bool,
+	filter string,
+	filterType string,
+	filterNamespacePrefix string,
+	filterNamespace string,
+	defaultsType string,
+) error {
+	return newLibScrapliResult(
+		m.get(
+			driverPtr,
+			operationID,
+			cancel,
+			filter,
+			filterType,
+			filterNamespacePrefix,
+			filterNamespace,
+			defaultsType,
+		),
+		"failed to submit get operation",
+	).check()
+}
+
+// CloseSession submits a CloseSession operation to the underlying driver. The driver populates
+// the operationID into the uint32 pointer.
+func (m *NetconfMapping) CloseSession(
+	driverPtr uintptr,
+	operationID *uint32,
+	cancel *bool,
+) error {
+	return newLibScrapliResult(
+		m.closeSession(
+			driverPtr,
+			operationID,
+			cancel,
+		),
+		"failed to submit closeSession operation",
+	).check()
+}
+
+// KillSession submits a KillSession operation to the underlying driver. The driver populates
+// the operationID into the uint32 pointer.
+func (m *NetconfMapping) KillSession(
+	driverPtr uintptr,
+	operationID *uint32,
+	cancel *bool,
+	sessionID uint64,
+) error {
+	return newLibScrapliResult(
+		m.killSession(
+			driverPtr,
+			operationID,
+			cancel,
+			sessionID,
+		),
+		"failed to submit killSession operation",
+	).check()
+}
+
+// Commit submits a Commit operation to the underlying driver. The driver populates the
+// operationID into the uint32 pointer.
+func (m *NetconfMapping) Commit(
+	driverPtr uintptr,
+	operationID *uint32,
+	cancel *bool,
+) error {
+	return newLibScrapliResult(
+		m.commit(
+			driverPtr,
+			operationID,
+			cancel,
+		),
+		"failed to submit commit operation",
+	).check()
+}
+
+// Discard submits a Discard operation to the underlying driver. The driver populates the
+// operationID into the uint32 pointer.
+func (m *NetconfMapping) Discard(
+	driverPtr uintptr,
+	operationID *uint32,
+	cancel *bool,
+) error {
+	return newLibScrapliResult(
+		m.discard(
+			driverPtr,
+			operationID,
+			cancel,
+		),
+		"failed to submit discard operation",
+	).check()
+}
+
+// CancelCommit submits a CancelCommit operation to the underlying driver. The driver populates the
+// operationID into the uint32 pointer.
+func (m *NetconfMapping) CancelCommit(
+	driverPtr uintptr,
+	operationID *uint32,
+	cancel *bool,
+	persistID string,
+) error {
+	return newLibScrapliResult(
+		m.cancelCommit(
+			driverPtr,
+			operationID,
+			cancel,
+			persistID,
+		),
+		"failed to submit cancelCommit operation",
+	).check()
+}
+
+// Validate submits a Validate operation to the underlying driver. The driver populates the
+// operationID into the uint32 pointer.
+func (m *NetconfMapping) Validate(
+	driverPtr uintptr,
+	operationID *uint32,
+	cancel *bool,
+	source string,
+) error {
+	return newLibScrapliResult(
+		m.validate(
+			driverPtr,
+			operationID,
+			cancel,
+			source,
+		),
+		"failed to submit validate operation",
+	).check()
+}
+
+// GetSchema submits a GetSchema operation to the underlying driver. The driver populates the
+// operationID into the uint32 pointer.
+func (m *NetconfMapping) GetSchema(
+	driverPtr uintptr,
+	operationID *uint32,
+	cancel *bool,
+	identifier string,
+	version string,
+	format string,
+) error {
+	return newLibScrapliResult(
+		m.getSchema(
+			driverPtr,
+			operationID,
+			cancel,
+			identifier,
+			version,
+			format,
+		),
+		"failed to submit getSchema operation",
+	).check()
+}
+
+// GetData submits a GetData operation to the underlying driver. The driver populates the
+// operationID into the uint32 pointer.
+func (m *NetconfMapping) GetData(
+	driverPtr uintptr,
+	operationID *uint32,
+	cancel *bool,
+	datastore,
+	filter,
+	filterType,
+	filterNamespacePrefix,
+	filterNamespace,
+	configFilter,
+	originFilters string,
+	maxDepth uint32,
+	withOrigin bool,
+	defaultsType string,
+) error {
+	return newLibScrapliResult(
+		m.getData(
+			driverPtr,
+			operationID,
+			cancel,
+			datastore,
+			filter,
+			filterType,
+			filterNamespacePrefix,
+			filterNamespace,
+			configFilter,
+			originFilters,
+			maxDepth,
+			withOrigin,
+			defaultsType,
+		),
+		"failed to submit getData operation",
+	).check()
+}
+
+// EditData submits an EditData operation to the underlying driver. The driver populates the
+// operationID into the uint32 pointer.
+func (m *NetconfMapping) EditData(
+	driverPtr uintptr,
+	operationID *uint32,
+	cancel *bool,
+	datastore string,
+	content string,
+	defaultOperation string,
+) error {
+	return newLibScrapliResult(
+		m.editData(
+			driverPtr,
+			operationID,
+			cancel,
+			datastore,
+			content,
+			defaultOperation,
+		),
+		"failed to submit editData operation",
+	).check()
+}
+
+// Action submits an Action operation to the underlying driver. The driver populates the
+// operationID into the uint32 pointer.
+func (m *NetconfMapping) Action(
+	driverPtr uintptr,
+	operationID *uint32,
+	cancel *bool,
+	action string,
+) error {
+	return newLibScrapliResult(
+		m.action(
+			driverPtr,
+			operationID,
+			cancel,
+			action,
+		),
+		"failed to submit action operation",
 	).check()
 }

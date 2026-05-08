@@ -58,7 +58,7 @@ func (n *Netconf) GetData(
 
 	loadedOptions := newGetDataOptions(options...)
 
-	status := n.ffiMap.Netconf.GetData(
+	err := n.ffiMap.Netconf.GetData(
 		n.ptr,
 		&operationID,
 		&cancel,
@@ -73,8 +73,8 @@ func (n *Netconf) GetData(
 		loadedOptions.withOrigin,
 		loadedOptions.defaultsType.String(),
 	)
-	if status != 0 {
-		return nil, scrapligoerrors.NewFfiError("failed to submit get-data operation", nil)
+	if err != nil {
+		return nil, err
 	}
 
 	return n.getResult(ctx, &cancel, operationID)

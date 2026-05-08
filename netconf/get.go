@@ -47,7 +47,7 @@ func (n *Netconf) Get(
 
 	loadedOptions := newGetOptions(options...)
 
-	status := n.ffiMap.Netconf.Get(
+	err := n.ffiMap.Netconf.Get(
 		n.ptr,
 		&operationID,
 		&cancel,
@@ -57,8 +57,8 @@ func (n *Netconf) Get(
 		loadedOptions.filterNamespace,
 		loadedOptions.defaultsType.String(),
 	)
-	if status != 0 {
-		return nil, scrapligoerrors.NewFfiError("failed to submit get operation", nil)
+	if err != nil {
+		return nil, err
 	}
 
 	return n.getResult(ctx, &cancel, operationID)

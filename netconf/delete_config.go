@@ -38,14 +38,14 @@ func (n *Netconf) DeleteConfig(
 
 	loadedOptions := newDeleteConfigOptions(options...)
 
-	status := n.ffiMap.Netconf.DeleteConfig(
+	err := n.ffiMap.Netconf.DeleteConfig(
 		n.ptr,
 		&operationID,
 		&cancel,
 		loadedOptions.target.String(),
 	)
-	if status != 0 {
-		return nil, scrapligoerrors.NewFfiError("failed to submit delete-config operation", nil)
+	if err != nil {
+		return nil, err
 	}
 
 	return n.getResult(ctx, &cancel, operationID)
