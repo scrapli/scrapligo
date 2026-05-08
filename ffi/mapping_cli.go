@@ -152,11 +152,10 @@ func (m *CliMapping) Open(
 			cancel,
 		),
 		"failed to submit open operation",
-		nil,
 	).check()
 }
 
-// Close closes the cli driver. It also handles freeing allocated resources.
+// Close closes the cli driver.
 func (m *CliMapping) Close(
 	driverPtr uintptr,
 	operationID *uint32,
@@ -169,7 +168,6 @@ func (m *CliMapping) Close(
 			cancel,
 		),
 		"failed to submit close operation",
-		nil,
 	).check()
 }
 
@@ -196,7 +194,6 @@ func (m *CliMapping) FetchOperationSizes(
 			errSize,
 		),
 		"fetch operation sizes failed",
-		nil,
 	).check()
 }
 
@@ -227,7 +224,6 @@ func (m *CliMapping) FetchOperation(
 			err,
 		),
 		"fetch operation failed",
-		nil,
 	).check()
 }
 
@@ -247,7 +243,6 @@ func (m *CliMapping) EnterMode(
 			requestedMode,
 		),
 		"failed to submit enterMode operation",
-		nil,
 	).check()
 }
 
@@ -265,7 +260,6 @@ func (m *CliMapping) GetPrompt(
 			cancel,
 		),
 		"failed to submit getPrompt operation",
-		nil,
 	).check()
 }
 
@@ -293,7 +287,6 @@ func (m *CliMapping) SendInput(
 			retainTrailingPrompt,
 		),
 		"failed to submit sendInput operation",
-		nil,
 	).check()
 }
 
@@ -321,7 +314,6 @@ func (m *CliMapping) SendInputs(
 			retainTrailingPrompt,
 		),
 		"failed to submit sendInputs operation",
-		nil,
 	).check()
 }
 
@@ -358,7 +350,6 @@ func (m *CliMapping) SendPromptedInput(
 			retainTrailingPrompt,
 		),
 		"failed to submit sendPromptedInput operation",
-		nil,
 	).check()
 }
 
@@ -375,7 +366,6 @@ func (m *CliMapping) ReadAny(
 			cancel,
 		),
 		"failed to submit readAny operation",
-		nil,
 	).check()
 }
 
@@ -398,6 +388,5 @@ func (m *CliMapping) ReadCallbackShouldExecute(
 			execute,
 		),
 		"failed checking if callback should execute",
-		nil,
 	).check()
 }

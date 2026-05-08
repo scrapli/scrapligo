@@ -40,7 +40,6 @@ func (m *SessionMapping) Read(
 	return newLibScrapliResult(
 		m.read(driverPtr, buf, readSize),
 		"failed executing read",
-		nil,
 	).check()
 }
 
@@ -53,7 +52,6 @@ func (m *SessionMapping) Write(
 	return newLibScrapliResult(
 		m.write(driverPtr, buf, redacted),
 		"failed executing write",
-		nil,
 	).check()
 }
 
@@ -66,7 +64,6 @@ func (m *SessionMapping) WriteAndReturn(
 	return newLibScrapliResult(
 		m.writeAndReturn(driverPtr, buf, redacted),
 		"failed executing writeAndReturn",
-		nil,
 	).check()
 }
 
@@ -77,6 +74,5 @@ func (m *SessionMapping) WriteReturn(
 	return newLibScrapliResult(
 		m.writeReturn(driverPtr),
 		"failed executing writeReturn",
-		nil,
 	).check()
 }

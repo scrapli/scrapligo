@@ -5,50 +5,50 @@ import "github.com/ebitengine/purego"
 func registerNetconf(m *Mapping, libScrapliFfi uintptr) {
 	purego.RegisterLibFunc(&m.Netconf.Alloc, libScrapliFfi, "ls_netconf_alloc")
 
-	purego.RegisterLibFunc(&m.Netconf.Open, libScrapliFfi, "ls_netconf_open")
-	purego.RegisterLibFunc(&m.Netconf.Close, libScrapliFfi, "ls_netconf_close")
+	purego.RegisterLibFunc(&m.Netconf.open, libScrapliFfi, "ls_netconf_open")
+	purego.RegisterLibFunc(&m.Netconf.close, libScrapliFfi, "ls_netconf_close")
 
 	purego.RegisterLibFunc(
-		&m.Netconf.FetchOperationSizes,
+		&m.Netconf.fetchOperationSizes,
 		libScrapliFfi,
 		"ls_netconf_fetch_operation_sizes",
 	)
 	purego.RegisterLibFunc(
-		&m.Netconf.FetchOperation,
+		&m.Netconf.fetchOperation,
 		libScrapliFfi,
 		"ls_netconf_fetch_operation",
 	)
 
-	purego.RegisterLibFunc(&m.Netconf.GetSessionID, libScrapliFfi, "ls_netconf_get_session_id")
+	purego.RegisterLibFunc(&m.Netconf.getSessionID, libScrapliFfi, "ls_netconf_get_session_id")
 	purego.RegisterLibFunc(
-		&m.Netconf.GetSubscriptionID,
+		&m.Netconf.getSubscriptionID,
 		libScrapliFfi,
 		"ls_netconf_get_subscription_id",
 	)
 
 	purego.RegisterLibFunc(
-		&m.Netconf.GetNextNotificationSize,
+		&m.Netconf.getNextNotificationSize,
 		libScrapliFfi,
 		"ls_netconf_next_notification_message_size",
 	)
 	purego.RegisterLibFunc(
-		&m.Netconf.GetNextNotification,
+		&m.Netconf.getNextNotification,
 		libScrapliFfi,
 		"ls_netconf_next_notification_message",
 	)
 
 	purego.RegisterLibFunc(
-		&m.Netconf.GetNextSubscriptionSize,
+		&m.Netconf.getNextSubscriptionSize,
 		libScrapliFfi,
 		"ls_netconf_next_subscription_message_size",
 	)
 	purego.RegisterLibFunc(
-		&m.Netconf.GetNextSubscription,
+		&m.Netconf.getNextSubscription,
 		libScrapliFfi,
 		"ls_netconf_next_subscription_message",
 	)
 
-	purego.RegisterLibFunc(&m.Netconf.RawRPC, libScrapliFfi, "ls_netconf_raw_rpc")
+	purego.RegisterLibFunc(&m.Netconf.rawRPC, libScrapliFfi, "ls_netconf_raw_rpc")
 
 	purego.RegisterLibFunc(&m.Netconf.GetConfig, libScrapliFfi, "ls_netconf_get_config")
 	purego.RegisterLibFunc(&m.Netconf.EditConfig, libScrapliFfi, "ls_netconf_edit_config")
@@ -79,21 +79,20 @@ type NetconfMapping struct {
 		optionsPtr uintptr,
 	) (driverPtr uintptr)
 
-	// Open opens the driver connection of the driver at driverPtr.
-	Open func(
+	open func(
 		driverPtr uintptr,
 		operationID *uint32,
 		cancel *bool,
 	) uint8
-	Close func(
+
+	close func(
 		driverPtr uintptr,
 		operationID *uint32,
 		cancel *bool,
 		force bool,
 	) uint8
 
-	// PollOperation polls the given operationID. See DriverMapping.PollerOperation for details.
-	FetchOperationSizes func(
+	fetchOperationSizes func(
 		driverPtr uintptr,
 		operationID uint32,
 		inputSize,
@@ -103,8 +102,8 @@ type NetconfMapping struct {
 		rpcErrorsSize,
 		errSize *uintptr,
 	) uint8
-	// FetchOperation polls the given operationID. See CliMapping.FetchOperation for details.
-	FetchOperation func(
+
+	fetchOperation func(
 		driverPtr uintptr,
 		operationID uint32,
 		resultStartTime *uint64,
@@ -117,51 +116,39 @@ type NetconfMapping struct {
 		err *[]byte,
 	) uint8
 
-	// GetSessionID returns the session id of the current driver session object.
-	GetSessionID func(
+	getSessionID func(
 		driverPtr uintptr,
 		sessionID *uint64,
 	) uint8
 
-	// GetSubscriptionID writes the subscription id of the given message to the pointer.
-	GetSubscriptionID func(
+	getSubscriptionID func(
 		message string,
 		subscriptionID *uint64,
 	) uint8
 
-	// GetNextNotificationSize writes the size of the next (if any) notification message into the
-	// given size pointer.
-	GetNextNotificationSize func(
+	getNextNotificationSize func(
 		driverPtr uintptr,
 		size *uint64,
-	)
+	) uint8
 
-	// GetNextNotificationSize writes the content of the next (if any) notification message into the
-	// given message pointer.
-	GetNextNotification func(
+	getNextNotification func(
 		driverPtr uintptr,
 		notification *[]byte,
 	) uint8
 
-	// GetNextSubscriptionSize writes the size of the next (if any) subscription message for the
-	// given id into the given size pointer.
-	GetNextSubscriptionSize func(
+	getNextSubscriptionSize func(
 		driverPtr uintptr,
 		subscriptionID uint64,
 		size *uint64,
-	)
+	) uint8
 
-	// GetNextSubscription writes the content of the next (if any) subscription message for the
-	// given id into the given message pointer.
-	GetNextSubscription func(
+	getNextSubscription func(
 		driverPtr uintptr,
 		subscriptionID uint64,
 		subscription *[]byte,
 	) uint8
 
-	// RawRPC submits a user defined rpc -- the library will ensure it is properly delimited but the
-	// given payload must be valid/correct.
-	RawRPC func(
+	rawRPC func(
 		driverPtr uintptr,
 		operationID *uint32,
 		cancel *bool,
@@ -324,4 +311,211 @@ type NetconfMapping struct {
 		cancel *bool,
 		action string,
 	) uint8
+}
+
+// Open opens the driver connection of the driver at driverPtr.
+func (m *NetconfMapping) Open(
+	driverPtr uintptr,
+	operationID *uint32,
+	cancel *bool,
+) error {
+	return newLibScrapliResult(
+		m.open(
+			driverPtr,
+			operationID,
+			cancel,
+		),
+		"failed to submit open operation",
+	).check()
+}
+
+// Close closes the cli driver.
+func (m *NetconfMapping) Close(
+	driverPtr uintptr,
+	operationID *uint32,
+	cancel *bool,
+	force bool,
+) error {
+	return newLibScrapliResult(
+		m.close(
+			driverPtr,
+			operationID,
+			cancel,
+			force,
+		),
+		"failed to submit close operation",
+	).check()
+}
+
+// FetchOperationSizes gets the result *sizes* for the given operation id.
+func (m *NetconfMapping) FetchOperationSizes(
+	driverPtr uintptr,
+	operationID uint32,
+	inputSize,
+	resultRawSize,
+	resultSize,
+	rpcWarningsSize,
+	rpcErrorsSize,
+	errSize *uintptr,
+) error {
+	return newLibScrapliResult(
+		m.fetchOperationSizes(
+			driverPtr,
+			operationID,
+			inputSize,
+			resultRawSize,
+			resultSize,
+			rpcWarningsSize,
+			rpcErrorsSize,
+			errSize,
+		),
+		"fetch operation sizes failed",
+	).check()
+}
+
+// FetchOperation gets the result of the given operationID -- before calling this you must have
+// already understood what the result sizes are such that those pointers can be appropriately
+// allocated for zig to write the results into.
+func (m *NetconfMapping) FetchOperation(
+	driverPtr uintptr,
+	operationID uint32,
+	resultStartTime *uint64,
+	resultEndTime *uint64,
+	input,
+	resultRaw,
+	result,
+	rpcWarnings,
+	rpcErrors,
+	err *[]byte,
+) error {
+	return newLibScrapliResult(
+		m.fetchOperation(
+			driverPtr,
+			operationID,
+			resultStartTime,
+			resultEndTime,
+			input,
+			resultRaw,
+			result,
+			rpcWarnings,
+			rpcErrors,
+			err,
+		),
+		"fetch operation failed",
+	).check()
+}
+
+// GetSessionID returns the session id of the current driver session object.
+func (m *NetconfMapping) GetSessionID(
+	driverPtr uintptr,
+	sessionID *uint64,
+) error {
+	return newLibScrapliResult(
+		m.getSessionID(
+			driverPtr,
+			sessionID,
+		),
+		"fetch session-id failed",
+	).check()
+}
+
+// GetSubscriptionID writes the subscription id of the given message to the pointer.
+func (m *NetconfMapping) GetSubscriptionID(
+	message string,
+	subscriptionID *uint64,
+) error {
+	return newLibScrapliResult(
+		m.getSubscriptionID(
+			message,
+			subscriptionID,
+		),
+		"fetch subscription-id failed",
+	).check()
+}
+
+// GetNextNotificationSize writes the size of the next (if any) notification message into the
+// given size pointer.
+func (m *NetconfMapping) GetNextNotificationSize(
+	driverPtr uintptr,
+	size *uint64,
+) error {
+	return newLibScrapliResult(
+		m.getNextNotificationSize(
+			driverPtr,
+			size,
+		),
+		"fetch next notification size failed",
+	).check()
+}
+
+// GetNextNotification writes the content of the next (if any) notification message into the
+// given message pointer.
+func (m *NetconfMapping) GetNextNotification(
+	driverPtr uintptr,
+	notification *[]byte,
+) error {
+	return newLibScrapliResult(
+		m.getNextNotification(
+			driverPtr,
+			notification,
+		),
+		"fetch next notification failed",
+	).check()
+}
+
+// GetNextSubscriptionSize writes the size of the next (if any) subscription message for the
+// given id into the given size pointer.
+func (m *NetconfMapping) GetNextSubscriptionSize(
+	driverPtr uintptr,
+	subscriptionID uint64,
+	size *uint64,
+) error {
+	return newLibScrapliResult(
+		m.getNextSubscriptionSize(
+			driverPtr,
+			subscriptionID,
+			size,
+		),
+		"fetch subscription size failed",
+	).check()
+}
+
+// GetNextSubscription writes the content of the next (if any) subscription message for the
+// given id into the given message pointer.
+func (m *NetconfMapping) GetNextSubscription(
+	driverPtr uintptr,
+	subscriptionID uint64,
+	subscription *[]byte,
+) error {
+	return newLibScrapliResult(
+		m.getNextSubscription(
+			driverPtr,
+			subscriptionID,
+			subscription,
+		),
+		"fetch subscription failed",
+	).check()
+}
+
+// RawRPC submits a user defined rpc -- the library will ensure it is properly delimited but the
+// given payload must be valid/correct.
+func (m *NetconfMapping) RawRPC(
+	driverPtr uintptr,
+	operationID *uint32,
+	cancel *bool,
+	payload string,
+	baseNamespacePrefix string,
+	extraNamespaces string,
+) error {
+	return newLibScrapliResult(
+		m.rawRPC(
+			driverPtr,
+			operationID,
+			cancel,
+			payload,
+			baseNamespacePrefix,
+			extraNamespaces,
+		),
+		"failed to submit raw rpc operation",
+	).check()
 }

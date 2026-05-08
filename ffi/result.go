@@ -22,9 +22,8 @@ const (
 // error message and error factory -- the latter of which is used to return contextual information
 // in the event the rc is a non-success value.
 type libscrapliResult struct {
-	rc                uint8
-	message           string
-	defaultErrFactory func(message string, inner error) error
+	rc      uint8
+	message string
 }
 
 // newLibScrapliResult returns a LibscrapliResult wrapping a u8 return code from a libscrapli ffi
@@ -32,12 +31,10 @@ type libscrapliResult struct {
 func newLibScrapliResult(
 	rc uint8,
 	message string,
-	defaultErrFactory func(message string, inner error) error,
 ) libscrapliResult {
 	return libscrapliResult{
-		rc:                rc,
-		message:           message,
-		defaultErrFactory: defaultErrFactory,
+		rc:      rc,
+		message: message,
 	}
 }
 
@@ -70,10 +67,6 @@ func (r libscrapliResult) check() error {
 		inner = scrapligoerrors.ErrInvalidArgument
 	case libscrapliReturnCodeUnknown:
 		inner = scrapligoerrors.ErrUnknown
-	}
-
-	if r.defaultErrFactory != nil {
-		return r.defaultErrFactory(r.message, inner)
 	}
 
 	return scrapligoerrors.NewFfiError(r.message, inner)

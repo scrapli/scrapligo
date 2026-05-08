@@ -50,7 +50,7 @@ func (n *Netconf) RawRPC(
 
 	loadedOptions := newRawRPCOptions(options...)
 
-	status := n.ffiMap.Netconf.RawRPC(
+	err := n.ffiMap.Netconf.RawRPC(
 		n.ptr,
 		&operationID,
 		&cancel,
@@ -58,8 +58,8 @@ func (n *Netconf) RawRPC(
 		loadedOptions.baseNamespacePrefix,
 		loadedOptions.extraNamespacesToFFI(),
 	)
-	if status != 0 {
-		return nil, scrapligoerrors.NewFfiError("failed to submit raw-rpc operation", nil)
+	if err != nil {
+		return nil, err
 	}
 
 	return n.getResult(ctx, &cancel, operationID)

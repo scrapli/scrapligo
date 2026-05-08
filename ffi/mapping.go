@@ -57,7 +57,6 @@ func (m *SharedMapping) FetchOptionsSize(
 			optionsSize,
 		),
 		"fetch options size failed",
-		nil,
 	).check()
 }
 
@@ -73,6 +72,5 @@ func (m *SharedMapping) FetchOptions(
 			options,
 		),
 		"fetch options failed",
-		nil,
 	).check()
 }

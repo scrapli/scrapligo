@@ -151,11 +151,11 @@ func (n *Netconf) Open(ctx context.Context) (*Result, error) {
 
 	var operationID uint32
 
-	status := n.ffiMap.Netconf.Open(n.ptr, &operationID, &cancel)
-	if status != 0 {
+	err := n.ffiMap.Netconf.Open(n.ptr, &operationID, &cancel)
+	if err != nil {
 		cleanup = true
 
-		return nil, scrapligoerrors.NewFfiError("failed to submit open operation", nil)
+		return nil, err
 	}
 
 	result, err := n.getResult(ctx, &cancel, operationID)
@@ -186,9 +186,9 @@ func (n *Netconf) Close(ctx context.Context, options ...Option) (*Result, error)
 
 	loadedOptions := newCloseOptions(options...)
 
-	status := n.ffiMap.Netconf.Close(n.ptr, &operationID, &cancel, loadedOptions.force)
-	if status != 0 {
-		return nil, scrapligoerrors.NewFfiError("failed to submit close operation", nil)
+	err := n.ffiMap.Netconf.Close(n.ptr, &operationID, &cancel, loadedOptions.force)
+	if err != nil {
+		return nil, err
 	}
 
 	return n.getResult(ctx, &cancel, operationID)
@@ -203,9 +203,9 @@ func (n *Netconf) GetSessionID() (uint64, error) {
 
 	var sessionID uint64
 
-	status := n.ffiMap.Netconf.GetSessionID(n.ptr, &sessionID)
-	if status != 0 {
-		return 0, scrapligoerrors.NewFfiError("session-id not set", nil)
+	err := n.ffiMap.Netconf.GetSessionID(n.ptr, &sessionID)
+	if err != nil {
+		return 0, err
 	}
 
 	return sessionID, nil
@@ -222,8 +222,12 @@ func (n *Netconf) GetSessionID() (uint64, error) {
 func (n *Netconf) GetSubscriptionID(message string) (uint64, error) {
 	var subscriptionID uint64
 
-	status := n.ffiMap.Netconf.GetSubscriptionID(message, &subscriptionID)
-	if status != 0 {
+	err := n.ffiMap.Netconf.GetSubscriptionID(message, &subscriptionID)
+	if err != nil {
+		return 0, err
+	}
+
+	if subscriptionID == 0 {
 		return 0, scrapligoerrors.NewFfiError(
 			"failed parsing subscription id",
 			scrapligoerrors.ErrSubscriptionID,
@@ -242,7 +246,10 @@ func (n *Netconf) GetNextNotification() (string, error) {
 
 	var notifSize uint64
 
-	n.ffiMap.Netconf.GetNextNotificationSize(n.ptr, &notifSize)
+	err := n.ffiMap.Netconf.GetNextNotificationSize(n.ptr, &notifSize)
+	if err != nil {
+		return "", err
+	}
 
 	if notifSize == 0 {
 		return "", scrapligoerrors.NewMessagesError()
@@ -250,9 +257,9 @@ func (n *Netconf) GetNextNotification() (string, error) {
 
 	notif := make([]byte, notifSize)
 
-	rc := n.ffiMap.Netconf.GetNextNotification(n.ptr, &notif)
-	if rc != 0 {
-		return "", scrapligoerrors.NewFfiError("get next notification failed", nil)
+	err = n.ffiMap.Netconf.GetNextNotification(n.ptr, &notif)
+	if err != nil {
+		return "", err
 	}
 
 	return string(notif), nil
@@ -267,7 +274,10 @@ func (n *Netconf) GetNextSubscription(subscriptionID uint64) (string, error) {
 
 	var subSize uint64
 
-	n.ffiMap.Netconf.GetNextSubscriptionSize(n.ptr, subscriptionID, &subSize)
+	err := n.ffiMap.Netconf.GetNextSubscriptionSize(n.ptr, subscriptionID, &subSize)
+	if err != nil {
+		return "", err
+	}
 
 	if subSize == 0 {
 		return "", scrapligoerrors.NewMessagesError()
@@ -275,9 +285,9 @@ func (n *Netconf) GetNextSubscription(subscriptionID uint64) (string, error) {
 
 	sub := make([]byte, subSize)
 
-	rc := n.ffiMap.Netconf.GetNextSubscription(n.ptr, subscriptionID, &sub)
-	if rc != 0 {
-		return "", scrapligoerrors.NewFfiError("get next subscription failed", nil)
+	err = n.ffiMap.Netconf.GetNextSubscription(n.ptr, subscriptionID, &sub)
+	if err != nil {
+		return "", err
 	}
 
 	return string(sub), nil
@@ -342,7 +352,7 @@ func (n *Netconf) getResult(
 
 	var inputSize, resultRawSize, resultSize, rpcWarningsSize, rpcErrorsSize, errSize uintptr
 
-	rc := n.ffiMap.Netconf.FetchOperationSizes(
+	err := n.ffiMap.Netconf.FetchOperationSizes(
 		n.ptr,
 		operationID,
 		&inputSize,
@@ -352,8 +362,8 @@ func (n *Netconf) getResult(
 		&rpcErrorsSize,
 		&errSize,
 	)
-	if rc != 0 {
-		return nil, scrapligoerrors.NewFfiError("poll operation failed", nil)
+	if err != nil {
+		return nil, err
 	}
 
 	var resultStartTime, resultEndTime uint64
@@ -370,7 +380,7 @@ func (n *Netconf) getResult(
 
 	errString := make([]byte, errSize)
 
-	rc = n.ffiMap.Netconf.FetchOperation(
+	err = n.ffiMap.Netconf.FetchOperation(
 		n.ptr,
 		operationID,
 		&resultStartTime,
@@ -382,8 +392,8 @@ func (n *Netconf) getResult(
 		&rpcErrors,
 		&errString,
 	)
-	if rc != 0 {
-		return nil, scrapligoerrors.NewFfiError("fetch operation result failed", nil)
+	if err != nil {
+		return nil, err
 	}
 
 	if errSize != 0 {
