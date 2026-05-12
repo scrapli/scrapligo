@@ -2,6 +2,8 @@
 prompt_pattern: '^.*[>#$]\s?+$'
 default_mode: 'privileged_exec'
 modes:
+  - name: 'privileged_exec'
+    prompt_pattern: '[\w_-]+ #'
   - name: 'exec'
     prompt_pattern: '[\w_-]+ (\([\w-]+\) )?[$#]'
 on_open_instructions:
