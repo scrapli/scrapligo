@@ -265,6 +265,23 @@ func (c *Cli) Close(ctx context.Context) (*Result, error) {
 	return c.getResult(ctx, &cancel, operationID)
 }
 
+// ReplaceDefinition replaces the "definition" of the driver. Most importantly changes/updates
+// the prompt pattern, but also updates the modes etc. available in the driver.
+func (c *Cli) ReplaceDefinition(definitionFileOrString string) error {
+	if c.ptr == 0 {
+		return scrapligoerrors.NewFfiError("driver pointer nil", nil)
+	}
+
+	c.options.Cli.DefinitionFileOrName = definitionFileOrString
+
+	err := loadDefinition(c.options)
+	if err != nil {
+		return err
+	}
+
+	return c.ffiMap.Cli.ReplaceDefinition(c.ptr, c.options.Cli.DefinitionString)
+}
+
 func (c *Cli) getResult(
 	ctx context.Context,
 	cancel *bool,
