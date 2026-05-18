@@ -28,6 +28,12 @@ func registerCli(m *Mapping, libScrapliFfi uintptr) {
 		libScrapliFfi,
 		"ls_cli_read_callback_should_execute",
 	)
+
+	purego.RegisterLibFunc(
+		&m.Cli.replaceDefinition,
+		libScrapliFfi,
+		"ls_cli_replace_definition",
+	)
 }
 
 // CliMapping holds libscrapli mappings specifically for cli drivers.
@@ -136,6 +142,11 @@ type CliMapping struct {
 		containsPattern string,
 		notContains string,
 		execute *bool,
+	) uint8
+
+	replaceDefinition func(
+		driverPtr uintptr,
+		definitionString string,
 	) uint8
 }
 
@@ -388,5 +399,20 @@ func (m *CliMapping) ReadCallbackShouldExecute(
 			execute,
 		),
 		"failed checking if callback should execute",
+	).check()
+}
+
+// ReplaceDefinition replaces the "definition" of the driver. Most importantly changes/updates
+// the prompt pattern, but also updates the modes etc. available in the driver.
+func (m *CliMapping) ReplaceDefinition(
+	driverPtr uintptr,
+	definitionString string,
+) error {
+	return newLibScrapliResult(
+		m.replaceDefinition(
+			driverPtr,
+			definitionString,
+		),
+		"failed replacing definition",
 	).check()
 }
