@@ -314,7 +314,7 @@ func (n *Netconf) getResult(
 
 	var _n int
 
-	pollFds := []unix.PollFd{{Fd: int32(n.pollFd), Events: unix.POLLIN}}
+	pollFds := []unix.PollFd{{Fd: int32(n.pollFd), Events: unix.POLLIN}} //nolint: gosec
 
 	for {
 		if ctx.Err() != nil {

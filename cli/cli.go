@@ -308,7 +308,7 @@ func (c *Cli) getResult(
 
 	var n int
 
-	pollFds := []unix.PollFd{{Fd: int32(c.pollFd), Events: unix.POLLIN}}
+	pollFds := []unix.PollFd{{Fd: int32(c.pollFd), Events: unix.POLLIN}} //nolint: gosec
 
 	for {
 		if ctx.Err() != nil {
