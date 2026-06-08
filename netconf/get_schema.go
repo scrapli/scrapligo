@@ -41,7 +41,7 @@ func (n *Netconf) GetSchema(
 
 	loadedOptions := newGetSchemaOptions(options...)
 
-	status := n.ffiMap.Netconf.GetSchema(
+	err := n.ffiMap.Netconf.GetSchema(
 		n.ptr,
 		&operationID,
 		&cancel,
@@ -49,8 +49,8 @@ func (n *Netconf) GetSchema(
 		loadedOptions.version,
 		loadedOptions.format.String(),
 	)
-	if status != 0 {
-		return nil, scrapligoerrors.NewFfiError("failed to submit get-schema operation", nil)
+	if err != nil {
+		return nil, err
 	}
 
 	return n.getResult(ctx, &cancel, operationID)

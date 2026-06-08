@@ -10,8 +10,10 @@ type driverOptions struct {
 	transportKindLen uintptr
 
 	cli struct {
-		definitionStr    uintptr
-		definitionStrLen uintptr
+		definitionStr               uintptr
+		definitionStrLen            uintptr
+		normalizeLineFeeds          *bool
+		normalizeTrailingWhitespace *bool
 	}
 
 	netconf struct {

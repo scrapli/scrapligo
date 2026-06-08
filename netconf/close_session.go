@@ -21,13 +21,13 @@ func (n *Netconf) CloseSession(
 
 	var operationID uint32
 
-	status := n.ffiMap.Netconf.CloseSession(
+	err := n.ffiMap.Netconf.CloseSession(
 		n.ptr,
 		&operationID,
 		&cancel,
 	)
-	if status != 0 {
-		return nil, scrapligoerrors.NewFfiError("failed to submit close-session operation", nil)
+	if err != nil {
+		return nil, err
 	}
 
 	return n.getResult(ctx, &cancel, operationID)

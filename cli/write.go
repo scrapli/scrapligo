@@ -11,9 +11,9 @@ func (c *Cli) Write(input string) error {
 		return scrapligoerrors.NewFfiError("driver pointer nil", nil)
 	}
 
-	status := c.ffiMap.Session.Write(c.ptr, input, false)
-	if status != 0 {
-		return scrapligoerrors.NewFfiError("failed executing write", nil)
+	err := c.ffiMap.Session.Write(c.ptr, input, false)
+	if err != nil {
+		return err
 	}
 
 	return nil
@@ -26,9 +26,9 @@ func (c *Cli) WriteAndReturn(input string) error {
 		return scrapligoerrors.NewFfiError("driver pointer nil", nil)
 	}
 
-	status := c.ffiMap.Session.WriteAndReturn(c.ptr, input, false)
-	if status != 0 {
-		return scrapligoerrors.NewFfiError("failed executing writeAndReturn", nil)
+	err := c.ffiMap.Session.WriteAndReturn(c.ptr, input, false)
+	if err != nil {
+		return err
 	}
 
 	return nil
@@ -41,9 +41,9 @@ func (c *Cli) WriteReturn() error {
 		return scrapligoerrors.NewFfiError("driver pointer nil", nil)
 	}
 
-	status := c.ffiMap.Session.WriteReturn(c.ptr)
-	if status != 0 {
-		return scrapligoerrors.NewFfiError("failed executing writeReturn", nil)
+	err := c.ffiMap.Session.WriteReturn(c.ptr)
+	if err != nil {
+		return err
 	}
 
 	return nil

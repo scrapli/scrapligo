@@ -20,16 +20,9 @@ import (
 )
 
 func loadDefinition(o *scrapligointernal.Options) error {
-	var definitionFileOrNameString string
+	definitionFileOrNameString := o.Cli.DefinitionFileOrName
 
 	var err error
-
-	switch v := any(o.Cli.DefinitionFileOrName).(type) {
-	case PlatformName:
-		definitionFileOrNameString = v.String()
-	case string:
-		definitionFileOrNameString = v
-	}
 
 	assetPlatformNames := GetPlatformNames()
 
@@ -167,20 +160,23 @@ func (c *Cli) GetOptions() (string, error) {
 
 	var optionsSize uintptr
 
-	rc := c.ffiMap.Shared.FetchOptionsSize(
+	err := c.ffiMap.Shared.FetchOptionsSize(
 		optionsPtr,
 		&optionsSize,
 	)
-	if rc != 0 {
-		return "", scrapligoerrors.NewFfiError("fetch options size failed", nil)
+	if err != nil {
+		return "", err
 	}
 
 	optionsStr := make([]byte, optionsSize)
 
-	c.ffiMap.Shared.FetchOptions(
+	err = c.ffiMap.Shared.FetchOptions(
 		optionsPtr,
 		&optionsStr,
 	)
+	if err != nil {
+		return "", err
+	}
 
 	return string(optionsStr), nil
 }
@@ -199,6 +195,8 @@ func (c *Cli) Open(ctx context.Context) (*Result, error) {
 		}
 
 		c.ffiMap.Shared.Free(c.ptr)
+
+		c.ptr = 0
 	}()
 
 	optionsPtr := c.ffiMap.Shared.AllocDriverOptions()
@@ -217,6 +215,8 @@ func (c *Cli) Open(ctx context.Context) (*Result, error) {
 
 	c.pollFd = int(c.ffiMap.Shared.GetPollFd(c.ptr))
 	if c.pollFd == 0 {
+		cleanup = true
+
 		return nil, scrapligoerrors.NewFfiError("failed to allocate cli", nil)
 	}
 
@@ -224,11 +224,11 @@ func (c *Cli) Open(ctx context.Context) (*Result, error) {
 
 	var operationID uint32
 
-	status := c.ffiMap.Cli.Open(c.ptr, &operationID, &cancel)
-	if status != 0 {
+	err := c.ffiMap.Cli.Open(c.ptr, &operationID, &cancel)
+	if err != nil {
 		cleanup = true
 
-		return nil, scrapligoerrors.NewFfiError("failed to submit open operation", nil)
+		return nil, err
 	}
 
 	result, err := c.getResult(ctx, &cancel, operationID)
@@ -247,19 +247,39 @@ func (c *Cli) Close(ctx context.Context) (*Result, error) {
 		return nil, scrapligoerrors.NewFfiError("driver pointer nil", nil)
 	}
 
-	// as long as driver ptr is not 0 we *always* want to free
-	defer c.ffiMap.Shared.Free(c.ptr)
+	defer func() {
+		c.ffiMap.Shared.Free(c.ptr)
+
+		c.ptr = 0
+	}()
 
 	cancel := false
 
 	var operationID uint32
 
-	status := c.ffiMap.Cli.Close(c.ptr, &operationID, &cancel)
-	if status != 0 {
-		return nil, scrapligoerrors.NewFfiError("failed to submit close operation", nil)
+	err := c.ffiMap.Cli.Close(c.ptr, &operationID, &cancel)
+	if err != nil {
+		return nil, err
 	}
 
 	return c.getResult(ctx, &cancel, operationID)
+}
+
+// ReplaceDefinition replaces the "definition" of the driver. Most importantly changes/updates
+// the prompt pattern, but also updates the modes etc. available in the driver.
+func (c *Cli) ReplaceDefinition(definitionFileOrString string) error {
+	if c.ptr == 0 {
+		return scrapligoerrors.NewFfiError("driver pointer nil", nil)
+	}
+
+	c.options.Cli.DefinitionFileOrName = definitionFileOrString
+
+	err := loadDefinition(c.options)
+	if err != nil {
+		return err
+	}
+
+	return c.ffiMap.Cli.ReplaceDefinition(c.ptr, c.options.Cli.DefinitionString)
 }
 
 func (c *Cli) getResult(
@@ -286,15 +306,20 @@ func (c *Cli) getResult(
 		}
 	}()
 
-	pollFd := &unix.FdSet{}
-	pollFd.Set(c.pollFd)
-
 	var n int
 
+	pollFds := []unix.PollFd{{Fd: int32(c.pollFd), Events: unix.POLLIN}} //nolint: gosec
+
 	for {
+		if ctx.Err() != nil {
+			return nil, ctx.Err()
+		}
+
+		pollFds[0].Revents = 0
+
 		var err error
 
-		n, err = unix.Select(c.pollFd+1, pollFd, &unix.FdSet{}, &unix.FdSet{}, nil)
+		n, err = unix.Poll(pollFds, scrapligoconstants.ReadyFDPollTimeoutMs)
 		if err != nil {
 			if errors.Is(err, unix.EINTR) {
 				// python automagically handles interrupts i guess go doesnt, so just act like
@@ -305,11 +330,17 @@ func (c *Cli) getResult(
 			return nil, scrapligoerrors.NewFfiError("waiting on operation ready signal", err)
 		}
 
-		break
-	}
+		if n > 0 {
+			if pollFds[0].Revents&unix.POLLNVAL != 0 {
+				return nil, scrapligoerrors.NewFfiError(
+					"waiting on operation ready signal",
+					unix.EBADF,
+				)
+			}
 
-	// if the context wasn't cancelled the goroutine will still be running, this will stop it
-	done <- struct{}{}
+			break
+		}
+	}
 
 	out := make([]byte, n)
 
@@ -317,7 +348,7 @@ func (c *Cli) getResult(
 
 	var inputsSize, resultsRawSize, resultsSize, resultsFailedIndicatorSize, errSize uintptr
 
-	rc := c.ffiMap.Cli.FetchOperationSizes(
+	err := c.ffiMap.Cli.FetchOperationSizes(
 		c.ptr,
 		operationID,
 		&operationCount,
@@ -327,8 +358,8 @@ func (c *Cli) getResult(
 		&resultsFailedIndicatorSize,
 		&errSize,
 	)
-	if rc != 0 {
-		return nil, scrapligoerrors.NewFfiError("poll operation failed", nil)
+	if err != nil {
+		return nil, err
 	}
 
 	var resultStartTime uint64
@@ -345,7 +376,7 @@ func (c *Cli) getResult(
 
 	errString := make([]byte, errSize)
 
-	rc = c.ffiMap.Cli.FetchOperation(
+	err = c.ffiMap.Cli.FetchOperation(
 		c.ptr,
 		operationID,
 		&resultStartTime,
@@ -356,8 +387,8 @@ func (c *Cli) getResult(
 		&resultsFailedWhenIndicator,
 		&errString,
 	)
-	if rc != 0 {
-		return nil, scrapligoerrors.NewFfiError("fetch operation result failed", nil)
+	if err != nil {
+		return nil, err
 	}
 
 	if errSize != 0 {

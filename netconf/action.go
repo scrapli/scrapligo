@@ -22,14 +22,14 @@ func (n *Netconf) Action(
 
 	var operationID uint32
 
-	status := n.ffiMap.Netconf.Action(
+	err := n.ffiMap.Netconf.Action(
 		n.ptr,
 		&operationID,
 		&cancel,
 		action,
 	)
-	if status != 0 {
-		return nil, scrapligoerrors.NewFfiError("failed to submit action operation", nil)
+	if err != nil {
+		return nil, err
 	}
 
 	return n.getResult(ctx, &cancel, operationID)

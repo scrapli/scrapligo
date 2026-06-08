@@ -23,7 +23,7 @@ type validateOptions struct {
 }
 
 // Validate executes a netconf validate rpc. Supported options:
-//   - WithTargetType
+//   - WithSource
 func (n *Netconf) Validate(
 	ctx context.Context,
 	options ...Option,
@@ -38,14 +38,14 @@ func (n *Netconf) Validate(
 
 	loadedOptions := newValidateOptions(options...)
 
-	status := n.ffiMap.Netconf.Validate(
+	err := n.ffiMap.Netconf.Validate(
 		n.ptr,
 		&operationID,
 		&cancel,
 		loadedOptions.source.String(),
 	)
-	if status != 0 {
-		return nil, scrapligoerrors.NewFfiError("failed to submit validate operation", nil)
+	if err != nil {
+		return nil, err
 	}
 
 	return n.getResult(ctx, &cancel, operationID)

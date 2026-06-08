@@ -38,14 +38,14 @@ func (n *Netconf) Unlock(
 
 	loadedOptions := newUnlockOptions(options...)
 
-	status := n.ffiMap.Netconf.Unlock(
+	err := n.ffiMap.Netconf.Unlock(
 		n.ptr,
 		&operationID,
 		&cancel,
 		loadedOptions.target.String(),
 	)
-	if status != 0 {
-		return nil, scrapligoerrors.NewFfiError("failed to submit unlock operation", nil)
+	if err != nil {
+		return nil, err
 	}
 
 	return n.getResult(ctx, &cancel, operationID)

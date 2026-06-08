@@ -38,14 +38,14 @@ func (n *Netconf) Lock(
 
 	loadedOptions := newLockOptions(options...)
 
-	status := n.ffiMap.Netconf.Lock(
+	err := n.ffiMap.Netconf.Lock(
 		n.ptr,
 		&operationID,
 		&cancel,
 		loadedOptions.target.String(),
 	)
-	if status != 0 {
-		return nil, scrapligoerrors.NewFfiError("failed to submit lock operation", nil)
+	if err != nil {
+		return nil, err
 	}
 
 	return n.getResult(ctx, &cancel, operationID)

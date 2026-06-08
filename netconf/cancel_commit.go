@@ -37,14 +37,14 @@ func (n *Netconf) CancelCommit(
 
 	loadedOptions := newCancelCommitOptions(options...)
 
-	status := n.ffiMap.Netconf.CancelCommit(
+	err := n.ffiMap.Netconf.CancelCommit(
 		n.ptr,
 		&operationID,
 		&cancel,
 		loadedOptions.persistID,
 	)
-	if status != 0 {
-		return nil, scrapligoerrors.NewFfiError("failed to submit cancel-commit operation", nil)
+	if err != nil {
+		return nil, err
 	}
 
 	return n.getResult(ctx, &cancel, operationID)

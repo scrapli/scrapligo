@@ -1,13 +1,37 @@
 .DEFAULT_GOAL := help
 
-## Show this help
+BLUE   := $(shell tput -Txterm setaf 4)
+YELLOW := $(shell tput -Txterm setaf 3)
+GREEN  := $(shell tput -Txterm setaf 2)
+RESET  := $(shell tput -Txterm sgr0)
+
+.PHONY: help
+
 help:
-	@awk -f build/makefile-doc.awk $(MAKEFILE_LIST)
+	@echo ""
+	@echo "${YELLOW}Usage:${RESET} make ${GREEN}<target>${RESET}"
+	@echo ""
+	@awk ' \
+    	/^##@@/ { gsub(/^##@@ */, ""); printf "\n${BLUE}%s${RESET}\n", toupper($$0); next } \
+    	/^##@/  { gsub(/^##@ */, ""); printf "  ${YELLOW}%s:${RESET}\n", $$0; next } \
+    	/^## /   { gsub(/^## */, ""); msg = $$0; next } \
+    	/^[a-zA-Z0-9_-]+:/ { \
+    	    target = $$1; gsub(/:.*/, "", target); \
+        	if (match($$0, /## */)) { \
+        	    msg = substr($$0, RSTART + RLENGTH); \
+            } \
+           	if (msg != "") { \
+           	    printf "    ${GREEN}%-18s${RESET} %s\n", target, msg; \
+               	msg = ""; \
+            } \
+    	} \
+	' $(MAKEFILE_LIST)
+	@echo ""
 
 ##@ Development
 ## Format all go files
 fmt:
-	go run mvdan.cc/gofumpt -w .
+	go run mvdan.cc/gofumpt -w -extra .
 	go run github.com/daixiang0/gci write .
 	go run github.com/golangci/golines --base-formatter="gofmt" -w .
 
@@ -30,7 +54,7 @@ test-e2e:
 
 ## Run e2e tests against "ci" test topology with race flag (count to never cache e2e tests)
 test-e2e-ci:
-	go test -v ./e2e/... -platforms nokia_srl -race -count=1 -skip-slow
+	go test -v ./e2e/... -platforms nokia_srlinux,netopeer -race -count=1 -skip-slow
 
 ##@ Testing Coverage
 ## Produce html coverage report
@@ -65,7 +89,7 @@ run-clab:
 		-v "$$(pwd):$$(pwd)" \
 		-e "WORKDIR=$$(pwd)/.clab" \
 		-e "HOST_ARCH=$$(uname -m)" \
-		ghcr.io/kentik/scrapli_clab/launcher:0.0.7
+		ghcr.io/scrapli/scrapli_clab/launcher:0.0.7
 
 ## Runs the clab functional testing topo with the ci specific topology - omits ceos
 run-clab-ci:
@@ -95,4 +119,4 @@ run-clab-ci:
         -e "WORKDIR=$$(pwd)/.clab" \
         -e "HOST_ARCH=$$(uname -m)" \
         -e "CLAB_TOPO=topo.ci.$$(uname -m).yaml" \
-        ghcr.io/kentik/scrapli_clab/launcher:0.0.7
+        ghcr.io/scrapli/scrapli_clab/launcher:0.0.7

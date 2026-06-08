@@ -19,14 +19,14 @@ func (n *Netconf) KillSession(
 
 	var operationID uint32
 
-	status := n.ffiMap.Netconf.KillSession(
+	err := n.ffiMap.Netconf.KillSession(
 		n.ptr,
 		&operationID,
 		&cancel,
 		sessionID,
 	)
-	if status != 0 {
-		return nil, scrapligoerrors.NewFfiError("failed to submit killSession operation", nil)
+	if err != nil {
+		return nil, err
 	}
 
 	return n.getResult(ctx, &cancel, operationID)

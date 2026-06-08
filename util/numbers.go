@@ -6,7 +6,7 @@ import "math"
 // simply returns the max uint64 value. So its lossy/can be bad, but won't break things.
 func SafeInt64ToUint64(i int64) uint64 {
 	if i < 0 {
-		return 0
+		return math.MaxUint64
 	}
 
 	return uint64(i)
