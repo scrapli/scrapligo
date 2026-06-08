@@ -60,9 +60,9 @@ func getZigStyleArch() string {
 }
 
 func isMusl() bool {
-	_, err := os.Stat("/lib/ld-musl-x86_64.so.1")
+	matches, _ := filepath.Glob("/lib/ld-musl-*.so.1")
 
-	return err == nil
+	return len(matches) > 0
 }
 
 func getLibscrapliCachePath() string {
@@ -77,19 +77,12 @@ func getLibscrapliCachePath() string {
 		return overridePath
 	}
 
-	var cacheDir string
-
-	switch runtime.GOOS {
-	case darwin:
-		cacheDir = fmt.Sprintf("%s/Library/Caches/scrapli", os.Getenv(scrapligoconstants.HomeEnv))
-	case linux:
-		cacheDir = os.Getenv(scrapligoconstants.XdgCacheHomeEnv)
-		if cacheDir == "" {
-			cacheDir = fmt.Sprintf("%s/.cache/scrapli", os.Getenv(scrapligoconstants.HomeEnv))
-		}
-	default:
-		panic("unsupported platform")
+	cacheDir, err := os.UserCacheDir()
+	if err != nil {
+		cacheDir = ".cache"
 	}
+
+	cacheDir = filepath.Join(cacheDir, "scrapli")
 
 	scrapligologging.Logger(
 		scrapligologging.Debug,
@@ -248,7 +241,7 @@ func writeLibScrapliToCache( //nolint: nonamedreturns
 	case darwin:
 		zigTriple = fmt.Sprintf("%s-macos", getZigStyleArch())
 		releaseFilename = fmt.Sprintf(
-			"libscrapli-%s-macos.dylib.%s",
+			"libscrapli-%s-macos.%s.dylib",
 			getZigStyleArch(),
 			scrapligoconstants.LibScrapliVersion,
 		)

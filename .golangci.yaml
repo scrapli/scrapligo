@@ -8,6 +8,7 @@ linters:
     - cyclop # already using gocyclo, and its good enough!
     - depguard
     - exhaustruct
+    - gomodguard # deprecated, gomodguard_V2 included in all ofc
     - paralleltest
     - perfsprint
     - varnamelen

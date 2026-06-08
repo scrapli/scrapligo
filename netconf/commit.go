@@ -21,13 +21,13 @@ func (n *Netconf) Commit(
 
 	var operationID uint32
 
-	status := n.ffiMap.Netconf.Commit(
+	err := n.ffiMap.Netconf.Commit(
 		n.ptr,
 		&operationID,
 		&cancel,
 	)
-	if status != 0 {
-		return nil, scrapligoerrors.NewFfiError("failed to submit commit operation", nil)
+	if err != nil {
+		return nil, err
 	}
 
 	return n.getResult(ctx, &cancel, operationID)

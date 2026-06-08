@@ -1,6 +1,9 @@
 package errors
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+)
 
 var (
 	_ error        = (*ScrapliError)(nil)
@@ -13,10 +16,10 @@ type wrappedError interface {
 
 // ErrNoMessages is an error returned when there are no more messages to check for a subscription or
 // notification stream.
-var ErrNoMessages = errors.New("errNoMessages")
+var ErrNoMessages = errors.New("no messages")
 
 // ErrSubscriptionID is an error returned when failing to parse a subscription id from a message.
-var ErrSubscriptionID = errors.New("errSubscriptionID")
+var ErrSubscriptionID = errors.New("subscription id")
 
 // ErrorKind is an enum(ish) representing the kind of error -- i.e. "ffi" or "auth".
 type ErrorKind string
@@ -41,6 +44,10 @@ type ScrapliError struct {
 }
 
 func (e *ScrapliError) Error() string {
+	if e.Inner != nil {
+		return fmt.Sprintf("%s: %v", e.Message, e.Inner)
+	}
+
 	return e.Message
 }
 
@@ -48,53 +55,35 @@ func (e *ScrapliError) Unwrap() error {
 	return e.Inner
 }
 
+func newScrapliError(kind ErrorKind, message string, inner error) error {
+	return &ScrapliError{
+		Kind:    kind,
+		Message: message,
+		Inner:   inner,
+	}
+}
+
 // NewFfiError returns a "ffi" flavor ScrapliError, wrapping the inner error if provided.
 func NewFfiError(message string, inner error) error {
-	e := &ScrapliError{
-		Kind:    Ffi,
-		Message: message,
-	}
-
-	if inner != nil {
-		e.Inner = inner
-	}
-
-	return e
+	return newScrapliError(Ffi, message, inner)
 }
 
 // NewOptionsError returns an "options" flavor ScrapliError, wrapping the inner error if provided.
 func NewOptionsError(message string, inner error) error {
-	e := &ScrapliError{
-		Kind:    Options,
-		Message: message,
-	}
+	return newScrapliError(Options, message, inner)
+}
 
-	if inner != nil {
-		e.Inner = inner
-	}
-
-	return e
+// NewNetconfError returns a "netconf" flavor ScrapliError, wrapping the inner error if provided.
+func NewNetconfError(message string, inner error) error {
+	return newScrapliError(Netconf, message, inner)
 }
 
 // NewUtilError returns a "util" flavor ScrapliError, wrapping the inner error if provided.
 func NewUtilError(message string, inner error) error {
-	e := &ScrapliError{
-		Kind:    Util,
-		Message: message,
-	}
-
-	if inner != nil {
-		e.Inner = inner
-	}
-
-	return e
+	return newScrapliError(Util, message, inner)
 }
 
 // NewMessagesError returns a "netconf" flavor ScrapliError, wrapping the ErrNoMessages error type.
 func NewMessagesError() error {
-	return &ScrapliError{
-		Kind:    Netconf,
-		Message: "no messages",
-		Inner:   ErrNoMessages,
-	}
+	return newScrapliError(Netconf, "no messages", ErrNoMessages)
 }

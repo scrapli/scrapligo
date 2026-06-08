@@ -9,6 +9,7 @@ import (
 	"slices"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/carlmontanari/difflibgo/difflibgo"
 )
@@ -58,6 +59,14 @@ func AssertNotDefault(t *testing.T, v any) {
 			t.Fatal("expected non-default value")
 		}
 	case [][]byte:
+		if len(typedV) == 0 {
+			t.Fatal("expected non-default value")
+		}
+	case time.Time:
+		if typedV.IsZero() {
+			t.Fatal("expected non-default value")
+		}
+	case []time.Time:
 		if len(typedV) == 0 {
 			t.Fatal("expected non-default value")
 		}

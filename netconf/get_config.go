@@ -50,7 +50,7 @@ func (n *Netconf) GetConfig(
 
 	loadedOptions := newGetConfigOptions(options...)
 
-	status := n.ffiMap.Netconf.GetConfig(
+	err := n.ffiMap.Netconf.GetConfig(
 		n.ptr,
 		&operationID,
 		&cancel,
@@ -61,8 +61,8 @@ func (n *Netconf) GetConfig(
 		loadedOptions.filterNamespace,
 		loadedOptions.defaultsType.String(),
 	)
-	if status != 0 {
-		return nil, scrapligoerrors.NewFfiError("failed to submit getConfig operation", nil)
+	if err != nil {
+		return nil, err
 	}
 
 	return n.getResult(ctx, &cancel, operationID)

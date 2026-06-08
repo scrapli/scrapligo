@@ -48,7 +48,7 @@ func (n *Netconf) EditData(
 
 	loadedOptions := newEditDataOptions(options...)
 
-	status := n.ffiMap.Netconf.EditData(
+	err := n.ffiMap.Netconf.EditData(
 		n.ptr,
 		&operationID,
 		&cancel,
@@ -56,8 +56,8 @@ func (n *Netconf) EditData(
 		content,
 		loadedOptions.getDefaultOperation(),
 	)
-	if status != 0 {
-		return nil, scrapligoerrors.NewFfiError("failed to submit edit-data operation", nil)
+	if err != nil {
+		return nil, err
 	}
 
 	return n.getResult(ctx, &cancel, operationID)

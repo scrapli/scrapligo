@@ -66,7 +66,7 @@ func (n *Netconf) EditConfig(
 
 	loadedOptions := newEditConfigOptions(options...)
 
-	status := n.ffiMap.Netconf.EditConfig(
+	err := n.ffiMap.Netconf.EditConfig(
 		n.ptr,
 		&operationID,
 		&cancel,
@@ -76,8 +76,8 @@ func (n *Netconf) EditConfig(
 		loadedOptions.getTestOption(),
 		loadedOptions.getErrorOption(),
 	)
-	if status != 0 {
-		return nil, scrapligoerrors.NewFfiError("failed to submit editConfig operation", nil)
+	if err != nil {
+		return nil, err
 	}
 
 	return n.getResult(ctx, &cancel, operationID)
