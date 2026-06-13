@@ -11,6 +11,8 @@ modes:
               input: 'enable'
   - name: 'privileged_exec'
     prompt_pattern: '^\S{1,48}#$'
+    prompt_excludes:
+      - '(config'
     accessible_modes:
       - name: 'exec'
         instructions:
@@ -43,7 +45,11 @@ failure_indicators:
   - '% Incomplete command'
   - '% Invalid input detected'
   - '% Unknown command'
+  - '% Too many parameters'
+  - '% Parameter error'
   - 'Error:'
+  - 'Failure:'
+  - 'The required ONT does not exist'
 on_open_instructions:
   - enter_mode:
       requested_mode: 'privileged_exec'
