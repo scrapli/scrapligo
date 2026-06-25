@@ -10,9 +10,7 @@ import (
 )
 
 func newSendInputsOptions(options ...Option) *sendInputsOptions {
-	o := &sendInputsOptions{
-		inputHandling: InputHandlingFuzzy,
-	}
+	o := &sendInputsOptions{}
 
 	for _, opt := range options {
 		opt(o)
@@ -23,10 +21,20 @@ func newSendInputsOptions(options ...Option) *sendInputsOptions {
 
 type sendInputsOptions struct {
 	requestedMode          string
-	inputHandling          InputHandling
+	inputHandling          *InputHandling
 	retainInput            bool
 	retainTrailingPrompt   bool
 	stopOnIndicatedFailure bool
+}
+
+func (o *sendInputsOptions) getInputHandling() *uint8 {
+	if o.inputHandling == nil {
+		return nil
+	}
+
+	v := uint8(*o.inputHandling)
+
+	return &v
 }
 
 // SendInputs send multiple "inputs" to the device.
@@ -53,7 +61,7 @@ func (c *Cli) SendInputs(
 		&cancel,
 		joinedInputs,
 		loadedOptions.requestedMode,
-		string(loadedOptions.inputHandling),
+		loadedOptions.getInputHandling(),
 		loadedOptions.retainInput,
 		loadedOptions.retainTrailingPrompt,
 	)

@@ -1,121 +1,77 @@
 package netconf
 
 // DatastoreType is an enum(ish) representing the name of a datastore on a device.
-type DatastoreType string
-
-// String (stringer) method for DatastoreType.
-func (t DatastoreType) String() string {
-	return string(t)
-}
+type DatastoreType uint8
 
 const (
-	DatastoreTypeConventional DatastoreType = "conventional"
-	DatastoreTypeRunning      DatastoreType = "running"
-	DatastoreTypeCandidate    DatastoreType = "candidate"
-	DatastoreTypeStartup      DatastoreType = "startup"
-	DatastoreTypeIntended     DatastoreType = "intended"
-	DatastoreTypeDynamic      DatastoreType = "dynamic"
-	DatastoreTypeOperational  DatastoreType = "operational"
+	DatastoreTypeConventional DatastoreType = iota
+	DatastoreTypeRunning
+	DatastoreTypeCandidate
+	DatastoreTypeStartup
+	DatastoreTypeIntended
+	DatastoreTypeDynamic
+	DatastoreTypeOperational
 )
 
 // FilterType is an enum(ish) representing the name of a filter type.
-type FilterType string
-
-// String (stringer) method for FilterType.
-func (t FilterType) String() string {
-	return string(t)
-}
+type FilterType uint8
 
 const (
-	FilterTypeSubtree FilterType = "subtree"
-	FilterTypeXpath   FilterType = "xpath"
+	FilterTypeSubtree FilterType = iota
+	FilterTypeXpath
 )
 
 // DefaultsType is an enum(ish) representing the name of a filter type.
-type DefaultsType string
-
-// String (stringer) method for DefaultsType.
-func (t DefaultsType) String() string {
-	return string(t)
-}
+type DefaultsType uint8
 
 const (
-	// DefaultsTypeUnset is the option to *not* set a defaults type -- we need to have a string
-	// to pass to zig abi so we just specify unset if it would be null in zig native.
-	DefaultsTypeUnset           DefaultsType = "unset"
-	DefaultsTypeReportAll       DefaultsType = "report-all"
-	DefaultsTypeReportAllTagged DefaultsType = "report-all-tagged"
-	DefaultsTypeTrim            DefaultsType = "trim"
-	DefaultsTypeExplicit        DefaultsType = "explicit"
+	DefaultsTypeReportAll DefaultsType = iota
+	DefaultsTypeReportAllTagged
+	DefaultsTypeTrim
+	DefaultsTypeExplicit
 )
 
 // SchemaFormat is an enum(ish) representing the name of a schema format.
-type SchemaFormat string
-
-// String (stringer) method for SchemaFormat.
-func (t SchemaFormat) String() string {
-	return string(t)
-}
+type SchemaFormat uint8
 
 const (
-	SchemaFormatXsd  SchemaFormat = "xsd"
-	SchemaFormatYang SchemaFormat = "yang"
-	SchemaFormatYin  SchemaFormat = "yin"
-	SchemaFormatRng  SchemaFormat = "rng"
-	SchemaFormatRnc  SchemaFormat = "rnc"
+	SchemaFormatXsd SchemaFormat = iota
+	SchemaFormatYang
+	SchemaFormatYin
+	SchemaFormatRng
+	SchemaFormatRnc
 )
 
 // ConfigFilter is an enum(ish) representing the valid config-filter options.
-type ConfigFilter string
-
-// String (stringer) method for ConfigFilter.
-func (t ConfigFilter) String() string {
-	return string(t)
-}
+type ConfigFilter uint8
 
 const (
-	ConfigFilterTrue  = "true"
-	ConfigFilterFalse = "false"
-	ConfigFilterUnset = "unset"
+	ConfigFilterTrue ConfigFilter = iota
+	ConfigFilterFalse
 )
 
 // DefaultOperation is an enum(ish) representing the name of a default operation field.
-type DefaultOperation string
-
-// String (stringer) method for DefaultOperation.
-func (t DefaultOperation) String() string {
-	return string(t)
-}
+type DefaultOperation uint8
 
 const (
-	DefaultOperationMerge   DefaultOperation = "merge"
-	DefaultOperationReplace DefaultOperation = "replace"
-	DefaultOperationNone    DefaultOperation = "none"
+	DefaultOperationMerge DefaultOperation = iota
+	DefaultOperationReplace
+	DefaultOperationNone
 )
 
 // TestOption is an enum(ish) representing the name of a default operation field.
-type TestOption string
-
-// String (stringer) method for TestOption.
-func (t TestOption) String() string {
-	return string(t)
-}
+type TestOption uint8
 
 const (
-	TestOptionTestThenSet TestOption = "test-then-set"
-	TestOptionSet         TestOption = "set"
+	TestOptionTestThenSet TestOption = iota
+	TestOptionSet
 )
 
 // ErrorOption is an enum(ish) representing the name of a default operation field.
-type ErrorOption string
-
-// String (stringer) method for DefaultOperation.
-func (t ErrorOption) String() string {
-	return string(t)
-}
+type ErrorOption uint8
 
 const (
-	ErrorOptionStopOnError     ErrorOption = "stop-on-error"
-	ErrorOptionContinueOnError ErrorOption = "continue-on-error"
-	ErrorOptionRollbackOnError ErrorOption = "rollback-on-error"
+	ErrorOptionStopOnError ErrorOption = iota
+	ErrorOptionContinueOnError
+	ErrorOptionRollbackOnError
 )

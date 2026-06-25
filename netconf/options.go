@@ -35,13 +35,13 @@ func WithDatastore(t DatastoreType) Option {
 	return func(o any) {
 		switch to := o.(type) {
 		case *editConfigOptions:
-			to.target = t
+			to.target = &t
 		case *getDataOptions:
-			to.datastore = t
+			to.datastore = &t
 		case *lockOptions:
-			to.target = t
+			to.target = &t
 		case *unlockOptions:
-			to.target = t
+			to.target = &t
 		}
 	}
 }
@@ -51,7 +51,7 @@ func WithSource(t DatastoreType) Option {
 	return func(o any) {
 		switch to := o.(type) {
 		case *validateOptions:
-			to.source = t
+			to.source = &t
 		}
 	}
 }
@@ -61,9 +61,9 @@ func WithSourceType(t DatastoreType) Option {
 	return func(o any) {
 		switch to := o.(type) {
 		case *getConfigOptions:
-			to.source = t
+			to.source = &t
 		case *copyConfigOptions:
-			to.source = t
+			to.source = &t
 		}
 	}
 }
@@ -73,15 +73,15 @@ func WithTargetType(t DatastoreType) Option {
 	return func(o any) {
 		switch to := o.(type) {
 		case *editConfigOptions:
-			to.target = t
+			to.target = &t
 		case *copyConfigOptions:
-			to.target = t
+			to.target = &t
 		case *deleteConfigOptions:
-			to.target = t
+			to.target = &t
 		case *lockOptions:
-			to.target = t
+			to.target = &t
 		case *unlockOptions:
-			to.target = t
+			to.target = &t
 		}
 	}
 }
@@ -105,11 +105,11 @@ func WithFilterType(t FilterType) Option {
 	return func(o any) {
 		switch to := o.(type) {
 		case *getConfigOptions:
-			to.filterType = t
+			to.filterType = &t
 		case *getOptions:
-			to.filterType = t
+			to.filterType = &t
 		case *getDataOptions:
-			to.filterType = t
+			to.filterType = &t
 		}
 	}
 }
@@ -147,11 +147,11 @@ func WithDefaultsType(t DefaultsType) Option {
 	return func(o any) {
 		switch to := o.(type) {
 		case *getConfigOptions:
-			to.defaultsType = t
+			to.defaultsType = &t
 		case *getOptions:
-			to.defaultsType = t
+			to.defaultsType = &t
 		case *getDataOptions:
-			to.defaultsType = t
+			to.defaultsType = &t
 		}
 	}
 }
@@ -161,7 +161,7 @@ func WithSchemaFormat(t SchemaFormat) Option {
 	return func(o any) {
 		switch to := o.(type) {
 		case *getSchemaOptions:
-			to.format = t
+			to.format = &t
 		}
 	}
 }
@@ -181,7 +181,7 @@ func WithConfigFilter(t ConfigFilter) Option {
 	return func(o any) {
 		switch to := o.(type) {
 		case *getDataOptions:
-			to.configFilter = t
+			to.configFilter = &t
 		}
 	}
 }

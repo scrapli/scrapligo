@@ -7,9 +7,7 @@ import (
 )
 
 func newSendInputOptions(options ...Option) *sendInputOptions {
-	o := &sendInputOptions{
-		inputHandling: InputHandlingFuzzy,
-	}
+	o := &sendInputOptions{}
 
 	for _, opt := range options {
 		opt(o)
@@ -20,9 +18,19 @@ func newSendInputOptions(options ...Option) *sendInputOptions {
 
 type sendInputOptions struct {
 	requestedMode        string
-	inputHandling        InputHandling
+	inputHandling        *InputHandling
 	retainInput          bool
 	retainTrailingPrompt bool
+}
+
+func (o *sendInputOptions) getInputHandling() *uint8 {
+	if o.inputHandling == nil {
+		return nil
+	}
+
+	v := uint8(*o.inputHandling)
+
+	return &v
 }
 
 // SendInput sends an "input" to the device. Historically scrapli(go) had "SendCommand(s)" and
@@ -50,7 +58,7 @@ func (c *Cli) SendInput(
 		&cancel,
 		input,
 		loadedOptions.requestedMode,
-		string(loadedOptions.inputHandling),
+		loadedOptions.getInputHandling(),
 		loadedOptions.retainInput,
 		loadedOptions.retainTrailingPrompt,
 	)

@@ -1,4 +1,4 @@
-package netconf
+package netconf //nolint: dupl
 
 import (
 	"context"
@@ -7,9 +7,7 @@ import (
 )
 
 func newValidateOptions(options ...Option) *validateOptions {
-	o := &validateOptions{
-		source: DatastoreTypeRunning,
-	}
+	o := &validateOptions{}
 
 	for _, opt := range options {
 		opt(o)
@@ -19,7 +17,17 @@ func newValidateOptions(options ...Option) *validateOptions {
 }
 
 type validateOptions struct {
-	source DatastoreType
+	source *DatastoreType
+}
+
+func (o *validateOptions) getSource() *uint8 {
+	if o.source == nil {
+		return nil
+	}
+
+	v := uint8(*o.source)
+
+	return &v
 }
 
 // Validate executes a netconf validate rpc. Supported options:
@@ -42,7 +50,7 @@ func (n *Netconf) Validate(
 		n.ptr,
 		&operationID,
 		&cancel,
-		loadedOptions.source.String(),
+		loadedOptions.getSource(),
 	)
 	if err != nil {
 		return nil, err

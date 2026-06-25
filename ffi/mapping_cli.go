@@ -98,7 +98,7 @@ type CliMapping struct {
 		cancel *bool,
 		input string,
 		requestedMode string,
-		inputHandling string,
+		inputHandling *uint8,
 		retainInput bool,
 		retainTrailingPrompt bool,
 	) uint8
@@ -109,7 +109,7 @@ type CliMapping struct {
 		cancel *bool,
 		inputs string,
 		requestedMode string,
-		inputHandling string,
+		inputHandling *uint8,
 		retainInput bool,
 		retainTrailingPrompt bool,
 	) uint8
@@ -124,7 +124,7 @@ type CliMapping struct {
 		response string,
 		abortInput string,
 		requestedMode string,
-		inputHandling string,
+		inputHandling *uint8,
 		hiddenInput bool,
 		retainTrailingPrompt bool,
 	) uint8
@@ -282,7 +282,7 @@ func (m *CliMapping) SendInput(
 	cancel *bool,
 	input string,
 	requestedMode string,
-	inputHandling string,
+	inputHandling *uint8,
 	retainInput bool,
 	retainTrailingPrompt bool,
 ) error {
@@ -309,7 +309,7 @@ func (m *CliMapping) SendInputs(
 	cancel *bool,
 	inputs string,
 	requestedMode string,
-	inputHandling string,
+	inputHandling *uint8,
 	retainInput bool,
 	retainTrailingPrompt bool,
 ) error {
@@ -341,7 +341,7 @@ func (m *CliMapping) SendPromptedInput(
 	response string,
 	abortInput string,
 	requestedMode string,
-	inputHandling string,
+	inputHandling *uint8,
 	hiddenInput bool,
 	retainTrailingPrompt bool,
 ) error {

@@ -7,9 +7,7 @@ import (
 )
 
 func newSendPromptedInputOptions(options ...Option) *sendPromptedInputOptions {
-	o := &sendPromptedInputOptions{
-		inputHandling: InputHandlingFuzzy,
-	}
+	o := &sendPromptedInputOptions{}
 
 	for _, opt := range options {
 		opt(o)
@@ -20,11 +18,21 @@ func newSendPromptedInputOptions(options ...Option) *sendPromptedInputOptions {
 
 type sendPromptedInputOptions struct {
 	requestedMode        string
-	inputHandling        InputHandling
+	inputHandling        *InputHandling
 	retainTrailingPrompt bool
 	promptPattern        string
 	abortInput           string
 	hiddenInput          bool
+}
+
+func (o *sendPromptedInputOptions) getInputHandling() *uint8 {
+	if o.inputHandling == nil {
+		return nil
+	}
+
+	v := uint8(*o.inputHandling)
+
+	return &v
 }
 
 // SendPromptedInput sends an `input` to the device expecting the given `prompt`, finally sending
@@ -56,7 +64,7 @@ func (c *Cli) SendPromptedInput(
 		response,
 		loadedOptions.abortInput,
 		loadedOptions.requestedMode,
-		string(loadedOptions.inputHandling),
+		loadedOptions.getInputHandling(),
 		loadedOptions.hiddenInput,
 		loadedOptions.retainTrailingPrompt,
 	)
