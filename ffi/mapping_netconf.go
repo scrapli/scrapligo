@@ -161,12 +161,12 @@ type NetconfMapping struct {
 		driverPtr uintptr,
 		operationID *uint32,
 		cancel *bool,
-		source string,
+		source *uint8,
 		filter string,
-		filterType string,
+		filterType *uint8,
 		filterNamespacePrefix string,
 		filterNamespace string,
-		defaultsType string,
+		defaultsType *uint8,
 	) uint8
 
 	editConfig func(
@@ -174,39 +174,39 @@ type NetconfMapping struct {
 		operationID *uint32,
 		cancel *bool,
 		config string,
-		target string,
-		defaultOperation string,
-		testOption string,
-		errorOption string,
+		target *uint8,
+		defaultOperation *uint8,
+		testOption *uint8,
+		errorOption *uint8,
 	) uint8
 
 	copyConfig func(
 		driverPtr uintptr,
 		operationID *uint32,
 		cancel *bool,
-		target string,
-		source string,
+		target *uint8,
+		source *uint8,
 	) uint8
 
 	deleteConfig func(
 		driverPtr uintptr,
 		operationID *uint32,
 		cancel *bool,
-		target string,
+		target *uint8,
 	) uint8
 
 	lock func(
 		driverPtr uintptr,
 		operationID *uint32,
 		cancel *bool,
-		target string,
+		target *uint8,
 	) uint8
 
 	unlock func(
 		driverPtr uintptr,
 		operationID *uint32,
 		cancel *bool,
-		target string,
+		target *uint8,
 	) uint8
 
 	get func(
@@ -214,10 +214,10 @@ type NetconfMapping struct {
 		operationID *uint32,
 		cancel *bool,
 		filter string,
-		filterType string,
+		filterType *uint8,
 		filterNamespacePrefix string,
 		filterNamespace string,
-		defaultsType string,
+		defaultsType *uint8,
 	) uint8
 
 	closeSession func(
@@ -253,7 +253,7 @@ type NetconfMapping struct {
 		driverPtr uintptr,
 		operationID *uint32,
 		cancel *bool,
-		source string,
+		source *uint8,
 	) uint8
 
 	getSchema func(
@@ -262,30 +262,30 @@ type NetconfMapping struct {
 		cancel *bool,
 		identifier string,
 		version string,
-		format string,
+		format *uint8,
 	) uint8
 	getData func(
 		driverPtr uintptr,
 		operationID *uint32,
 		cancel *bool,
-		datastore,
-		filter,
-		filterType,
-		filterNamespacePrefix,
-		filterNamespace,
-		configFilter,
+		datastore *uint8,
+		filter string,
+		filterType *uint8,
+		filterNamespacePrefix string,
+		filterNamespace string,
+		configFilter *bool,
 		originFilters string,
 		maxDepth uint32,
 		withOrigin bool,
-		defaultsType string,
+		defaultsType *uint8,
 	) uint8
 	editData func(
 		driverPtr uintptr,
 		operationID *uint32,
 		cancel *bool,
-		datastore string,
+		datastore *uint8,
 		content string,
-		defaultOperation string,
+		defaultOperation *uint8,
 	) uint8
 	action func(
 		driverPtr uintptr,
@@ -508,12 +508,12 @@ func (m *NetconfMapping) GetConfig(
 	driverPtr uintptr,
 	operationID *uint32,
 	cancel *bool,
-	source string,
+	source *uint8,
 	filter string,
-	filterType string,
+	filterType *uint8,
 	filterNamespacePrefix string,
 	filterNamespace string,
-	defaultsType string,
+	defaultsType *uint8,
 ) error {
 	return newLibScrapliResult(
 		m.getConfig(
@@ -538,10 +538,10 @@ func (m *NetconfMapping) EditConfig(
 	operationID *uint32,
 	cancel *bool,
 	config string,
-	target string,
-	defaultOperation string,
-	testOption string,
-	errorOption string,
+	target *uint8,
+	defaultOperation *uint8,
+	testOption *uint8,
+	errorOption *uint8,
 ) error {
 	return newLibScrapliResult(
 		m.editConfig(
@@ -564,8 +564,8 @@ func (m *NetconfMapping) CopyConfig(
 	driverPtr uintptr,
 	operationID *uint32,
 	cancel *bool,
-	target string,
-	source string,
+	target *uint8,
+	source *uint8,
 ) error {
 	return newLibScrapliResult(
 		m.copyConfig(
@@ -585,7 +585,7 @@ func (m *NetconfMapping) DeleteConfig(
 	driverPtr uintptr,
 	operationID *uint32,
 	cancel *bool,
-	target string,
+	target *uint8,
 ) error {
 	return newLibScrapliResult(
 		m.deleteConfig(
@@ -604,7 +604,7 @@ func (m *NetconfMapping) Lock(
 	driverPtr uintptr,
 	operationID *uint32,
 	cancel *bool,
-	target string,
+	target *uint8,
 ) error {
 	return newLibScrapliResult(
 		m.lock(
@@ -623,7 +623,7 @@ func (m *NetconfMapping) Unlock(
 	driverPtr uintptr,
 	operationID *uint32,
 	cancel *bool,
-	target string,
+	target *uint8,
 ) error {
 	return newLibScrapliResult(
 		m.unlock(
@@ -643,10 +643,10 @@ func (m *NetconfMapping) Get(
 	operationID *uint32,
 	cancel *bool,
 	filter string,
-	filterType string,
+	filterType *uint8,
 	filterNamespacePrefix string,
 	filterNamespace string,
-	defaultsType string,
+	defaultsType *uint8,
 ) error {
 	return newLibScrapliResult(
 		m.get(
@@ -758,7 +758,7 @@ func (m *NetconfMapping) Validate(
 	driverPtr uintptr,
 	operationID *uint32,
 	cancel *bool,
-	source string,
+	source *uint8,
 ) error {
 	return newLibScrapliResult(
 		m.validate(
@@ -779,7 +779,7 @@ func (m *NetconfMapping) GetSchema(
 	cancel *bool,
 	identifier string,
 	version string,
-	format string,
+	format *uint8,
 ) error {
 	return newLibScrapliResult(
 		m.getSchema(
@@ -800,16 +800,16 @@ func (m *NetconfMapping) GetData(
 	driverPtr uintptr,
 	operationID *uint32,
 	cancel *bool,
-	datastore,
-	filter,
-	filterType,
-	filterNamespacePrefix,
-	filterNamespace,
-	configFilter,
+	datastore *uint8,
+	filter string,
+	filterType *uint8,
+	filterNamespacePrefix string,
+	filterNamespace string,
+	configFilter *bool,
 	originFilters string,
 	maxDepth uint32,
 	withOrigin bool,
-	defaultsType string,
+	defaultsType *uint8,
 ) error {
 	return newLibScrapliResult(
 		m.getData(
@@ -837,9 +837,9 @@ func (m *NetconfMapping) EditData(
 	driverPtr uintptr,
 	operationID *uint32,
 	cancel *bool,
-	datastore string,
+	datastore *uint8,
 	content string,
-	defaultOperation string,
+	defaultOperation *uint8,
 ) error {
 	return newLibScrapliResult(
 		m.editData(

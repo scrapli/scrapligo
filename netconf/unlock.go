@@ -1,4 +1,4 @@
-package netconf
+package netconf //nolint: dupl
 
 import (
 	"context"
@@ -7,9 +7,7 @@ import (
 )
 
 func newUnlockOptions(options ...Option) *unlockOptions {
-	o := &unlockOptions{
-		target: DatastoreTypeRunning,
-	}
+	o := &unlockOptions{}
 
 	for _, opt := range options {
 		opt(o)
@@ -19,7 +17,17 @@ func newUnlockOptions(options ...Option) *unlockOptions {
 }
 
 type unlockOptions struct {
-	target DatastoreType
+	target *DatastoreType
+}
+
+func (o *unlockOptions) getTarget() *uint8 {
+	if o.target == nil {
+		return nil
+	}
+
+	v := uint8(*o.target)
+
+	return &v
 }
 
 // Unlock executes a netconf unlock rpc. Supported options:
@@ -42,7 +50,7 @@ func (n *Netconf) Unlock(
 		n.ptr,
 		&operationID,
 		&cancel,
-		loadedOptions.target.String(),
+		loadedOptions.getTarget(),
 	)
 	if err != nil {
 		return nil, err

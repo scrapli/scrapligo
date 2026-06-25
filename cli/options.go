@@ -1,21 +1,21 @@
 package cli
 
 // InputHandling is an enum(ish) representing the kind of InputHandling an operation should use.
-type InputHandling string
+type InputHandling uint8
 
 const (
 	// InputHandlingExact represents "exact" input handling -- meaning the driver will read the
 	// *exact* inputs from the connection before continuing/sending the return char.
-	InputHandlingExact InputHandling = "exact"
+	InputHandlingExact InputHandling = iota
 	// InputHandlingFuzzy represents "fuzzy" input handling -- meaning the driver will read all
 	// input characters in the correct order from the connection before continuing/sending return --
 	// this means that inputs can still be read even if there are some chars that interrupt it such
 	// as backspaces or indicators of newlines etc.
-	InputHandlingFuzzy InputHandling = "fuzzy"
+	InputHandlingFuzzy
 	// InputHandlingIgnore represents "ignore" input handling -- meaning the driver will simply
 	// continue to sending return rather than attempting to read/consume the input. Generally,
 	// don't use this.
-	InputHandlingIgnore InputHandling = "ignore"
+	InputHandlingIgnore
 )
 
 // Option defines a functional option for a cli operation.
@@ -40,11 +40,11 @@ func WithInputHandling(i InputHandling) Option {
 	return func(o any) {
 		switch to := o.(type) {
 		case *sendInputOptions:
-			to.inputHandling = i
+			to.inputHandling = &i
 		case *sendInputsOptions:
-			to.inputHandling = i
+			to.inputHandling = &i
 		case *sendPromptedInputOptions:
-			to.inputHandling = i
+			to.inputHandling = &i
 		}
 	}
 }

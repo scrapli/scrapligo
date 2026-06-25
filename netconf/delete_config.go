@@ -1,4 +1,4 @@
-package netconf
+package netconf //nolint: dupl
 
 import (
 	"context"
@@ -7,9 +7,7 @@ import (
 )
 
 func newDeleteConfigOptions(options ...Option) *deleteConfigOptions {
-	o := &deleteConfigOptions{
-		target: DatastoreTypeRunning,
-	}
+	o := &deleteConfigOptions{}
 
 	for _, opt := range options {
 		opt(o)
@@ -19,7 +17,17 @@ func newDeleteConfigOptions(options ...Option) *deleteConfigOptions {
 }
 
 type deleteConfigOptions struct {
-	target DatastoreType
+	target *DatastoreType
+}
+
+func (o *deleteConfigOptions) getTarget() *uint8 {
+	if o.target == nil {
+		return nil
+	}
+
+	v := uint8(*o.target)
+
+	return &v
 }
 
 // DeleteConfig executes a netconf delete config rpc. Supported options:
@@ -42,7 +50,7 @@ func (n *Netconf) DeleteConfig(
 		n.ptr,
 		&operationID,
 		&cancel,
-		loadedOptions.target.String(),
+		loadedOptions.getTarget(),
 	)
 	if err != nil {
 		return nil, err
