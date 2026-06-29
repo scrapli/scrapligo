@@ -37,12 +37,12 @@ func TestMain(m *testing.M) {
 	os.Exit(exitCode)
 }
 
-func TestConcurrency(t *testing.T) {
+func TestConcurrency(t *testing.T) { //nolint: gocognit
 	tmpDir := t.TempDir()
 
 	dumboBin := fmt.Sprintf("%s/dumbo", tmpDir)
 
-	dumboBuild := exec.CommandContext(
+	dumboBuild := exec.CommandContext( //nolint: gosec
 		t.Context(),
 		"go",
 		"build",
