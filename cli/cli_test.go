@@ -38,32 +38,25 @@ func TestMain(m *testing.M) {
 }
 
 func TestConcurrency(t *testing.T) {
-	dumboCmd := exec.CommandContext(
+	tmpDir := t.TempDir()
+
+	dumboBin := fmt.Sprintf("%s/dumbo", tmpDir)
+
+	dumboBuild := exec.CommandContext(
 		t.Context(),
 		"go",
-		"run",
+		"build",
+		"-o",
+		dumboBin,
 		"main.go",
 	)
 
-	dumboCmd.Dir = "../build/dummy_ssh_server"
+	dumboBuild.Dir = "../build/dummy_ssh_server"
 
-	err := dumboCmd.Start()
+	err := dumboBuild.Run()
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	// since we just do "start" give the server time to run (esp since we are doing go run so has
-	// to build the thing too)
-	time.Sleep(250 * time.Millisecond)
-
-	t.Cleanup(
-		func() {
-			t.Log("cleanup dummy server")
-
-			_ = dumboCmd.Process.Kill()
-			_ = dumboCmd.Wait()
-		},
-	)
 
 	for _, transportName := range []string{
 		"bin",
@@ -74,6 +67,31 @@ func TestConcurrency(t *testing.T) {
 		t.Run(testName, func(t *testing.T) {
 			t.Logf("%s: starting", testName)
 			defer t.Logf("%s: complete", testName)
+
+			dumboCmd := exec.CommandContext(
+				t.Context(),
+				dumboBin,
+			)
+
+			err = dumboCmd.Start()
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			time.Sleep(250 * time.Millisecond)
+
+			t.Cleanup(
+				func() {
+					t.Log("cleanup dummy server")
+
+					err = dumboCmd.Process.Kill()
+					if err != nil {
+						t.Fatal(err)
+					}
+
+					_ = dumboCmd.Wait()
+				},
+			)
 
 			ctx, cancel := context.WithTimeout(t.Context(), 10*time.Second)
 			defer cancel()

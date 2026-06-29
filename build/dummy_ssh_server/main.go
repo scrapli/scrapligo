@@ -5,6 +5,7 @@ import (
 	"context"
 	"crypto/rand"
 	"crypto/rsa"
+	"errors"
 	"fmt"
 	"log"
 	mathrand "math/rand"
@@ -12,6 +13,7 @@ import (
 	"os"
 	"os/signal"
 	"strings"
+	"sync"
 	"syscall"
 	"time"
 
@@ -125,32 +127,33 @@ func main() {
 
 	fmt.Println("dumbo is listening...")
 
-	sem := make(chan struct{}, 50)
+	var wg sync.WaitGroup
+
+	go func() {
+		<-ctx.Done()
+		_ = listener.Close()
+	}()
 
 	for {
-		sem <- struct{}{} // blocks Accept loop when full
-
 		conn, err := listener.Accept()
 		if err != nil {
-			<-sem
-			continue
+			if errors.Is(err, net.ErrClosed) {
+				break
+			}
+
+			panic(err)
 		}
 
+		wg.Add(1)
 		go func(conn net.Conn) {
-			defer func() { <-sem }()
+			defer wg.Done()
+			defer conn.Close()
+
 			handleConnection(conn, sshConfig)
 		}(conn)
 	}
 
-	// conn, err := listener.Accept()
-	// if err != nil {
-	// 	log.Printf("failed to accept incoming connection: %v", err)
-
-	// 	continue
-	// }
-
-	// go handleConnection(conn, sshConfig)
-	// }
+	wg.Wait()
 }
 
 func handleConnection(nConn net.Conn, config *ssh.ServerConfig) {
