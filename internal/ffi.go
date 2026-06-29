@@ -2,12 +2,9 @@ package internal
 
 type driverOptions struct {
 	loggerCallback uintptr
-	loggerLevel    uintptr
-	loggerLevelLen uintptr
-
-	port             *uint16
-	transportKind    uintptr
-	transportKindLen uintptr
+	loggerLevel    uint8
+	port           *uint16
+	transportKind  uint8
 
 	cli struct {
 		definitionStr               uintptr

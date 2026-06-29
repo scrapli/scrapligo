@@ -8,18 +8,14 @@ import (
 )
 
 // TransportKind is an enum(ish) representing the kind of transport a Cli should use.
-type TransportKind string
+type TransportKind uint8
 
+// enumerations of TransportKind.
 const (
-	// TransportKindBin represents the "bin" transport -- the default transport that is a wrapper
-	// around /bin/ssh.
-	TransportKindBin TransportKind = "bin"
-	// TransportKindSSH2 represents the "ssh2" transport -- the transport using libssh2.
-	TransportKindSSH2 TransportKind = "ssh2"
-	// TransportKindTelnet represents the "telnet" transport.
-	TransportKindTelnet TransportKind = "telnet"
-	// TransportKindTest represents the "Test" transport that is used for integration testing.
-	TransportKindTest TransportKind = "test_"
+	TransportKindBin TransportKind = iota
+	TransportKindTelnet
+	TransportKindSSH2
+	TransportKindTest
 )
 
 var zero uint64 //nolint: gochecknoglobals
@@ -69,8 +65,7 @@ func (o *Options) GetLogger() *scrapligologging.AnyLogger {
 func (o *Options) Apply(optionsPtr uintptr) {
 	opts := (*driverOptions)(unsafe.Pointer(optionsPtr)) //nolint: govet
 
-	opts.loggerLevel = uintptr(unsafe.Pointer(unsafe.StringData(string(o.LoggerLevel))))
-	opts.loggerLevelLen = uintptr(len(o.LoggerLevel))
+	opts.loggerLevel = uint8(scrapligologging.IntFromLevel(o.LoggerLevel))
 	opts.loggerCallback = scrapligologging.LoggerToLoggerCallback(
 		o.Logger,
 		uint8(scrapligologging.IntFromLevel(o.LoggerLevel)),
@@ -83,8 +78,7 @@ func (o *Options) Apply(optionsPtr uintptr) {
 	o.Session.apply(opts)
 	o.Auth.apply(opts)
 
-	opts.transportKind = uintptr(unsafe.Pointer(unsafe.StringData(string(o.TransportKind))))
-	opts.transportKindLen = uintptr(len(o.TransportKind))
+	opts.transportKind = uint8(o.TransportKind)
 
 	switch o.TransportKind {
 	case TransportKindBin:
