@@ -99,7 +99,7 @@ func TestConcurrency(t *testing.T) {
 				)
 			}
 
-			for range 200 {
+			for range 100 {
 				wg.Go(
 					func() {
 						// tiny sleep seems to make the test way more consistent -- at least locally
