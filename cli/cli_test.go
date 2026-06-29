@@ -4,13 +4,12 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	mathrand "math/rand"
 	"os"
 	"os/exec"
 	"sync"
 	"testing"
 	"time"
-
-	mathrand "math/rand"
 
 	scrapligocli "github.com/scrapli/scrapligo/v2/cli"
 	scrapligoffi "github.com/scrapli/scrapligo/v2/ffi"
@@ -106,7 +105,9 @@ func TestConcurrency(t *testing.T) {
 						// tiny sleep seems to make the test way more consistent -- at least locally
 						// on darwin i think we get starved for ptys and weird shit happens w/out
 						// this.
-						time.Sleep(time.Duration(mathrand.Intn(100)) * time.Millisecond)
+						time.Sleep(
+							time.Duration(mathrand.Intn(100)) * time.Millisecond, //nolint:gosec
+						)
 
 						c, err := scrapligocli.NewCli( //nolint: contextcheck
 							"localhost",
