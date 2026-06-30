@@ -100,7 +100,8 @@ type NetconfMapping struct {
 		resultSize,
 		rpcWarningsSize,
 		rpcErrorsSize,
-		errSize *uintptr,
+		errSize,
+		lastErrStrSize *uintptr,
 	) uint8
 
 	fetchOperation func(
@@ -113,7 +114,8 @@ type NetconfMapping struct {
 		result,
 		rpcWarnings,
 		rpcErrors,
-		err *[]byte,
+		err,
+		lastErrStr *[]byte,
 	) uint8
 
 	getSessionID func(
@@ -338,7 +340,8 @@ func (m *NetconfMapping) FetchOperationSizes(
 	resultSize,
 	rpcWarningsSize,
 	rpcErrorsSize,
-	errSize *uintptr,
+	errSize,
+	lastErrStrSize *uintptr,
 ) error {
 	return newLibScrapliResult(
 		m.fetchOperationSizes(
@@ -350,6 +353,7 @@ func (m *NetconfMapping) FetchOperationSizes(
 			rpcWarningsSize,
 			rpcErrorsSize,
 			errSize,
+			lastErrStrSize,
 		),
 		"fetch operation sizes failed",
 	).check()
@@ -368,7 +372,8 @@ func (m *NetconfMapping) FetchOperation(
 	result,
 	rpcWarnings,
 	rpcErrors,
-	err *[]byte,
+	err,
+	lastErrStr *[]byte,
 ) error {
 	return newLibScrapliResult(
 		m.fetchOperation(
@@ -382,6 +387,7 @@ func (m *NetconfMapping) FetchOperation(
 			rpcWarnings,
 			rpcErrors,
 			err,
+			lastErrStr,
 		),
 		"fetch operation failed",
 	).check()

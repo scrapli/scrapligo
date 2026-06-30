@@ -346,7 +346,14 @@ func (c *Cli) getResult(
 
 	_, _ = unix.Read(c.pollFd, out)
 
-	var inputsSize, resultsRawSize, resultsSize, resultsFailedIndicatorSize, errSize uintptr
+	var (
+		inputsSize                 uintptr
+		resultsRawSize             uintptr
+		resultsSize                uintptr
+		resultsFailedIndicatorSize uintptr
+		errSize                    uintptr
+		lastErrStrSize             uintptr
+	)
 
 	err := c.ffiMap.Cli.FetchOperationSizes(
 		c.ptr,
@@ -357,6 +364,7 @@ func (c *Cli) getResult(
 		&resultsSize,
 		&resultsFailedIndicatorSize,
 		&errSize,
+		&lastErrStrSize,
 	)
 	if err != nil {
 		return nil, err
@@ -376,6 +384,8 @@ func (c *Cli) getResult(
 
 	errString := make([]byte, errSize)
 
+	lastErrString := make([]byte, lastErrStrSize)
+
 	err = c.ffiMap.Cli.FetchOperation(
 		c.ptr,
 		operationID,
@@ -386,6 +396,7 @@ func (c *Cli) getResult(
 		&results,
 		&resultsFailedWhenIndicator,
 		&errString,
+		&lastErrString,
 	)
 	if err != nil {
 		return nil, err
@@ -394,7 +405,13 @@ func (c *Cli) getResult(
 	if errSize != 0 {
 		// always wrap the context error (even if nil) so we catch cancels/deadline exceeded and
 		// users can errors.Is with that
-		return nil, scrapligoerrors.NewFfiError(string(errString), ctx.Err())
+		outErrMsg := string(errString)
+
+		if lastErrStrSize > 0 {
+			outErrMsg += fmt.Sprintf(": %s", string(lastErrString))
+		}
+
+		return nil, scrapligoerrors.NewFfiError(outErrMsg, ctx.Err())
 	}
 
 	return NewResult(

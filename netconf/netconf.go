@@ -3,6 +3,7 @@ package netconf
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	scrapligoconstants "github.com/scrapli/scrapligo/v2/constants"
 	scrapligoerrors "github.com/scrapli/scrapligo/v2/errors"
@@ -352,7 +353,15 @@ func (n *Netconf) getResult(
 
 	_, _ = unix.Read(n.pollFd, out)
 
-	var inputSize, resultRawSize, resultSize, rpcWarningsSize, rpcErrorsSize, errSize uintptr
+	var (
+		inputSize       uintptr
+		resultRawSize   uintptr
+		resultSize      uintptr
+		rpcWarningsSize uintptr
+		rpcErrorsSize   uintptr
+		errSize         uintptr
+		lastErrStrSize  uintptr
+	)
 
 	err := n.ffiMap.Netconf.FetchOperationSizes(
 		n.ptr,
@@ -363,6 +372,7 @@ func (n *Netconf) getResult(
 		&rpcWarningsSize,
 		&rpcErrorsSize,
 		&errSize,
+		&lastErrStrSize,
 	)
 	if err != nil {
 		return nil, err
@@ -382,6 +392,8 @@ func (n *Netconf) getResult(
 
 	errString := make([]byte, errSize)
 
+	lastErrString := make([]byte, lastErrStrSize)
+
 	err = n.ffiMap.Netconf.FetchOperation(
 		n.ptr,
 		operationID,
@@ -393,13 +405,20 @@ func (n *Netconf) getResult(
 		&rpcWarnings,
 		&rpcErrors,
 		&errString,
+		&lastErrString,
 	)
 	if err != nil {
 		return nil, err
 	}
 
 	if errSize != 0 {
-		return nil, scrapligoerrors.NewFfiError(string(errString), ctx.Err())
+		outErrMsg := string(errString)
+
+		if lastErrStrSize > 0 {
+			outErrMsg += fmt.Sprintf(": %s", string(lastErrString))
+		}
+
+		return nil, scrapligoerrors.NewFfiError(outErrMsg, ctx.Err())
 	}
 
 	return NewResult(

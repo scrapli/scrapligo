@@ -64,7 +64,8 @@ type CliMapping struct {
 		resultsRawSize,
 		resultsSize,
 		resultsFailedIndicatorSize,
-		errSize *uintptr,
+		errSize,
+		lastErrStrSize *uintptr,
 	) uint8
 
 	fetchOperation func(
@@ -76,7 +77,8 @@ type CliMapping struct {
 		resultsRaw,
 		results,
 		resultsFailedIndicator,
-		err *[]byte,
+		err,
+		lastErrStr *[]byte,
 	) uint8
 
 	enterMode func(
@@ -191,7 +193,8 @@ func (m *CliMapping) FetchOperationSizes(
 	resultsRawSize,
 	resultsSize,
 	resultsFailedIndicatorSize,
-	errSize *uintptr,
+	errSize,
+	lastErrStrSize *uintptr,
 ) error {
 	return newLibScrapliResult(
 		m.fetchOperationSizes(
@@ -203,6 +206,7 @@ func (m *CliMapping) FetchOperationSizes(
 			resultsSize,
 			resultsFailedIndicatorSize,
 			errSize,
+			lastErrStrSize,
 		),
 		"fetch operation sizes failed",
 	).check()
@@ -220,7 +224,8 @@ func (m *CliMapping) FetchOperation(
 	resultsRaw,
 	results,
 	resultsFailedIndicator,
-	err *[]byte,
+	err,
+	lastErrStr *[]byte,
 ) error {
 	return newLibScrapliResult(
 		m.fetchOperation(
@@ -233,6 +238,7 @@ func (m *CliMapping) FetchOperation(
 			results,
 			resultsFailedIndicator,
 			err,
+			lastErrStr,
 		),
 		"fetch operation failed",
 	).check()
