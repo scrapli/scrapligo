@@ -346,7 +346,10 @@ func (c *Cli) getResult(
 
 	out := make([]byte, n)
 
-	_, _ = unix.Read(c.pollFd, out)
+	_, err := unix.Read(c.pollFd, out)
+	if err != nil {
+		return nil, err
+	}
 
 	var (
 		inputsSize                 uintptr
@@ -357,7 +360,7 @@ func (c *Cli) getResult(
 		lastErrStrSize             uintptr
 	)
 
-	err := c.ffiMap.Cli.FetchOperationSizes(
+	err = c.ffiMap.Cli.FetchOperationSizes(
 		c.ptr,
 		operationID,
 		&operationCount,

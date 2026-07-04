@@ -353,7 +353,10 @@ func (n *Netconf) getResult(
 
 	out := make([]byte, _n)
 
-	_, _ = unix.Read(n.pollFd, out)
+	_, err := unix.Read(n.pollFd, out)
+	if err != nil {
+		return nil, err
+	}
 
 	var (
 		inputSize       uintptr
@@ -365,7 +368,7 @@ func (n *Netconf) getResult(
 		lastErrStrSize  uintptr
 	)
 
-	err := n.ffiMap.Netconf.FetchOperationSizes(
+	err = n.ffiMap.Netconf.FetchOperationSizes(
 		n.ptr,
 		operationID,
 		&inputSize,
