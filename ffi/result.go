@@ -6,6 +6,7 @@ import (
 
 const (
 	libscrapliReturnCodeSuccess uint8 = iota
+	libscrapliReturnCodeUnknown
 	libscrapliReturnCodeOutOfMemory
 	libscrapliReturnCodeEOF
 	libscrapliReturnCodeCancelled
@@ -15,7 +16,6 @@ const (
 	libscrapliReturnCodeTransport
 	libscrapliReturnCodeOperation
 	libscrapliReturnCodeInvalidArgument
-	libscrapliReturnCodeUnknown
 )
 
 // libscrapliResult holds a libscrapli return code and the caller of that functions provided
