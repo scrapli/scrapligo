@@ -62,7 +62,7 @@ func TestConcurrency(t *testing.T) { //nolint: gocognit
 		"bin",
 		"ssh2",
 	} {
-		testName := fmt.Sprintf("concurrencty-%s", transportName)
+		testName := fmt.Sprintf("concurrency-%s", transportName)
 
 		t.Run(testName, func(t *testing.T) {
 			t.Logf("%s: starting", testName)
@@ -117,7 +117,7 @@ func TestConcurrency(t *testing.T) { //nolint: gocognit
 				)
 			}
 
-			for range 100 {
+			for range 200 {
 				wg.Go(
 					func() {
 						// tiny sleep seems to make the test way more consistent -- at least locally

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"sync"
 
 	scrapligoconstants "github.com/scrapli/scrapligo/v2/constants"
 	scrapligoerrors "github.com/scrapli/scrapligo/v2/errors"
@@ -294,7 +295,7 @@ func (n *Netconf) GetNextSubscription(subscriptionID uint64) (string, error) {
 	return string(sub), nil
 }
 
-func (n *Netconf) getResult(
+func (n *Netconf) getResult( //nolint: funlen
 	ctx context.Context,
 	cancel *bool,
 	operationID uint32,
@@ -302,9 +303,14 @@ func (n *Netconf) getResult(
 	done := make(chan struct{}, 1)
 	defer close(done)
 
+	cancelLock := &sync.Mutex{}
+
 	go func() {
 		select {
 		case <-ctx.Done():
+			cancelLock.Lock()
+			defer cancelLock.Unlock()
+
 			*cancel = true
 
 			return
@@ -319,7 +325,11 @@ func (n *Netconf) getResult(
 
 	for {
 		if ctx.Err() != nil {
+			cancelLock.Lock()
+
 			*cancel = true
+
+			cancelLock.Unlock()
 
 			return nil, ctx.Err()
 		}

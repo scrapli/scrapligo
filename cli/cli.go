@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 
 	scrapligoassets "github.com/scrapli/scrapligo/v2/assets"
 	scrapligoclidefinitionoptions "github.com/scrapli/scrapligo/v2/cli/definitionoptions"
@@ -282,7 +283,7 @@ func (c *Cli) ReplaceDefinition(definitionFileOrString string) error {
 	return c.ffiMap.Cli.ReplaceDefinition(c.ptr, c.options.Cli.DefinitionString)
 }
 
-func (c *Cli) getResult(
+func (c *Cli) getResult( //nolint: funlen
 	ctx context.Context,
 	cancel *bool,
 	operationID uint32,
@@ -292,12 +293,17 @@ func (c *Cli) getResult(
 
 	var operationCount uint32
 
+	cancelLock := &sync.Mutex{}
+
 	// so in go flavor we actually use ctx to cause libscrapli to timeout vs python where we rely on
 	// the timeouts in libscrapli itself. so in this case we need to ensure that we do not block the
 	// context so it can properly cancel on timeout/cancellation...
 	go func() {
 		select {
 		case <-ctx.Done():
+			cancelLock.Lock()
+			defer cancelLock.Unlock()
+
 			*cancel = true
 
 			return
@@ -312,7 +318,11 @@ func (c *Cli) getResult(
 
 	for {
 		if ctx.Err() != nil {
+			cancelLock.Lock()
+
 			*cancel = true
+
+			cancelLock.Unlock()
 
 			return nil, ctx.Err()
 		}
