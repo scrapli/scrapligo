@@ -319,6 +319,8 @@ func (n *Netconf) getResult(
 
 	for {
 		if ctx.Err() != nil {
+			*cancel = true
+
 			return nil, ctx.Err()
 		}
 
