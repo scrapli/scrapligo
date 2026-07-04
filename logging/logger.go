@@ -9,7 +9,7 @@ import (
 // AnyLogger is a logger that wraps any of the supported logger types (log.Logger, slog.Logger or
 // the callback style) to give the Cli/Netconf objects an abstracted, simple logger object.
 type AnyLogger struct {
-	level    LogLeveLAsInt
+	level    LogLevelAsInt
 	trace    func(s string)
 	debug    func(s string)
 	info     func(s string)
@@ -62,16 +62,18 @@ func (l *AnyLogger) Critical(s string) {
 	l.critical(s)
 }
 
+func noopLoggerFunc(string) {}
+
 // LoggerToAnyLogger wraps any of the supported logger flavors in an AnyLogger so the Cli/Netconf
 // objects can easily log to them w/ a consistent/simple interface.
 func LoggerToAnyLogger(logger any, logLevel LogLevel) *AnyLogger {
 	al := &AnyLogger{
 		level:    IntFromLevel(logLevel),
-		trace:    func(_ string) {},
-		debug:    func(_ string) {},
-		info:     func(_ string) {},
-		warn:     func(_ string) {},
-		critical: func(_ string) {},
+		trace:    noopLoggerFunc,
+		debug:    noopLoggerFunc,
+		info:     noopLoggerFunc,
+		warn:     noopLoggerFunc,
+		critical: noopLoggerFunc,
 	}
 
 	switch l := logger.(type) {
@@ -80,7 +82,7 @@ func LoggerToAnyLogger(logger any, logLevel LogLevel) *AnyLogger {
 		al.debug = func(s string) { l.Printf("debug :: %s", s) }
 		al.info = func(s string) { l.Printf(" info :: %s", s) }
 		al.warn = func(s string) { l.Printf(" warn :: %s", s) }
-		al.critical = func(s string) { l.Printf(" crit ::: %s", s) }
+		al.critical = func(s string) { l.Printf(" crit :: %s", s) }
 	case *slog.Logger:
 		al.trace = func(s string) { l.Debug(fmt.Sprintf("trace: %s", s)) }
 		al.debug = func(s string) { l.Debug(s) }

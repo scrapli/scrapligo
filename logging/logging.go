@@ -11,10 +11,8 @@ import (
 )
 
 var (
-	// Level is the level at which to emit log messages. When the ScrapligoDebug env var is set
-	// we use that value (if it == one of the log levels, otherwise it defaults to debug), for all
-	// other cases this defaults to warn.
-	Level LogLevel //nolint: gochecknoglobals
+	// Level is the level at which to emit log messages.
+	Level = defaultLevel() //nolint:gochecknoglobals
 
 	// Logger is the main logging function, used mostly for "global" non connection/device related
 	// things like the ffi layer.
@@ -24,6 +22,32 @@ var (
 		}
 	}
 )
+
+func defaultLevel() LogLevel {
+	v := os.Getenv(scrapligoconstants.ScrapligoDebug)
+	if v == "" {
+		return Warn
+	}
+
+	switch v {
+	case Trace.String():
+		return Trace
+	case Debug.String():
+		return Debug
+	case Info.String():
+		return Info
+	case Warn.String():
+		return Warn
+	case Critical.String():
+		return Critical
+	case Fatal.String():
+		return Fatal
+	case Disabled.String():
+		return Disabled
+	default:
+		return Debug
+	}
+}
 
 // LoggerToLoggerCallback wraps a given supported logger type in a callback to be passed to the
 // underlying libscrapli bits.
@@ -90,32 +114,4 @@ func LoggerToLoggerCallback(logger any, logLevel uint8) uintptr { //nolint: gocy
 	}
 
 	return loggerCallback
-}
-
-// normally i *really* dislike inits but... meh?
-func init() { //nolint: gochecknoinits
-	v := os.Getenv(scrapligoconstants.ScrapligoDebug)
-
-	if v != "" {
-		switch v {
-		case Trace.String():
-			Level = Trace
-		case Debug.String():
-			Level = Debug
-		case Info.String():
-			Level = Info
-		case Warn.String():
-			Level = Warn
-		case Critical.String():
-			Level = Critical
-		case Fatal.String():
-			Level = Fatal
-		case Disabled.String():
-			Level = Disabled
-		default:
-			Level = Debug
-		}
-	} else {
-		Level = Warn
-	}
 }
