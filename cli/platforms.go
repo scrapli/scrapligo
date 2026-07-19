@@ -6,7 +6,7 @@ package cli
 type PlatformName string
 
 // String (stringer) method for PlatformName for formatting and/or just to NokiaSrl.String() when
-// passing to.
+// passing to adriver.
 func (p PlatformName) String() string {
 	return string(p)
 }

@@ -15,7 +15,7 @@ const (
 	// a tagged release version).
 	LibScrapliVersionOverrideEnv = "LIBSCRAPLI_VERSION"
 
-	// XdgCacheHomeEnv is the key for env var for XDG_CAHCE_HOME -- we use this to try to see where
+	// XdgCacheHomeEnv is the key for env var for XDG_CACHE_HOME -- we use this to try to see where
 	// a user would want us to cache the libscrapli dynamic library file.
 	XdgCacheHomeEnv = "XDG_CACHE_HOME"
 
