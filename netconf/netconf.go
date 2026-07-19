@@ -295,7 +295,7 @@ func (n *Netconf) GetNextSubscription(subscriptionID uint64) (string, error) {
 	return string(sub), nil
 }
 
-func (n *Netconf) getResult( //nolint: funlen
+func (n *Netconf) getResult( //nolint: funlen,gocyclo
 	ctx context.Context,
 	cancel *bool,
 	operationID uint32,
@@ -361,11 +361,20 @@ func (n *Netconf) getResult( //nolint: funlen
 		}
 	}
 
-	out := make([]byte, _n)
+	var out [1]byte
 
-	_, err := unix.Read(n.pollFd, out)
-	if err != nil {
-		return nil, err
+	for {
+		_, err := unix.Read(n.pollFd, out[:])
+		if err == nil {
+			break
+		}
+
+		if errors.Is(err, unix.EINTR) {
+			// same as loop above -- retry on interrupts
+			continue
+		}
+
+		return nil, scrapligoerrors.NewFfiError("draining operation ready signal", err)
 	}
 
 	var (
@@ -378,7 +387,7 @@ func (n *Netconf) getResult( //nolint: funlen
 		lastErrStrSize  uintptr
 	)
 
-	err = n.ffiMap.Netconf.FetchOperationSizes(
+	err := n.ffiMap.Netconf.FetchOperationSizes(
 		n.ptr,
 		operationID,
 		&inputSize,

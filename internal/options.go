@@ -112,11 +112,11 @@ func (o *CliOptions) apply(opts *driverOptions) {
 	opts.cli.definitionStr = uintptr(unsafe.Pointer(unsafe.StringData(o.DefinitionString)))
 	opts.cli.definitionStrLen = uintptr(len(o.DefinitionString))
 
-	if o.NormalizeLineFeeds == false {
+	if !o.NormalizeLineFeeds {
 		opts.cli.normalizeLineFeeds = &o.NormalizeLineFeeds
 	}
 
-	if o.NormalizeTrailingWhitespace == false {
+	if !o.NormalizeTrailingWhitespace {
 		opts.cli.normalizeTrailingWhitespace = &o.NormalizeTrailingWhitespace
 	}
 }

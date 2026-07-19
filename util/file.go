@@ -47,6 +47,10 @@ func LoadFileLines(f string) ([]string, error) {
 		return []string{}, err
 	}
 
+	defer func() {
+		_ = file.Close()
+	}()
+
 	scanner := bufio.NewScanner(file)
 	scanner.Split(bufio.ScanLines)
 
@@ -54,6 +58,11 @@ func LoadFileLines(f string) ([]string, error) {
 
 	for scanner.Scan() {
 		lines = append(lines, scanner.Text())
+	}
+
+	scannerErr := scanner.Err()
+	if scannerErr != nil {
+		return nil, err
 	}
 
 	return lines, nil

@@ -95,7 +95,7 @@ func (r *Result) Result() string {
 
 // ResultRaw returns all raw results joined on newline chars.
 func (r *Result) ResultRaw() []byte {
-	if len(r.Results) == 0 {
+	if len(r.ResultsRaw) == 0 {
 		return nil
 	}
 

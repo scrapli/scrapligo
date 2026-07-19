@@ -132,7 +132,9 @@ func TestConcurrency(t *testing.T) { //nolint: gocognit
 							opts...,
 						)
 						if err != nil {
-							t.Fatal(err)
+							t.Error(err)
+
+							return
 						}
 
 						_, err = c.Open(ctx)

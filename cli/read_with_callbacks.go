@@ -94,7 +94,7 @@ func (c *Cli) ReadWithCallbacks( //nolint: gocyclo
 
 	resultsRaw := bytes.NewBuffer(nil)
 
-	executedCallbacks := make(map[string]any)
+	executedCallbacks := make(map[string]struct{})
 
 	for {
 		var operationID uint32
@@ -162,7 +162,7 @@ func (c *Cli) ReadWithCallbacks( //nolint: gocyclo
 
 			c.l.Info(fmt.Sprintf("executing callback %q", cb.name))
 
-			executedCallbacks[cb.name] = nil
+			executedCallbacks[cb.name] = struct{}{}
 
 			pos = len(curResults)
 

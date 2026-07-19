@@ -273,17 +273,17 @@ func (c *Cli) ReplaceDefinition(definitionFileOrString string) error {
 		return scrapligoerrors.NewFfiError("driver pointer nil", nil)
 	}
 
-	c.options.Cli.DefinitionFileOrName = definitionFileOrString
-
 	err := loadDefinition(c.options)
 	if err != nil {
 		return err
 	}
 
+	c.options.Cli.DefinitionFileOrName = definitionFileOrString
+
 	return c.ffiMap.Cli.ReplaceDefinition(c.ptr, c.options.Cli.DefinitionString)
 }
 
-func (c *Cli) getResult( //nolint: funlen
+func (c *Cli) getResult( //nolint: funlen,gocyclo
 	ctx context.Context,
 	cancel *bool,
 	operationID uint32,
@@ -354,11 +354,20 @@ func (c *Cli) getResult( //nolint: funlen
 		}
 	}
 
-	out := make([]byte, n)
+	var out [1]byte
 
-	_, err := unix.Read(c.pollFd, out)
-	if err != nil {
-		return nil, err
+	for {
+		_, err := unix.Read(c.pollFd, out[:])
+		if err == nil {
+			break
+		}
+
+		if errors.Is(err, unix.EINTR) {
+			// same as loop above -- retry on interrupts
+			continue
+		}
+
+		return nil, scrapligoerrors.NewFfiError("draining operation ready signal", err)
 	}
 
 	var (
@@ -370,7 +379,7 @@ func (c *Cli) getResult( //nolint: funlen
 		lastErrStrSize             uintptr
 	)
 
-	err = c.ffiMap.Cli.FetchOperationSizes(
+	err := c.ffiMap.Cli.FetchOperationSizes(
 		c.ptr,
 		operationID,
 		&operationCount,

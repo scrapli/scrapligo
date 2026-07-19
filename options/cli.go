@@ -28,9 +28,9 @@ func WithDefinitionFileOrName[T PlatformNameOrString](s T) Option {
 	}
 }
 
-// WithDefintionContent sets the Cli definition content for the Cli object. The name is required as
+// WithDefinitionContent sets the Cli definition content for the Cli object. The name is required as
 // well for us to know how to lookup static options and augments.
-func WithDefintionContent(s string, b []byte) Option {
+func WithDefinitionContent(s string, b []byte) Option {
 	return func(o *scrapligointernal.Options) error {
 		o.Cli.DefinitionPlatform = s
 		o.Cli.DefinitionString = string(b)
