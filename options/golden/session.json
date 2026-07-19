@@ -21,6 +21,8 @@
     "return_char": "return",
     "operation_timeout_ns": 3600000000000,
     "operation_max_search_depth": 9876,
+    "scratch_initial_size": null,
+    "scratch_retain_max": null,
     "record_destination": "recorderoutput"
   },
   "auth": {

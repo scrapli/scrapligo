@@ -21,6 +21,8 @@
     "return_char": "",
     "operation_timeout_ns": 0,
     "operation_max_search_depth": null,
+    "scratch_initial_size": null,
+    "scratch_retain_max": null,
     "record_destination": ""
   },
   "auth": {
