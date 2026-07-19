@@ -33,6 +33,8 @@ type driverOptions struct {
 		recordDestination       uintptr
 		recordDestinationLen    uintptr
 		recorderCallback        uintptr
+		scratchInitialSize      *uint64
+		scratchRetainMax        *uint64
 	}
 
 	auth struct {

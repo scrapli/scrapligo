@@ -70,6 +70,26 @@ func WithOperationMaxSearchDepth(i uint64) Option {
 	}
 }
 
+// WithScratchInitialSize sets the initial size of the "scratch" bufs that the session holds.
+// Almost certainly you can leave this alone unless you have some specific needs.
+func WithScratchInitialSize(i uint64) Option {
+	return func(o *scrapligointernal.Options) error {
+		o.Session.ScratchInitialSize = &i
+
+		return nil
+	}
+}
+
+// WithScratchRetainMax sets the max size (to retain) of the "scratch" bufs -- dont mess with this
+// unless you have some specific needs.
+func WithScratchRetainMax(i uint64) Option {
+	return func(o *scrapligointernal.Options) error {
+		o.Session.ScratchRetainMax = &i
+
+		return nil
+	}
+}
+
 // WithSessionRecorderPath sets the output path for a recorder/writer for the session.
 func WithSessionRecorderPath(s string) Option {
 	return func(o *scrapligointernal.Options) error {

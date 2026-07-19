@@ -161,6 +161,9 @@ type SessionOptions struct {
 	OperationTimeoutNs      *uint64
 	OperationMaxSearchDepth *uint64
 
+	ScratchInitialSize *uint64
+	ScratchRetainMax   *uint64
+
 	RecorderPath     string
 	RecorderCallback func(buf *[]byte)
 }
@@ -193,6 +196,14 @@ func (o *SessionOptions) apply(opts *driverOptions) {
 
 	if o.OperationMaxSearchDepth != nil {
 		opts.session.operationMaxSearchDepth = o.OperationMaxSearchDepth
+	}
+
+	if o.ScratchInitialSize != nil {
+		opts.session.scratchInitialSize = o.ScratchInitialSize
+	}
+
+	if o.ScratchRetainMax != nil {
+		opts.session.scratchRetainMax = o.ScratchRetainMax
 	}
 
 	if o.RecorderPath != "" {
