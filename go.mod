@@ -10,9 +10,9 @@ tool (
 
 require (
 	github.com/carlmontanari/difflibgo v0.0.0-20240227210139-93685b1c22ae
-	github.com/ebitengine/purego v0.10.1
+	github.com/ebitengine/purego v0.10.2
 	github.com/sirikothe/gotextfsm v1.1.0
-	golang.org/x/sys v0.46.0
+	golang.org/x/sys v0.47.0
 )
 
 require (
