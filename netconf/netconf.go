@@ -320,7 +320,9 @@ func (n *Netconf) getResult( //nolint: funlen,gocyclo
 	operationID uint32,
 ) (*Result, error) {
 	var _n int
+
 	var ctxErr error
+
 	var cancelCleanupDeadline time.Time
 
 	pollFds := []unix.PollFd{{Fd: int32(n.pollFd), Events: unix.POLLIN}} //nolint: gosec

@@ -310,7 +310,9 @@ func (c *Cli) getResult( //nolint: funlen,gocyclo
 	var operationCount uint32
 
 	var n int
+
 	var ctxErr error
+
 	var cancelCleanupDeadline time.Time
 
 	pollFds := []unix.PollFd{{Fd: int32(c.pollFd), Events: unix.POLLIN}} //nolint: gosec
