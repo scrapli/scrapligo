@@ -7,7 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"sync"
+	"time"
 
 	scrapligoassets "github.com/scrapli/scrapligo/v2/assets"
 	scrapligoclidefinitionoptions "github.com/scrapli/scrapligo/v2/cli/definitionoptions"
@@ -17,8 +17,13 @@ import (
 	scrapligointernal "github.com/scrapli/scrapligo/v2/internal"
 	scrapligologging "github.com/scrapli/scrapligo/v2/logging"
 	scrapligooptions "github.com/scrapli/scrapligo/v2/options"
+	scrapligoutil "github.com/scrapli/scrapligo/v2/util"
 	"golang.org/x/sys/unix"
 )
+
+const defaultCancelCleanupGrace = 5 * time.Second
+
+var errOperationCancelCleanupTimeout = errors.New("libscrapli operation cleanup timeout")
 
 func loadDefinition(o *scrapligointernal.Options) error {
 	definitionFileOrNameString := o.Cli.DefinitionFileOrName
@@ -188,14 +193,16 @@ func (c *Cli) GetOptions() (string, error) {
 func (c *Cli) Open(ctx context.Context) (*Result, error) {
 	// ensure we dealloc if something happens, otherwise users calls to defer close would not be
 	// super handy
-	cleanup := false
+	cleanup, cleanupFree := false, true
 
 	defer func() {
 		if !cleanup {
 			return
 		}
 
-		c.ffiMap.Shared.Free(c.ptr)
+		if cleanupFree {
+			c.ffiMap.Shared.Free(c.ptr)
+		}
 
 		c.ptr = 0
 	}()
@@ -235,6 +242,7 @@ func (c *Cli) Open(ctx context.Context) (*Result, error) {
 	result, err := c.getResult(ctx, &cancel, operationID)
 	if err != nil {
 		cleanup = true
+		cleanupFree = !errors.Is(err, errOperationCancelCleanupTimeout)
 
 		return nil, err
 	}
@@ -248,8 +256,12 @@ func (c *Cli) Close(ctx context.Context) (*Result, error) {
 		return nil, scrapligoerrors.NewFfiError("driver pointer nil", nil)
 	}
 
+	cleanup := true
+
 	defer func() {
-		c.ffiMap.Shared.Free(c.ptr)
+		if cleanup {
+			c.ffiMap.Shared.Free(c.ptr)
+		}
 
 		c.ptr = 0
 	}()
@@ -263,7 +275,14 @@ func (c *Cli) Close(ctx context.Context) (*Result, error) {
 		return nil, err
 	}
 
-	return c.getResult(ctx, &cancel, operationID)
+	result, err := c.getResult(ctx, &cancel, operationID)
+	if err != nil {
+		cleanup = !errors.Is(err, errOperationCancelCleanupTimeout)
+
+		return nil, err
+	}
+
+	return result, nil
 }
 
 // ReplaceDefinition replaces the "definition" of the driver. Most importantly changes/updates
@@ -288,43 +307,30 @@ func (c *Cli) getResult( //nolint: funlen,gocyclo
 	cancel *bool,
 	operationID uint32,
 ) (*Result, error) {
-	done := make(chan struct{}, 1)
-	defer close(done)
-
 	var operationCount uint32
 
-	cancelLock := &sync.Mutex{}
-
-	// so in go flavor we actually use ctx to cause libscrapli to timeout vs python where we rely on
-	// the timeouts in libscrapli itself. so in this case we need to ensure that we do not block the
-	// context so it can properly cancel on timeout/cancellation...
-	go func() {
-		select {
-		case <-ctx.Done():
-			cancelLock.Lock()
-			defer cancelLock.Unlock()
-
-			*cancel = true
-
-			return
-		case <-done:
-			return
-		}
-	}()
-
 	var n int
+	var ctxErr error
+	var cancelCleanupDeadline time.Time
 
 	pollFds := []unix.PollFd{{Fd: int32(c.pollFd), Events: unix.POLLIN}} //nolint: gosec
 
 	for {
-		if ctx.Err() != nil {
-			cancelLock.Lock()
-
+		if ctxErr == nil && ctx.Err() != nil {
+			ctxErr = ctx.Err()
 			*cancel = true
 
-			cancelLock.Unlock()
+			cancelCleanupDeadline = time.Now().Add(c.cancelCleanupGrace())
+		}
 
-			return nil, ctx.Err()
+		if ctxErr != nil && time.Now().After(cancelCleanupDeadline) {
+			msg := "libscrapli operation did not finish after cancellation; " +
+				"skipping free to avoid blocking in FFI cleanup"
+
+			return nil, scrapligoerrors.NewFfiError(
+				msg,
+				errors.Join(ctxErr, errOperationCancelCleanupTimeout),
+			)
 		}
 
 		pollFds[0].Revents = 0
@@ -438,6 +444,10 @@ func (c *Cli) getResult( //nolint: funlen,gocyclo
 		return nil, scrapligoerrors.NewFfiError(outErrMsg, ctx.Err())
 	}
 
+	if ctxErr != nil {
+		return nil, ctxErr
+	}
+
 	return NewResult(
 		c.host,
 		c.options.Port,
@@ -448,4 +458,17 @@ func (c *Cli) getResult( //nolint: funlen,gocyclo
 		results,
 		resultsFailedWhenIndicator,
 	), nil
+}
+
+func (c *Cli) cancelCleanupGrace() time.Duration {
+	if c.options == nil || c.options.Session.OperationTimeoutNs == nil {
+		return defaultCancelCleanupGrace
+	}
+
+	v := *c.options.Session.OperationTimeoutNs
+	if v == 0 {
+		return defaultCancelCleanupGrace
+	}
+
+	return time.Duration(scrapligoutil.SafeUint64ToInt64(v))
 }

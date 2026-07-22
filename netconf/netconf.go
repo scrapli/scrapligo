@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"sync"
+	"time"
 
 	scrapligoconstants "github.com/scrapli/scrapligo/v2/constants"
 	scrapligoerrors "github.com/scrapli/scrapligo/v2/errors"
@@ -12,8 +12,13 @@ import (
 	scrapligointernal "github.com/scrapli/scrapligo/v2/internal"
 	scrapligologging "github.com/scrapli/scrapligo/v2/logging"
 	scrapligooptions "github.com/scrapli/scrapligo/v2/options"
+	scrapligoutil "github.com/scrapli/scrapligo/v2/util"
 	"golang.org/x/sys/unix"
 )
+
+const defaultCancelCleanupGrace = 5 * time.Second
+
+var errOperationCancelCleanupTimeout = errors.New("libscrapli operation cleanup timeout")
 
 func newCloseOptions(options ...Option) *closeOptions {
 	o := &closeOptions{}
@@ -116,14 +121,16 @@ func (n *Netconf) GetOptions() (string, error) {
 func (n *Netconf) Open(ctx context.Context) (*Result, error) {
 	// ensure we dealloc if something happens, otherwise users calls to defer close would not be
 	// super handy
-	cleanup := false
+	cleanup, cleanupFree := false, true
 
 	defer func() {
 		if !cleanup {
 			return
 		}
 
-		n.ffiMap.Shared.Free(n.ptr)
+		if cleanupFree {
+			n.ffiMap.Shared.Free(n.ptr)
+		}
 
 		n.ptr = 0
 	}()
@@ -163,6 +170,7 @@ func (n *Netconf) Open(ctx context.Context) (*Result, error) {
 	result, err := n.getResult(ctx, &cancel, operationID)
 	if err != nil {
 		cleanup = true
+		cleanupFree = !errors.Is(err, errOperationCancelCleanupTimeout)
 
 		return nil, err
 	}
@@ -176,8 +184,12 @@ func (n *Netconf) Close(ctx context.Context, options ...Option) (*Result, error)
 		return nil, scrapligoerrors.NewFfiError("driver pointer nil", nil)
 	}
 
+	cleanup := true
+
 	defer func() {
-		n.ffiMap.Shared.Free(n.ptr)
+		if cleanup {
+			n.ffiMap.Shared.Free(n.ptr)
+		}
 
 		n.ptr = 0
 	}()
@@ -193,7 +205,14 @@ func (n *Netconf) Close(ctx context.Context, options ...Option) (*Result, error)
 		return nil, err
 	}
 
-	return n.getResult(ctx, &cancel, operationID)
+	result, err := n.getResult(ctx, &cancel, operationID)
+	if err != nil {
+		cleanup = !errors.Is(err, errOperationCancelCleanupTimeout)
+
+		return nil, err
+	}
+
+	return result, nil
 }
 
 // GetSessionID returns the session-id as parsed during the capabilities exchange -- if we for some
@@ -300,38 +319,28 @@ func (n *Netconf) getResult( //nolint: funlen,gocyclo
 	cancel *bool,
 	operationID uint32,
 ) (*Result, error) {
-	done := make(chan struct{}, 1)
-	defer close(done)
-
-	cancelLock := &sync.Mutex{}
-
-	go func() {
-		select {
-		case <-ctx.Done():
-			cancelLock.Lock()
-			defer cancelLock.Unlock()
-
-			*cancel = true
-
-			return
-		case <-done:
-			return
-		}
-	}()
-
 	var _n int
+	var ctxErr error
+	var cancelCleanupDeadline time.Time
 
 	pollFds := []unix.PollFd{{Fd: int32(n.pollFd), Events: unix.POLLIN}} //nolint: gosec
 
 	for {
-		if ctx.Err() != nil {
-			cancelLock.Lock()
-
+		if ctxErr == nil && ctx.Err() != nil {
+			ctxErr = ctx.Err()
 			*cancel = true
 
-			cancelLock.Unlock()
+			cancelCleanupDeadline = time.Now().Add(n.cancelCleanupGrace())
+		}
 
-			return nil, ctx.Err()
+		if ctxErr != nil && time.Now().After(cancelCleanupDeadline) {
+			msg := "libscrapli operation did not finish after cancellation; " +
+				"skipping free to avoid blocking in FFI cleanup"
+
+			return nil, scrapligoerrors.NewFfiError(
+				msg,
+				errors.Join(ctxErr, errOperationCancelCleanupTimeout),
+			)
 		}
 
 		pollFds[0].Revents = 0
@@ -445,6 +454,10 @@ func (n *Netconf) getResult( //nolint: funlen,gocyclo
 		return nil, scrapligoerrors.NewFfiError(outErrMsg, ctx.Err())
 	}
 
+	if ctxErr != nil {
+		return nil, ctxErr
+	}
+
 	return NewResult(
 		string(input),
 		n.host,
@@ -456,4 +469,17 @@ func (n *Netconf) getResult( //nolint: funlen,gocyclo
 		rpcWarnings,
 		rpcErrors,
 	), nil
+}
+
+func (n *Netconf) cancelCleanupGrace() time.Duration {
+	if n.options == nil || n.options.Session.OperationTimeoutNs == nil {
+		return defaultCancelCleanupGrace
+	}
+
+	v := *n.options.Session.OperationTimeoutNs
+	if v == 0 {
+		return defaultCancelCleanupGrace
+	}
+
+	return time.Duration(scrapligoutil.SafeUint64ToInt64(v))
 }
