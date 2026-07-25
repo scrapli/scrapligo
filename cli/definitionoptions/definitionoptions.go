@@ -9,8 +9,8 @@ import (
 )
 
 var (
-	platformOptionsInst      *platformOptions //nolint: gochecknoglobals
-	platformOptionsInsttOnce sync.Once        //nolint: gochecknoglobals
+	platformOptionsInst     *platformOptions //nolint: gochecknoglobals
+	platformOptionsInstOnce sync.Once        //nolint: gochecknoglobals
 )
 
 // PlatformOptions is an interface defining the platform registration/mapping singleton.
@@ -22,7 +22,7 @@ type PlatformOptions interface {
 
 // GetPlatformOptions returns the PlatformOptions singleton.
 func GetPlatformOptions() PlatformOptions { //nolint: ireturn
-	platformOptionsInsttOnce.Do(func() {
+	platformOptionsInstOnce.Do(func() {
 		platformOptionsInst = &platformOptions{
 			optLock: &sync.Mutex{},
 			optMap: map[string][]scrapligooptions.Option{
