@@ -54,10 +54,10 @@ func WithNetconfCapabilitiesCallback(f func(serverCapabilities []string) []strin
 		// or we somehow couldnt encode the users provided capabilities. this doesn't *feel* great,
 		// but feels like its likely not super common use case, and the likelihood is so low that
 		// we'll let it happen...
-		o.Netconf.CapabilitiesCallback = func(serverHello *string) *string {
+		o.Netconf.CapabilitiesCallback = func(serverHello string) string {
 			hello := &scrapligointernal.NetconfServerHello{}
 
-			err := xml.Unmarshal([]byte(*serverHello), &hello)
+			err := xml.Unmarshal([]byte(serverHello), &hello)
 			if err != nil {
 				panic(err)
 			}
@@ -83,7 +83,7 @@ func WithNetconfCapabilitiesCallback(f func(serverCapabilities []string) []strin
 
 			outCaps := buf.String()
 
-			return &outCaps
+			return outCaps
 		}
 
 		return nil

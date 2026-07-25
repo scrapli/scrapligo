@@ -133,7 +133,7 @@ type NetconfOptions struct {
 	ErrorTag              string
 	PreferredVersion      string
 	MessagePollIntervalNS uint64
-	CapabilitiesCallback  func(serverCapabilities *string) *string
+	CapabilitiesCallback  func(serverCapabilities string) string
 }
 
 func (o *NetconfOptions) apply(opts *driverOptions) {

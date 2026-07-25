@@ -13,6 +13,7 @@ import (
 
 	scrapligocli "github.com/scrapli/scrapligo/v2/cli"
 	scrapligoffi "github.com/scrapli/scrapligo/v2/ffi"
+	scrapligologging "github.com/scrapli/scrapligo/v2/logging"
 	scrapligooptions "github.com/scrapli/scrapligo/v2/options"
 	scrapligotesthelper "github.com/scrapli/scrapligo/v2/testhelper"
 )
@@ -160,6 +161,37 @@ func TestConcurrency(t *testing.T) { //nolint: gocognit
 		})
 
 		time.Sleep(time.Second)
+	}
+}
+
+// TestLoggerCallbackLimit asserts that we can create more clis (with a logger configured) than
+// purego's hard limit of 2,000 callbacks. prior to the logger dispatcher restructuring, every
+// cli/netconf object with a logger configured allocated a purego callback at option apply time --
+// those callback slots are never freed, so object number 2,001 would panic. with the dispatcher
+// singleton there is exactly one purego callback for logging regardless of how many objects exist.
+func TestLoggerCallbackLimit(t *testing.T) {
+	// 2k max callbacks in purego
+	const instanceCount = 2_001
+
+	for i := range instanceCount {
+		c, err := scrapligocli.NewCli(
+			testHost,
+			scrapligooptions.WithDefinitionFileOrName(scrapligocli.AristaEos),
+			scrapligooptions.WithLogger(
+				func(_ scrapligologging.LogLevel, _ string) {},
+			),
+		)
+		if err != nil {
+			t.Fatalf("failed creating cli instance %d: %v", i, err)
+		}
+
+		// GetOptions applies the options -- that is where logger (callback) registration happens,
+		// and, historically, where the per-object purego callback was allocated; this lets us
+		// exercise the callback path without needing to actually open a connection
+		_, err = c.GetOptions()
+		if err != nil {
+			t.Fatalf("failed applying options for cli instance %d: %v", i, err)
+		}
 	}
 }
 

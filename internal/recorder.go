@@ -12,6 +12,8 @@ var (
 	recorderDispatcherInstOnce sync.Once           //nolint: gochecknoglobals
 )
 
+type recorderCallbackF func(s string)
+
 // RecorderDispatcher is the interface returned when fetching the singleton recorderDispatcher. The
 // dispatcher exists because in purego we have a max of 2000 callbacks -- same story as the logging
 // dispatcher. While probably less important duplicating the pattern for the recorder is easy
@@ -22,8 +24,6 @@ type RecorderDispatcher interface {
 
 	GetRecorderCallback() uintptr
 }
-
-type recorderCallbackF func(s string)
 
 // GetRecorderDispatcher returns the RecorderDispatcher singleton.
 func GetRecorderDispatcher() RecorderDispatcher { //nolint: ireturn
