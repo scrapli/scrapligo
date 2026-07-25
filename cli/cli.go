@@ -72,12 +72,13 @@ func loadDefinition(o *scrapligointernal.Options) error {
 // Cli is an object representing a connection to a device of some sort -- this object wraps the
 // underlying zig driver (created via libscrapli).
 type Cli struct {
-	ptr     uintptr
-	pollFd  int
-	ffiMap  *scrapligoffi.Mapping
-	host    string
-	options *scrapligointernal.Options
-	l       *scrapligologging.AnyLogger
+	ptr      uintptr
+	userData uintptr
+	pollFd   int
+	ffiMap   *scrapligoffi.Mapping
+	host     string
+	options  *scrapligointernal.Options
+	l        *scrapligologging.AnyLogger
 }
 
 // NewCli returns a new instance of Cli setup with the given options.
@@ -91,9 +92,10 @@ func NewCli(
 	}
 
 	c := &Cli{
-		ffiMap:  ffiMap,
-		host:    host,
-		options: scrapligointernal.NewOptions(),
+		userData: scrapligointernal.GetUserDataDispatcherr().Register(),
+		ffiMap:   ffiMap,
+		host:     host,
+		options:  scrapligointernal.NewOptions(),
 	}
 
 	for _, opt := range opts {
@@ -157,11 +159,14 @@ func (c *Cli) GetOptions() (string, error) {
 	optionsPtr := c.ffiMap.Shared.AllocDriverOptions()
 	defer c.ffiMap.Shared.FreeDriverOptions(optionsPtr)
 
-	c.options.Apply(optionsPtr)
+	err := c.options.Apply(c.userData, optionsPtr)
+	if err != nil {
+		return "", err
+	}
 
 	var optionsSize uintptr
 
-	err := c.ffiMap.Shared.FetchOptionsSize(
+	err = c.ffiMap.Shared.FetchOptionsSize(
 		optionsPtr,
 		&optionsSize,
 	)
@@ -188,12 +193,14 @@ func (c *Cli) GetOptions() (string, error) {
 func (c *Cli) Open(ctx context.Context) (*Result, error) {
 	// ensure we dealloc if something happens, otherwise users calls to defer close would not be
 	// super handy
-	cleanup := false
+	cleanup := true
 
 	defer func() {
 		if !cleanup {
 			return
 		}
+
+		scrapligointernal.GetLoggerDispatcher().Deregister(c.userData)
 
 		c.ffiMap.Shared.Free(c.ptr)
 
@@ -203,7 +210,10 @@ func (c *Cli) Open(ctx context.Context) (*Result, error) {
 	optionsPtr := c.ffiMap.Shared.AllocDriverOptions()
 	defer c.ffiMap.Shared.FreeDriverOptions(optionsPtr)
 
-	c.options.Apply(optionsPtr)
+	err := c.options.Apply(c.userData, optionsPtr)
+	if err != nil {
+		return nil, err
+	}
 
 	c.ptr = c.ffiMap.Cli.Alloc(
 		c.host,
@@ -216,8 +226,6 @@ func (c *Cli) Open(ctx context.Context) (*Result, error) {
 
 	c.pollFd = int(c.ffiMap.Shared.GetPollFd(c.ptr))
 	if c.pollFd == 0 {
-		cleanup = true
-
 		return nil, scrapligoerrors.NewFfiError("failed to allocate cli", nil)
 	}
 
@@ -225,19 +233,17 @@ func (c *Cli) Open(ctx context.Context) (*Result, error) {
 
 	var operationID uint32
 
-	err := c.ffiMap.Cli.Open(c.ptr, &operationID, &cancel)
+	err = c.ffiMap.Cli.Open(c.ptr, &operationID, &cancel)
 	if err != nil {
-		cleanup = true
-
 		return nil, err
 	}
 
 	result, err := c.getResult(ctx, &cancel, operationID)
 	if err != nil {
-		cleanup = true
-
 		return nil, err
 	}
+
+	cleanup = false
 
 	return result, nil
 }
@@ -249,6 +255,8 @@ func (c *Cli) Close(ctx context.Context) (*Result, error) {
 	}
 
 	defer func() {
+		scrapligointernal.GetLoggerDispatcher().Deregister(c.userData)
+
 		c.ffiMap.Shared.Free(c.ptr)
 
 		c.ptr = 0

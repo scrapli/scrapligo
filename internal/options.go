@@ -62,14 +62,19 @@ func (o *Options) GetLogger() *scrapligologging.AnyLogger {
 }
 
 // Apply applies the Options to the given driver options struct at optionsPtr.
-func (o *Options) Apply(optionsPtr uintptr) {
+func (o *Options) Apply(userData, optionsPtr uintptr) error {
 	opts := (*driverOptions)(unsafe.Pointer(optionsPtr)) //nolint: govet
 
+	ld := GetLoggerDispatcher()
+
+	err := ld.Register(userData, o.Logger, o.LoggerLevel)
+	if err != nil {
+		return err
+	}
+
+	opts.userData = userData
 	opts.loggerLevel = uint8(scrapligologging.IntFromLevel(o.LoggerLevel))
-	opts.loggerCallback = scrapligologging.LoggerToLoggerCallback(
-		o.Logger,
-		uint8(scrapligologging.IntFromLevel(o.LoggerLevel)),
-	)
+	opts.loggerCallback = ld.GetLoggerCallback()
 
 	opts.port = &o.Port
 
@@ -89,6 +94,8 @@ func (o *Options) Apply(optionsPtr uintptr) {
 	case TransportKindTest:
 		o.Transport.Test.apply(opts)
 	}
+
+	return nil
 }
 
 // CliOptions holds cli specific options.

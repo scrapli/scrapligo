@@ -1,6 +1,8 @@
 package internal
 
 type driverOptions struct {
+	userData uintptr
+
 	loggerCallback uintptr
 	loggerLevel    uint8
 	port           *uint16

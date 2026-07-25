@@ -32,12 +32,13 @@ type closeOptions struct {
 // Netconf is an object representing a netconf connection to a device of some sort -- this object
 // wraps the underlying zig (netconf) driver (created via libscrapli).
 type Netconf struct {
-	ptr     uintptr
-	pollFd  int
-	ffiMap  *scrapligoffi.Mapping
-	host    string
-	options *scrapligointernal.Options
-	l       *scrapligologging.AnyLogger
+	ptr      uintptr
+	userData uintptr
+	pollFd   int
+	ffiMap   *scrapligoffi.Mapping
+	host     string
+	options  *scrapligointernal.Options
+	l        *scrapligologging.AnyLogger
 }
 
 // NewNetconf returns a new instance of Netconf setup with the given options.
@@ -51,9 +52,10 @@ func NewNetconf(
 	}
 
 	n := &Netconf{
-		ffiMap:  ffiMap,
-		host:    host,
-		options: scrapligointernal.NewOptions(),
+		userData: scrapligointernal.GetUserDataDispatcherr().Register(),
+		ffiMap:   ffiMap,
+		host:     host,
+		options:  scrapligointernal.NewOptions(),
 	}
 
 	for _, opt := range opts {
@@ -85,11 +87,14 @@ func (n *Netconf) GetOptions() (string, error) {
 	optionsPtr := n.ffiMap.Shared.AllocDriverOptions()
 	defer n.ffiMap.Shared.FreeDriverOptions(optionsPtr)
 
-	n.options.Apply(optionsPtr)
+	err := n.options.Apply(n.userData, optionsPtr)
+	if err != nil {
+		return "", err
+	}
 
 	var optionsSize uintptr
 
-	err := n.ffiMap.Shared.FetchOptionsSize(
+	err = n.ffiMap.Shared.FetchOptionsSize(
 		optionsPtr,
 		&optionsSize,
 	)
@@ -116,12 +121,14 @@ func (n *Netconf) GetOptions() (string, error) {
 func (n *Netconf) Open(ctx context.Context) (*Result, error) {
 	// ensure we dealloc if something happens, otherwise users calls to defer close would not be
 	// super handy
-	cleanup := false
+	cleanup := true
 
 	defer func() {
 		if !cleanup {
 			return
 		}
+
+		scrapligointernal.GetLoggerDispatcher().Deregister(n.userData)
 
 		n.ffiMap.Shared.Free(n.ptr)
 
@@ -131,7 +138,10 @@ func (n *Netconf) Open(ctx context.Context) (*Result, error) {
 	optionsPtr := n.ffiMap.Shared.AllocDriverOptions()
 	defer n.ffiMap.Shared.FreeDriverOptions(optionsPtr)
 
-	n.options.Apply(optionsPtr)
+	err := n.options.Apply(n.userData, optionsPtr)
+	if err != nil {
+		return nil, err
+	}
 
 	n.ptr = n.ffiMap.Netconf.Alloc(
 		n.host,
@@ -144,8 +154,6 @@ func (n *Netconf) Open(ctx context.Context) (*Result, error) {
 
 	n.pollFd = int(n.ffiMap.Shared.GetPollFd(n.ptr))
 	if n.pollFd == 0 {
-		cleanup = true
-
 		return nil, scrapligoerrors.NewFfiError("failed to allocate netconf", nil)
 	}
 
@@ -153,19 +161,17 @@ func (n *Netconf) Open(ctx context.Context) (*Result, error) {
 
 	var operationID uint32
 
-	err := n.ffiMap.Netconf.Open(n.ptr, &operationID, &cancel)
+	err = n.ffiMap.Netconf.Open(n.ptr, &operationID, &cancel)
 	if err != nil {
-		cleanup = true
-
 		return nil, err
 	}
 
 	result, err := n.getResult(ctx, &cancel, operationID)
 	if err != nil {
-		cleanup = true
-
 		return nil, err
 	}
+
+	cleanup = false
 
 	return result, nil
 }
@@ -177,6 +183,8 @@ func (n *Netconf) Close(ctx context.Context, options ...Option) (*Result, error)
 	}
 
 	defer func() {
+		scrapligointernal.GetLoggerDispatcher().Deregister(n.userData)
+
 		n.ffiMap.Shared.Free(n.ptr)
 
 		n.ptr = 0
