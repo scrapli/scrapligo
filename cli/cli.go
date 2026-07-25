@@ -201,6 +201,7 @@ func (c *Cli) Open(ctx context.Context) (*Result, error) {
 		}
 
 		scrapligointernal.GetLoggerDispatcher().Deregister(c.userData)
+		scrapligointernal.GetRecorderDispatcher().Deregister(c.userData)
 
 		c.ffiMap.Shared.Free(c.ptr)
 
@@ -256,6 +257,7 @@ func (c *Cli) Close(ctx context.Context) (*Result, error) {
 
 	defer func() {
 		scrapligointernal.GetLoggerDispatcher().Deregister(c.userData)
+		scrapligointernal.GetRecorderDispatcher().Deregister(c.userData)
 
 		c.ffiMap.Shared.Free(c.ptr)
 

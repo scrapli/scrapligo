@@ -100,7 +100,7 @@ func WithSessionRecorderPath(s string) Option {
 }
 
 // WithSessionRecorderCallback sets the callback for a recorder/writer for the session.
-func WithSessionRecorderCallback(f func(s *[]byte)) Option {
+func WithSessionRecorderCallback(f func(s string)) Option {
 	return func(o *scrapligointernal.Options) error {
 		o.Session.RecorderCallback = f
 

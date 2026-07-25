@@ -80,7 +80,7 @@ func (o *Options) Apply(userData, optionsPtr uintptr) error {
 
 	o.Cli.apply(opts)
 	o.Netconf.apply(opts)
-	o.Session.apply(opts)
+	o.Session.apply(opts.userData, opts)
 	o.Auth.apply(opts)
 
 	opts.transportKind = uint8(o.TransportKind)
@@ -172,10 +172,10 @@ type SessionOptions struct {
 	ScratchRetainMax   *uint64
 
 	RecorderPath     string
-	RecorderCallback func(buf *[]byte)
+	RecorderCallback func(buf string)
 }
 
-func (o *SessionOptions) apply(opts *driverOptions) {
+func (o *SessionOptions) apply(userData uintptr, opts *driverOptions) {
 	if o.ReadSize != nil {
 		opts.session.readSize = o.ReadSize
 	}
@@ -217,7 +217,11 @@ func (o *SessionOptions) apply(opts *driverOptions) {
 		opts.session.recordDestination = uintptr(unsafe.Pointer(unsafe.StringData(o.RecorderPath)))
 		opts.session.recordDestinationLen = uintptr(len(o.RecorderPath))
 	} else if o.RecorderCallback != nil {
-		opts.session.recorderCallback = purego.NewCallback(o.RecorderCallback)
+		rd := GetRecorderDispatcher()
+
+		rd.Register(userData, o.RecorderCallback)
+
+		opts.session.recorderCallback = rd.GetRecorderCallback()
 	}
 }
 

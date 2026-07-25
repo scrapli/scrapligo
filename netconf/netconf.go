@@ -129,6 +129,7 @@ func (n *Netconf) Open(ctx context.Context) (*Result, error) {
 		}
 
 		scrapligointernal.GetLoggerDispatcher().Deregister(n.userData)
+		scrapligointernal.GetRecorderDispatcher().Deregister(n.userData)
 
 		n.ffiMap.Shared.Free(n.ptr)
 
@@ -184,6 +185,7 @@ func (n *Netconf) Close(ctx context.Context, options ...Option) (*Result, error)
 
 	defer func() {
 		scrapligointernal.GetLoggerDispatcher().Deregister(n.userData)
+		scrapligointernal.GetRecorderDispatcher().Deregister(n.userData)
 
 		n.ffiMap.Shared.Free(n.ptr)
 

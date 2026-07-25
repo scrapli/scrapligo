@@ -27,8 +27,8 @@ type loggerCallbackF func(level uint8, message string)
 // libscrapli, and it properly dispatches logs based on the id which is the pointer to the Cli or
 // Netconf object.
 type LoggerDispatcher interface {
-	Register(ptr uintptr, logger any, logLevel scrapligologging.LogLevel) error
-	Deregister(ptr uintptr)
+	Register(userData uintptr, logger any, logLevel scrapligologging.LogLevel) error
+	Deregister(userData uintptr)
 
 	GetLoggerCallback() uintptr
 }
