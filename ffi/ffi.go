@@ -1,7 +1,9 @@
 package ffi
 
 import (
+	"bytes"
 	"context"
+	"debug/elf"
 	"errors"
 	"fmt"
 	"io"
@@ -59,10 +61,36 @@ func getZigStyleArch() string {
 	}
 }
 
-func isMusl() bool {
+func isMuslFallback() bool {
 	matches, _ := filepath.Glob("/lib/ld-musl-*.so.1")
 
 	return len(matches) > 0
+}
+
+func isMusl() bool {
+	f, err := elf.Open("/proc/self/exe")
+	if err != nil {
+		return isMuslFallback()
+	}
+
+	defer func() {
+		_ = f.Close()
+	}()
+
+	for _, p := range f.Progs {
+		if p.Type == elf.PT_INTERP {
+			interp := make([]byte, p.Filesz)
+
+			_, err = io.ReadFull(io.NewSectionReader(p, 0, int64(p.Filesz)), interp) //nolint: gosec
+			if err != nil {
+				return isMuslFallback()
+			}
+
+			return bytes.Contains(interp, []byte("ld-musl"))
+		}
+	}
+
+	return isMuslFallback()
 }
 
 func getLibscrapliCachePath() string {
@@ -93,10 +121,64 @@ func getLibscrapliCachePath() string {
 	return cacheDir
 }
 
-func libscrapliVersionIsHash() bool {
+func getLibscrapliVersion() string {
+	return scrapligoutil.GetEnvStrOrDefault(
+		scrapligoconstants.LibScrapliVersionOverrideEnv,
+		scrapligoconstants.LibScrapliVersion,
+	)
+}
+
+func libscrapliVersionIsHash(version string) bool {
 	return regexp.MustCompile(
 		`(?i)^[0-9a-f]{7,40}$`,
-	).MatchString(scrapligoconstants.LibScrapliVersion)
+	).MatchString(version)
+}
+
+func getLibscrapliAbi() string {
+	if isMusl() {
+		return "musl"
+	}
+
+	return "gnu"
+}
+
+func getLibscrapliTargetFilename(version string) string {
+	var libFilename string
+
+	switch runtime.GOOS {
+	case darwin:
+		libFilename = fmt.Sprintf(
+			"libscrapli-%s-macos.%s.dylib",
+			getZigStyleArch(),
+			version,
+		)
+	case linux:
+		libFilename = fmt.Sprintf(
+			"libscrapli-%s-linux-%s.so.%s",
+			getZigStyleArch(),
+			getLibscrapliAbi(),
+			version,
+		)
+	default:
+		panic("unsupported platform")
+	}
+
+	return libFilename
+}
+
+func getLibscrapliTargetZigTriple() string {
+	var zigTriple string
+
+	switch runtime.GOOS {
+	case darwin:
+		zigTriple = fmt.Sprintf("%s-macos", getZigStyleArch())
+	case linux:
+		zigTriple = fmt.Sprintf("%s-linux-%s", getZigStyleArch(), getLibscrapliAbi())
+	default:
+		panic("unsupported platform")
+	}
+
+	return zigTriple
 }
 
 // EnsureLibscrapli ensures libscrapli is present at the cache path. It returns the final path
@@ -113,28 +195,9 @@ func EnsureLibscrapli(ctx context.Context) (string, error) {
 		return overridePath, nil
 	}
 
-	var libFilename string
+	version := getLibscrapliVersion()
 
-	switch runtime.GOOS {
-	case darwin:
-		libFilename = fmt.Sprintf(
-			"libscrapli.%s.dylib",
-			scrapligoutil.GetEnvStrOrDefault(
-				scrapligoconstants.LibScrapliVersionOverrideEnv,
-				scrapligoconstants.LibScrapliVersion,
-			),
-		)
-	case linux:
-		libFilename = fmt.Sprintf(
-			"libscrapli.so.%s",
-			scrapligoutil.GetEnvStrOrDefault(
-				scrapligoconstants.LibScrapliVersionOverrideEnv,
-				scrapligoconstants.LibScrapliVersion,
-			),
-		)
-	default:
-		panic("unsupported platform")
-	}
+	libFilename := getLibscrapliTargetFilename(version)
 
 	cachePath := getLibscrapliCachePath()
 
@@ -157,7 +220,7 @@ func EnsureLibscrapli(ctx context.Context) (string, error) {
 		cachedLibFilename,
 	)
 
-	err = writeLibScrapliToCache(ctx, cachedLibFilename)
+	err = writeLibScrapliToCache(ctx, version, cachedLibFilename)
 	if err != nil {
 		return "", err
 	}
@@ -205,6 +268,7 @@ func writeHTTPContentsFromPath(
 
 func writeLibScrapliToCache( //nolint: nonamedreturns
 	ctx context.Context,
+	version string,
 	cachedLibFilename string,
 ) (err error) {
 	err = os.MkdirAll(
@@ -233,37 +297,11 @@ func writeLibScrapliToCache( //nolint: nonamedreturns
 		_ = os.Remove(cachedLibFilename)
 	}()
 
-	var zigTriple string
+	zigTriple := getLibscrapliTargetZigTriple()
 
-	var releaseFilename string
+	releaseFilename := getLibscrapliTargetFilename(version)
 
-	switch runtime.GOOS {
-	case darwin:
-		zigTriple = fmt.Sprintf("%s-macos", getZigStyleArch())
-		releaseFilename = fmt.Sprintf(
-			"libscrapli-%s-macos.%s.dylib",
-			getZigStyleArch(),
-			scrapligoconstants.LibScrapliVersion,
-		)
-	case linux:
-		abi := "gnu"
-
-		if isMusl() {
-			abi = "musl"
-		}
-
-		zigTriple = fmt.Sprintf("%s-linux-%s", getZigStyleArch(), abi)
-		releaseFilename = fmt.Sprintf(
-			"libscrapli-%s-linux-%s.so.%s",
-			getZigStyleArch(),
-			abi,
-			scrapligoconstants.LibScrapliVersion,
-		)
-	default:
-		panic("unsupported platform")
-	}
-
-	if libscrapliVersionIsHash() {
+	if libscrapliVersionIsHash(version) {
 		scrapligologging.Logger(
 			scrapligologging.Debug,
 			"libscrapli target version is hash, attempting to build via docker...",
@@ -281,7 +319,7 @@ func writeLibScrapliToCache( //nolint: nonamedreturns
 			"-v",
 			fmt.Sprintf("%s:/out", filepath.Dir(cachedLibFilename)),
 			"-e",
-			fmt.Sprintf("TAG=%s", scrapligoconstants.LibScrapliVersion),
+			fmt.Sprintf("TAG=%s", version),
 			"-e",
 			fmt.Sprintf("TARGET=%s", zigTriple),
 			"-e",
@@ -304,7 +342,7 @@ func writeLibScrapliToCache( //nolint: nonamedreturns
 			fmt.Sprintf(
 				"%s/releases/download/v%s/%s",
 				libscrapliRepo,
-				scrapligoconstants.LibScrapliVersion,
+				version,
 				releaseFilename,
 			),
 			f,
