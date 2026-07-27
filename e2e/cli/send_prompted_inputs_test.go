@@ -66,7 +66,8 @@ func TestSendPromptedInput(t *testing.T) {
 					caseData.input,
 					caseData.prompt,
 					caseData.response,
-					caseData.options...)
+					caseData.options...,
+				)
 				if err != nil {
 					t.Fatal(err)
 				}

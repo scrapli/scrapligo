@@ -73,7 +73,8 @@ func (c *Cli) ReadWithCallbacks( //nolint: gocyclo
 			return nil, scrapligoerrors.NewOptionsError(
 				fmt.Sprintf(
 					"callback %q missing contains or containsPattern, cannot proceed", cb.name,
-				), nil)
+				), nil,
+			)
 		}
 	}
 

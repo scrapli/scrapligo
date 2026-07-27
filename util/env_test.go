@@ -47,7 +47,8 @@ func TestGetEnvStrOrDefault(t *testing.T) {
 						testCase.expected,
 					)
 				}
-			})
+			},
+		)
 	}
 }
 
@@ -92,6 +93,7 @@ func TestGetEnvIntOrDefault(t *testing.T) {
 						testCase.expected,
 					)
 				}
-			})
+			},
+		)
 	}
 }
