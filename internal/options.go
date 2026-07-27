@@ -3,7 +3,6 @@ package internal
 import (
 	"unsafe"
 
-	"github.com/ebitengine/purego"
 	scrapligologging "github.com/scrapli/scrapligo/v2/logging"
 )
 
@@ -79,7 +78,7 @@ func (o *Options) Apply(userData, optionsPtr uintptr) error {
 	opts.port = &o.Port
 
 	o.Cli.apply(opts)
-	o.Netconf.apply(opts)
+	o.Netconf.apply(opts.userData, opts)
 	o.Session.apply(opts.userData, opts)
 	o.Auth.apply(opts)
 
@@ -136,7 +135,7 @@ type NetconfOptions struct {
 	CapabilitiesCallback  func(serverCapabilities string) string
 }
 
-func (o *NetconfOptions) apply(opts *driverOptions) {
+func (o *NetconfOptions) apply(userData uintptr, opts *driverOptions) {
 	if o.ErrorTag != "" {
 		opts.netconf.errorTag = uintptr(unsafe.Pointer(unsafe.StringData(o.ErrorTag)))
 		opts.netconf.errorTagLen = uintptr(len(o.ErrorTag))
@@ -154,7 +153,11 @@ func (o *NetconfOptions) apply(opts *driverOptions) {
 	}
 
 	if o.CapabilitiesCallback != nil {
-		opts.netconf.capabilitiesCallback = purego.NewCallback(o.CapabilitiesCallback)
+		cd := GetNetconfCapabiltiesDispatcher()
+
+		cd.Register(userData, o.CapabilitiesCallback)
+
+		opts.netconf.capabilitiesCallback = cd.GetCapabilitiesCallback()
 	}
 }
 

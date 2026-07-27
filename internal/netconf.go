@@ -28,7 +28,8 @@ func GetNetconfCapabiltiesDispatcher() NetconfCapabiltiesDispatcher { //nolint: 
 	netconfCapabiltiesDispatcherInstOnce.Do(
 		func() {
 			netconfCapabiltiesDispatcherInst = &netconfCapabilitiesDispatcher{
-				lock: sync.RWMutex{},
+				lock:                  sync.RWMutex{},
+				capabilitiesCallbacks: map[uintptr]capabilitiesCallbackF{},
 			}
 
 			cb := purego.NewCallback(netconfCapabiltiesDispatcherInst.capabilities)
@@ -41,23 +42,23 @@ func GetNetconfCapabiltiesDispatcher() NetconfCapabiltiesDispatcher { //nolint: 
 }
 
 type netconfCapabilitiesDispatcher struct {
-	lock      sync.RWMutex
-	recorders map[uintptr]capabilitiesCallbackF
-	cb        uintptr
+	lock                  sync.RWMutex
+	capabilitiesCallbacks map[uintptr]capabilitiesCallbackF
+	cb                    uintptr
 }
 
 func (n *netconfCapabilitiesDispatcher) Register(userData uintptr, f capabilitiesCallbackF) {
 	n.lock.Lock()
 	defer n.lock.Unlock()
 
-	n.recorders[userData] = f
+	n.capabilitiesCallbacks[userData] = f
 }
 
 func (n *netconfCapabilitiesDispatcher) Deregister(userData uintptr) {
 	n.lock.Lock()
 	defer n.lock.Unlock()
 
-	delete(n.recorders, userData)
+	delete(n.capabilitiesCallbacks, userData)
 }
 
 func (n *netconfCapabilitiesDispatcher) GetCapabilitiesCallback() uintptr {
@@ -70,7 +71,7 @@ func (n *netconfCapabilitiesDispatcher) capabilities(userData uintptr, message *
 
 	var out string
 
-	cf, ok := n.recorders[userData]
+	cf, ok := n.capabilitiesCallbacks[userData]
 	if !ok {
 		return &out
 	}

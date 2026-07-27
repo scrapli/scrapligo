@@ -30,7 +30,8 @@ func GetRecorderDispatcher() RecorderDispatcher { //nolint: ireturn
 	recorderDispatcherInstOnce.Do(
 		func() {
 			recorderDispatcherInst = &recorderDispatcher{
-				lock: sync.RWMutex{},
+				lock:      sync.RWMutex{},
+				recorders: map[uintptr]recorderCallbackF{},
 			}
 
 			cb := purego.NewCallback(recorderDispatcherInst.record)
