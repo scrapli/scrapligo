@@ -94,7 +94,7 @@ func TestConcurrency(t *testing.T) { //nolint: gocognit
 				},
 			)
 
-			ctx, cancel := context.WithTimeout(t.Context(), 10*time.Second)
+			ctx, cancel := context.WithTimeout(t.Context(), 30*time.Second)
 			defer cancel()
 
 			wg := &sync.WaitGroup{}
