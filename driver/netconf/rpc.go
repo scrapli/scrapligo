@@ -50,16 +50,14 @@ func (d *Driver) sendRPC(
 		d.SelectedVersion,
 	)
 
+	// WriteAndReturn already appends the trailing "\n" that terminates the v1.1 "\n##\n"
+	// end-of-chunks marker (and, for v1.0, follows the "]]>]]>" delimiter). Writing an
+	// additional return here (as was previously done for v1.1) sends a spurious extra "\n"
+	// that some strict NETCONF servers reject with a framing error, e.g. "invalid protocol
+	// framing characters received".
 	err = d.Channel.WriteAndReturn(serialized.framedXML, false)
 	if err != nil {
 		return nil, err
-	}
-
-	if d.SelectedVersion == V1Dot1 {
-		err = d.Channel.WriteReturn()
-		if err != nil {
-			return nil, err
-		}
 	}
 
 	done := make(chan []byte)

@@ -46,7 +46,10 @@ func (m *message) serialize(
 	case V1Dot0:
 		msg = append(msg, []byte(v1Dot0Delim)...)
 	case V1Dot1:
-		msg = append([]byte(fmt.Sprintf("#%d\n", len(msg))), msg...)
+		// per RFC 6242 a chunk must start with its own leading LF ("chunk = LF chunk-size LF
+		// chunk-data") -- make the framed message fully self contained rather than relying on
+		// a neighboring message's trailing newline to (sometimes) supply it.
+		msg = append([]byte(fmt.Sprintf("\n#%d\n", len(msg))), msg...)
 		msg = append(msg, []byte("\n##")...)
 	}
 
