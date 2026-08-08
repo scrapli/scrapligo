@@ -9,10 +9,8 @@ type driverOptions struct {
 	transportKind  uint8
 
 	cli struct {
-		definitionStr               uintptr
-		definitionStrLen            uintptr
-		normalizeLineFeeds          *bool
-		normalizeTrailingWhitespace *bool
+		definitionStr    uintptr
+		definitionStrLen uintptr
 	}
 
 	netconf struct {
@@ -25,18 +23,20 @@ type driverOptions struct {
 	}
 
 	session struct {
-		readSize                *uint64
-		readMinDelayNs          *uint64
-		readMaxDelayNs          *uint64
-		returnChar              uintptr
-		returnCharLen           uintptr
-		operationTimeoutNs      *uint64
-		operationMaxSearchDepth *uint64
-		recordDestination       uintptr
-		recordDestinationLen    uintptr
-		recorderCallback        uintptr
-		scratchInitialSize      *uint64
-		scratchRetainMax        *uint64
+		readSize                    *uint64
+		readMinDelayNs              *uint64
+		readMaxDelayNs              *uint64
+		returnChar                  uintptr
+		returnCharLen               uintptr
+		operationTimeoutNs          *uint64
+		operationMaxSearchDepth     *uint64
+		recordDestination           uintptr
+		recordDestinationLen        uintptr
+		recorderCallback            uintptr
+		scratchInitialSize          *uint64
+		scratchRetainMax            *uint64
+		normalizeLineFeeds          *bool
+		normalizeTrailingWhitespace *bool
 	}
 
 	auth struct {

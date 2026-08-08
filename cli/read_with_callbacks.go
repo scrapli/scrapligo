@@ -58,7 +58,7 @@ func (r *ReadCallback) ok() bool {
 // from the session, checking new session output against the provided callbacks (in the order
 // provided). When a callback is triggered, the callback is executed, if the callback is marked as
 // "completes" then the parent function exits, otherwise this continues forever.
-func (c *Cli) ReadWithCallbacks( //nolint: gocyclo
+func (c *Cli) ReadWithCallbacks( //nolint: gocyclo, funlen, gocognit
 	ctx context.Context,
 	initialInput string,
 	callbacks ...*ReadCallback,
@@ -93,7 +93,7 @@ func (c *Cli) ReadWithCallbacks( //nolint: gocyclo
 
 	var results strings.Builder
 
-	resultsRaw := bytes.NewBuffer(nil)
+	resultsRawJournal := bytes.NewBuffer(nil)
 
 	executedCallbacks := make(map[string]struct{})
 
@@ -115,7 +115,15 @@ func (c *Cli) ReadWithCallbacks( //nolint: gocyclo
 		}
 
 		results.WriteString(r.Result())
-		resultsRaw.Write(r.ResultRaw())
+
+		// contextcheck is due to grabbing libscrapli mapping in the raw result func so we can
+		// get access to the reconstruct funcs
+		rawJournal, err := r.ResultRaw() //nolint: contextcheck
+		if err != nil {
+			return nil, err
+		}
+
+		resultsRawJournal.Write(rawJournal)
 
 		for _, cb := range callbacks {
 			_, alreadyExecuted := executedCallbacks[cb.name]
@@ -173,16 +181,28 @@ func (c *Cli) ReadWithCallbacks( //nolint: gocyclo
 			}
 
 			if cb.completes {
-				return NewResult(
+				rawJournal := resultsRawJournal.Bytes()
+
+				r := newResult(
 					c.host,
 					c.options.Port,
-					[]byte(initialInput),
 					scrapligoutil.SafeInt64ToUint64(startTime.UnixNano()),
 					[]uint64{scrapligoutil.SafeInt64ToUint64(time.Now().UnixNano())},
-					resultsRaw.Bytes(),
-					[]byte(curResults),
+					[]byte(initialInput),
+					[]uint64{uint64(len(initialInput))},
 					nil,
-				), nil
+					[]uint64{0},
+					[]byte(curResults),
+					[]uint64{uint64(len(curResults))},
+					nil,
+				)
+
+				// our raw journal is non existent since we are manually constructing this final
+				// result, so just patch in the existing raw journal. we lose the magical lazy
+				// evaluation of the raw bits but thats ok since its just read w callbacks
+				r.resultsRaw = rawJournal
+
+				return r, nil
 			}
 		}
 	}

@@ -212,5 +212,11 @@ func assertResult(t *testing.T, r *scrapligonetconf.Result, testGoldenPath strin
 	scrapligotesthelper.AssertNotDefault(t, r.EndTime)
 	scrapligotesthelper.AssertNotDefault(t, r.ElapsedTimeSeconds)
 	scrapligotesthelper.AssertNotDefault(t, r.Host)
-	scrapligotesthelper.AssertNotDefault(t, r.ResultRaw)
+
+	resultRaw, err := r.ResultRaw()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	scrapligotesthelper.AssertNotDefault(t, resultRaw)
 }

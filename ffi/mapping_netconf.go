@@ -19,6 +19,18 @@ func registerNetconf(m *Mapping, libScrapliFfi uintptr) {
 		"ls_netconf_fetch_operation",
 	)
 
+	purego.RegisterLibFunc(
+		&m.Netconf.getReconstructedResultRawSize,
+		libScrapliFfi,
+		"ls_netconf_get_reconstructed_result_raw_size",
+	)
+
+	purego.RegisterLibFunc(
+		&m.Netconf.getReconstructedResultRaw,
+		libScrapliFfi,
+		"ls_netconf_get_reconstructed_result_raw",
+	)
+
 	purego.RegisterLibFunc(&m.Netconf.getSessionID, libScrapliFfi, "ls_netconf_get_session_id")
 	purego.RegisterLibFunc(
 		&m.Netconf.getSubscriptionID,
@@ -116,6 +128,18 @@ type NetconfMapping struct {
 		rpcErrors,
 		err,
 		lastErrStr *[]byte,
+	) uint8
+
+	getReconstructedResultRawSize func(
+		result,
+		rawResultJournal *[]byte,
+		reconstructedSize *uintptr,
+	) uint8
+
+	getReconstructedResultRaw func(
+		result,
+		rawResultJournal,
+		reconstructed *[]byte,
 	) uint8
 
 	getSessionID func(
@@ -390,6 +414,39 @@ func (m *NetconfMapping) FetchOperation(
 			lastErrStr,
 		),
 		"fetch operation failed",
+	).check()
+}
+
+// GetReconstructedResultRawSize determines the size of the raw result based on the result and
+// the raw journal.
+func (m *NetconfMapping) GetReconstructedResultRawSize(
+	result,
+	resultRawJournal *[]byte,
+	reconstructedSize *uintptr,
+) error {
+	return newLibScrapliResult(
+		m.getReconstructedResultRawSize(
+			result,
+			resultRawJournal,
+			reconstructedSize,
+		),
+		"get reconstructed result raw size failed",
+	).check()
+}
+
+// GetReconstructedResultRaw returns the reconstructed raw from a given result/journal.
+func (m *NetconfMapping) GetReconstructedResultRaw(
+	result,
+	resultRawJournal,
+	reconstructed *[]byte,
+) error {
+	return newLibScrapliResult(
+		m.getReconstructedResultRaw(
+			result,
+			resultRawJournal,
+			reconstructed,
+		),
+		"get reconstructed result raw failed",
 	).check()
 }
 

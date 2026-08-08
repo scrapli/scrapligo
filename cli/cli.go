@@ -410,9 +410,15 @@ func (c *Cli) getResult( //nolint: funlen,gocyclo
 
 	inputs := make([]byte, inputsSize)
 
-	resultsRaw := make([]byte, resultsRawSize)
+	inputLens := make([]uint64, operationCount)
+
+	resultRawJournals := make([]byte, resultsRawSize)
+
+	resultRawJournalLens := make([]uint64, operationCount)
 
 	results := make([]byte, resultsSize)
+
+	resultLens := make([]uint64, operationCount)
 
 	resultsFailedWhenIndicator := make([]byte, resultsFailedIndicatorSize)
 
@@ -426,8 +432,11 @@ func (c *Cli) getResult( //nolint: funlen,gocyclo
 		&resultStartTime,
 		&splits,
 		&inputs,
-		&resultsRaw,
+		&inputLens,
+		&resultRawJournals,
+		&resultRawJournalLens,
 		&results,
+		&resultLens,
 		&resultsFailedWhenIndicator,
 		&errString,
 		&lastErrString,
@@ -448,14 +457,17 @@ func (c *Cli) getResult( //nolint: funlen,gocyclo
 		return nil, scrapligoerrors.NewFfiError(outErrMsg, ctx.Err())
 	}
 
-	return NewResult(
+	return newResult(
 		c.host,
 		c.options.Port,
-		inputs,
 		resultStartTime,
 		splits,
-		resultsRaw,
+		inputs,
+		inputLens,
+		resultRawJournals,
+		resultRawJournalLens,
 		results,
+		resultLens,
 		resultsFailedWhenIndicator,
 	), nil
 }

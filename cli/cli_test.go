@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	mathrand "math/rand"
+	"net"
 	"os"
 	"os/exec"
 	"sync"
@@ -79,7 +80,25 @@ func TestConcurrency(t *testing.T) { //nolint: gocognit
 				t.Fatal(err)
 			}
 
-			time.Sleep(250 * time.Millisecond)
+			dialer := &net.Dialer{}
+
+			probeCtx, probeCancel := context.WithTimeout(t.Context(), 5*time.Second)
+			defer probeCancel()
+
+			for {
+				conn, dialErr := dialer.DialContext(probeCtx, "tcp", "localhost:2222")
+				if dialErr == nil {
+					_ = conn.Close()
+
+					break
+				}
+
+				if probeCtx.Err() != nil {
+					t.Fatalf("dummy server never started listening: %v", dialErr)
+				}
+
+				time.Sleep(10 * time.Millisecond)
+			}
 
 			t.Cleanup(
 				func() {
@@ -257,7 +276,12 @@ func assertResult(t *testing.T, r *scrapligocli.Result, testGoldenPath string) {
 	scrapligotesthelper.AssertNotDefault(t, r.StartTime)
 	scrapligotesthelper.AssertNotDefault(t, r.EndTime())
 	scrapligotesthelper.AssertNotDefault(t, r.ElapsedTimeSeconds)
-	scrapligotesthelper.AssertNotDefault(t, r.Results)
-	scrapligotesthelper.AssertNotDefault(t, r.ResultsRaw)
 	scrapligotesthelper.AssertEqual(t, false, r.Failed())
+
+	resultRaw, err := r.ResultRaw()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	scrapligotesthelper.AssertNotDefault(t, resultRaw)
 }

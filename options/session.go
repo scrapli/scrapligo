@@ -90,6 +90,26 @@ func WithScratchRetainMax(i uint64) Option {
 	}
 }
 
+// WithNoNormalizeLineFeeds tells libscrapli to *not* normalize \r\n -> \n when fetching the
+// (processed) result from cli operations. Ignored for netconf.
+func WithNoNormalizeLineFeeds() Option {
+	return func(o *scrapligointernal.Options) error {
+		o.Session.NormalizeLineFeeds = false
+
+		return nil
+	}
+}
+
+// WithNoNormalizeTrailingWhitespace tells libscrapli to *not* clean/normalize (remove) trailing
+// whitespace when fetching the (processed) result from cli operations. Ignored for netconf.
+func WithNoNormalizeTrailingWhitespace() Option {
+	return func(o *scrapligointernal.Options) error {
+		o.Session.NormalizeTrailingWhitespace = false
+
+		return nil
+	}
+}
+
 // WithSessionRecorderPath sets the output path for a recorder/writer for the session.
 func WithSessionRecorderPath(s string) Option {
 	return func(o *scrapligointernal.Options) error {

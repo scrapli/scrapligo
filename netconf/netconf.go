@@ -390,20 +390,20 @@ func (n *Netconf) getResult( //nolint: funlen,gocyclo
 	}
 
 	var (
-		inputSize       uintptr
-		resultRawSize   uintptr
-		resultSize      uintptr
-		rpcWarningsSize uintptr
-		rpcErrorsSize   uintptr
-		errSize         uintptr
-		lastErrStrSize  uintptr
+		inputSize            uintptr
+		resultRawJournalSize uintptr
+		resultSize           uintptr
+		rpcWarningsSize      uintptr
+		rpcErrorsSize        uintptr
+		errSize              uintptr
+		lastErrStrSize       uintptr
 	)
 
 	err := n.ffiMap.Netconf.FetchOperationSizes(
 		n.ptr,
 		operationID,
 		&inputSize,
-		&resultRawSize,
+		&resultRawJournalSize,
 		&resultSize,
 		&rpcWarningsSize,
 		&rpcErrorsSize,
@@ -418,7 +418,7 @@ func (n *Netconf) getResult( //nolint: funlen,gocyclo
 
 	input := make([]byte, inputSize)
 
-	resultRaw := make([]byte, resultRawSize)
+	resultRawJournal := make([]byte, resultRawJournalSize)
 
 	result := make([]byte, resultSize)
 
@@ -436,7 +436,7 @@ func (n *Netconf) getResult( //nolint: funlen,gocyclo
 		&resultStartTime,
 		&resultEndTime,
 		&input,
-		&resultRaw,
+		&resultRawJournal,
 		&result,
 		&rpcWarnings,
 		&rpcErrors,
@@ -457,13 +457,13 @@ func (n *Netconf) getResult( //nolint: funlen,gocyclo
 		return nil, scrapligoerrors.NewFfiError(outErrMsg, ctx.Err())
 	}
 
-	return NewResult(
+	return newResult(
 		string(input),
 		n.host,
 		n.options.Port,
 		resultStartTime,
 		resultEndTime,
-		resultRaw,
+		resultRawJournal,
 		string(result),
 		rpcWarnings,
 		rpcErrors,

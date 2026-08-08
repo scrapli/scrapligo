@@ -44,11 +44,13 @@ func NewOptions() *Options {
 		TransportKind: TransportKindBin,
 		Port:          0,
 		Cli: CliOptions{
-			DefinitionFileOrName:        "default",
+			DefinitionFileOrName: "default",
+		},
+		Netconf: NetconfOptions{},
+		Session: SessionOptions{
 			NormalizeLineFeeds:          true,
 			NormalizeTrailingWhitespace: true,
 		},
-		Netconf: NetconfOptions{},
 		Auth: AuthOptions{
 			LookupMap: make(map[string]string),
 		},
@@ -117,14 +119,6 @@ func (o *CliOptions) apply(opts *driverOptions) {
 
 	opts.cli.definitionStr = uintptr(unsafe.Pointer(unsafe.StringData(o.DefinitionString)))
 	opts.cli.definitionStrLen = uintptr(len(o.DefinitionString))
-
-	if !o.NormalizeLineFeeds {
-		opts.cli.normalizeLineFeeds = &o.NormalizeLineFeeds
-	}
-
-	if !o.NormalizeTrailingWhitespace {
-		opts.cli.normalizeTrailingWhitespace = &o.NormalizeTrailingWhitespace
-	}
 }
 
 // NetconfOptions holds netconf specific options.
@@ -174,6 +168,9 @@ type SessionOptions struct {
 	ScratchInitialSize *uint64
 	ScratchRetainMax   *uint64
 
+	NormalizeLineFeeds          bool
+	NormalizeTrailingWhitespace bool
+
 	RecorderPath     string
 	RecorderCallback func(buf string)
 }
@@ -214,6 +211,14 @@ func (o *SessionOptions) apply(userData uintptr, opts *driverOptions) {
 
 	if o.ScratchRetainMax != nil {
 		opts.session.scratchRetainMax = o.ScratchRetainMax
+	}
+
+	if !o.NormalizeLineFeeds {
+		opts.session.normalizeLineFeeds = &o.NormalizeLineFeeds
+	}
+
+	if !o.NormalizeTrailingWhitespace {
+		opts.session.normalizeTrailingWhitespace = &o.NormalizeTrailingWhitespace
 	}
 
 	if o.RecorderPath != "" {

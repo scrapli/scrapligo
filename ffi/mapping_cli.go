@@ -15,6 +15,18 @@ func registerCli(m *Mapping, libScrapliFfi uintptr) {
 	)
 	purego.RegisterLibFunc(&m.Cli.fetchOperation, libScrapliFfi, "ls_cli_fetch_operation")
 
+	purego.RegisterLibFunc(
+		&m.Cli.getReconstructedResultRawSize,
+		libScrapliFfi,
+		"ls_cli_get_reconstructed_result_raw_size",
+	)
+
+	purego.RegisterLibFunc(
+		&m.Cli.getReconstructedResultRaw,
+		libScrapliFfi,
+		"ls_cli_get_reconstructed_result_raw",
+	)
+
 	purego.RegisterLibFunc(&m.Cli.enterMode, libScrapliFfi, "ls_cli_enter_mode")
 	purego.RegisterLibFunc(&m.Cli.getPrompt, libScrapliFfi, "ls_cli_get_prompt")
 	purego.RegisterLibFunc(&m.Cli.sendInput, libScrapliFfi, "ls_cli_send_input")
@@ -73,12 +85,27 @@ type CliMapping struct {
 		operationID uint32,
 		resultStartTime *uint64,
 		splits *[]uint64,
-		inputs,
-		resultsRaw,
-		results,
+		inputs *[]byte,
+		inputLens *[]uint64,
+		resultRawJournals *[]byte,
+		resultRawJournalLens *[]uint64,
+		results *[]byte,
+		resultLens *[]uint64,
 		resultsFailedIndicator,
 		err,
 		lastErrStr *[]byte,
+	) uint8
+
+	getReconstructedResultRawSize func(
+		result,
+		rawResultJournal *[]byte,
+		reconstructedSize *uintptr,
+	) uint8
+
+	getReconstructedResultRaw func(
+		result,
+		rawResultJournal,
+		reconstructed *[]byte,
 	) uint8
 
 	enterMode func(
@@ -220,9 +247,12 @@ func (m *CliMapping) FetchOperation(
 	operationID uint32,
 	resultStartTime *uint64,
 	splits *[]uint64,
-	inputs,
-	resultsRaw,
-	results,
+	inputs *[]byte,
+	inputsLens *[]uint64,
+	resultsRawJournals *[]byte,
+	resultsRawJournalLens *[]uint64,
+	results *[]byte,
+	resultLens *[]uint64,
 	resultsFailedIndicator,
 	err,
 	lastErrStr *[]byte,
@@ -234,13 +264,49 @@ func (m *CliMapping) FetchOperation(
 			resultStartTime,
 			splits,
 			inputs,
-			resultsRaw,
+			inputsLens,
+			resultsRawJournals,
+			resultsRawJournalLens,
 			results,
+			resultLens,
 			resultsFailedIndicator,
 			err,
 			lastErrStr,
 		),
 		"fetch operation failed",
+	).check()
+}
+
+// GetReconstructedResultRawSize determines the size of the raw result based on the result and
+// the raw journal.
+func (m *CliMapping) GetReconstructedResultRawSize(
+	result,
+	resultRawJournal *[]byte,
+	reconstructedSize *uintptr,
+) error {
+	return newLibScrapliResult(
+		m.getReconstructedResultRawSize(
+			result,
+			resultRawJournal,
+			reconstructedSize,
+		),
+		"get reconstructed result raw size failed",
+	).check()
+}
+
+// GetReconstructedResultRaw returns the reconstructed raw from a given result/journal.
+func (m *CliMapping) GetReconstructedResultRaw(
+	result,
+	resultRawJournal,
+	reconstructed *[]byte,
+) error {
+	return newLibScrapliResult(
+		m.getReconstructedResultRaw(
+			result,
+			resultRawJournal,
+			reconstructed,
+		),
+		"get reconstructed result raw failed",
 	).check()
 }
 
