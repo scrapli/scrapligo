@@ -180,7 +180,8 @@ type NetconfMapping struct {
 		cancel *bool,
 		payload string,
 		baseNamespacePrefix string,
-		extraNamespaces string,
+		extraNamespaces *[]byte,
+		extraNamespaceLens *[]uint64,
 	) uint8
 
 	getConfig func(
@@ -550,7 +551,8 @@ func (m *NetconfMapping) RawRPC(
 	cancel *bool,
 	payload string,
 	baseNamespacePrefix string,
-	extraNamespaces string,
+	extraNamespaces *[]byte,
+	extraNamespaceLens *[]uint64,
 ) error {
 	return newLibScrapliResult(
 		m.rawRPC(
@@ -560,6 +562,7 @@ func (m *NetconfMapping) RawRPC(
 			payload,
 			baseNamespacePrefix,
 			extraNamespaces,
+			extraNamespaceLens,
 		),
 		"failed to submit raw rpc operation",
 	).check()

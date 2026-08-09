@@ -136,11 +136,13 @@ type CliMapping struct {
 		driverPtr uintptr,
 		operationID *uint32,
 		cancel *bool,
-		inputs string,
+		inputs *[]byte,
+		inputLens *[]uint64,
 		requestedMode string,
 		inputHandling *uint8,
 		retainInput bool,
 		retainTrailingPrompt bool,
+		stopOnIndicatedFailure bool,
 	) uint8
 
 	sendPromptedInput func(
@@ -379,11 +381,13 @@ func (m *CliMapping) SendInputs(
 	driverPtr uintptr,
 	operationID *uint32,
 	cancel *bool,
-	inputs string,
+	inputs *[]byte,
+	inputLens *[]uint64,
 	requestedMode string,
 	inputHandling *uint8,
 	retainInput bool,
-	retainTrailingPrompt bool,
+	retainTrailingPrompt,
+	stopOnIndicatedFailure bool,
 ) error {
 	return newLibScrapliResult(
 		m.sendInputs(
@@ -391,10 +395,12 @@ func (m *CliMapping) SendInputs(
 			operationID,
 			cancel,
 			inputs,
+			inputLens,
 			requestedMode,
 			inputHandling,
 			retainInput,
 			retainTrailingPrompt,
+			stopOnIndicatedFailure,
 		),
 		"failed to submit sendInputs operation",
 	).check()

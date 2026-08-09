@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"strings"
 
-	scrapligoconstants "github.com/scrapli/scrapligo/v2/constants"
 	scrapligoerrors "github.com/scrapli/scrapligo/v2/errors"
 )
 
@@ -24,14 +23,17 @@ type rawRPCOptions struct {
 	extraNamespaces     [][2]string
 }
 
-func (o *rawRPCOptions) extraNamespacesToFFI() string {
+func (o *rawRPCOptions) extraNamespacesToFFI() ([]byte, []uint64) { //nolint: gocritic
 	namespaces := make([]string, len(o.extraNamespaces))
+
+	namespaceLens := make([]uint64, len(o.extraNamespaces))
 
 	for i, ns := range o.extraNamespaces {
 		namespaces[i] = fmt.Sprintf("%s::%s", ns[0], ns[1])
+		namespaceLens[i] = uint64(len(namespaces[i]))
 	}
 
-	return strings.Join(namespaces, scrapligoconstants.LibScrapliDelimiter)
+	return []byte(strings.Join(namespaces, "")), namespaceLens
 }
 
 // RawRPC executes a user provided "raw" rpc.
@@ -50,13 +52,16 @@ func (n *Netconf) RawRPC(
 
 	loadedOptions := newRawRPCOptions(options...)
 
+	extraNamespaces, extraNamespacesLens := loadedOptions.extraNamespacesToFFI()
+
 	err := n.ffiMap.Netconf.RawRPC(
 		n.ptr,
 		&operationID,
 		&cancel,
 		payload,
 		loadedOptions.baseNamespacePrefix,
-		loadedOptions.extraNamespacesToFFI(),
+		&extraNamespaces,
+		&extraNamespacesLens,
 	)
 	if err != nil {
 		return nil, err
