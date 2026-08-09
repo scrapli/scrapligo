@@ -2,7 +2,6 @@ package netconf
 
 import (
 	"context"
-	"fmt"
 	"strings"
 
 	scrapligoerrors "github.com/scrapli/scrapligo/v2/errors"
@@ -24,13 +23,22 @@ type rawRPCOptions struct {
 }
 
 func (o *rawRPCOptions) extraNamespacesToFFI() ([]byte, []uint64) { //nolint: gocritic
-	namespaces := make([]string, len(o.extraNamespaces))
+	namespaces := make([]string, len(o.extraNamespaces)*2) //nolint: mnd
 
-	namespaceLens := make([]uint64, len(o.extraNamespaces))
+	namespaceLens := make([]uint64, len(o.extraNamespaces)*2) //nolint: mnd
 
-	for i, ns := range o.extraNamespaces {
-		namespaces[i] = fmt.Sprintf("%s::%s", ns[0], ns[1])
-		namespaceLens[i] = uint64(len(namespaces[i]))
+	var idx int
+
+	for _, ns := range o.extraNamespaces {
+		namespaces[idx] = ns[0]
+		namespaceLens[idx] = uint64(len(ns[0]))
+
+		idx++
+
+		namespaces[idx] = ns[1]
+		namespaceLens[idx] = uint64(len(ns[1]))
+
+		idx++
 	}
 
 	return []byte(strings.Join(namespaces, "")), namespaceLens
