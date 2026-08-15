@@ -21,6 +21,17 @@ const (
 // Option defines a functional option for a cli operation.
 type Option func(o any)
 
+// WithForceClose closes a cli session without sending on exit inputs -- it simply tears down
+// the transport/session.
+func WithForceClose() Option {
+	return func(o any) {
+		switch to := o.(type) {
+		case *closeOptions:
+			to.force = true
+		}
+	}
+}
+
 // WithRequestedMode sets the requested mode for the operation.
 func WithRequestedMode(s string) Option {
 	return func(o any) {

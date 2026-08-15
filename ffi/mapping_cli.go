@@ -66,6 +66,7 @@ type CliMapping struct {
 		driverPtr uintptr,
 		operationID *uint32,
 		cancel *bool,
+		force bool,
 	) uint8
 
 	fetchOperationSizes func(
@@ -202,12 +203,14 @@ func (m *CliMapping) Close(
 	driverPtr uintptr,
 	operationID *uint32,
 	cancel *bool,
+	force bool,
 ) error {
 	return newLibScrapliResult(
 		m.close(
 			driverPtr,
 			operationID,
 			cancel,
+			force,
 		),
 		"failed to submit close operation",
 	).check()

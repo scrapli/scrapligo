@@ -307,7 +307,7 @@ func (n *Netconf) GetNextSubscription(subscriptionID uint64) (string, error) {
 	return string(sub), nil
 }
 
-func (n *Netconf) getResult( //nolint: funlen,gocyclo
+func (n *Netconf) getResult(
 	ctx context.Context,
 	cancel *bool,
 	operationID uint32,
@@ -331,62 +331,9 @@ func (n *Netconf) getResult( //nolint: funlen,gocyclo
 		}
 	}()
 
-	var _n int
-
-	pollFds := []unix.PollFd{{Fd: int32(n.pollFd), Events: unix.POLLIN}} //nolint: gosec
-
-	for {
-		if ctx.Err() != nil {
-			cancelLock.Lock()
-
-			*cancel = true
-
-			cancelLock.Unlock()
-
-			return nil, ctx.Err()
-		}
-
-		pollFds[0].Revents = 0
-
-		var err error
-
-		_n, err = unix.Poll(pollFds, scrapligoconstants.ReadyFDPollTimeoutMs)
-		if err != nil {
-			if errors.Is(err, unix.EINTR) {
-				// python automagically handles interrupts i guess go doesnt, so just act like
-				// we do on the python side when polling the wakeup fd
-				continue
-			}
-
-			return nil, scrapligoerrors.NewFfiError("waiting on operation ready signal", err)
-		}
-
-		if _n > 0 {
-			if pollFds[0].Revents&unix.POLLNVAL != 0 {
-				return nil, scrapligoerrors.NewFfiError(
-					"waiting on operation ready signal",
-					unix.EBADF,
-				)
-			}
-
-			break
-		}
-	}
-
-	var out [1]byte
-
-	for {
-		_, err := unix.Read(n.pollFd, out[:])
-		if err == nil {
-			break
-		}
-
-		if errors.Is(err, unix.EINTR) {
-			// same as loop above -- retry on interrupts
-			continue
-		}
-
-		return nil, scrapligoerrors.NewFfiError("draining operation ready signal", err)
+	err := n.getResultWaitWakeup(ctx, cancelLock, cancel)
+	if err != nil {
+		return nil, err
 	}
 
 	var (
@@ -399,7 +346,7 @@ func (n *Netconf) getResult( //nolint: funlen,gocyclo
 		lastErrStrSize       uintptr
 	)
 
-	err := n.ffiMap.Netconf.FetchOperationSizes(
+	err = n.ffiMap.Netconf.FetchOperationSizes(
 		n.ptr,
 		operationID,
 		&inputSize,
@@ -468,4 +415,70 @@ func (n *Netconf) getResult( //nolint: funlen,gocyclo
 		rpcWarnings,
 		rpcErrors,
 	), nil
+}
+
+func (n *Netconf) getResultWaitWakeup(
+	ctx context.Context,
+	cancelLock *sync.Mutex,
+	cancel *bool,
+) error {
+	var _n int
+
+	pollFds := []unix.PollFd{{Fd: int32(n.pollFd), Events: unix.POLLIN}} //nolint: gosec
+
+	for {
+		if ctx.Err() != nil {
+			cancelLock.Lock()
+
+			*cancel = true
+
+			cancelLock.Unlock()
+
+			return ctx.Err()
+		}
+
+		pollFds[0].Revents = 0
+
+		var err error
+
+		_n, err = unix.Poll(pollFds, scrapligoconstants.ReadyFDPollTimeoutMs)
+		if err != nil {
+			if errors.Is(err, unix.EINTR) {
+				// python automagically handles interrupts i guess go doesnt, so just act like
+				// we do on the python side when polling the wakeup fd
+				continue
+			}
+
+			return scrapligoerrors.NewFfiError("waiting on operation ready signal", err)
+		}
+
+		if _n > 0 {
+			if pollFds[0].Revents&unix.POLLNVAL != 0 {
+				return scrapligoerrors.NewFfiError(
+					"waiting on operation ready signal",
+					unix.EBADF,
+				)
+			}
+
+			break
+		}
+	}
+
+	var out [1]byte
+
+	for {
+		_, err := unix.Read(n.pollFd, out[:])
+		if err == nil {
+			break
+		}
+
+		if errors.Is(err, unix.EINTR) {
+			// same as loop above -- retry on interrupts
+			continue
+		}
+
+		return scrapligoerrors.NewFfiError("draining operation ready signal", err)
+	}
+
+	return nil
 }
