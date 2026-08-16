@@ -2,7 +2,6 @@ package cli
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -17,7 +16,6 @@ import (
 	scrapligointernal "github.com/scrapli/scrapligo/v2/internal"
 	scrapligologging "github.com/scrapli/scrapligo/v2/logging"
 	scrapligooptions "github.com/scrapli/scrapligo/v2/options"
-	"golang.org/x/sys/unix"
 )
 
 func newCloseOptions(options ...Option) *closeOptions {
@@ -338,7 +336,7 @@ func (c *Cli) getResult(
 		}
 	}()
 
-	err := c.getResultWaitWakeup(ctx, cancelLock, cancel)
+	err := scrapligointernal.GetResultWaitWakeup(ctx, c.pollFd, cancelLock, cancel, operationID)
 	if err != nil {
 		return nil, err
 	}
@@ -433,70 +431,4 @@ func (c *Cli) getResult(
 		resultLens,
 		resultsFailedWhenIndicator,
 	), nil
-}
-
-func (c *Cli) getResultWaitWakeup(
-	ctx context.Context,
-	cancelLock *sync.Mutex,
-	cancel *bool,
-) error {
-	var n int
-
-	pollFds := []unix.PollFd{{Fd: int32(c.pollFd), Events: unix.POLLIN}} //nolint: gosec
-
-	for {
-		if ctx.Err() != nil {
-			cancelLock.Lock()
-
-			*cancel = true
-
-			cancelLock.Unlock()
-
-			return ctx.Err()
-		}
-
-		pollFds[0].Revents = 0
-
-		var err error
-
-		n, err = unix.Poll(pollFds, scrapligoconstants.ReadyFDPollTimeoutMs)
-		if err != nil {
-			if errors.Is(err, unix.EINTR) {
-				// python automagically handles interrupts i guess go doesnt, so just act like
-				// we do on the python side when polling the wakeup fd
-				continue
-			}
-
-			return scrapligoerrors.NewFfiError("waiting on operation ready signal", err)
-		}
-
-		if n > 0 {
-			if pollFds[0].Revents&unix.POLLNVAL != 0 {
-				return scrapligoerrors.NewFfiError(
-					"waiting on operation ready signal",
-					unix.EBADF,
-				)
-			}
-
-			break
-		}
-	}
-
-	var out [1]byte
-
-	for {
-		_, err := unix.Read(c.pollFd, out[:])
-		if err == nil {
-			break
-		}
-
-		if errors.Is(err, unix.EINTR) {
-			// same as loop above -- retry on interrupts
-			continue
-		}
-
-		return scrapligoerrors.NewFfiError("draining operation ready signal", err)
-	}
-
-	return nil
 }
