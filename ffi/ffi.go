@@ -266,7 +266,7 @@ func writeHTTPContentsFromPath(
 	return nil
 }
 
-func writeLibScrapliToCache( //nolint: nonamedreturns
+func writeLibScrapliToCache(
 	ctx context.Context,
 	version string,
 	cachedLibFilename string,
