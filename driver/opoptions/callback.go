@@ -70,6 +70,22 @@ func WithCallbackInsensitive(b bool) util.Option {
 	}
 }
 
+// WithCallbackSearchDepth limits searches to new bytes plus depth preceding bytes.
+// Use this for local markers whose context fits within depth. Values <= 0 keep full
+// segment matching. Callbacks with NotContains always search the full segment.
+func WithCallbackSearchDepth(depth int) util.Option {
+	return func(o interface{}) error {
+		c, ok := o.(*generic.Callback)
+		if !ok {
+			return util.ErrIgnoredOption
+		}
+
+		c.SearchDepth = depth
+
+		return nil
+	}
+}
+
 // WithCallbackResetOutput will cause the generic.Callback to "reset" or zero the read bytes
 // after execution and before returning ot the next callback loop.
 func WithCallbackResetOutput() util.Option {

@@ -6,6 +6,9 @@ import (
 	"fmt"
 	"regexp"
 	"time"
+	"unicode/utf8"
+
+	"github.com/scrapli/scrapligo/channel"
 
 	"github.com/scrapli/scrapligo/response"
 
@@ -55,6 +58,12 @@ type Callback struct {
 	notContainsBytes []byte
 	ContainsRe       *regexp.Regexp
 	Insensitive      bool
+	// SearchDepth limits matching to newly read bytes plus this many preceding bytes.
+	// Values <= 0 search the entire output since the last ResetOutput (the default).
+	// Use this only for local markers whose required context fits within SearchDepth;
+	// the full output is still passed to Callback and retained in the response.
+	// NotContains requires the full segment and disables this optimization.
+	SearchDepth int
 	// ResetOutput bool indicating if the output should be reset or not after callback execution.
 	ResetOutput bool
 	// Once bool indicating if this callback should be executed only one time.
@@ -90,7 +99,7 @@ func (c *Callback) notContains() []byte {
 	return c.notContainsBytes
 }
 
-func (c *Callback) check(b []byte) bool {
+func (c *Callback) check(b []byte, containsRe *regexp.Regexp) bool {
 	if c.Insensitive {
 		b = bytes.ToLower(b)
 	}
@@ -100,7 +109,7 @@ func (c *Callback) check(b []byte) bool {
 		return true
 	}
 
-	if (c.ContainsRe != nil && c.ContainsRe.Match(b)) &&
+	if (containsRe != nil && containsRe.Match(b)) &&
 		!(c.NotContains != "" && !bytes.Contains(b, c.notContains())) {
 		return true
 	}
@@ -108,25 +117,74 @@ func (c *Callback) check(b []byte) bool {
 	return false
 }
 
-type callbackResult struct {
-	i         int
-	callbacks []*Callback
-	b         []byte
-	fb        []byte
-	err       error
+// callbackSearch preserves the character before a bounded search window. Requiring
+// the regex to consume that character keeps ^, \A and word boundaries from treating
+// the cut in the buffer as the beginning of the original output.
+type callbackSearch struct {
+	callback   *Callback
+	expression string
+	prepared   bool
+	pattern    *regexp.Regexp
 }
 
-func (d *Driver) executeCallback(
-	i int,
-	callbacks []*Callback,
-	b, fb []byte,
-	t time.Duration,
-) ([]byte, error) {
-	cb := callbacks[i]
+func newCallbackSearch(cb *Callback) callbackSearch {
+	return callbackSearch{callback: cb}
+}
 
+// boundedPattern is prepared lazily and refreshed if a callback changes its regex
+// between stages. Cache failures too: wrapping a valid regex can exceed regexp's
+// nesting limit, in which case the caller must keep full-segment matching.
+func (s *callbackSearch) boundedPattern() *regexp.Regexp {
+	if s.callback.ContainsRe == nil {
+		return nil
+	}
+
+	expression := s.callback.ContainsRe.String()
+	if !s.prepared || s.expression != expression {
+		s.expression = expression
+		s.prepared = true
+
+		pattern, err := regexp.Compile(`(?s:.)(?:` + expression + `)`)
+		if err != nil {
+			s.pattern = nil
+		} else {
+			s.pattern = pattern
+		}
+	}
+
+	return s.pattern
+}
+
+func (s *callbackSearch) check(b []byte, previousLen int) bool {
+	cb := s.callback
+	if cb.SearchDepth <= 0 || cb.NotContains != "" || previousLen <= cb.SearchDepth {
+		return cb.check(b, cb.ContainsRe)
+	}
+
+	pattern := s.boundedPattern()
+	if cb.ContainsRe != nil && pattern == nil {
+		return cb.check(b, cb.ContainsRe)
+	}
+
+	start := previousLen - cb.SearchDepth
+	// Do not split a UTF-8 character at the beginning of the search window.
+	for shift := 0; shift < utf8.UTFMax-1 && start > 0 && !utf8.RuneStart(b[start]); shift++ {
+		start--
+	}
+
+	if start == 0 {
+		return cb.check(b, cb.ContainsRe)
+	}
+
+	_, size := utf8.DecodeLastRune(b[:start])
+
+	return cb.check(b[start-size:], pattern)
+}
+
+func (d *Driver) executeCallback(cb *Callback, b []byte) error {
 	if cb.Once {
 		if cb.triggered {
-			return nil, fmt.Errorf(
+			return fmt.Errorf(
 				"%w: callback once set, and callback already triggered",
 				util.ErrOperationError,
 			)
@@ -140,24 +198,11 @@ func (d *Driver) executeCallback(
 		// callback is nil
 		err := cb.Callback(d, string(b))
 		if err != nil {
-			return nil, err
+			return err
 		}
 	}
 
-	if cb.Complete {
-		return fb, nil
-	}
-
-	if cb.ResetOutput {
-		b = nil
-	}
-
-	nt := t
-	if cb.NextTimeout != 0 {
-		nt = cb.NextTimeout
-	}
-
-	return d.handleCallbacks(callbacks, b, fb, nt)
+	return nil
 }
 
 func (d *Driver) handleCallbacks(
@@ -165,64 +210,108 @@ func (d *Driver) handleCallbacks(
 	b, fb []byte,
 	timeout time.Duration,
 ) ([]byte, error) {
+	searches := make([]callbackSearch, len(callbacks))
+	for i, cb := range callbacks {
+		searches[i] = newCallbackSearch(cb)
+	}
+
+	for {
+		result, err := d.readCallback(searches, b, fb, timeout)
+		if err != nil {
+			return nil, err
+		}
+
+		cb := result.callback
+		b, fb = result.b, result.fb
+
+		if err := d.executeCallback(cb, b); err != nil {
+			return nil, err
+		}
+
+		if cb.Complete {
+			return fb, nil
+		}
+
+		if cb.ResetOutput {
+			b = nil
+		}
+
+		if cb.NextTimeout != 0 {
+			timeout = cb.NextTimeout
+		}
+	}
+}
+
+type callbackResult struct {
+	callback *Callback
+	b        []byte
+	fb       []byte
+}
+
+// readCallback reads synchronously: Channel.Read is non-blocking, and no reader
+// goroutine should remain on the channel after this operation times out.
+func (d *Driver) readCallback(
+	searches []callbackSearch,
+	b, fb []byte,
+	timeout time.Duration,
+) (*callbackResult, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
-	c := make(chan *callbackResult)
+	readDelay := d.Channel.ReadDelay
+	if readDelay <= 0 {
+		readDelay = channel.DefaultReadDelayMicroSeconds * time.Microsecond
+	}
 
-	go func() {
-		defer close(c)
+	ticker := time.NewTicker(readDelay)
+	defer ticker.Stop()
 
-		for {
+	// Check once when entering a callback stage, including a retained segment or
+	// a pattern matching empty output. Otherwise only new data triggers matching.
+	checkPending := true
+
+	for {
+		if ctx.Err() != nil {
+			return nil, fmt.Errorf("%w: timeout handling callbacks", util.ErrTimeoutError)
+		}
+
+		rb, err := d.Channel.Read()
+		if err != nil {
+			return nil, err
+		}
+
+		if len(rb) == 0 && !checkPending {
 			select {
 			case <-ctx.Done():
-				return
-			default:
-				rb, err := d.Channel.Read()
-				if err != nil {
-					c <- &callbackResult{
-						err: err,
-					}
-
-					return
-				}
-
-				b = append(b, rb...)
-				fb = append(fb, rb...)
-
-				for i, cb := range callbacks {
-					if cb.check(b) {
-						c <- &callbackResult{
-							i:         i,
-							callbacks: callbacks,
-							b:         b,
-							fb:        fb,
-							err:       nil,
-						}
-
-						return
-					}
-				}
+				return nil, fmt.Errorf("%w: timeout handling callbacks", util.ErrTimeoutError)
+			case <-ticker.C:
+				continue
 			}
 		}
-	}()
 
-	select {
-	case r := <-c:
-		if r == nil {
-			return nil, fmt.Errorf(
-				"%w: reading from closed channel during callbacks",
-				util.ErrTimeoutError,
-			)
+		previousLen := len(b)
+		if checkPending {
+			previousLen = 0
+			checkPending = false
 		}
 
-		if r.err != nil {
-			return nil, r.err
-		}
+		b = append(b, rb...)
+		fb = append(fb, rb...)
 
-		return d.executeCallback(r.i, r.callbacks, r.b, r.fb, timeout)
-	case <-ctx.Done():
-		return nil, fmt.Errorf("%w: timeout handling callbacks", util.ErrTimeoutError)
+		for i := range searches {
+			search := &searches[i]
+			matched := search.check(b, previousLen)
+
+			if ctx.Err() != nil {
+				return nil, fmt.Errorf("%w: timeout handling callbacks", util.ErrTimeoutError)
+			}
+
+			if !matched {
+				continue
+			}
+
+			return &callbackResult{callback: search.callback, b: b, fb: fb}, nil
+		}
 	}
 }
 
