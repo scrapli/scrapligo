@@ -36,6 +36,12 @@ func registerCli(m *Mapping, libScrapliFfi uintptr) {
 	purego.RegisterLibFunc(&m.Cli.readAny, libScrapliFfi, "ls_cli_read_any")
 
 	purego.RegisterLibFunc(
+		&m.Cli.executeOnOpenCallback,
+		libScrapliFfi,
+		"ls_cli_execute_on_open_callback",
+	)
+
+	purego.RegisterLibFunc(
 		&m.Cli.readCallbackShouldExecute,
 		libScrapliFfi,
 		"ls_cli_read_callback_should_execute",
@@ -162,6 +168,12 @@ type CliMapping struct {
 	) uint8
 
 	readAny func(
+		driverPtr uintptr,
+		operationID *uint32,
+		cancel *bool,
+	) uint8
+
+	executeOnOpenCallback func(
 		driverPtr uintptr,
 		operationID *uint32,
 		cancel *bool,
@@ -458,6 +470,22 @@ func (m *CliMapping) ReadAny(
 			cancel,
 		),
 		"failed to submit readAny operation",
+	).check()
+}
+
+// ExecuteOnOpenCallback submit a ExecuteOnOpenCallback operaiton to the driver.
+func (m *CliMapping) ExecuteOnOpenCallback(
+	driverPtr uintptr,
+	operationID *uint32,
+	cancel *bool,
+) error {
+	return newLibScrapliResult(
+		m.executeOnOpenCallback(
+			driverPtr,
+			operationID,
+			cancel,
+		),
+		"failed to submit executeOnOpenCallback operation",
 	).check()
 }
 

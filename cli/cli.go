@@ -307,6 +307,27 @@ func (c *Cli) ReplaceDefinition(definitionFileOrString string) error {
 	return c.ffiMap.Cli.ReplaceDefinition(c.ptr, c.options.Cli.DefinitionString)
 }
 
+// ExecuteOnOpenCallback is used to explicitly trigger the on open callback for the given platform.
+// You may want to do this after replacing the definition, or if paging gets reset for some reason.
+// Note that this is very dumb and doesn't know or care what the on open callback does, so it is
+// possible that it could cause issues for you if something isnt idempotent or something.
+func (c *Cli) ExecuteOnOpenCallback(ctx context.Context) (*Result, error) {
+	if c.ptr == 0 {
+		return nil, scrapligoerrors.NewFfiError("driver pointer nil", nil)
+	}
+
+	cancel := false
+
+	var operationID uint32
+
+	err := c.ffiMap.Cli.ExecuteOnOpenCallback(c.ptr, &operationID, &cancel)
+	if err != nil {
+		return nil, err
+	}
+
+	return c.getResult(ctx, &cancel, operationID)
+}
+
 func (c *Cli) getResult(
 	ctx context.Context,
 	cancel *bool,
