@@ -4,7 +4,6 @@ set -euo pipefail
 # lil helper to highlight all the places there are versions of things that may need to be updated
 # during release or just maintenance stuff. ignores action versions (dependabots problem) and the
 # actual versions in go.mod (other than go version itself)
-PURPLE=$(printf '\033[1;35m')
 CYAN=$(printf '\033[1;36m')
 NC=$(printf '\033[0m')
 
@@ -22,7 +21,6 @@ highlight_version() {
 
 # file :: re to match the line :: nice name to print
 locations=(
-    "constants/versions.go     ^var\\sVersion =                         scrapligo"
     "constants/versions.go     ^var\\sLibScrapliVersion\\s=             libscrapli"
     "constants/versions.go     ^var\\sScrapliDefinitionsVersion\\s=     definitions"
     "go.mod                    ^go\\s                                   go"

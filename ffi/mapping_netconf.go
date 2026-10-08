@@ -32,6 +32,18 @@ func registerNetconf(m *Mapping, libScrapliFfi uintptr) {
 	)
 
 	purego.RegisterLibFunc(&m.Netconf.getSessionID, libScrapliFfi, "ls_netconf_get_session_id")
+
+	purego.RegisterLibFunc(
+		&m.Netconf.getCapabilitiesSize,
+		libScrapliFfi,
+		"ls_netconf_get_capabilities_size",
+	)
+	purego.RegisterLibFunc(
+		&m.Netconf.getCapabilities,
+		libScrapliFfi,
+		"ls_netconf_get_capabilities",
+	)
+
 	purego.RegisterLibFunc(
 		&m.Netconf.getSubscriptionID,
 		libScrapliFfi,
@@ -145,6 +157,16 @@ type NetconfMapping struct {
 	getSessionID func(
 		driverPtr uintptr,
 		sessionID *uint64,
+	) uint8
+
+	getCapabilitiesSize func(
+		driverPtr uintptr,
+		size *uint64,
+	) uint8
+
+	getCapabilities func(
+		driverPtr uintptr,
+		capabilities *[]byte,
 	) uint8
 
 	getSubscriptionID func(
@@ -462,6 +484,36 @@ func (m *NetconfMapping) GetSessionID(
 			sessionID,
 		),
 		"fetch session-id failed",
+	).check()
+}
+
+// GetCapabilitiesSize fills the size of the joined capability strings from
+// the server.
+func (m *NetconfMapping) GetCapabilitiesSize(
+	driverPtr uintptr,
+	size *uint64,
+) error {
+	return newLibScrapliResult(
+		m.getCapabilitiesSize(
+			driverPtr,
+			size,
+		),
+		"fetch capabilities size failed",
+	).check()
+}
+
+// GetCapabilities fills the joined capability strings from the server into the
+// buf.
+func (m *NetconfMapping) GetCapabilities(
+	driverPtr uintptr,
+	capabilities *[]byte,
+) error {
+	return newLibScrapliResult(
+		m.getCapabilities(
+			driverPtr,
+			capabilities,
+		),
+		"fetch capabilities failed",
 	).check()
 }
 

@@ -3,6 +3,7 @@ package netconf
 import (
 	"context"
 	"fmt"
+	"strings"
 	"sync"
 
 	scrapligoerrors "github.com/scrapli/scrapligo/v2/errors"
@@ -220,6 +221,33 @@ func (n *Netconf) GetSessionID() (uint64, error) {
 	}
 
 	return sessionID, nil
+}
+
+// GetCapabilities returns the capabilities advertised by the server.
+func (n *Netconf) GetCapabilities() ([]string, error) {
+	if n.ptr == 0 {
+		return nil, scrapligoerrors.NewFfiError("driver pointer nil", nil)
+	}
+
+	var capsSize uint64
+
+	err := n.ffiMap.Netconf.GetCapabilitiesSize(n.ptr, &capsSize)
+	if err != nil {
+		return nil, err
+	}
+
+	if capsSize == 0 {
+		return nil, scrapligoerrors.NewMessagesError()
+	}
+
+	caps := make([]byte, capsSize)
+
+	err = n.ffiMap.Netconf.GetCapabilities(n.ptr, &caps)
+	if err != nil {
+		return nil, err
+	}
+
+	return strings.Split(string(caps), "\n"), nil
 }
 
 // GetSubscriptionID attempts to parse a subscription id from a netconf rpc reply message. It can
