@@ -47,7 +47,10 @@ func TestCloseSession(t *testing.T) {
 				}
 
 				defer func() {
-					_, _ = n.Close(ctx)
+					_, err = n.Close(ctx)
+					if err != nil {
+						t.Log(err)
+					}
 				}()
 
 				r, err := n.CloseSession(ctx, c.options...)
