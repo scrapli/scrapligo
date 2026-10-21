@@ -180,10 +180,13 @@ func (d *Driver) sendClientCapabilities() error {
 		caps = []byte(v1Dot1Caps)
 	}
 
-	err := d.Channel.WriteAndReturn(caps, false)
-	if err != nil {
-		return err
+	if d.SelectedVersion == V1Dot1 {
+		// the hello is always 1.0 framed ("]]>]]>"), and the first 1.1 chunk that follows brings
+		// its own leading LF (see serializeMessage). a trailing return here would make that
+		// first chunk arrive with two LFs, which strict servers (e.g. ConfD) reject as invalid
+		// framing and then drop the session.
+		return d.Channel.Write(caps, false)
 	}
 
-	return nil
+	return d.Channel.WriteAndReturn(caps, false)
 }
