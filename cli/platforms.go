@@ -34,6 +34,7 @@ const (
 	DlinkOs              PlatformName = "dlink_os"
 	EdgecoreEcs          PlatformName = "edgecore_ecs"
 	EltexEsr             PlatformName = "eltex_esr"
+	EltexMes             PlatformName = "eltex_mes"
 	FortinetFortios      PlatformName = "fortinet_fortios"
 	FortinetWlc          PlatformName = "fortinet_wlc"
 	HpComware            PlatformName = "hp_comware"
@@ -41,6 +42,7 @@ const (
 	HuaweiVrp            PlatformName = "huawei_vrp"
 	IpinfusionOcnos      PlatformName = "ipinfusion_ocnos"
 	JuniperJunos         PlatformName = "juniper_junos"
+	LantronixItmgos      PlatformName = "lantronix_itmgos"
 	MikrotikRouteros     PlatformName = "mikrotik_routeros"
 	NokiaSrlinux         PlatformName = "nokia_srlinux"
 	NokiaSros            PlatformName = "nokia_sros"
@@ -86,6 +88,7 @@ func GetPlatformNames() []string {
 		string(DlinkOs),
 		string(EdgecoreEcs),
 		string(EltexEsr),
+		string(EltexMes),
 		string(FortinetFortios),
 		string(FortinetWlc),
 		string(HpComware),
@@ -93,6 +96,7 @@ func GetPlatformNames() []string {
 		string(HuaweiVrp),
 		string(IpinfusionOcnos),
 		string(JuniperJunos),
+		string(LantronixItmgos),
 		string(MikrotikRouteros),
 		string(NokiaSrlinux),
 		string(NokiaSros),

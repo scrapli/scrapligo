@@ -18,6 +18,8 @@ func TestAuthOptions(t *testing.T) {
 		scrapligooptions.WithPassword("bar"),
 		scrapligooptions.WithPrivateKeyPath("secretpath"),
 		scrapligooptions.WithPrivateKeyPassphrase("secretpassphrase"),
+		scrapligooptions.WithCertificatePath("certpath"),
+		scrapligooptions.WithCertificateContent("certcontent"),
 		scrapligooptions.WithLookupKeyValue("baz", "qux"),
 		scrapligooptions.WithForceInSessionAuth(),
 		scrapligooptions.WithUsernamePattern("usernamepattern"),
