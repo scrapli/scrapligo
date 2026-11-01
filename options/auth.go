@@ -49,6 +49,28 @@ func WithPrivateKeyContent(s string) Option {
 	}
 }
 
+// WithCertificatePath sets the path to an OpenSSH user certificate for the private key set with
+// WithPrivateKeyPath; it is presented with that key when authenticating (passed as CertificateFile
+// with the bin transport). It is not paired with WithPrivateKeyContent.
+func WithCertificatePath(s string) Option {
+	return func(o *scrapligointernal.Options) error {
+		o.Auth.CertificatePath = s
+
+		return nil
+	}
+}
+
+// WithCertificateContent sets the OpenSSH user certificate content (the "-cert.pub" file's
+// contents) for the private key set with WithPrivateKeyContent; it is presented with that key when
+// authenticating. Only supported with the ssh2 transport, and not paired with WithPrivateKeyPath.
+func WithCertificateContent(s string) Option {
+	return func(o *scrapligointernal.Options) error {
+		o.Auth.CertificateContent = s
+
+		return nil
+	}
+}
+
 // WithLookupKeyValue adds an entry to the lookup map for the driver instance.
 func WithLookupKeyValue(key, value string) Option {
 	return func(o *scrapligointernal.Options) error {

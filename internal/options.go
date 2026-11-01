@@ -241,6 +241,8 @@ type AuthOptions struct {
 	PrivateKeyPath       string
 	PrivateKeyPassphrase string
 	PrivateKeyContent    string
+	CertificatePath      string
+	CertificateContent   string
 
 	LookupMap        map[string]string
 	lookupMapKeys    []string
@@ -254,6 +256,21 @@ type AuthOptions struct {
 	UsernamePattern   string
 	PasswordPattern   string
 	PassphrasePattern string
+}
+
+// applyCertificate sets the OpenSSH user certificate options, if any.
+func (o *AuthOptions) applyCertificate(opts *driverOptions) {
+	if o.CertificatePath != "" {
+		opts.auth.certificatePath = uintptr(unsafe.Pointer(unsafe.StringData(o.CertificatePath)))
+		opts.auth.certificatePathLen = uintptr(len(o.CertificatePath))
+	}
+
+	if o.CertificateContent != "" {
+		opts.auth.certificateContent = uintptr(
+			unsafe.Pointer(unsafe.StringData(o.CertificateContent)),
+		)
+		opts.auth.certificateContentLen = uintptr(len(o.CertificateContent))
+	}
 }
 
 func (o *AuthOptions) apply(opts *driverOptions) {
@@ -285,6 +302,8 @@ func (o *AuthOptions) apply(opts *driverOptions) {
 		)
 		opts.auth.privateKeyContentLen = uintptr(len(o.PrivateKeyContent))
 	}
+
+	o.applyCertificate(opts)
 
 	if len(o.LookupMap) > 0 {
 		// this ensures that the string/uint16 slices have a lifetime that lasts as long as
