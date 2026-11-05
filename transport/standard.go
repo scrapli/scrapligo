@@ -3,6 +3,7 @@ package transport
 import (
 	"fmt"
 	"io"
+	"net"
 	"os"
 
 	"github.com/scrapli/scrapligo/util"
@@ -35,6 +36,23 @@ func NewStandardTransport(s *SSHArgs) (*Standard, error) {
 	}
 
 	return t, nil
+}
+
+// HostKeyError is returned when strict host key verification fails, it wraps the underlying
+// verification error and holds the host key presented by the server.
+type HostKeyError struct {
+	HostKey ssh.PublicKey
+	Err     error
+}
+
+// Error returns the underlying verification error message.
+func (e *HostKeyError) Error() string {
+	return e.Err.Error()
+}
+
+// Unwrap returns the underlying verification error.
+func (e *HostKeyError) Unwrap() error {
+	return e.Err
 }
 
 // Standard is the standard (crypto/ssh) transport object.
@@ -107,7 +125,14 @@ func (t *Standard) openBase(a *Args) error {
 			return err
 		}
 
-		keyCallback = knownHosts
+		keyCallback = func(hostname string, remote net.Addr, key ssh.PublicKey) error {
+			err := knownHosts(hostname, remote, key)
+			if err != nil {
+				return &HostKeyError{HostKey: key, Err: err}
+			}
+
+			return nil
+		}
 	}
 
 	authMethods := make([]ssh.AuthMethod, 0)
