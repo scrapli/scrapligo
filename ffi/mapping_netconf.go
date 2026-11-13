@@ -126,6 +126,7 @@ type NetconfMapping struct {
 		rpcErrorsSize,
 		errSize,
 		lastErrStrSize *uintptr,
+		errCode *uint8,
 	) uint8
 
 	fetchOperation func(
@@ -378,7 +379,9 @@ func (m *NetconfMapping) Close(
 	).check()
 }
 
-// FetchOperationSizes gets the result *sizes* for the given operation id.
+// FetchOperationSizes gets the result *sizes* for the given operation id. If the operation
+// failed, errCode is set to the libscrapli result code of the error the operation hit -- pass it
+// to OperationError to build the error to return.
 func (m *NetconfMapping) FetchOperationSizes(
 	driverPtr uintptr,
 	operationID uint32,
@@ -389,6 +392,7 @@ func (m *NetconfMapping) FetchOperationSizes(
 	rpcErrorsSize,
 	errSize,
 	lastErrStrSize *uintptr,
+	errCode *uint8,
 ) error {
 	return newLibScrapliResult(
 		m.fetchOperationSizes(
@@ -401,6 +405,7 @@ func (m *NetconfMapping) FetchOperationSizes(
 			rpcErrorsSize,
 			errSize,
 			lastErrStrSize,
+			errCode,
 		),
 		"fetch operation sizes failed",
 	).check()

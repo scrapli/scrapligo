@@ -1,6 +1,8 @@
 package ffi
 
 import (
+	"errors"
+
 	scrapligoerrors "github.com/scrapli/scrapligo/v2/errors"
 )
 
@@ -44,30 +46,51 @@ func (r libscrapliResult) check() error {
 		return nil
 	}
 
-	var inner error
+	return scrapligoerrors.NewFfiError(r.message, resultCodeError(r.rc))
+}
 
-	switch r.rc {
+// resultCodeError returns the sentinel error matching a (non-success) libscrapli result code, or
+// nil if the code does not map to a specific error.
+func resultCodeError(rc uint8) error {
+	switch rc {
 	case libscrapliReturnCodeOutOfMemory:
-		inner = scrapligoerrors.ErrOutOfMemory
+		return scrapligoerrors.ErrOutOfMemory
 	case libscrapliReturnCodeEOF:
-		inner = scrapligoerrors.ErrEOF
+		return scrapligoerrors.ErrEOF
 	case libscrapliReturnCodeCancelled:
-		inner = scrapligoerrors.ErrCancelled
+		return scrapligoerrors.ErrCancelled
 	case libscrapliReturnCodeTimeout:
-		inner = scrapligoerrors.ErrTimeout
+		return scrapligoerrors.ErrTimeout
 	case libscrapliReturnCodeDriver:
-		inner = scrapligoerrors.ErrDriver
+		return scrapligoerrors.ErrDriver
 	case libscrapliReturnCodeSession:
-		inner = scrapligoerrors.ErrSession
+		return scrapligoerrors.ErrSession
 	case libscrapliReturnCodeTransport:
-		inner = scrapligoerrors.ErrTransport
+		return scrapligoerrors.ErrTransport
 	case libscrapliReturnCodeOperation:
-		inner = scrapligoerrors.ErrOperation
+		return scrapligoerrors.ErrOperation
 	case libscrapliReturnCodeInvalidArgument:
-		inner = scrapligoerrors.ErrInvalidArgument
+		return scrapligoerrors.ErrInvalidArgument
 	case libscrapliReturnCodeUnknown:
-		inner = scrapligoerrors.ErrUnknown
+		return scrapligoerrors.ErrUnknown
+	default:
+		return nil
+	}
+}
+
+// OperationError builds the error for a failed operation from the values fetched from libscrapli.
+// The returned error wraps the sentinel error matching errCode (ErrOperation if the code does not
+// map to a specific error) and ctxErr (if not nil) so users can errors.Is with either.
+func OperationError(errCode uint8, errName, lastErr string, ctxErr error) error {
+	message := errName
+	if lastErr != "" {
+		message += ": " + lastErr
 	}
 
-	return scrapligoerrors.NewFfiError(r.message, inner)
+	inner := resultCodeError(errCode)
+	if inner == nil || errors.Is(inner, scrapligoerrors.ErrUnknown) {
+		inner = scrapligoerrors.ErrOperation
+	}
+
+	return scrapligoerrors.NewFfiError(message, errors.Join(inner, ctxErr))
 }

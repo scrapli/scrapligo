@@ -369,6 +369,8 @@ func (c *Cli) getResult(
 		resultsFailedIndicatorSize uintptr
 		errSize                    uintptr
 		lastErrStrSize             uintptr
+
+		errCode uint8
 	)
 
 	err = c.ffiMap.Cli.FetchOperationSizes(
@@ -381,6 +383,7 @@ func (c *Cli) getResult(
 		&resultsFailedIndicatorSize,
 		&errSize,
 		&lastErrStrSize,
+		&errCode,
 	)
 	if err != nil {
 		return nil, err
@@ -430,13 +433,12 @@ func (c *Cli) getResult(
 	if errSize != 0 {
 		// always wrap the context error (even if nil) so we catch cancels/deadline exceeded and
 		// users can errors.Is with that
-		outErrMsg := string(errString)
-
-		if lastErrStrSize > 0 {
-			outErrMsg += fmt.Sprintf(": %s", string(lastErrString))
-		}
-
-		return nil, scrapligoerrors.NewFfiError(outErrMsg, ctx.Err())
+		return nil, scrapligoffi.OperationError(
+			errCode,
+			string(errString),
+			string(lastErrString),
+			ctx.Err(),
+		)
 	}
 
 	return newResult(

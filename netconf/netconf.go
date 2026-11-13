@@ -2,7 +2,6 @@ package netconf
 
 import (
 	"context"
-	"fmt"
 	"strings"
 	"sync"
 
@@ -369,6 +368,7 @@ func (n *Netconf) getResult(
 		rpcErrorsSize        uintptr
 		errSize              uintptr
 		lastErrStrSize       uintptr
+		errCode              uint8
 	)
 
 	err = n.ffiMap.Netconf.FetchOperationSizes(
@@ -381,6 +381,7 @@ func (n *Netconf) getResult(
 		&rpcErrorsSize,
 		&errSize,
 		&lastErrStrSize,
+		&errCode,
 	)
 	if err != nil {
 		return nil, err
@@ -420,13 +421,14 @@ func (n *Netconf) getResult(
 	}
 
 	if errSize != 0 {
-		outErrMsg := string(errString)
-
-		if lastErrStrSize > 0 {
-			outErrMsg += fmt.Sprintf(": %s", string(lastErrString))
-		}
-
-		return nil, scrapligoerrors.NewFfiError(outErrMsg, ctx.Err())
+		// always wrap the context error (even if nil) so we catch cancels/deadline exceeded and
+		// users can errors.Is with that
+		return nil, scrapligoffi.OperationError(
+			errCode,
+			string(errString),
+			string(lastErrString),
+			ctx.Err(),
+		)
 	}
 
 	return newResult(
