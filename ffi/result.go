@@ -7,7 +7,8 @@ import (
 )
 
 const (
-	libscrapliReturnCodeSuccess uint8 = iota
+	// LibscrapliReturnCodeSuccess is the libscrapli result code for a successful call/operation.
+	LibscrapliReturnCodeSuccess uint8 = iota
 	libscrapliReturnCodeUnknown
 	libscrapliReturnCodeOutOfMemory
 	libscrapliReturnCodeEOF
@@ -42,7 +43,7 @@ func newLibScrapliResult(
 
 // check returns an error if the LibscrapliResult return code is a non-success value.
 func (r libscrapliResult) check() error {
-	if r.rc == libscrapliReturnCodeSuccess {
+	if r.rc == LibscrapliReturnCodeSuccess {
 		return nil
 	}
 

@@ -430,7 +430,7 @@ func (c *Cli) getResult(
 		return nil, err
 	}
 
-	if errSize != 0 {
+	if errCode != scrapligoffi.LibscrapliReturnCodeSuccess {
 		// always wrap the context error (even if nil) so we catch cancels/deadline exceeded and
 		// users can errors.Is with that
 		return nil, scrapligoffi.OperationError(
