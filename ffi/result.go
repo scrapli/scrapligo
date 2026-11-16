@@ -7,7 +7,6 @@ import (
 )
 
 const (
-	// LibscrapliReturnCodeSuccess is the libscrapli result code for a successful call/operation.
 	LibscrapliReturnCodeSuccess uint8 = iota
 	libscrapliReturnCodeUnknown
 	libscrapliReturnCodeOutOfMemory
