@@ -67,6 +67,8 @@ func (r libscrapliResult) check() error {
 		inner = scrapligoerrors.ErrInvalidArgument
 	case libscrapliReturnCodeUnknown:
 		inner = scrapligoerrors.ErrUnknown
+	default:
+		inner = scrapligoerrors.ErrUnknown
 	}
 
 	return scrapligoerrors.NewFfiError(r.message, inner)

@@ -10,7 +10,7 @@ import (
 // platform specific "mode").
 func (c *Cli) EnterMode(ctx context.Context, requestedMode string) (*Result, error) {
 	if c.ptr == 0 {
-		return nil, scrapligoerrors.NewFfiError("driver pointer nil", nil)
+		return nil, scrapligoerrors.ErrNotOpen
 	}
 
 	cancel := false

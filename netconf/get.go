@@ -55,7 +55,7 @@ func (n *Netconf) Get(
 	options ...Option,
 ) (*Result, error) {
 	if n.ptr == 0 {
-		return nil, scrapligoerrors.NewFfiError("driver pointer nil", nil)
+		return nil, scrapligoerrors.ErrNotOpen
 	}
 
 	cancel := false

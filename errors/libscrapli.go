@@ -35,3 +35,31 @@ var ErrInvalidArgument = errors.New("libscrapli: invalid argument")
 // ErrUnknown is an error corresponding to the libscrapli result return code for other errors
 // that are not explicitly caught in libscrapli.
 var ErrUnknown = errors.New("libscrapli: unknown/unhandled error")
+
+// LibscrapliErrorNameToError returns the sentinel error for the given libscrapli error name (the
+// zig error name, as returned by libscrapli for failed operations). This mirrors libscrapli's
+// toFfiResult mapping (zig error -> FfiResult code) so that a given error resolves to the same
+// sentinel whether it arrives as a return code or as an operation error name. Any name not
+// handled there (including other ScrapliError members such as IndexError) returns ErrUnknown.
+func LibscrapliErrorNameToError(name string) error {
+	switch name {
+	case "OutOfMemory":
+		return ErrOutOfMemory
+	case "EOF":
+		return ErrEOF
+	case "Cancelled":
+		return ErrCancelled
+	case "TimeoutExceeded":
+		return ErrTimeout
+	case "Driver":
+		return ErrDriver
+	case "Session":
+		return ErrSession
+	case "Transport":
+		return ErrTransport
+	case "Operation":
+		return ErrOperation
+	default:
+		return ErrUnknown
+	}
+}

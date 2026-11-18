@@ -21,6 +21,9 @@ var ErrNoMessages = errors.New("no messages")
 // ErrSubscriptionID is an error returned when failing to parse a subscription id from a message.
 var ErrSubscriptionID = errors.New("subscription id")
 
+// ErrNotOpen is an error returned when doing things that require an open driver and it isnt open.
+var ErrNotOpen = errors.New("driver not open")
+
 // ErrorKind is an enum(ish) representing the kind of error -- i.e. "ffi" or "auth".
 type ErrorKind string
 
@@ -34,6 +37,11 @@ const (
 	Netconf ErrorKind = "netconf"
 	// Util represents errors encountered during utility funcs like parsing output.
 	Util ErrorKind = "util"
+	// Operation represents errors encountered while executing an operation against a device --
+	// i.e. a timeout, an authentication/connection failure, or the session hitting EOF. These
+	// errors wrap one of the libscrapli sentinel errors (ErrTimeout, ErrTransport, etc.), and
+	// also the context error if the operation's context was cancelled or exceeded its deadline.
+	Operation ErrorKind = "operation"
 )
 
 // ScrapliError is the base error type used for all scrapli errors.
@@ -98,7 +106,8 @@ func NewUtilError(message string, inner error) error {
 	return newScrapliError(Util, message, inner)
 }
 
-// NewMessagesError returns a "netconf" flavor ScrapliError, wrapping the ErrNoMessages error type.
-func NewMessagesError() error {
-	return newScrapliError(Netconf, "no more messages available", ErrNoMessages)
+// NewOperationError returns an "operation" flavor ScrapliError, wrapping the inner error if
+// provided.
+func NewOperationError(message string, inner error) error {
+	return newScrapliError(Operation, message, inner)
 }

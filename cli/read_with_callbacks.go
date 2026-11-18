@@ -64,7 +64,7 @@ func (c *Cli) ReadWithCallbacks( //nolint: gocyclo, funlen, gocognit
 	callbacks ...*ReadCallback,
 ) (*Result, error) {
 	if c.ptr == 0 {
-		return nil, scrapligoerrors.NewFfiError("driver pointer nil", nil)
+		return nil, scrapligoerrors.ErrNotOpen
 	}
 
 	// check to make sure all callbacks have a contains or containspattern set
