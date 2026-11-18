@@ -2,7 +2,6 @@ package netconf
 
 import (
 	"context"
-	"fmt"
 	"strings"
 	"sync"
 
@@ -154,7 +153,7 @@ func (n *Netconf) Open(ctx context.Context) (*Result, error) {
 
 	n.pollFd = int(n.ffiMap.Shared.GetPollFd(n.ptr))
 	if n.pollFd == 0 {
-		return nil, scrapligoerrors.NewFfiError("failed to allocate netconf", nil)
+		return nil, scrapligoerrors.NewFfiError("failed to get poll fd for netconf", nil)
 	}
 
 	cancel := false
@@ -179,7 +178,7 @@ func (n *Netconf) Open(ctx context.Context) (*Result, error) {
 // Close closes the netconf object. This also deallocates the underlying (zig) netconf object.
 func (n *Netconf) Close(ctx context.Context, options ...Option) (*Result, error) {
 	if n.ptr == 0 {
-		return nil, scrapligoerrors.NewFfiError("driver pointer nil", nil)
+		return nil, scrapligoerrors.ErrNotOpen
 	}
 
 	defer func() {
@@ -210,7 +209,7 @@ func (n *Netconf) Close(ctx context.Context, options ...Option) (*Result, error)
 // reason didn't parse the session-id during capabilities exchange this will return an error.
 func (n *Netconf) GetSessionID() (uint64, error) {
 	if n.ptr == 0 {
-		return 0, scrapligoerrors.NewFfiError("driver pointer nil", nil)
+		return 0, scrapligoerrors.ErrNotOpen
 	}
 
 	var sessionID uint64
@@ -226,7 +225,7 @@ func (n *Netconf) GetSessionID() (uint64, error) {
 // GetCapabilities returns the capabilities advertised by the server.
 func (n *Netconf) GetCapabilities() ([]string, error) {
 	if n.ptr == 0 {
-		return nil, scrapligoerrors.NewFfiError("driver pointer nil", nil)
+		return nil, scrapligoerrors.ErrNotOpen
 	}
 
 	var capsSize uint64
@@ -237,7 +236,7 @@ func (n *Netconf) GetCapabilities() ([]string, error) {
 	}
 
 	if capsSize == 0 {
-		return nil, scrapligoerrors.NewMessagesError()
+		return nil, scrapligoerrors.ErrNoMessages
 	}
 
 	caps := make([]byte, capsSize)
@@ -267,7 +266,7 @@ func (n *Netconf) GetSubscriptionID(message string) (uint64, error) {
 	}
 
 	if subscriptionID == 0 {
-		return 0, scrapligoerrors.NewFfiError(
+		return 0, scrapligoerrors.NewNetconfError(
 			"failed parsing subscription id",
 			scrapligoerrors.ErrSubscriptionID,
 		)
@@ -280,7 +279,7 @@ func (n *Netconf) GetSubscriptionID(message string) (uint64, error) {
 // a ErrNoMessages will be returned.
 func (n *Netconf) GetNextNotification() (string, error) {
 	if n.ptr == 0 {
-		return "", scrapligoerrors.NewFfiError("driver pointer nil", nil)
+		return "", scrapligoerrors.ErrNotOpen
 	}
 
 	var notifSize uint64
@@ -291,7 +290,7 @@ func (n *Netconf) GetNextNotification() (string, error) {
 	}
 
 	if notifSize == 0 {
-		return "", scrapligoerrors.NewMessagesError()
+		return "", scrapligoerrors.ErrNoMessages
 	}
 
 	notif := make([]byte, notifSize)
@@ -308,7 +307,7 @@ func (n *Netconf) GetNextNotification() (string, error) {
 // if any. If there are no messages, a ErrNoMessages will be returned.
 func (n *Netconf) GetNextSubscription(subscriptionID uint64) (string, error) {
 	if n.ptr == 0 {
-		return "", scrapligoerrors.NewFfiError("driver pointer nil", nil)
+		return "", scrapligoerrors.ErrNotOpen
 	}
 
 	var subSize uint64
@@ -319,7 +318,7 @@ func (n *Netconf) GetNextSubscription(subscriptionID uint64) (string, error) {
 	}
 
 	if subSize == 0 {
-		return "", scrapligoerrors.NewMessagesError()
+		return "", scrapligoerrors.ErrNoMessages
 	}
 
 	sub := make([]byte, subSize)
@@ -420,13 +419,11 @@ func (n *Netconf) getResult(
 	}
 
 	if errSize != 0 {
-		outErrMsg := string(errString)
-
-		if lastErrStrSize > 0 {
-			outErrMsg += fmt.Sprintf(": %s", string(lastErrString))
-		}
-
-		return nil, scrapligoerrors.NewFfiError(outErrMsg, ctx.Err())
+		return nil, scrapligointernal.NewOperationError(
+			ctx,
+			string(errString),
+			string(lastErrString),
+		)
 	}
 
 	return newResult(

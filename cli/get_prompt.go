@@ -9,7 +9,7 @@ import (
 // GetPrompt returns a Result object containing the current "prompt" of the target device.
 func (c *Cli) GetPrompt(ctx context.Context) (*Result, error) {
 	if c.ptr == 0 {
-		return nil, scrapligoerrors.NewFfiError("driver pointer nil", nil)
+		return nil, scrapligoerrors.ErrNotOpen
 	}
 
 	cancel := false
