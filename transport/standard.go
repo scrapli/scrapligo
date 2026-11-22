@@ -66,6 +66,7 @@ type Standard struct {
 	ExtraKexs         []string
 	HostKeyAlgorithms []string
 	PrivateKey        []byte
+	HostKeyCallback   ssh.HostKeyCallback
 }
 
 func (t *Standard) openSession(a *Args, cfg *ssh.ClientConfig) error {
@@ -106,21 +107,29 @@ func (t *Standard) openSession(a *Args, cfg *ssh.ClientConfig) error {
 	return nil
 }
 
+func (t *Standard) strictHostKeyCallback(a *Args) (ssh.HostKeyCallback, error) {
+	if t.HostKeyCallback != nil {
+		return t.HostKeyCallback, nil
+	}
+
+	if t.SSHArgs.KnownHostsFile == "" {
+		a.l.Critical("strict host key checking requested, but no known hosts file provided")
+
+		return nil, fmt.Errorf(
+			"%w: strict host key checking requested, but no known hosts file provided",
+			util.ErrBadOption,
+		)
+	}
+
+	return knownhosts.New(t.SSHArgs.KnownHostsFile)
+}
+
 func (t *Standard) openBase(a *Args) error {
 	/* #nosec G106 */
 	keyCallback := ssh.InsecureIgnoreHostKey()
 
 	if t.SSHArgs.StrictKey {
-		if t.SSHArgs.KnownHostsFile == "" {
-			a.l.Critical("strict host key checking requested, but no known hosts file provided")
-
-			return fmt.Errorf(
-				"%w: strict host key checking requested, but no known hosts file provided",
-				util.ErrBadOption,
-			)
-		}
-
-		knownHosts, err := knownhosts.New(t.SSHArgs.KnownHostsFile)
+		knownHosts, err := t.strictHostKeyCallback(a)
 		if err != nil {
 			return err
 		}

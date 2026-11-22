@@ -3,6 +3,8 @@ package options
 import (
 	"github.com/scrapli/scrapligo/transport"
 	"github.com/scrapli/scrapligo/util"
+
+	"golang.org/x/crypto/ssh"
 )
 
 // WithStandardTransportPrivateKeyBytes sets the SSH private key and passphrase to use for SSH key based auth.
@@ -16,6 +18,22 @@ func WithStandardTransportPrivateKeyBytes(ks []byte, ps string) util.Option {
 
 		a.PrivateKey = ks
 		a.SSHArgs.PrivateKeyPassPhrase = ps
+
+		return nil
+	}
+}
+
+// WithStandardTransportHostKeyCallback sets the callback used to verify the server host key when
+// strict key checking is enabled, it is used instead of the known hosts file.
+func WithStandardTransportHostKeyCallback(c ssh.HostKeyCallback) util.Option {
+	return func(o interface{}) error {
+		t, ok := o.(*transport.Standard)
+
+		if !ok {
+			return util.ErrIgnoredOption
+		}
+
+		t.HostKeyCallback = c
 
 		return nil
 	}
