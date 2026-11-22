@@ -239,7 +239,7 @@ func (c *Cli) Open(ctx context.Context) (*Result, error) {
 
 	c.pollFd = int(c.ffiMap.Shared.GetPollFd(c.ptr))
 	if c.pollFd == 0 {
-		return nil, scrapligoerrors.NewFfiError("failed to allocate cli", nil)
+		return nil, scrapligoerrors.NewFfiError("failed to get poll fd for cli", nil)
 	}
 
 	cancel := false
@@ -264,7 +264,7 @@ func (c *Cli) Open(ctx context.Context) (*Result, error) {
 // Close closes the driver object. This also deallocates the underlying (zig) driver object.
 func (c *Cli) Close(ctx context.Context, options ...Option) (*Result, error) {
 	if c.ptr == 0 {
-		return nil, scrapligoerrors.NewFfiError("driver pointer nil", nil)
+		return nil, scrapligoerrors.ErrNotOpen
 	}
 
 	defer func() {
@@ -294,7 +294,7 @@ func (c *Cli) Close(ctx context.Context, options ...Option) (*Result, error) {
 // the prompt pattern, but also updates the modes etc. available in the driver.
 func (c *Cli) ReplaceDefinition(definitionFileOrString string) error {
 	if c.ptr == 0 {
-		return scrapligoerrors.NewFfiError("driver pointer nil", nil)
+		return scrapligoerrors.ErrNotOpen
 	}
 
 	err := loadDefinition(c.options)
@@ -313,7 +313,7 @@ func (c *Cli) ReplaceDefinition(definitionFileOrString string) error {
 // possible that it could cause issues for you if something isnt idempotent or something.
 func (c *Cli) ExecuteOnOpenCallback(ctx context.Context) (*Result, error) {
 	if c.ptr == 0 {
-		return nil, scrapligoerrors.NewFfiError("driver pointer nil", nil)
+		return nil, scrapligoerrors.ErrNotOpen
 	}
 
 	cancel := false
@@ -428,15 +428,11 @@ func (c *Cli) getResult(
 	}
 
 	if errSize != 0 {
-		// always wrap the context error (even if nil) so we catch cancels/deadline exceeded and
-		// users can errors.Is with that
-		outErrMsg := string(errString)
-
-		if lastErrStrSize > 0 {
-			outErrMsg += fmt.Sprintf(": %s", string(lastErrString))
-		}
-
-		return nil, scrapligoerrors.NewFfiError(outErrMsg, ctx.Err())
+		return nil, scrapligointernal.NewOperationError(
+			ctx,
+			string(errString),
+			string(lastErrString),
+		)
 	}
 
 	return newResult(

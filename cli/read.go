@@ -29,7 +29,7 @@ type readOptions struct {
 // drains the read buffer, and if there is nothing to read we just return 0 bytes read.
 func (c *Cli) Read(options ...Option) ([]byte, error) {
 	if c.ptr == 0 {
-		return nil, scrapligoerrors.NewFfiError("driver pointer nil", nil)
+		return nil, scrapligoerrors.ErrNotOpen
 	}
 
 	loadedOptions := newReadOptions(options...)

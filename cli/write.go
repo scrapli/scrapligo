@@ -8,7 +8,7 @@ import (
 // with caution.
 func (c *Cli) Write(input string) error {
 	if c.ptr == 0 {
-		return scrapligoerrors.NewFfiError("driver pointer nil", nil)
+		return scrapligoerrors.ErrNotOpen
 	}
 
 	err := c.ffiMap.Session.Write(c.ptr, input, false)
@@ -23,7 +23,7 @@ func (c *Cli) Write(input string) error {
 // driver operation loop in zig, use with caution.
 func (c *Cli) WriteAndReturn(input string) error {
 	if c.ptr == 0 {
-		return scrapligoerrors.NewFfiError("driver pointer nil", nil)
+		return scrapligoerrors.ErrNotOpen
 	}
 
 	err := c.ffiMap.Session.WriteAndReturn(c.ptr, input, false)
@@ -38,7 +38,7 @@ func (c *Cli) WriteAndReturn(input string) error {
 // with caution.
 func (c *Cli) WriteReturn() error {
 	if c.ptr == 0 {
-		return scrapligoerrors.NewFfiError("driver pointer nil", nil)
+		return scrapligoerrors.ErrNotOpen
 	}
 
 	err := c.ffiMap.Session.WriteReturn(c.ptr)

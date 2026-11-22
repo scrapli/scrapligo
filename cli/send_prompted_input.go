@@ -45,7 +45,7 @@ func (c *Cli) SendPromptedInput(
 	options ...Option,
 ) (*Result, error) {
 	if c.ptr == 0 {
-		return nil, scrapligoerrors.NewFfiError("driver pointer nil", nil)
+		return nil, scrapligoerrors.ErrNotOpen
 	}
 
 	cancel := false
